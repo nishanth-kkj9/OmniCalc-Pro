@@ -6,11 +6,7 @@ No code execution possible - only mathematical expressions.
 """
 import math
 import re
-import signal
-import sys
-import multiprocessing
-from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
-from typing import Any
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 
 import sympy as sp
 from sympy import SympifyError, Basic
@@ -22,7 +18,7 @@ from sympy.parsing.sympy_parser import (
 )
 
 from utils.logger import get_logger
-from utils.constants import MAX_EXPR_LENGTH, MAX_RESULT_DIGITS, MAX_EXECUTION_TIME, MAX_NESTING_DEPTH
+from utils.constants import MAX_EXPR_LENGTH, MAX_EXECUTION_TIME, MAX_NESTING_DEPTH
 
 logger = get_logger()
 
