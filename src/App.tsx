@@ -19,6 +19,7 @@ import { FractionsCalculator } from './components/FractionsCalculator';
 import { FormulasPanel } from './components/FormulasPanel';
 import { HistoryPanel } from './components/HistoryPanel';
 import { SettingsModal } from './components/SettingsModal';
+import { CommandPalette } from './components/CommandPalette';
 import { playClickSound, prewarmAudio } from './utils/sound';
 import { ACCENT_COLOR_MAP } from './utils/formatting';
 
@@ -50,6 +51,14 @@ export function App() {
   });
   const [currentMode, setCurrentMode] = useState<CalcMode>(() => settings.defaultMode || 'basic');
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState<boolean>(false);
+
+  // Listen for custom open event
+  useEffect(() => {
+    const handleOpen = () => setCommandPaletteOpen(true);
+    window.addEventListener('open-command-palette', handleOpen);
+    return () => window.removeEventListener('open-command-palette', handleOpen);
+  }, []);
 
   // Apply Theme & Accent Color to html root element
   useEffect(() => {
@@ -201,6 +210,7 @@ export function App() {
           currentMode={currentMode}
           onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
           onSelectMode={setCurrentMode}
+          onOpenCommandPalette={() => setCommandPaletteOpen(true)}
           settings={settings}
           onUpdateSettings={updateSettings}
         />
@@ -241,6 +251,18 @@ export function App() {
           )}
         </main>
       </div>
+
+      {/* Global Command Palette */}
+      <CommandPalette
+        isOpen={commandPaletteOpen}
+        onClose={() => setCommandPaletteOpen(false)}
+        onSelectMode={(mode) => {
+          setCurrentMode(mode);
+          setSidebarOpen(false);
+        }}
+        settings={settings}
+        onUpdateSettings={updateSettings}
+      />
     </div>
   );
 }
