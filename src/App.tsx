@@ -139,7 +139,13 @@ export function App() {
       prewarmAudio();
       const target = (e.target as HTMLElement)?.closest('button, [role="button"], input[type="button"]');
       if (target && settings.soundEnabled) {
-        playClickSound(settings.soundVolume, settings.soundProfile);
+        const text = target.textContent?.trim() || '';
+        const soundType = (text === '=' || text === 'Calculate' || text === 'Solve')
+          ? 'equals'
+          : (text === 'C' || text === 'AC' || text === 'CE')
+          ? 'clear'
+          : 'click';
+        playClickSound(soundType, settings.soundVolume, settings.soundProfile);
         if (settings.hapticFeedback && 'vibrate' in navigator) {
           try {
             navigator.vibrate(10);
