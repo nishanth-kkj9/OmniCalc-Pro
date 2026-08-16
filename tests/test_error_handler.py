@@ -6,6 +6,8 @@ import json
 import tempfile
 from unittest.mock import MagicMock, patch, PropertyMock
 from pathlib import Path
+from PySide6.QtWidgets import QApplication
+from core.error_handler import GlobalErrorHandler
 
 
 class TestStructuredFormatter(unittest.TestCase):
@@ -115,7 +117,3 @@ class TestGlobalErrorHandler(unittest.TestCase):
         app = MagicMock()
         install_global_handler(app)
         MockHandler.return_value.install.assert_called_once()
-
-
-from PySide6.QtWidgets import QApplication
-from core.error_handler import GlobalErrorHandler

@@ -11,15 +11,6 @@ _instance = None
 _lock = threading.Lock()
 
 
-def get_history_manager() -> "HistoryManager":
-    global _instance
-    if _instance is None:
-        with _lock:
-            if _instance is None:
-                _instance = HistoryManager()
-    return _instance
-
-
 class HistoryManager:
     def __init__(self):
         os.makedirs(DB_DIR, exist_ok=True)
@@ -95,3 +86,12 @@ class HistoryManager:
 
     def __del__(self):
         self.close()
+
+
+def get_history_manager() -> HistoryManager:
+    global _instance
+    if _instance is None:
+        with _lock:
+            if _instance is None:
+                _instance = HistoryManager()
+    return _instance

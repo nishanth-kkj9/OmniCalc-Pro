@@ -57,7 +57,7 @@ disallow_untyped_defs = false
 follow_imports = "silent"
 
 [[tool.mypy.overrides]]
-module = ["PySide6.*", "matplotlib.*", "numpy.*", "sympy.*", "pyperclip.*"]
+module = ["PySide6.*", "matplotlib.*", "numpy.*", "sympy.*", "pyperclip.*", "ctypes.wintypes.*"]
 ignore_missing_imports = true
 
 

@@ -4,7 +4,7 @@ SVG Icon loader with theme-aware color support.
 import os
 from typing import Optional
 from PySide6.QtGui import QIcon, QPixmap, QPainter, QColor
-from PySide6.QtCore import QSize
+from PySide6.QtCore import QSize, Qt
 from PySide6.QtSvg import QSvgRenderer
 from utils.constants import ICONS_DIR, ICON_SIZE
 from utils.logger import get_logger
@@ -99,5 +99,3 @@ def clear_icon_cache():
     """Clear the icon cache (useful on theme change)."""
     global _icon_cache
     _icon_cache.clear()
-
-from PySide6.QtCore import Qt

@@ -5,8 +5,7 @@ Provides native Windows 11 backdrop effects for frameless windows.
 import sys
 import platform
 from typing import Optional
-from ctypes import windll, c_int, c_void_p, byref, sizeof, Structure, POINTER
-from ctypes.wintypes import HWND, DWORD, BOOL, RECT
+from ctypes import c_int, c_void_p, byref, sizeof, Structure, POINTER
 
 from PySide6.QtCore import QObject, QTimer
 from PySide6.QtWidgets import QWidget
@@ -19,11 +18,20 @@ logger = get_logger()
 if sys.platform == "win32":
     try:
         from ctypes import WinDLL
+        from ctypes.wintypes import HWND, DWORD, BOOL, RECT
         dwmapi = WinDLL("dwmapi")
     except Exception:
         dwmapi = None
+        HWND = c_void_p  # type: ignore[misc, assignment]
+        DWORD = c_int    # type: ignore[misc, assignment]
+        BOOL = c_int     # type: ignore[misc, assignment]
+        RECT = c_void_p  # type: ignore[misc, assignment]
 else:
     dwmapi = None
+    HWND = c_void_p      # type: ignore[misc, assignment]
+    DWORD = c_int        # type: ignore[misc, assignment]
+    BOOL = c_int         # type: ignore[misc, assignment]
+    RECT = c_void_p      # type: ignore[misc, assignment]
 
 
 DWMWA_USE_IMMERSIVE_DARK_MODE = 20
