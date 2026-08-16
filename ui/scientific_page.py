@@ -77,7 +77,7 @@ class ScientificPage(QWidget):
             try:
                 self.expression = str(safe_eval(self.expression, self.config.get("angle_mode", "degrees")))
                 self.display.flash_result(success=True)
-            except:
+            except Exception:
                 self.expression = "Error"
                 self.display.flash_result(success=False)
         elif t == "x!":

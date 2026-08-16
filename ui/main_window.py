@@ -80,8 +80,10 @@ class CustomTitleBar(QWidget):
         self.offset = QPoint()
 
     def _bind_window_btn(self, txt, win, btn_ref):
-        if txt == "\u2500": return win.showMinimized
-        if txt == "\u25a1": return lambda: win.showMaximized() if not win.isMaximized() else win.showNormal()
+        if txt == "\u2500":
+            return win.showMinimized
+        if txt == "\u25a1":
+            return lambda: win.showMaximized() if not win.isMaximized() else win.showNormal()
         if txt == "\U0001f513":
             def toggle_top():
                 current = win.windowFlags()

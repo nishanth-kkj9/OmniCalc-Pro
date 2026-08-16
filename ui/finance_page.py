@@ -19,9 +19,12 @@ class FinancePage(QWidget):
         self.update_form(0)
 
     def update_form(self, idx):
-        for lbl in self.labels: lbl.deleteLater()
-        for inp in self.inputs: inp.deleteLater()
-        self.labels.clear(); self.inputs.clear()
+        for lbl in self.labels:
+            lbl.deleteLater()
+        for inp in self.inputs:
+            inp.deleteLater()
+        self.labels.clear()
+        self.inputs.clear()
         if hasattr(self, 'btn') and self.btn:
             self.btn.deleteLater()
         if hasattr(self, 'res') and self.res:
@@ -67,4 +70,5 @@ class FinancePage(QWidget):
                 saved, final = self.engine.discount(*map(float, vals))
                 res = f"You Save: {saved}\nFinal Price: {final}"
             self.res.setText(str(res))
-        except: self.res.setText("Invalid Input")
+        except Exception:
+            self.res.setText("Invalid Input")

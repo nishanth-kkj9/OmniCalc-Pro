@@ -43,7 +43,8 @@ class ConverterPage(QWidget):
         self.to_unit.clear()
         self.from_unit.addItems(units)
         self.to_unit.addItems(units)
-        if len(units) > 1: self.to_unit.setCurrentIndex(1)
+        if len(units) > 1:
+            self.to_unit.setCurrentIndex(1)
         self.calculate()
 
     def calculate(self):
@@ -51,4 +52,5 @@ class ConverterPage(QWidget):
             val = float(self.val_input.text())
             res = self.engine.convert(val, self.from_unit.currentText(), self.to_unit.currentText(), self.cat_combo.currentText())
             self.result_label.setText(f"Result: {round(res, 6)}")
-        except: self.result_label.setText("Result: Invalid Input")
+        except Exception:
+            self.result_label.setText("Result: Invalid Input")
