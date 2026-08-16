@@ -1,0 +1,8 @@
+{
+  "theme": "dark",
+  "font_size": 15,
+  "angle_mode": "degrees",
+  "graph_grid": true,
+  "history_limit": 500,
+  "last_page": "dashboard"
+}
