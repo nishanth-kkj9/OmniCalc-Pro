@@ -142,4 +142,4 @@ jobs:
         run: ruff check .
 
       - name: Static Type Check with MyPy
-        run: mypy core/ utils/ --ignore-missing-imports
+        run: mypy -p core -p utils -p ui

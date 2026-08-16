@@ -29,6 +29,10 @@ dev = [
     "mypy>=1.5.0",
 ]
 
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["core*", "ui*", "utils*"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
@@ -43,6 +47,8 @@ ignore = ["E501", "E402", "F401", "F841", "E722", "W605", "F403", "F405"]
 
 [tool.mypy]
 python_version = "3.10"
+mypy_path = "."
+explicit_package_bases = true
 ignore_missing_imports = true
 warn_return_any = false
 warn_unused_configs = false
@@ -53,4 +59,5 @@ follow_imports = "silent"
 [[tool.mypy.overrides]]
 module = ["PySide6.*", "matplotlib.*", "numpy.*", "sympy.*", "pyperclip.*"]
 ignore_missing_imports = true
+
 
