@@ -11,7 +11,16 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-from PySide6.QtWidgets import QApplication, QMessageBox, QDialog, QVBoxLayout, QTextEdit, QPushButton, QHBoxLayout
+from PySide6.QtWidgets import (
+    QApplication,
+    QMessageBox,
+    QDialog,
+    QVBoxLayout,
+    QTextEdit,
+    QPushButton,
+    QHBoxLayout,
+    QLabel,
+)
 from PySide6.QtCore import Qt, QObject, QEvent
 
 from utils.logger import get_logger
@@ -68,10 +77,9 @@ class CrashDialog(QDialog):
 
         layout = QVBoxLayout(self)
 
-        layout.addWidget(QMessageBox(self))
         msg = QLabel("OmniCalc Pro encountered an unexpected error and needs to close.")
         msg.setWordWrap(True)
-        msg.setStyleSheet("font-size: 14px; padding: 10px;")
+        msg.setStyleSheet("font-size: 14px; padding: 10px; font-weight: bold;")
         layout.addWidget(msg)
 
         details = QTextEdit()

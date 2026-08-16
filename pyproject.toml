@@ -18,9 +18,6 @@ dependencies = [
     "numpy>=1.24.0",
     "sympy>=1.12.0",
     "matplotlib>=3.7.0",
-    "pandas>=2.0.0",
-    "requests>=2.31.0",
-    "qtawesome>=1.2.0",
     "pyperclip>=1.8.2",
 ]
 
@@ -49,12 +46,11 @@ python_version = "3.10"
 ignore_missing_imports = true
 warn_return_any = false
 warn_unused_configs = false
-check_untyped_defs = false
+check_untyped_defs = true
 disallow_untyped_defs = false
 follow_imports = "silent"
 
 [[tool.mypy.overrides]]
-module = ["PySide6.*", "matplotlib.*", "numpy.*", "pandas.*", "sympy.*", "qtawesome.*", "pyperclip.*", "requests.*", "ui.*", "core.*", "utils.*"]
+module = ["PySide6.*", "matplotlib.*", "numpy.*", "sympy.*", "pyperclip.*"]
 ignore_missing_imports = true
-ignore_errors = true
 

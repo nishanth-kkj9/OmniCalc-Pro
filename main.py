@@ -17,6 +17,10 @@ def main():
     app.setApplicationName("OmniCalc Pro")
     app.setOrganizationName("OmniCalc")
     
+    # Wire global crash and error recovery handler
+    from core.error_handler import install_global_handler
+    install_global_handler(app)
+    
     config = load_config()
     theme = get_theme(app)
     theme.apply(config.get("theme", "dark"))

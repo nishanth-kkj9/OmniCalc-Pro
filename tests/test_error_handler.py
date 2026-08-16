@@ -42,10 +42,26 @@ class TestStructuredFormatter(unittest.TestCase):
 
 
 class TestCrashDialog(unittest.TestCase):
+    def setUp(self):
+        from PySide6.QtWidgets import QApplication
+        if QApplication.instance() is None:
+            self.app = QApplication(["--platform", "offscreen"])
+        else:
+            self.app = QApplication.instance()
+
     def test_class_attributes(self):
         from core.error_handler import CrashDialog
         self.assertTrue(hasattr(CrashDialog, '_restart'))
         self.assertTrue(hasattr(CrashDialog, '_close'))
+
+    def test_instantiate_crash_dialog(self):
+        from core.error_handler import CrashDialog
+        dialog = CrashDialog("Test error message", "Traceback line 1\nTraceback line 2")
+        self.assertIsNotNone(dialog)
+        self.assertEqual(dialog.windowTitle(), "OmniCalc Pro - Unexpected Error")
+        # Test dialog close and restart methods
+        dialog._restart()
+        dialog._close()
 
 
 class TestGlobalErrorHandler(unittest.TestCase):

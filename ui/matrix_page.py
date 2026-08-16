@@ -38,11 +38,18 @@ class MatrixPage(QWidget):
             A = self.engine.parse(self.mat_a.text())
             op = self.op.currentText()
             res = ""
-            if op == "Add": res = str(self.engine.add(A, self.engine.parse(self.mat_b.text())))
-            elif op == "Subtract": res = str(self.engine.sub(A, self.engine.parse(self.mat_b.text())))
-            elif op == "Multiply": res = str(self.engine.mul(A, self.engine.parse(self.mat_b.text())))
-            elif op == "Determinant": res = f"{self.engine.det(A):.4f}"
-            elif op == "Inverse": res = str(self.engine.inv(A))
-            elif op == "Transpose": res = str(self.engine.trans(A))
+            if op == "Add":
+                res = str(self.engine.add(A, self.engine.parse(self.mat_b.text())))
+            elif op == "Subtract":
+                res = str(self.engine.sub(A, self.engine.parse(self.mat_b.text())))
+            elif op == "Multiply":
+                res = str(self.engine.mul(A, self.engine.parse(self.mat_b.text())))
+            elif op == "Determinant":
+                res = f"{self.engine.det(A):.4f}"
+            elif op == "Inverse":
+                res = str(self.engine.inv(A))
+            elif op == "Transpose":
+                res = str(self.engine.trans(A))
             self.output.setText(res)
-        except Exception as e: self.output.setText(f"Error: {e}")
+        except Exception as e:
+            self.output.setText(f"Error: {e}")

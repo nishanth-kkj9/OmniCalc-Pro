@@ -34,11 +34,11 @@ class ProgrammerPage(QWidget):
     def convert_all(self):
         try:
             val = self.dec_in.text()
-            base = self.base_combo.currentText()
             self.res_label.setText(f"Binary: {self.engine.to_base(val, 'BIN')}")
             self.res_label2.setText(f"Octal: {self.engine.to_base(val, 'OCT')}")
             self.res_label3.setText(f"Hexadecimal: {self.engine.to_base(val, 'HEX')}")
-        except: pass
+        except Exception:
+            pass
 
     def bitwise_layout(self, layout):
         layout.addWidget(QLabel("Bitwise Op:"), 6, 0)
