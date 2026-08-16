@@ -32,15 +32,13 @@ export function formatNumberWithSettings(
   }
 
   // Standard notation
-  // Avoid unnecessary trailing zeros if decimal is long, but respect precision
+  // Avoid floating-point multiplication roundoff artifacts by using toFixed
   let formatted: string;
   if (Number.isInteger(val)) {
     formatted = val.toString();
   } else {
-    // Round to precision
-    const factor = Math.pow(10, precision);
-    const rounded = Math.round(val * factor) / factor;
-    formatted = rounded.toString();
+    const parsed = Number.parseFloat(val.toFixed(precision));
+    formatted = parsed.toString();
   }
 
   // Separate integer and decimal parts

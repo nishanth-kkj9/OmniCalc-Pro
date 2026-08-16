@@ -42,7 +42,7 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
     setFunctions(functions.filter((f) => f.id !== id));
   };
 
-  const updateFunction = (id: string, field: 'expression' | 'enabled', val: any) => {
+  const updateFunction = (id: string, field: 'expression' | 'enabled', val: string | boolean) => {
     setFunctions(
       functions.map((f) => (f.id === id ? { ...f, [field]: val } : f))
     );
@@ -381,6 +381,8 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
             ref={canvasRef}
             width={800}
             height={450}
+            role="img"
+            aria-label={`Interactive 2D Cartesian Function Graph displaying plotted functions from X: ${xMin} to ${xMax}, Y: ${yMin} to ${yMax}`}
             onMouseMove={handleMouseMove}
             onMouseLeave={() => setHoverCoords(null)}
             className="w-full h-full cursor-crosshair block"

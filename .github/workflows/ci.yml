@@ -12,8 +12,46 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  web-lint:
+    name: Web Linter & Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Node Dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+  web-test:
+    name: Web Unit Tests & Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Node Dependencies
+        run: npm ci
+
+      - name: Run Vitest Unit Tests with Coverage
+        run: npm run coverage
+
   web-ci:
-    name: Web App CI (Node.js & TypeScript)
+    name: Web Build & Typecheck
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -92,4 +130,4 @@ jobs:
         run: ruff check .
 
       - name: Static Type Check with MyPy
-        run: mypy core/ utils/ --ignore-missing-imports
+        run: mypy core/ utils/

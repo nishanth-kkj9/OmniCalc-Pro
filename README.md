@@ -2,7 +2,8 @@
 
 **An advanced, multi-paradigm calculation suite featuring 17 specialized mathematical engines, interactive visualizations, and modern desktop & web interfaces.**
 
-[![CI & Build](https://github.com/nishanth-kkj9/-OmniCalc-Pro/actions/workflows/ci.yml/badge.svg)](https://github.com/nishanth-kkj9/-OmniCalc-Pro/actions/workflows/ci.yml)
+[![CI & Build](https://github.com/nishanth-kkj9/OmniCalc-Pro/actions/workflows/ci.yml/badge.svg)](https://github.com/nishanth-kkj9/OmniCalc-Pro/actions/workflows/ci.yml)
+[![Version](https://img.shields.io/badge/Version-2.1.0-emerald.svg)](VERSION)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18.3-61dafb?logo=react)](https://react.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38b2ac?logo=tailwind-css)](https://tailwindcss.com/)
@@ -14,8 +15,8 @@
 
 ## 🌟 Overview
 
-**OmniCalc Pro** bridges the gap between everyday arithmetic, scientific exploration, computational algebra, and practical everyday tools. It is available as:
-1. **Interactive Web Application**: Built with React 18, TypeScript, Tailwind CSS, Lucide icons, and MathJS with responsive layouts, tactile audio synthesis, and dark/light/OLED themes.
+**OmniCalc Pro** bridges the gap between everyday arithmetic, scientific exploration, computational algebra, and practical daily utility tools. It is delivered in two complementary forms:
+1. **Interactive Web Application**: Built with React 18, TypeScript, Tailwind CSS, Lucide icons, and MathJS with dynamic bundle code-splitting, tactile audio synthesis, and dark/light/OLED themes.
 2. **Native Desktop Suite**: Built with Python 3.10+ and PySide6 featuring Windows 11 Mica/Acrylic effects, SQLite history caching, and AST-safe symbolic mathematics.
 
 ---
@@ -51,7 +52,7 @@
   - **Light Theme**: High-contrast, clean slate aesthetic optimized for daylight visibility.
   - **Dark Slate Theme**: Deep eye-safe twilight navy palette.
   - **OLED True Black Theme**: Pure black (`#000000`) for OLED power efficiency.
-  - **Accent Colors**: Electric Sky, Emerald Teal, Royal Violet, Solar Amber, Rose Magenta, and Cyber Slate.
+  - **Accent Colors**: Sky Blue, Emerald Teal, Violet Indigo, Amber Gold, Rose Pink, and Cyan Teal.
 - **Audio Synthesizer & Haptics**: Built-in Web Audio API synthesizer for tactile mechanical keypress feedback with zero external asset latency.
 - **Responsive Layout**: Fluid desktop sidebar with collapsible mobile drawers, responsive quick-switch pills, and touch-optimized keypad targets.
 - **One-Click Copy & Export**: Dedicated copy buttons on digital displays and comprehensive CSV/JSON history logs.
@@ -63,31 +64,47 @@
 ### 🌐 1. Web Application (React + Vite + TypeScript)
 
 #### Prerequisites
-- Node.js 18.x or 20.x+
+- Node.js 20.x+ (see `.nvmrc`)
 - npm or bun
 
 #### Setup & Development
 ```bash
 # Clone the repository
-git clone https://github.com/nishanth-kkj9/-OmniCalc-Pro.git
+git clone https://github.com/nishanth-kkj9/OmniCalc-Pro.git
 cd OmniCalc-Pro
 
 # Install dependencies
 npm install
 
-# Start the Vite development server
+# Start the development server
 npm run dev
 ```
 
-Visit `http://localhost:3000` (or the port displayed in your terminal) to view the app.
+Visit `http://localhost:3000` to interact with the application.
 
-#### Production Build
+#### Tests, Linting & Production Build
 ```bash
-# Type check and build production bundle
-npm run build
+# Run Vitest test suite
+npm test
 
-# Preview production build locally
-npm run preview
+# Run tests with coverage reporting
+npm run coverage
+
+# Run ESLint validation
+npm run lint
+
+# Format code with Prettier
+npm run format
+
+# Typecheck and build production bundle
+npm run build
+```
+
+#### Docker Deployment
+```bash
+# Build and run containerized web app
+docker build -t omnicalc-pro .
+docker run -p 3000:3000 omnicalc-pro
 ```
 
 ---
@@ -95,43 +112,43 @@ npm run preview
 ### 🖥️ 2. Desktop Application (Python + PySide6)
 
 #### Prerequisites
-- Python 3.10 or higher
-- Windows 10/11 (recommended for Windows Fluent / Mica effects), macOS, or Linux
+- Python 3.10+ (see `.python-version`)
+- Windows 10/11 (recommended for Fluent / Mica effects), macOS, or Linux
 
-#### Installation
+#### Installation & Launch
 ```bash
-# Set up a virtual environment (optional but recommended)
+# Set up a virtual environment
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install runtime dependencies
 pip install -r requirements.txt
 
-# Launch the desktop app
+# Launch the desktop app via root entry point
 python main.py
 ```
 
-#### Development & Testing
+#### Development, Testing & Code Quality
 ```bash
-# Install development dependencies (pytest, ruff, mypy)
+# Install development dependencies
 pip install -e ".[dev]"
 
-# Run test suite
-pytest tests/ -v
+# Run full pytest suite
+pytest tests/ -v --tb=short
 
-# Run linter
+# Run Ruff linter
 ruff check .
 
-# Type-check core modules
-mypy core/ utils/ --ignore-missing-imports
+# Static type check
+mypy core/ utils/
 ```
 
-#### Packaging Desktop Executable
+#### Standalone PyInstaller Binary
 ```bash
 pip install pyinstaller
 pyinstaller --onefile --windowed --icon=assets/icons/app_icon.svg main.py
 ```
-The compiled standalone executable will be located in the `dist/` directory.
+The compiled executable will be written to `dist/`.
 
 ---
 
@@ -147,8 +164,7 @@ The compiled standalone executable will be located in the `dist/` directory.
 | `Escape` / `C` | Clear active expression / Close palette | Calculators / Modals |
 | `(` / `)` | Open / Close Parentheses | Calculators |
 | `^` | Exponentiation ($x^y$) | Scientific & Calculus |
-| `Ctrl+1` – `Ctrl+0` | Direct Engine Page Switching | Desktop |
-| `Ctrl+T` | Toggle Color Theme | Desktop & Web |
+| `Ctrl+T` | Toggle Color Theme | Global |
 | `Ctrl+C` | Copy Active Result to Clipboard | Global |
 
 ---
@@ -158,10 +174,14 @@ The compiled standalone executable will be located in the `dist/` directory.
 ```
 OmniCalc-Pro/
 ├── .github/
-│   └── workflows/
-│       └── ci.yml              # Multi-platform CI (Web typecheck/build + Python matrix test/lint)
+│   ├── workflows/
+│   │   ├── ci.yml              # CI (Web lint/test/build + Python matrix tests/lint)
+│   │   ├── codeql.yml          # CodeQL security analysis
+│   │   └── release.yml         # GitHub automated release on tag
+│   ├── ISSUE_TEMPLATE/         # GitHub issue templates (bug report, feature request)
+│   └── PULL_REQUEST_TEMPLATE.md# Pull request template
 ├── src/                        # Web Application (React 18 + TypeScript + Tailwind)
-│   ├── components/             # 17 Calculation modules & UI components
+│   ├── components/             # 17 Calculation modules & UI components (Code-split)
 │   │   ├── BasicCalculator.tsx
 │   │   ├── ScientificCalculator.tsx
 │   │   ├── FractionsCalculator.tsx
@@ -183,40 +203,29 @@ OmniCalc-Pro/
 │   │   ├── Header.tsx
 │   │   └── Sidebar.tsx
 │   ├── utils/                  # Core calculation & formatting helpers
-│   │   ├── calculator.ts       # Expression parser & MathJS evaluator
+│   │   ├── calculator.ts       # Expression parser & MathJS evaluator (EvalResult)
+│   │   ├── calculator.test.ts  # Vitest unit test suite
 │   │   ├── formatting.ts       # Number formatting, SI suffixes, theme tokens
+│   │   ├── formatting.test.ts  # Vitest formatting test suite
 │   │   ├── history.ts          # Local storage history persistence
+│   │   ├── history.test.ts     # Vitest history test suite
 │   │   └── sound.ts            # Web Audio API procedural sound synthesizer
-│   ├── types.ts                # Application data types & interfaces
-│   ├── App.tsx                 # Root application component
+│   ├── test/                   # Test configuration and setup
+│   │   └── setup.ts
+│   ├── types.ts                # TypeScript types & interfaces
+│   ├── App.tsx                 # Root application component (Code-split with Suspense)
 │   └── main.tsx                # Client entry point
 ├── core/                       # Desktop Engine Modules (Python)
-│   ├── safe_evaluator.py       # AST-based mathematical evaluator (no eval)
-│   ├── parser.py               # Sympy symbolic parser
-│   ├── calculator_engine.py    # Basic arithmetic engine
-│   ├── scientific_engine.py    # Advanced scientific engine
-│   ├── finance_engine.py       # Loan, interest, and tax engine
-│   ├── matrix_engine.py        # Matrix linear algebra engine
-│   ├── programmer_engine.py    # Bitwise & radix engine
-│   ├── converter_engine.py     # Unit conversion tables
-│   ├── statistics_engine.py    # Descriptive statistics engine
-│   ├── graph_engine.py         # Matplotlib graphing engine
-│   └── history_manager.py      # SQLite history database
 ├── ui/                         # Desktop UI Components (PySide6)
 ├── utils/                      # Desktop Python utility modules
 ├── tests/                      # Python Test Suite
+├── main.py                     # Desktop Application Root Entry Point
+├── Dockerfile                  # Multi-stage production container image
+├── VERSION                     # Single source of truth version file (2.1.0)
 ├── package.json                # Web NPM dependencies & scripts
-├── pyproject.toml              # Python project metadata & tool configurations
+├── pyproject.toml              # Python project metadata & modern ruff/mypy tool config
 └── requirements.txt            # Python dependencies
 ```
-
----
-
-## 🔒 Security & Precision Guardrails
-
-- **AST-Based Evaluation**: Python calculation engines strictly employ Abstract Syntax Tree (AST) parsing with Sympy whitelists, eliminating arbitrary code execution risks.
-- **Sandboxed Web Evaluation**: Web mathematical evaluation passes sanitized expression strings through MathJS within controlled trigonometric and logarithmic function scopes.
-- **Edge Case Protection**: Guarded against divide-by-zero, non-converging Newton-Raphson iterations, negative square roots in real mode, and trigonometric singularities (e.g., $\tan(90^\circ)$).
 
 ---
 

@@ -20,7 +20,7 @@ export function addHistory(
   if (!expression || !result || result === 'Error') return getHistory();
   
   // Check settings if autoSave is disabled
-  let autoSave = settings?.autoSaveHistory;
+  const autoSave = settings?.autoSaveHistory;
   let maxItems = settings?.maxHistoryItems || 100;
 
   if (autoSave === undefined) {
@@ -40,7 +40,7 @@ export function addHistory(
 
   const current = getHistory();
   const newItem: HistoryItem = {
-    id: 'hist_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+    id: 'hist_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
     expression,
     result,
     mode,
@@ -51,7 +51,8 @@ export function addHistory(
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
   } catch (e) {
-    console.error('Failed to save history to localStorage', e);
+    // Quota exceeded or private browsing restrictions
+    console.warn('Failed to save history to localStorage:', e);
   }
   return updated;
 }
@@ -60,7 +61,7 @@ export function clearHistory(): HistoryItem[] {
   try {
     localStorage.removeItem(STORAGE_KEY);
   } catch (e) {
-    console.error('Failed to clear history', e);
+    console.warn('Failed to clear history:', e);
   }
   return [];
 }
@@ -70,7 +71,7 @@ export function deleteHistoryItem(id: string): HistoryItem[] {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(current));
   } catch (e) {
-    console.error('Failed to delete history item', e);
+    console.warn('Failed to delete history item:', e);
   }
   return current;
 }
