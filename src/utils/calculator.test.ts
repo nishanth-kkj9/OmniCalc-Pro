@@ -81,6 +81,23 @@ describe('Calculator Evaluator', () => {
         expect(res.error).toBe('syntax');
       }
     });
+
+    it('blocks prototype pollution and security injection attempts', () => {
+      expect(evaluateWithResult('constructor.prototype').ok).toBe(false);
+      expect(evaluateWithResult('__proto__').ok).toBe(false);
+      expect(evaluateWithResult('window.alert(1)').ok).toBe(false);
+      expect(evaluateWithResult('eval("2+2")').ok).toBe(false);
+    });
+
+    it('blocks deeply nested parentheses attacks', () => {
+      const nested = '('.repeat(30) + '5' + ')'.repeat(30);
+      expect(evaluateWithResult(nested).ok).toBe(false);
+    });
+
+    it('blocks oversized exponents to prevent CPU lockup', () => {
+      const hugeExp = evaluateWithResult('10 ^ 999999');
+      expect(hugeExp.ok).toBe(false);
+    });
   });
 
   describe('formatNumber utility', () => {

@@ -26,11 +26,14 @@ jobs:
           npm ci
           npm run build
           tar -czvf omnicalc-pro-web.tar.gz dist/
+          sha256sum omnicalc-pro-web.tar.gz > SHA256SUMS
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: omnicalc-pro-web.tar.gz
+          files: |
+            omnicalc-pro-web.tar.gz
+            SHA256SUMS
           draft: false
           prerelease: false
           generate_release_notes: true

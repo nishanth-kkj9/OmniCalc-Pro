@@ -1,0 +1,20 @@
+[
+  {
+    "name": "sin_degrees_30",
+    "expr": "sin(30)",
+    "expected": 0.5,
+    "angle_mode": "degrees"
+  },
+  {
+    "name": "cos_degrees_60",
+    "expr": "cos(60)",
+    "expected": 0.5,
+    "angle_mode": "degrees"
+  },
+  {
+    "name": "tan_degrees_45",
+    "expr": "tan(45)",
+    "expected": 1.0,
+    "angle_mode": "degrees"
+  }
+]

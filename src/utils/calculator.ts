@@ -4,9 +4,35 @@ import { formatNumberWithSettings } from './formatting';
 
 const math = create(all, {});
 
+// Maximum limits for web evaluation
+const MAX_WEB_EXPR_LENGTH = 500;
+const MAX_WEB_NESTING_DEPTH = 25;
+
+const BLOCKED_TOKENS_REGEX = /\b(constructor|__proto__|prototype|import|eval|Function|process|window|document|localStorage|sessionStorage|cookie)\b/i;
+
 export type EvalResult =
   | { ok: true; value: string }
   | { ok: false; error: 'syntax' | 'math' | 'overflow' };
+
+/**
+ * Validates expression length, nesting depth, and blocked keywords.
+ */
+function prevalidateWebExpression(expr: string): boolean {
+  if (expr.length > MAX_WEB_EXPR_LENGTH) return false;
+  if (BLOCKED_TOKENS_REGEX.test(expr)) return false;
+
+  let depth = 0;
+  for (let i = 0; i < expr.length; i++) {
+    if (expr[i] === '(') {
+      depth++;
+      if (depth > MAX_WEB_NESTING_DEPTH) return false;
+    } else if (expr[i] === ')') {
+      depth--;
+      if (depth < 0) return false;
+    }
+  }
+  return depth === 0;
+}
 
 /**
  * Evaluates a mathematical expression and returns a typed EvalResult.
@@ -19,6 +45,11 @@ export function evaluateWithResult(
 ): EvalResult {
   if (!expr || !expr.trim()) {
     return { ok: true, value: '' };
+  }
+
+  // Pre-validate complexity and safety
+  if (!prevalidateWebExpression(expr)) {
+    return { ok: false, error: 'syntax' };
   }
 
   try {
@@ -34,8 +65,13 @@ export function evaluateWithResult(
       .replace(/√([0-9a-zA-Z.]+)/g, 'sqrt($1)');
 
     // Percentage conversion: e.g. 50% -> (50 * 0.01)
-    // Ensure we don't clobber 'mod' operations
     sanitized = sanitized.replace(/(\d+(?:\.\d+)?)%/g, '($1 * 0.01)');
+
+    // Block huge exponents in web calculator
+    const expMatch = sanitized.match(/(?:\^|\*\*)\s*(\d+)/);
+    if (expMatch && parseInt(expMatch[1], 10) > 10000) {
+      return { ok: false, error: 'overflow' };
+    }
 
     let mathScope: Record<string, any> = {
       // Standard Logarithmic & Exponential Functions

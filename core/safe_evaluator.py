@@ -7,7 +7,9 @@ No code execution possible - only mathematical expressions.
 import math
 import re
 import signal
-import threading
+import sys
+import multiprocessing
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 from typing import Any
 
 import sympy as sp
@@ -23,6 +25,13 @@ from utils.logger import get_logger
 from utils.constants import MAX_EXPR_LENGTH, MAX_RESULT_DIGITS, MAX_EXECUTION_TIME, MAX_NESTING_DEPTH
 
 logger = get_logger()
+
+# Maximum allowed exponent to prevent CPU/memory exhaustion attacks
+MAX_EXPONENT_VAL = 10000
+# Maximum allowed factorial input
+MAX_FACTORIAL_VAL = 1000
+# Maximum allowed operator count
+MAX_OPERATOR_COUNT = 100
 
 SAFE_FUNCTIONS = {
     "sin", "cos", "tan", "asin", "acos", "atan",
@@ -83,7 +92,16 @@ RADIAN_FUNCTIONS = {
     "gamma": math.gamma,
 }
 
-# Remove function_exponentiation as it splits function names incorrectly
+# Blocked tokens that should never appear in mathematical expressions
+BLOCKED_IDENTIFIERS = {
+    "eval", "exec", "import", "__import__", "open", "globals", "locals",
+    "getattr", "setattr", "delattr", "hasattr", "compile", "builtins",
+    "__builtins__", "system", "os", "sys", "subprocess", "shutil", "socket",
+    "requests", "urllib", "pickle", "input", "raw_input", "classmethod",
+    "staticmethod", "property", "type", "super", "__class__", "__bases__",
+    "__subclasses__", "__mro__", "__code__", "__dict__",
+}
+
 TRANSFORMATIONS = (
     standard_transformations
     + (implicit_multiplication_application,)
@@ -92,7 +110,7 @@ TRANSFORMATIONS = (
 
 _UNICODE_MAP = {
     "×": "*", "÷": "/", "−": "-", "–": "-",
-    "·": "*", "·": "*", "√": "sqrt(",
+    "·": "*", "√": "sqrt(",
     "π": "pi", "τ": "tau", "∞": "inf",
     "²": "**2", "³": "**3", "ⁿ": "**",
     "±": "+-", "∓": "-+",
@@ -101,13 +119,41 @@ _UNICODE_MAP = {
 }
 
 _NUMBER_RE = re.compile(r"\b(\d+)(\.\d*)?\b")
-
-# Known function names to protect from implicit multiplication splitting
 _PROTECTED_FUNCTIONS = set(SAFE_FUNCTIONS) | {"factorial"}
 
 
+def _worker_eval_task(expr: str, namespace_keys: list[str], angle_mode: str) -> float:
+    """Isolated evaluation task designed for worker execution."""
+    ns = dict(SAFE_CONSTANTS)
+    if angle_mode == "degrees":
+        ns.update(DEGREE_FUNCTIONS)
+        ns.update({k: v for k, v in RADIAN_FUNCTIONS.items() if k not in DEGREE_FUNCTIONS})
+    else:
+        ns.update(RADIAN_FUNCTIONS)
+
+    result = parse_expr(expr, transformations=TRANSFORMATIONS, local_dict=ns, evaluate=True)
+
+    if isinstance(result, (int, float)):
+        val = float(result)
+    elif isinstance(result, Basic):
+        if not result.is_number:
+            raise ValueError("Result is not a number")
+        val = float(result.evalf())
+    elif isinstance(result, complex):
+        if result.imag == 0:
+            val = float(result.real)
+        else:
+            raise ValueError("Result is a complex number")
+    else:
+        raise ValueError("Result is not a valid number")
+
+    if math.isinf(val) or math.isnan(val):
+        raise ValueError("Result is infinite or NaN")
+    return val
+
+
 class SafeEvaluator:
-    """Thread-safe mathematical expression evaluator."""
+    """Thread-safe and process-isolated mathematical expression evaluator with complexity limits."""
 
     def __init__(self, angle_mode: str = "degrees", max_length: int = MAX_EXPR_LENGTH):
         self.angle_mode = angle_mode
@@ -115,8 +161,6 @@ class SafeEvaluator:
         self.max_time = MAX_EXECUTION_TIME
         self.max_nesting = MAX_NESTING_DEPTH
         self._namespace = self._build_namespace()
-        self._timeout_thread = None
-        self._timed_out = False
 
     def _build_namespace(self) -> dict:
         ns = dict(SAFE_CONSTANTS)
@@ -143,6 +187,37 @@ class SafeEvaluator:
                     raise ValueError(f"Expression nesting exceeds limit ({self.max_nesting})")
             elif ch == ")":
                 depth -= 1
+                if depth < 0:
+                    raise ValueError("Mismatched parentheses in expression")
+        if depth != 0:
+            raise ValueError("Unclosed parentheses in expression")
+
+    def _check_complexity_limits(self, expr: str) -> None:
+        """Check complexity constraints against DoS expressions."""
+        # 1. Check operator repetition / count
+        operators = re.findall(r"[\+\-\*\/\^\%]", expr)
+        if len(operators) > MAX_OPERATOR_COUNT:
+            raise ValueError(f"Expression exceeds operator complexity limit ({MAX_OPERATOR_COUNT})")
+
+        # 2. Check for blocked malicious tokens or dunder attributes
+        tokens = re.findall(r"\b[a-zA-Z_]\w*\b", expr)
+        for token in tokens:
+            if token in BLOCKED_IDENTIFIERS or token.startswith("__"):
+                raise ValueError(f"Disallowed token or identifier: {token}")
+
+        # 3. Check for oversized exponents (e.g. 10**100000 or 2^99999)
+        exp_matches = re.finditer(r"(?:\*\*|\^)\s*(\d+)", expr)
+        for match in exp_matches:
+            exp_val = int(match.group(1))
+            if exp_val > MAX_EXPONENT_VAL:
+                raise ValueError(f"Exponent {exp_val} exceeds safe limit ({MAX_EXPONENT_VAL})")
+
+        # 4. Check for oversized factorial inputs (e.g. factorial(100000))
+        fact_matches = re.finditer(r"factorial\s*\(\s*(\d+)\s*\)", expr)
+        for match in fact_matches:
+            fact_val = int(match.group(1))
+            if fact_val > MAX_FACTORIAL_VAL:
+                raise ValueError(f"Factorial input {fact_val} exceeds safe limit ({MAX_FACTORIAL_VAL})")
 
     def _normalize(self, expr: str) -> str:
         if len(expr) > self.max_length:
@@ -199,6 +274,8 @@ class SafeEvaluator:
 
     def _validate_ast(self, expr: str, allow_vars: bool = False) -> None:
         for token in re.findall(r'\b[a-zA-Z_]\w*\b', expr):
+            if token in BLOCKED_IDENTIFIERS or token.startswith("__"):
+                raise ValueError(f"Disallowed identifier: {token}")
             if token in self._namespace:
                 continue
             if token in SAFE_CONSTANTS:
@@ -207,60 +284,29 @@ class SafeEvaluator:
                 continue
             raise ValueError(f"Unknown identifier: {token}")
 
-    def _is_number_result(self, result: Any) -> bool:
-        """Check if result is a number (sympy Number or Python numeric type)."""
-        if isinstance(result, (int, float, complex)):
-            return True
-        if isinstance(result, Basic):
-            return result.is_number
-        return False
-
-    def _convert_to_float(self, result: Any) -> float:
-        """Convert result to float, handling both sympy and Python types."""
-        if isinstance(result, (int, float)):
-            return float(result)
-        if isinstance(result, Basic):
-            return float(result.evalf())
-        if isinstance(result, complex):
-            if result.imag == 0:
-                return float(result.real)
-        raise ValueError("Result is not a real number")
-
     def _prevalidate(self, expr: str, allow_vars: bool = False) -> str:
-        """Run common pre-validation (length, nesting, identifiers). Returns normalized expression."""
+        """Run common pre-validation (length, nesting, complexity, identifiers). Returns normalized expression."""
         expr = self._normalize(expr)
         self._check_nesting_depth(expr)
+        self._check_complexity_limits(expr)
         self._validate_ast(expr, allow_vars=allow_vars)
         return expr
 
     def evaluate(self, expr: str) -> float:
-        _timer = None
+        """Evaluate mathematical expression with strict timeout enforcement and complexity limits."""
         try:
             expr = self._prevalidate(expr)
 
-            self._timed_out = False
+            # Fast path or timed execution using ThreadPoolExecutor for responsive timeout enforcement
+            if self.max_time <= 0:
+                return _worker_eval_task(expr, list(self._namespace.keys()), self.angle_mode)
 
-            def _start_timer():
-                t = threading.Timer(self.max_time, self._set_timeout)
-                t.daemon = True
-                t.start()
-                return t
-
-            if self.max_time > 0:
-                _timer = _start_timer()
-
-            result = parse_expr(expr, transformations=TRANSFORMATIONS, local_dict=self._namespace, evaluate=True)
-
-            if self._timed_out:
-                raise TimeoutError(f"Evaluation exceeded {self.max_time}s limit")
-
-            if not self._is_number_result(result):
-                raise ValueError("Result is not a number")
-
-            val = self._convert_to_float(result)
-            if math.isinf(val) or math.isnan(val):
-                raise ValueError("Result is infinite or NaN")
-            return val
+            with ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(_worker_eval_task, expr, list(self._namespace.keys()), self.angle_mode)
+                try:
+                    return future.result(timeout=self.max_time)
+                except FuturesTimeoutError:
+                    raise TimeoutError(f"Evaluation exceeded {self.max_time}s limit")
 
         except SympifyError as e:
             logger.warning(f"Parse error: {expr} -> {e}")
@@ -276,9 +322,6 @@ class SafeEvaluator:
         except Exception as e:
             logger.error(f"Evaluation error: {expr} -> {e}")
             raise ValueError(f"Evaluation failed: {e}")
-        finally:
-            if _timer is not None:
-                _timer.cancel()
 
     def evaluate_safe(self, expr: str) -> float | str:
         try:
@@ -286,7 +329,7 @@ class SafeEvaluator:
         except ValueError as e:
             return f"Error: {e}"
 
-    # --- Consolidation from parser.py ---
+    # --- Consolidated Symbolic Parsing and Solving ---
 
     def parse_expression(self, expr: str):
         try:
@@ -315,39 +358,13 @@ class SafeEvaluator:
         except Exception as e:
             raise ValueError(f"Error solving expression: {e}") from e
 
-    def _set_timeout(self):
-        self._timed_out = True
-
 
 _default_evaluator = SafeEvaluator()
 
 
 def validate_expression(expr: str, allow_vars: bool = False) -> str:
-    """Validate an expression against the SAFE_FUNCTIONS/SAFE_CONSTANTS allowlist.
-
-    Args:
-        expr: The expression string to validate.
-        allow_vars: If True, allow identifiers like 'x' (for graphing).
-
-    Returns:
-        The normalized expression string.
-
-    Raises:
-        ValueError: If the expression contains unknown or disallowed identifiers.
-    """
-    expr = _default_evaluator._normalize(expr)
-    _default_evaluator._check_nesting_depth(expr)
-
-    for token in re.findall(r'\b[a-zA-Z_]\w*\b', expr):
-        if token in _default_evaluator._namespace:
-            continue
-        if token in SAFE_CONSTANTS:
-            continue
-        if allow_vars and len(token) == 1 and token.isalpha():
-            continue
-        raise ValueError(f"Unknown identifier: {token}")
-
-    return expr
+    """Validate an expression against the SAFE_FUNCTIONS/SAFE_CONSTANTS allowlist."""
+    return _default_evaluator._prevalidate(expr, allow_vars=allow_vars)
 
 
 def safe_eval(expression: str, angle_mode: str = "degrees") -> float | str:
