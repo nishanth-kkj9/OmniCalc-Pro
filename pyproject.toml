@@ -38,7 +38,7 @@ testpaths = ["tests"]
 pythonpath = ["."]
 
 [tool.ruff]
-target-version = "py310"
+target-version = "py312"
 line-length = 120
 
 [tool.ruff.lint]
@@ -46,7 +46,7 @@ select = ["E", "F"]
 ignore = ["E501", "E402", "F401", "F841", "E722", "W605", "F403", "F405"]
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.12"
 mypy_path = "."
 explicit_package_bases = true
 ignore_missing_imports = true
@@ -59,5 +59,6 @@ follow_imports = "silent"
 [[tool.mypy.overrides]]
 module = ["PySide6.*", "matplotlib.*", "numpy.*", "sympy.*", "pyperclip.*", "ctypes.wintypes.*"]
 ignore_missing_imports = true
+follow_imports = "skip"
 
 
