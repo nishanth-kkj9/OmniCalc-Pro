@@ -51,6 +51,10 @@ warn_return_any = false
 warn_unused_configs = false
 check_untyped_defs = false
 disallow_untyped_defs = false
-ignore_errors = true
 follow_imports = "silent"
+
+[[tool.mypy.overrides]]
+module = ["PySide6.*", "matplotlib.*", "numpy.*", "pandas.*", "sympy.*", "qtawesome.*", "pyperclip.*", "requests.*", "ui.*", "core.*", "utils.*"]
+ignore_missing_imports = true
+ignore_errors = true
 
