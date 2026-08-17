@@ -6,6 +6,7 @@ No code execution possible - only mathematical expressions.
 """
 import math
 import re
+from typing import Any
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 
 import sympy as sp
