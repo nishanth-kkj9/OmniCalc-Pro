@@ -47,8 +47,12 @@ class TestConverterEngine(unittest.TestCase):
         self.assertAlmostEqual(result, 1024.0)
 
     def test_invalid_category(self):
-        result = self.engine.convert(1, "m", "km", "Invalid")
-        self.assertEqual(result, 0)
+        with self.assertRaises(ValueError):
+            self.engine.convert(1, "m", "km", "Invalid")
+
+    def test_invalid_units(self):
+        with self.assertRaises(ValueError):
+            self.engine.convert(1, "invalid_unit", "km", "Length")
 
     def test_categories_list(self):
         cats = self.engine.CATEGORIES

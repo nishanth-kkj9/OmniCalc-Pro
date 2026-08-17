@@ -1,7 +1,10 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { create, all } from 'mathjs';
 import { evaluateExpression } from '../utils/calculator';
 import { AppSettings } from '../types';
 import { Plus, Trash2, Download, ZoomIn, ZoomOut, RefreshCw, Table } from 'lucide-react';
+
+const math = create(all, {});
 
 interface GraphingCalculatorProps {
   settings: AppSettings;
@@ -48,7 +51,31 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
     );
   };
 
-  // Evaluate function f(x) safely
+  // Compile expressions once to avoid re-parsing per pixel on every frame
+  const compiledFns = useMemo(() => {
+    return functions.map((fn) => {
+      if (!fn.enabled || !fn.expression.trim()) return null;
+      try {
+        const sanitized = fn.expression
+          .replace(/×/g, '*')
+          .replace(/÷/g, '/')
+          .replace(/π/g, 'pi')
+          .replace(/−/g, '-')
+          .replace(/√\(/g, 'sqrt(')
+          .replace(/√([0-9a-zA-Z.]+)/g, 'sqrt($1)')
+          .replace(/(\d+(?:\.\d+)?)%/g, '($1 * 0.01)');
+        const parsed = math.parse(sanitized);
+        return {
+          ...fn,
+          compiled: parsed.compile(),
+        };
+      } catch {
+        return null;
+      }
+    });
+  }, [functions]);
+
+  // Evaluate function f(x) safely for table
   const evalFuncAtX = useCallback(
     (expr: string, xVal: number): number | null => {
       try {
@@ -138,20 +165,30 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
     ctx.lineTo(zeroX, height);
     ctx.stroke();
 
-    // Plot Functions
-    functions.forEach((fn) => {
-      if (!fn.enabled || !fn.expression.trim()) return;
+    // Plot Functions using precompiled nodes and capped points (800)
+    const MAX_POINTS = Math.min(Math.round(width), 800);
+    const step = (xMax - xMin) / MAX_POINTS;
 
-      ctx.strokeStyle = fn.color;
+    compiledFns.forEach((c) => {
+      if (!c) return;
+
+      ctx.strokeStyle = c.color;
       ctx.lineWidth = 2.5;
       ctx.beginPath();
 
       let isDrawing = false;
-      const numPoints = width;
 
-      for (let i = 0; i <= numPoints; i++) {
-        const xVal = xMin + (i / numPoints) * (xMax - xMin);
-        const yVal = evalFuncAtX(fn.expression, xVal);
+      for (let i = 0; i <= MAX_POINTS; i++) {
+        const xVal = xMin + i * step;
+        let yVal: number | null = null;
+        try {
+          const r = c.compiled.evaluate({ x: xVal });
+          if (typeof r === 'number' && isFinite(r)) {
+            yVal = r;
+          }
+        } catch {
+          yVal = null;
+        }
 
         if (yVal !== null && yVal >= yMin - 100 && yVal <= yMax + 100) {
           const cx = toCanvasX(xVal);
@@ -169,7 +206,7 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
       }
       ctx.stroke();
     });
-  }, [xMin, xMax, yMin, yMax, functions, evalFuncAtX]);
+  }, [xMin, xMax, yMin, yMax, compiledFns, settings.theme]);
 
   useEffect(() => {
     drawGraph();

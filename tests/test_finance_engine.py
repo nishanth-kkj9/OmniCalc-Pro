@@ -29,9 +29,10 @@ class TestFinanceEngine(unittest.TestCase):
         self.assertAlmostEqual(interest, 126.83, places=2)
 
     def test_gst_inclusive(self):
-        original, tax = self.engine.gst(118, 18, inclusive=True)
-        self.assertAlmostEqual(original, 100.0, places=2)
+        base, tax, total = self.engine.gst(118, 18, inclusive=True)
+        self.assertAlmostEqual(base, 100.0, places=2)
         self.assertAlmostEqual(tax, 18.0, places=2)
+        self.assertAlmostEqual(total, 118.0, places=2)
 
     def test_gst_exclusive(self):
         base, tax, total = self.engine.gst(100, 18, inclusive=False)

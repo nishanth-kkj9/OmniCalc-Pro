@@ -82,7 +82,7 @@ class FinancePage(QWidget):
                 amt_val = float(vals[0])
                 rate_val = float(vals[1])
                 gst_res = self.engine.gst(amt_val, rate_val)
-                res_text = f"Original: {gst_res[0]}\nTax: {gst_res[1]}"
+                res_text = f"Base: {gst_res[0]}\nTax: {gst_res[1]}\nTotal: {gst_res[2]}"
             else:
                 price = float(vals[0])
                 disc = float(vals[1])
