@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Copy, Check, Sparkles, RefreshCw, Equal } from 'lucide-react';
+import { Copy, Check, RefreshCw } from 'lucide-react';
 import { AppSettings } from '../types';
 
 interface EquationSolverProps {

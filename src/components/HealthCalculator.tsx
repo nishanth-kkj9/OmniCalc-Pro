@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { Heart, Activity, Flame, Scale, User, RefreshCw } from 'lucide-react';
 import { AppSettings } from '../types';
 
 interface HealthCalculatorProps {
   settings?: AppSettings;
 }
 
-export const HealthCalculator: React.FC<HealthCalculatorProps> = ({ settings }) => {
+export const HealthCalculator: React.FC<HealthCalculatorProps> = ({ settings: _settings }) => {
   const [tab, setTab] = useState<'bmi' | 'tdee' | 'heartrate'>('bmi');
   const [unitSystem, setUnitSystem] = useState<'metric' | 'imperial'>('metric');
 

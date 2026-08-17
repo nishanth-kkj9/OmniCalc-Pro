@@ -155,7 +155,7 @@ const CATEGORY_UNITS: Record<UnitCategory, { base: string; units: Record<string,
   },
 };
 
-export const ConverterCalculator: React.FC<ConverterCalculatorProps> = ({ settings }) => {
+export const ConverterCalculator: React.FC<ConverterCalculatorProps> = ({ settings: _settings }) => {
   const [category, setCategory] = useState<UnitCategory>('Length');
   const [fromUnit, setFromUnit] = useState<string>('m');
   const [toUnit, setToUnit] = useState<string>('ft');

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { HistoryItem, CalcMode, AppSettings } from '../types';
+import { HistoryItem, AppSettings } from '../types';
 import { getHistory, clearHistory, deleteHistoryItem } from '../utils/history';
 import { Search, Trash2, Copy, Download, Check, ArrowRight } from 'lucide-react';
 

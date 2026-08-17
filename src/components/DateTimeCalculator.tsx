@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
-import { Calendar, Clock, ArrowRight, RefreshCw, Copy, Check, Briefcase, Award } from 'lucide-react';
 import { AppSettings } from '../types';
 
 interface DateTimeCalculatorProps {
   settings?: AppSettings;
 }
 
-export const DateTimeCalculator: React.FC<DateTimeCalculatorProps> = ({ settings }) => {
+export const DateTimeCalculator: React.FC<DateTimeCalculatorProps> = ({ settings: _settings }) => {
   const [tab, setTab] = useState<'diff' | 'addsub' | 'age' | 'worktime'>('diff');
-  const [copied, setCopied] = useState<string | null>(null);
 
   // Today ISO
   const todayStr = new Date().toISOString().split('T')[0];
@@ -35,12 +33,6 @@ export const DateTimeCalculator: React.FC<DateTimeCalculatorProps> = ({ settings
   const [workEnd, setWorkEnd] = useState<string>('17:30');
   const [breakMins, setBreakMins] = useState<number>(45);
   const [hourlyRate, setHourlyRate] = useState<number>(25);
-
-  const handleCopy = (id: string, text: string) => {
-    navigator.clipboard.writeText(text);
-    setCopied(id);
-    setTimeout(() => setCopied(null), 2000);
-  };
 
   // Compute Date Difference
   const computeDateDiff = () => {
@@ -142,7 +134,7 @@ export const DateTimeCalculator: React.FC<DateTimeCalculatorProps> = ({ settings
     const totalDaysLived = Math.floor((now.getTime() - dob.getTime()) / (1000 * 60 * 60 * 24));
 
     // Next Birthday
-    let nextBday = new Date(now.getFullYear(), dob.getMonth(), dob.getDate());
+    const nextBday = new Date(now.getFullYear(), dob.getMonth(), dob.getDate());
     if (nextBday < now) {
       nextBday.setFullYear(nextBday.getFullYear() + 1);
     }
@@ -161,7 +153,7 @@ export const DateTimeCalculator: React.FC<DateTimeCalculatorProps> = ({ settings
     const [h1, m1] = workStart.split(':').map(Number);
     const [h2, m2] = workEnd.split(':').map(Number);
 
-    let startMins = h1 * 60 + m1;
+    const startMins = h1 * 60 + m1;
     let endMins = h2 * 60 + m2;
     if (endMins < startMins) endMins += 24 * 60; // Next day shift
 

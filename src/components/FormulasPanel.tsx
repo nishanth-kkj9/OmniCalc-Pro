@@ -3,21 +3,11 @@ import {
   Copy, 
   Check, 
   Search, 
-  Atom, 
-  Compass, 
-  TrendingUp, 
-  Cpu, 
-  Sigma, 
-  Grid, 
-  BarChart2, 
-  Heart, 
-  ArrowLeftRight, 
   BookOpen, 
-  Hash, 
-  HelpCircle,
   Sparkles,
-  ExternalLink,
-  Layers
+  Hash,
+  Layers,
+  HelpCircle
 } from 'lucide-react';
 import { AppSettings, CalcMode } from '../types';
 
@@ -601,7 +591,6 @@ export const FormulasPanel: React.FC<FormulasPanelProps> = ({ settings, onNaviga
   const [selectedCat, setSelectedCat] = useState<string>('All');
   const [search, setSearch] = useState<string>('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [selectedItem, setSelectedItem] = useState<FormulaConstantItem | null>(null);
 
   const categories = [
     'All',

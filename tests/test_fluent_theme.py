@@ -1,10 +1,15 @@
 import unittest
 from unittest.mock import MagicMock, patch
+import ui.fluent_theme
 
 
 class TestFluentTheme(unittest.TestCase):
     def setUp(self):
+        ui.fluent_theme._theme_instance = None
         self.mock_app = MagicMock()
+
+    def tearDown(self):
+        ui.fluent_theme._theme_instance = None
 
     def test_init_default_theme(self):
         from ui.fluent_theme import FluentTheme

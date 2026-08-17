@@ -8,7 +8,7 @@ interface MatrixCalculatorProps {
   settings?: AppSettings;
 }
 
-export const MatrixCalculator: React.FC<MatrixCalculatorProps> = ({ settings }) => {
+export const MatrixCalculator: React.FC<MatrixCalculatorProps> = ({ settings: _settings }) => {
   const [rowsA, setRowsA] = useState<number>(3);
   const [colsA, setColsA] = useState<number>(3);
   const [matA, setMatA] = useState<Matrix>([

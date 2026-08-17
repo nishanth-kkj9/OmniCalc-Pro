@@ -1,27 +1,24 @@
 import React, { useState, useRef } from 'react';
 import { AppSettings, AngleMode, CalcMode } from '../types';
 import { 
-  Moon, 
-  Sun, 
+  Moon,
+  Sun,
   Volume2, 
-  VolumeX, 
+  VolumeX,
   Trash2, 
   Check, 
   Download, 
   Upload, 
   RotateCcw, 
-  Sparkles, 
   Sliders, 
   Palette, 
   Cpu, 
   Keyboard, 
   Database, 
   Volume1, 
-  Vibrate, 
-  Eye, 
-  Info,
-  Layers,
-  FileText
+  Vibrate,
+  Eye,
+  Info
 } from 'lucide-react';
 import { playClickSound } from '../utils/sound';
 import { getHistory, clearHistory } from '../utils/history';

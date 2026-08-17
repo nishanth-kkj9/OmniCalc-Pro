@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { BitWordSize, NumberBase, AppSettings } from '../types';
 import { addHistory } from '../utils/history';
 
@@ -6,7 +6,7 @@ interface ProgrammerCalculatorProps {
   settings?: AppSettings;
 }
 
-export const ProgrammerCalculator: React.FC<ProgrammerCalculatorProps> = ({ settings }) => {
+export const ProgrammerCalculator: React.FC<ProgrammerCalculatorProps> = ({ settings: _settings }) => {
   const [val, setVal] = useState<bigint>(0n);
   const [activeBase, setActiveBase] = useState<NumberBase>('DEC');
   const [wordSize, setWordSize] = useState<BitWordSize>(64);
@@ -29,7 +29,7 @@ export const ProgrammerCalculator: React.FC<ProgrammerCalculatorProps> = ({ sett
 
   // Handle number input
   const handleDigit = (digit: string) => {
-    let newBuf = inputBuffer === '0' ? digit : inputBuffer + digit;
+    const newBuf = inputBuffer === '0' ? digit : inputBuffer + digit;
     try {
       let parsed = 0n;
       if (activeBase === 'HEX') parsed = BigInt('0x' + newBuf);

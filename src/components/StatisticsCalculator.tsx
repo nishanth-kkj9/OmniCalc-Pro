@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { addHistory } from '../utils/history';
 import { AppSettings } from '../types';
 
 interface StatisticsCalculatorProps {
   settings?: AppSettings;
 }
 
-export const StatisticsCalculator: React.FC<StatisticsCalculatorProps> = ({ settings }) => {
+export const StatisticsCalculator: React.FC<StatisticsCalculatorProps> = ({ settings: _settings }) => {
   const [rawInput, setRawInput] = useState<string>('12, 15, 18, 22, 25, 25, 28, 30, 32, 35, 40, 45, 50');
 
   // Parse numbers safely

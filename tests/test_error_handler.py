@@ -47,7 +47,7 @@ class TestCrashDialog(unittest.TestCase):
     def setUp(self):
         from PySide6.QtWidgets import QApplication
         if QApplication.instance() is None:
-            self.app = QApplication(["--platform", "offscreen"])
+            self.app = QApplication([sys.argv[0] if sys.argv else "pytest", "-platform", "offscreen"])
         else:
             self.app = QApplication.instance()
 

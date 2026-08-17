@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
-import { Divide, Sparkles, RefreshCw, Copy, Check, Hash } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import { AppSettings } from '../types';
 
 interface FractionsCalculatorProps {
   settings?: AppSettings;
 }
 
-export const FractionsCalculator: React.FC<FractionsCalculatorProps> = ({ settings }) => {
+export const FractionsCalculator: React.FC<FractionsCalculatorProps> = ({ settings: _settings }) => {
   const [tab, setTab] = useState<'fractions' | 'gcd_lcm' | 'prime'>('fractions');
-  const [copied, setCopied] = useState<string | null>(null);
 
   // Fraction State
   const [f1Num, setF1Num] = useState<string>('3');

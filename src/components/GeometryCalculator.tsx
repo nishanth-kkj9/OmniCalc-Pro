@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Triangle, Circle, Box, Sparkles, RefreshCw, Copy, Check } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import { AppSettings } from '../types';
 
 interface GeometryCalculatorProps {
@@ -8,7 +8,6 @@ interface GeometryCalculatorProps {
 
 export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings }) => {
   const [tab, setTab] = useState<'triangle' | '2d_shapes' | '3d_shapes'>('triangle');
-  const [copied, setCopied] = useState<string | null>(null);
 
   // Triangle State (Sides a, b, c)
   const [sideA, setSideA] = useState<string>('5');

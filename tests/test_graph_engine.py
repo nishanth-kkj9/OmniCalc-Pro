@@ -1,5 +1,7 @@
 import unittest
+import sys
 from unittest.mock import patch, MagicMock, PropertyMock
+from PySide6.QtWidgets import QApplication
 
 
 # Mock the entire backend_qt to prevent FigureCanvasQTAgg init issues
@@ -7,6 +9,11 @@ from unittest.mock import patch, MagicMock, PropertyMock
 @patch("core.graph_engine.Figure")
 @patch("core.graph_engine.np")
 class TestGraphEngine(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        if QApplication.instance() is None:
+            cls.app = QApplication([sys.argv[0] if sys.argv else "pytest", "-platform", "offscreen"])
+
     def setUp(self):
         self.get_width_height_patch = patch(
             "core.graph_engine.FigureCanvasQTAgg.get_width_height",

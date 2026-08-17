@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
-import { addHistory } from '../utils/history';
 import { AppSettings } from '../types';
 
 type FinanceTab = 'emi' | 'compound' | 'gst' | 'discount' | 'roi';
@@ -9,7 +8,7 @@ interface FinanceCalculatorProps {
   settings?: AppSettings;
 }
 
-export const FinanceCalculator: React.FC<FinanceCalculatorProps> = ({ settings }) => {
+export const FinanceCalculator: React.FC<FinanceCalculatorProps> = ({ settings: _settings }) => {
   const [activeTab, setActiveTab] = useState<FinanceTab>('emi');
 
   // EMI State

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Play, RotateCcw, Copy, Check, Info, Sparkles, TrendingUp } from 'lucide-react';
+import { Copy, Check } from 'lucide-react';
 import { AppSettings } from '../types';
 import { evaluateExpression } from '../utils/calculator';
 
@@ -15,7 +15,7 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
   const [intFunc, setIntFunc] = useState<string>('x^2 + 2*x + 1');
   const [intA, setIntA] = useState<string>('0');
   const [intB, setIntB] = useState<string>('3');
-  const [intSubdiv, setIntSubdiv] = useState<number>(100);
+  const [intSubdiv] = useState<number>(100);
 
   // Derivative State
   const [diffFunc, setDiffFunc] = useState<string>('sin(x) + x^2');

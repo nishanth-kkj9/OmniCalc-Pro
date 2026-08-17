@@ -8,9 +8,13 @@ on:
   schedule:
     - cron: '0 12 * * 1'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   analyze:
-    name: CodeQL Security Scan
+    name: CodeQL Security Scan (${{ matrix.language }})
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -20,7 +24,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'javascript', 'python' ]
+        include:
+          - language: javascript-typescript
+            build-mode: none
+          - language: python
+            build-mode: none
 
     steps:
       - name: Checkout repository
@@ -30,8 +38,9 @@ jobs:
         uses: github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
         with:
-          category: "/language:${{matrix.language}}"
+          category: "/language:${{ matrix.language }}"
