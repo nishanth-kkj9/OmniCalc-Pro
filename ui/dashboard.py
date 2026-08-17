@@ -10,11 +10,13 @@ class DashboardPage(QWidget):
     def setup_ui(self):
         main = QVBoxLayout(self)
         
-        title = QLabel("Welcome to OmniCalc Pro", objectName="Title")
+        title = QLabel("Welcome to OmniCalc Pro")
+        title.setObjectName("Title")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         main.addWidget(title)
 
-        subtitle = QLabel("All-in-One Advanced Calculator for Professionals", objectName="Subtitle")
+        subtitle = QLabel("All-in-One Advanced Calculator for Professionals")
+        subtitle.setObjectName("Subtitle")
         subtitle.setAlignment(Qt.AlignmentFlag.AlignCenter)
         main.addWidget(subtitle)
 
@@ -39,11 +41,13 @@ class DashboardPage(QWidget):
             
             v.addWidget(lbl)
             
-            lbl_title = QLabel(t, objectName="Title")
+            lbl_title = QLabel(t)
+            lbl_title.setObjectName("Title")
             lbl_title.setAlignment(Qt.AlignmentFlag.AlignCenter)
             v.addWidget(lbl_title)
             
-            lbl_sub = QLabel(d, objectName="Subtitle")
+            lbl_sub = QLabel(d)
+            lbl_sub.setObjectName("Subtitle")
             lbl_sub.setAlignment(Qt.AlignmentFlag.AlignCenter)
             v.addWidget(lbl_sub)
             

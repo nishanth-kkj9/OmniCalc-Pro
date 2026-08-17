@@ -182,8 +182,11 @@ _theme_instance: Optional[FluentTheme] = None
 
 def get_theme(app: Optional[QApplication] = None) -> FluentTheme:
     global _theme_instance
-    if _theme_instance is None and app is not None:
-        _theme_instance = FluentTheme(app)
+    if _theme_instance is None:
+        target_app = app or QApplication.instance()
+        if target_app is None:
+            target_app = QApplication([])
+        _theme_instance = FluentTheme(target_app)
     return _theme_instance
 
 

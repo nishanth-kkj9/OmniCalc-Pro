@@ -120,7 +120,7 @@ _PROTECTED_FUNCTIONS = set(SAFE_FUNCTIONS) | {"factorial"}
 
 def _worker_eval_task(expr: str, namespace_keys: list[str], angle_mode: str) -> float:
     """Isolated evaluation task designed for worker execution."""
-    ns = dict(SAFE_CONSTANTS)
+    ns: dict[str, Any] = dict(SAFE_CONSTANTS)
     if angle_mode == "degrees":
         ns.update(DEGREE_FUNCTIONS)
         ns.update({k: v for k, v in RADIAN_FUNCTIONS.items() if k not in DEGREE_FUNCTIONS})
@@ -158,8 +158,8 @@ class SafeEvaluator:
         self.max_nesting = MAX_NESTING_DEPTH
         self._namespace = self._build_namespace()
 
-    def _build_namespace(self) -> dict:
-        ns = dict(SAFE_CONSTANTS)
+    def _build_namespace(self) -> dict[str, Any]:
+        ns: dict[str, Any] = dict(SAFE_CONSTANTS)
         if self.angle_mode == "degrees":
             ns.update(DEGREE_FUNCTIONS)
             ns.update({k: v for k, v in RADIAN_FUNCTIONS.items() if k not in DEGREE_FUNCTIONS})
@@ -234,7 +234,7 @@ class SafeEvaluator:
             expr = expr.replace(k, v)
 
         # 1. Protect scientific notation (e.g. 1e3) from implicit multiplication
-        sci_placeholders = {}
+        sci_placeholders: dict[str, str] = {}
         def _protect_sci(m):
             orig = m.group(0)
             key = f"__SCI_{len(sci_placeholders)}__"
@@ -243,7 +243,7 @@ class SafeEvaluator:
         expr = re.sub(r"\b(\d+(?:\.\d+)?)[eE]([+-]?\d+)\b", _protect_sci, expr)
 
         # 2. Protect function names from implicit multiplication splitting
-        func_placeholders = {}
+        func_placeholders: dict[str, str] = {}
         for func in sorted(_PROTECTED_FUNCTIONS, key=len, reverse=True):
             placeholder = f"__FUNC_{func}__"
             func_placeholders[placeholder] = func

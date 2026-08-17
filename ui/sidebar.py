@@ -30,19 +30,19 @@ class Sidebar(QWidget):
             }
         """)
 
-        self.layout = QVBoxLayout(self)
-        self.layout.setContentsMargins(0, SIDEBAR_MARGIN, 0, SIDEBAR_MARGIN)
-        self.layout.setSpacing(SIDEBAR_SPACING)
-        self.layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, SIDEBAR_MARGIN, 0, SIDEBAR_MARGIN)
+        layout.setSpacing(SIDEBAR_SPACING)
+        layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
         header = QLabel("\U0001f4ca  OmniCalc")
         header.setStyleSheet("color: #00ffaa; font-size: 16px; font-weight: bold; padding: 8px 12px;")
-        self.layout.addWidget(header)
+        layout.addWidget(header)
 
         separator = QFrame()
         separator.setFrameShape(QFrame.Shape.HLine)
         separator.setStyleSheet("color: #252535; margin: 4px 8px;")
-        self.layout.addWidget(separator)
+        layout.addWidget(separator)
 
         for i, name in enumerate(PAGE_NAMES):
             btn = QToolButton()
@@ -70,9 +70,9 @@ class Sidebar(QWidget):
             """)
             btn.clicked.connect(lambda _, idx=i: self.page_changed.emit(idx))
             self.btn_list.append(btn)
-            self.layout.addWidget(btn)
+            layout.addWidget(btn)
 
-        self.layout.addStretch()
+        layout.addStretch()
 
         self.collapse_btn = QPushButton("\u25c0")
         self.collapse_btn.setFixedSize(36, 36)
@@ -90,7 +90,7 @@ class Sidebar(QWidget):
             }
         """)
         self.collapse_btn.clicked.connect(self.toggle_expand)
-        self.layout.addWidget(self.collapse_btn, 0, Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.collapse_btn, 0, Qt.AlignmentFlag.AlignCenter)
 
         self.animation_group = QParallelAnimationGroup()
 

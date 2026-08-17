@@ -115,6 +115,8 @@ class Windows11Effects(QObject):
 
     def _set_dark_mode(self):
         """Enable dark mode for title bar and window frame."""
+        if dwmapi is None:
+            return
         value = c_int(1 if self._dark_mode else 0)
         dwmapi.DwmSetWindowAttribute(
             HWND(self._hwnd),
@@ -125,6 +127,8 @@ class Windows11Effects(QObject):
 
     def _set_mica_effect(self):
         """Set Mica or Acrylic backdrop type."""
+        if dwmapi is None:
+            return
         value = c_int(self._current_backdrop)
         dwmapi.DwmSetWindowAttribute(
             HWND(self._hwnd),
@@ -135,6 +139,8 @@ class Windows11Effects(QObject):
 
     def _set_corner_preference(self):
         """Set rounded corner preference."""
+        if dwmapi is None:
+            return
         value = c_int(self._corner_preference)
         dwmapi.DwmSetWindowAttribute(
             HWND(self._hwnd),
@@ -145,6 +151,8 @@ class Windows11Effects(QObject):
 
     def _extend_frame_into_client_area(self):
         """Extend frame into client area for custom title bar."""
+        if dwmapi is None:
+            return
         margins = MARGINS(-1, -1, -1, -1)
         dwmapi.DwmExtendFrameIntoClientArea(
             HWND(self._hwnd),

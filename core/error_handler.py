@@ -73,7 +73,7 @@ class CrashDialog(QDialog):
         self.setWindowTitle("OmniCalc Pro - Unexpected Error")
         self.setModal(True)
         self.resize(600, 400)
-        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
+        self.setWindowFlags(self.windowFlags() & ~Qt.WindowType.WindowContextHelpButtonHint)
 
         layout = QVBoxLayout(self)
 
@@ -125,11 +125,11 @@ class GlobalErrorHandler(QObject):
 
     def install(self) -> None:
         sys.excepthook = self._excepthook
-        self.app.notify = self._notify
+        setattr(self.app, "notify", self._notify)
 
     def uninstall(self) -> None:
         sys.excepthook = self._original_hook
-        self.app.notify = self._original_notify
+        setattr(self.app, "notify", self._original_notify)
 
     def _excepthook(self, exc_type, exc_value, exc_tb) -> None:
         if self._handling:

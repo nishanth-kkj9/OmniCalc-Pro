@@ -54,12 +54,12 @@ class BasicPage(QWidget):
         ]
         
         for b in btns:
-            r = b[0]
-            c = b[1]
-            txt = b[2]
-            rs = b[3] if len(b) > 3 else 1
-            cs = b[4] if len(b) > 4 else 1
-            cls = b[5] if len(b) > 5 else ""
+            r = int(b[0])
+            c = int(b[1])
+            txt = str(b[2])
+            rs = int(b[3]) if len(b) > 3 else 1
+            cs = int(b[4]) if len(b) > 4 else 1
+            cls = str(b[5]) if len(b) > 5 else ""
             
             btn = CalcButton(txt, cls)
             btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)

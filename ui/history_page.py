@@ -54,4 +54,6 @@ class HistoryPage(QWidget):
         self.refresh()
 
     def copy_result(self, row, col):
-        copy_to_clipboard(self.table.item(row, col).text())
+        item = self.table.item(row, col)
+        if item is not None:
+            copy_to_clipboard(item.text())

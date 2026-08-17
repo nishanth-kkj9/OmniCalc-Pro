@@ -21,26 +21,31 @@ class ServiceLocator:
 
     _instance: ServiceLocator | None = None
     _lock = threading.Lock()
+    _services: dict[str, Any]
+    _factories: dict[str, Callable[[], Any]]
+    _singletons: dict[str, bool]
+    _initialized: bool
 
     def __new__(cls) -> ServiceLocator:
         if cls._instance is None:
             with cls._lock:
                 if cls._instance is None:
-                    cls._instance = super().__new__(cls)
-                    cls._instance._services: dict[str, Any] = {}
-                    cls._instance._factories: dict[str, Callable[[], Any]] = {}
-                    cls._instance._singletons: dict[str, bool] = {}
-                    cls._instance._initialized = False
+                    instance = super().__new__(cls)
+                    instance._services = {}
+                    instance._factories = {}
+                    instance._singletons = {}
+                    instance._initialized = False
+                    cls._instance = instance
         return cls._instance
 
-    def register(self, name: str, factory: Callable[[], T], singleton: bool = True) -> None:
+    def register(self, name: str, factory: Callable[[], Any], singleton: bool = True) -> None:
         """Register a service factory."""
         self._factories[name] = factory
         self._singletons[name] = singleton
         if name in self._services:
             del self._services[name]
 
-    def get(self, name: str) -> T:
+    def get(self, name: str) -> Any:
         """Get service instance, creating if needed."""
         if name not in self._factories:
             raise KeyError(f"Service not registered: {name}")

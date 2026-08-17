@@ -12,7 +12,9 @@ class SettingsPage(QWidget):
 
     def setup_ui(self):
         layout = QVBoxLayout(self)
-        layout.addWidget(QLabel("Settings", objectName="Title"))
+        title = QLabel("Settings")
+        title.setObjectName("Title")
+        layout.addWidget(title)
         
         h = QHBoxLayout()
         h.addWidget(QLabel("Theme:"))

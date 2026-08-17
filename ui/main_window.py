@@ -38,7 +38,8 @@ class CustomTitleBar(QWidget):
         self.app_icon.setStyleSheet("font-size: 18px;")
         layout.addWidget(self.app_icon)
 
-        self.status_lbl = QLabel("OmniCalc Pro", styleSheet="color: #e0e0e0; font-weight: bold;")
+        self.status_lbl = QLabel("OmniCalc Pro")
+        self.status_lbl.setStyleSheet("color: #e0e0e0; font-weight: bold;")
         layout.addWidget(self.status_lbl)
         layout.addStretch()
 

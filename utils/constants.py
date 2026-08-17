@@ -2,9 +2,9 @@ import os
 import sys
 
 if getattr(sys, 'frozen', False):
-    BASE_DIR: str = os.path.dirname(sys.executable)
+    BASE_DIR = os.path.dirname(sys.executable)
 else:
-    BASE_DIR: str = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 ASSETS_DIR: str = os.path.join(BASE_DIR, 'assets')
 THEMES_DIR: str = os.path.join(ASSETS_DIR, 'themes')
