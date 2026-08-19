@@ -9,7 +9,6 @@ import re
 from typing import Any
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 
-import sympy as sp
 from sympy import SympifyError, Basic
 from sympy.parsing.sympy_parser import (
     parse_expr,
@@ -115,7 +114,6 @@ _UNICODE_MAP = {
     "≈": "~", "≡": "==",
 }
 
-_NUMBER_RE = re.compile(r"\b(\d+)(\.\d*)?\b")
 _PROTECTED_FUNCTIONS = set(SAFE_FUNCTIONS) | {"factorial"}
 
 
