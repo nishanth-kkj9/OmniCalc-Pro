@@ -1,8 +1,15 @@
 import React, { useState } from 'react';
 import { addHistory } from '../utils/history';
 import { AppSettings } from '../types';
-
-type Matrix = number[][];
+import {
+  Matrix,
+  computeDeterminant,
+  invertMatrix,
+  transposeMatrix,
+  addMatrices,
+  subtractMatrices,
+  multiplyMatrices,
+} from '../utils/matrix';
 
 interface MatrixCalculatorProps {
   settings?: AppSettings;
@@ -69,59 +76,38 @@ export const MatrixCalculator: React.FC<MatrixCalculatorProps> = ({ settings: _s
   // Matrix Operations
   const handleAdd = () => {
     setErrorMsg(null);
-    if (rowsA !== rowsB || colsA !== colsB) {
+    const res = addMatrices(matA, matB);
+    if (!res) {
       setErrorMsg('Matrices must have the same dimensions for addition.');
       return;
     }
-    const res: Matrix = matA.map((r, i) => r.map((val, j) => val + matB[i][j]));
     setResultMat(res);
     setResultLabel('A + B');
-    addHistory('A + B', 'Matrix Result', 'matrix');
+    addHistory('A + B', 'Matrix Addition Result', 'matrix');
   };
 
   const handleSub = () => {
     setErrorMsg(null);
-    if (rowsA !== rowsB || colsA !== colsB) {
+    const res = subtractMatrices(matA, matB);
+    if (!res) {
       setErrorMsg('Matrices must have the same dimensions for subtraction.');
       return;
     }
-    const res: Matrix = matA.map((r, i) => r.map((val, j) => val - matB[i][j]));
     setResultMat(res);
     setResultLabel('A - B');
-    addHistory('A - B', 'Matrix Result', 'matrix');
+    addHistory('A - B', 'Matrix Subtraction Result', 'matrix');
   };
 
   const handleMul = () => {
     setErrorMsg(null);
-    if (colsA !== rowsB) {
+    const res = multiplyMatrices(matA, matB);
+    if (!res) {
       setErrorMsg('Columns of A must equal Rows of B for multiplication.');
       return;
     }
-    const res: Matrix = Array.from({ length: rowsA }, () => Array(colsB).fill(0));
-    for (let i = 0; i < rowsA; i++) {
-      for (let j = 0; j < colsB; j++) {
-        for (let k = 0; k < colsA; k++) {
-          res[i][j] += matA[i][k] * matB[k][j];
-        }
-      }
-    }
     setResultMat(res);
     setResultLabel('A × B');
-    addHistory('A × B', 'Matrix Result', 'matrix');
-  };
-
-  // Helper determinant function
-  const calcDet = (m: Matrix): number => {
-    const n = m.length;
-    if (n === 1) return m[0][0];
-    if (n === 2) return m[0][0] * m[1][1] - m[0][1] * m[1][0];
-
-    let det = 0;
-    for (let i = 0; i < n; i++) {
-      const subMat = m.slice(1).map((row) => row.filter((_, colIdx) => colIdx !== i));
-      det += Math.pow(-1, i) * m[0][i] * calcDet(subMat);
-    }
-    return det;
+    addHistory('A × B', 'Matrix Multiplication Result', 'matrix');
   };
 
   const handleDet = (target: 'A' | 'B') => {
@@ -135,21 +121,42 @@ export const MatrixCalculator: React.FC<MatrixCalculatorProps> = ({ settings: _s
       return;
     }
 
-    const detVal = calcDet(m);
-    setResultMat(detVal);
-    setResultLabel(`det(${target})`);
-    addHistory(`det(${target})`, String(detVal), 'matrix');
+    const { det, singular } = computeDeterminant(m);
+    if (isNaN(det)) {
+      setErrorMsg(`Could not calculate determinant for Matrix ${target}.`);
+      return;
+    }
+    setResultMat(det);
+    setResultLabel(`det(${target}) ${singular ? '(Singular)' : ''}`);
+    addHistory(`det(${target})`, String(det), 'matrix');
   };
 
-  const handleTranspose = (target: 'A' | 'B') => {
+  const handleInverse = (target: 'A' | 'B') => {
     setErrorMsg(null);
     const m = target === 'A' ? matA : matB;
     const r = target === 'A' ? rowsA : rowsB;
     const c = target === 'A' ? colsA : colsB;
 
-    const res: Matrix = Array.from({ length: c }, (_, i) =>
-      Array.from({ length: r }, (_, j) => m[j][i])
-    );
+    if (r !== c) {
+      setErrorMsg(`Matrix ${target} must be square (NxN) to compute inverse.`);
+      return;
+    }
+
+    const inv = invertMatrix(m);
+    if (!inv) {
+      setErrorMsg(`Matrix ${target} is singular (det = 0) and cannot be inverted.`);
+      return;
+    }
+
+    setResultMat(inv);
+    setResultLabel(`${target}⁻¹ (Inverse)`);
+    addHistory(`${target}⁻¹`, 'Matrix Inverse', 'matrix');
+  };
+
+  const handleTranspose = (target: 'A' | 'B') => {
+    setErrorMsg(null);
+    const m = target === 'A' ? matA : matB;
+    const res = transposeMatrix(m);
     setResultMat(res);
     setResultLabel(`${target}ᵀ (Transpose)`);
     addHistory(`${target}ᵀ`, 'Matrix Transpose', 'matrix');
@@ -193,6 +200,7 @@ export const MatrixCalculator: React.FC<MatrixCalculatorProps> = ({ settings: _s
 
           <div className="flex items-center gap-2 pt-1">
             <button onClick={() => handleDet('A')} className="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl border border-slate-700">det(A)</button>
+            <button onClick={() => handleInverse('A')} className="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl border border-slate-700">A⁻¹</button>
             <button onClick={() => handleTranspose('A')} className="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl border border-slate-700">Aᵀ</button>
           </div>
         </div>
@@ -231,6 +239,7 @@ export const MatrixCalculator: React.FC<MatrixCalculatorProps> = ({ settings: _s
 
           <div className="flex items-center gap-2 pt-1">
             <button onClick={() => handleDet('B')} className="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl border border-slate-700">det(B)</button>
+            <button onClick={() => handleInverse('B')} className="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl border border-slate-700">B⁻¹</button>
             <button onClick={() => handleTranspose('B')} className="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl border border-slate-700">Bᵀ</button>
           </div>
         </div>

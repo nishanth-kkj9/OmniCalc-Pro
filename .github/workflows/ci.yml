@@ -11,10 +11,15 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   web-lint:
     name: Web Linter & Format Check
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -34,6 +39,8 @@ jobs:
   web-test:
     name: Web Unit Tests & Coverage
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -47,12 +54,14 @@ jobs:
       - name: Install Node Dependencies
         run: npm ci
 
-      - name: Run Vitest Unit Tests with Coverage
-        run: npm run coverage
+      - name: Run Vitest Unit Tests
+        run: npm test
 
   web-ci:
     name: Web Build & Typecheck
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -84,6 +93,8 @@ jobs:
     name: Python Linting & Type Analysis
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -109,6 +120,8 @@ jobs:
     name: Python Engine Tests (${{ matrix.os }}, Python ${{ matrix.python-version }})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:

@@ -31,6 +31,11 @@ OmniCalc Pro executes arbitrary mathematical calculations across two platforms:
 - **Complexity Limits**: Maximum input length (500 chars), nesting depth (10 levels), maximum operator limits, exponent size limits (≤ 10,000), and factorial limits (≤ 1,000).
 
 ### 2. Web Application (`src/utils/calculator.ts`)
-- **MathJS Sandboxing**: All client-side evaluations run with restricted mathematical scopes.
-- **Input Sanitization**: Prototype pollution vectors (`__proto__`, `constructor`, `prototype`, `eval`, `Function`, `window`, `document`) are strictly filtered out before parsing.
-- **Client-Side Complexity Limits**: Guardrails against deeply nested parentheses and exponential computing blowup.
+- **True AST Allowlist Validation (`validateMathAst`)**: Parses expressions into MathJS AST representation, traversing nodes to strictly allow only approved AST types (`OperatorNode`, `ConstantNode`, `SymbolNode`, `FunctionNode`, `ParenthesisNode`, `BlockNode`).
+- **Forbidden Constructs**: Explicitly rejects object creation (`ObjectNode`), property access (`AccessorNode`), variable assignments (`AssignmentNode`), function definitions (`FunctionAssignmentNode`), and arbitrary global lookups.
+- **Strict Function & Symbol Whitelist**: Only approved mathematical functions (e.g., `sin`, `cos`, `log`, `sqrt`, `mod`) and recognized mathematical constants/variables (`pi`, `e`, `x`) are allowed.
+- **Resource Exhaustion Guardrails**:
+  - `MAX_EXPRESSION_LENGTH`: 500 characters
+  - `MAX_NESTING_DEPTH`: 25 levels
+  - `MAX_EXPONENT`: 10,000
+  - Matrix Dimension Limit: 5x5 with O(N^3) LU decomposition
