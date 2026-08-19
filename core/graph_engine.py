@@ -1,8 +1,15 @@
 """Graphing calculator logic."""
+import os
 import numpy as np
 import sympy as sp
 import matplotlib
-matplotlib.use("QtAgg")
+
+if os.environ.get("MPLBACKEND") not in ("Agg", "agg", "SVG", "svg", "PDF", "pdf"):
+    try:
+        matplotlib.use("QtAgg")
+    except Exception:
+        pass
+
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 

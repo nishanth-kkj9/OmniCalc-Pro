@@ -52,11 +52,8 @@ class ProgrammerEngine:
         b_base: str = "DEC"
     ) -> Union[int, str]:
         try:
-            mask = WORD_MASKS.get(word_size, WORD_MASKS[64])
             a_int = ProgrammerEngine._to_int(a, a_base)
             b_int = ProgrammerEngine._to_int(b, b_base) if op != "NOT" else 0
-            a_int &= mask
-            b_int &= mask
 
             if op == "AND":
                 return a_int & b_int
@@ -64,16 +61,7 @@ class ProgrammerEngine:
                 return a_int | b_int
             elif op == "XOR":
                 return a_int ^ b_int
-            elif op == "NAND":
-                return (~(a_int & b_int)) & mask
-            elif op == "NOR":
-                return (~(a_int | b_int)) & mask
-            elif op == "XNOR":
-                return (~(a_int ^ b_int)) & mask
             elif op == "NOT":
-                # For backwards compatibility with standard Python signed tests:
-                # if word_size is default 64, ~a_int produces signed ~a_int
-                # but if unsigned masking is desired, masked value is returned
                 return ~a_int
             else:
                 return 0

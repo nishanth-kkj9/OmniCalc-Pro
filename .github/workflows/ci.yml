@@ -83,6 +83,7 @@ jobs:
   python-lint:
     name: Python Linting & Type Analysis
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -107,6 +108,7 @@ jobs:
   python-test:
     name: Python Engine Tests (${{ matrix.os }}, Python ${{ matrix.python-version }})
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
