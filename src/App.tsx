@@ -6,6 +6,7 @@ import { SettingsModal } from './components/SettingsModal';
 import { CommandPalette } from './components/CommandPalette';
 import { playClickSound, prewarmAudio } from './utils/sound';
 import { ACCENT_COLOR_MAP } from './utils/formatting';
+import { loadInitialSettings, saveSettings } from './utils/settings';
 import { Loader2, AlertCircle } from 'lucide-react';
 
 // Lazy load the 17 engine views for optimal bundle splitting and fast initial render
@@ -26,25 +27,6 @@ const StatisticsCalculator = lazy(() => import('./components/StatisticsCalculato
 const FormulasPanel = lazy(() => import('./components/FormulasPanel').then(m => ({ default: m.FormulasPanel })));
 const HistoryPanel = lazy(() => import('./components/HistoryPanel').then(m => ({ default: m.HistoryPanel })));
 
-const SETTINGS_KEY = 'omnicalc_settings_v2';
-const SETTINGS_VERSION = 2;
-
-const DEFAULT_SETTINGS: AppSettings = {
-  theme: 'dark',
-  accentColor: 'sky',
-  angleMode: 'DEG',
-  precision: 6,
-  notation: 'standard',
-  thousandsSeparator: 'comma',
-  fontSize: 'normal',
-  soundEnabled: true,
-  soundVolume: 0.5,
-  soundProfile: 'mechanical',
-  hapticFeedback: false,
-  defaultMode: 'basic',
-  maxHistoryItems: 100,
-  autoSaveHistory: true,
-};
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -110,27 +92,7 @@ function EngineLoadingFallback({ theme }: { theme: string }) {
 }
 
 export function App() {
-  const [settings, setSettings] = useState<AppSettings>(() => {
-    try {
-      const saved = localStorage.getItem(SETTINGS_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.__v !== SETTINGS_VERSION) {
-          localStorage.removeItem(SETTINGS_KEY);
-        }
-        return { ...DEFAULT_SETTINGS, ...parsed };
-      }
-      // Migrate legacy key if present
-      const legacy = localStorage.getItem('omnicalc_settings');
-      if (legacy) {
-        const parsedLegacy = JSON.parse(legacy);
-        return { ...DEFAULT_SETTINGS, ...parsedLegacy };
-      }
-      return DEFAULT_SETTINGS;
-    } catch {
-      return DEFAULT_SETTINGS;
-    }
-  });
+  const [settings, setSettings] = useState<AppSettings>(() => loadInitialSettings());
   const [currentMode, setCurrentMode] = useState<CalcMode>(() => settings.defaultMode || 'basic');
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState<boolean>(false);
@@ -144,11 +106,7 @@ export function App() {
 
   // Save settings when modified
   useEffect(() => {
-    try {
-      localStorage.setItem(SETTINGS_KEY, JSON.stringify({ ...settings, __v: SETTINGS_VERSION }));
-    } catch (e) {
-      console.warn('Failed to persist omnicalc_settings:', e);
-    }
+    saveSettings(settings);
   }, [settings]);
 
   // Apply Theme to document HTML element

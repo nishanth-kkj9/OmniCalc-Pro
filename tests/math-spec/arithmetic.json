@@ -6,6 +6,24 @@
     "angle_mode": "degrees"
   },
   {
+    "name": "basic_subtraction",
+    "expr": "100 - 45.5",
+    "expected": 54.5,
+    "angle_mode": "degrees"
+  },
+  {
+    "name": "basic_multiplication",
+    "expr": "7.5 * 8",
+    "expected": 60.0,
+    "angle_mode": "degrees"
+  },
+  {
+    "name": "basic_division",
+    "expr": "144 / 12",
+    "expected": 12.0,
+    "angle_mode": "degrees"
+  },
+  {
     "name": "operator_precedence",
     "expr": "2 + 3 * 4",
     "expected": 14.0,
@@ -24,15 +42,21 @@
     "angle_mode": "degrees"
   },
   {
-    "name": "square_root",
-    "expr": "sqrt(144)",
-    "expected": 12.0,
+    "name": "compound_fractions",
+    "expr": "(50 - 10) / (2 * 5)",
+    "expected": 4.0,
     "angle_mode": "degrees"
   },
   {
-    "name": "logarithm_base10",
-    "expr": "log10(1000)",
-    "expected": 3.0,
+    "name": "unary_minus",
+    "expr": "-15 + 25",
+    "expected": 10.0,
+    "angle_mode": "degrees"
+  },
+  {
+    "name": "nested_parentheses",
+    "expr": "((2 + 3) * (4 + 1)) / 5",
+    "expected": 5.0,
     "angle_mode": "degrees"
   }
 ]

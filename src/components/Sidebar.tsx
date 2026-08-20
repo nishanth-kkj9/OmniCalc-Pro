@@ -22,6 +22,7 @@ import {
   X
 } from 'lucide-react';
 import { CalcMode, AppSettings } from '../types';
+import { APP_NAME, APP_VERSION } from '../constants/version';
 
 interface SidebarProps {
   currentMode: CalcMode;
@@ -213,7 +214,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentMode, onSelectMode, isO
 
         {/* Footer info */}
         <div className={`p-3 border-t text-[11px] text-center ${footerColor}`}>
-          OmniCalc Pro v3.0 • Multi-Engine Suite
+          {APP_NAME} v{APP_VERSION} • Multi-Engine Suite
         </div>
       </aside>
     </>

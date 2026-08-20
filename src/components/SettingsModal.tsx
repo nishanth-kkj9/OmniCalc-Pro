@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { AppSettings, AngleMode, CalcMode } from '../types';
+import { APP_NAME, APP_VERSION } from '../constants/version';
 import { 
   Moon,
   Sun,
@@ -886,7 +887,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       }`}>
         <div className="flex items-center gap-2">
           <Info className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--accent)' }} />
-          <span>OmniCalc Pro v3.0 • 17 Integrated Mathematical Engines</span>
+          <span>{APP_NAME} v{APP_VERSION} • 17 Integrated Mathematical Engines</span>
         </div>
         <div className="text-[11px]">
           Client-Side Zero-Latency Computation

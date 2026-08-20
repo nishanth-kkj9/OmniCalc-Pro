@@ -6,9 +6,21 @@
     "angle_mode": "degrees"
   },
   {
+    "name": "sin_degrees_90",
+    "expr": "sin(90)",
+    "expected": 1.0,
+    "angle_mode": "degrees"
+  },
+  {
     "name": "cos_degrees_60",
     "expr": "cos(60)",
     "expected": 0.5,
+    "angle_mode": "degrees"
+  },
+  {
+    "name": "cos_degrees_0",
+    "expr": "cos(0)",
+    "expected": 1.0,
     "angle_mode": "degrees"
   },
   {
@@ -16,5 +28,35 @@
     "expr": "tan(45)",
     "expected": 1.0,
     "angle_mode": "degrees"
+  },
+  {
+    "name": "asin_degrees_half",
+    "expr": "asin(0.5)",
+    "expected": 30.0,
+    "angle_mode": "degrees"
+  },
+  {
+    "name": "acos_degrees_half",
+    "expr": "acos(0.5)",
+    "expected": 60.0,
+    "angle_mode": "degrees"
+  },
+  {
+    "name": "atan_degrees_one",
+    "expr": "atan(1)",
+    "expected": 45.0,
+    "angle_mode": "degrees"
+  },
+  {
+    "name": "sin_radians_pi_over_2",
+    "expr": "sin(pi / 2)",
+    "expected": 1.0,
+    "angle_mode": "radians"
+  },
+  {
+    "name": "cos_radians_pi",
+    "expr": "cos(pi)",
+    "expected": -1.0,
+    "angle_mode": "radians"
   }
 ]
