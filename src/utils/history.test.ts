@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { getHistory, addHistory, clearHistory, deleteHistoryItem } from './history';
+import { SETTINGS_STORAGE_KEY, LEGACY_SETTINGS_STORAGE_KEY } from '../types';
 
 describe('History Storage Utility', () => {
   beforeEach(() => {
@@ -34,6 +35,20 @@ describe('History Storage Utility', () => {
 
   it('respects autoSaveHistory disabled setting', () => {
     const list = addHistory('10 * 10', '100', 'basic', { autoSaveHistory: false });
+    expect(list.length).toBe(0);
+    expect(getHistory().length).toBe(0);
+  });
+
+  it('respects autoSaveHistory disabled from localStorage omnicalc_settings_v2', () => {
+    localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify({ autoSaveHistory: false }));
+    const list = addHistory('10 * 10', '100', 'basic');
+    expect(list.length).toBe(0);
+    expect(getHistory().length).toBe(0);
+  });
+
+  it('falls back to legacy settings key if v2 is not set', () => {
+    localStorage.setItem(LEGACY_SETTINGS_STORAGE_KEY, JSON.stringify({ autoSaveHistory: false }));
+    const list = addHistory('10 * 10', '100', 'basic');
     expect(list.length).toBe(0);
     expect(getHistory().length).toBe(0);
   });

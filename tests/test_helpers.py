@@ -34,6 +34,16 @@ class TestHelpers(unittest.TestCase):
             self.assertEqual(result["font_size"], 14)
             self.assertEqual(result["angle_mode"], "degrees")
 
+    def test_load_config_corrupted_json(self):
+        config_path = os.path.join(self.config_dir, 'corrupt.json')
+        with open(config_path, 'w', encoding='utf-8') as f:
+            f.write("{invalid-json")
+        with patch('utils.helpers.CONFIG_PATH', config_path):
+            result = load_config()
+            self.assertEqual(result["theme"], "dark")
+            self.assertEqual(result["font_size"], 14)
+            self.assertEqual(result["angle_mode"], "degrees")
+
     def test_save_and_load_config(self):
         config_path = os.path.join(self.config_dir, 'config.json')
         test_cfg = {"theme": "light", "font_size": 16, "angle_mode": "radians"}

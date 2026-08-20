@@ -196,6 +196,30 @@ class TestSafeEvaluatorTimeoutDepth(unittest.TestCase):
         result = ev.evaluate("2+2")
         self.assertEqual(result, 4.0)
 
+    def test_timeout_enforcement(self):
+        ev = SafeEvaluator()
+        ev.max_time = 0.001
+        with self.assertRaises((TimeoutError, ValueError)):
+            ev.evaluate("sin(1) + cos(2) + tan(3) + sqrt(4)")
+
+    def test_nested_and_exponential_factorial_rejection(self):
+        ev = SafeEvaluator()
+        with self.assertRaises(ValueError):
+            ev.evaluate("factorial(factorial(10))")
+        with self.assertRaises(ValueError):
+            ev.evaluate("factorial(9**5)")
+        with self.assertRaises(ValueError):
+            ev.evaluate("factorial(500)")
+
+    def test_oversized_gamma_and_exp_rejection(self):
+        ev = SafeEvaluator()
+        with self.assertRaises(ValueError):
+            ev.evaluate("gamma(100000)")
+        with self.assertRaises(ValueError):
+            ev.evaluate("gamma(9**5)")
+        with self.assertRaises(ValueError):
+            ev.evaluate("exp(99999)")
+
     def test_parse_expression(self):
         ev = SafeEvaluator()
         result = ev.parse_expression("x**2 + 1")

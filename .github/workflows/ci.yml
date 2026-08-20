@@ -54,8 +54,8 @@ jobs:
       - name: Install Node Dependencies
         run: npm ci
 
-      - name: Run Vitest Unit Tests
-        run: npm test
+      - name: Run Vitest Unit Tests & Coverage
+        run: npm run coverage
 
   web-ci:
     name: Web Build & Typecheck

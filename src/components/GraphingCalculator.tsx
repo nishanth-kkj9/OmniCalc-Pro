@@ -1,10 +1,8 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { create, all } from 'mathjs';
-import { evaluateExpression } from '../utils/calculator';
+import { evaluateExpression, compileSafeExpression } from '../utils/calculator';
 import { AppSettings } from '../types';
 import { Plus, Trash2, Download, ZoomIn, ZoomOut, RefreshCw, Table } from 'lucide-react';
-
-const math = create(all, {});
+import { MAX_GRAPH_SAMPLES } from '../constants/limits';
 
 interface GraphingCalculatorProps {
   settings: AppSettings;
@@ -51,29 +49,20 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
     );
   };
 
-  // Compile expressions once to avoid re-parsing per pixel on every frame
+  // Compile expressions safely with central AST validator once to avoid re-parsing per pixel on every frame
   const compiledFns = useMemo(() => {
     return functions.map((fn) => {
       if (!fn.enabled || !fn.expression.trim()) return null;
-      try {
-        const sanitized = fn.expression
-          .replace(/×/g, '*')
-          .replace(/÷/g, '/')
-          .replace(/π/g, 'pi')
-          .replace(/−/g, '-')
-          .replace(/√\(/g, 'sqrt(')
-          .replace(/√([0-9a-zA-Z.]+)/g, 'sqrt($1)')
-          .replace(/(\d+(?:\.\d+)?)%/g, '($1 * 0.01)');
-        const parsed = math.parse(sanitized);
+      const res = compileSafeExpression(fn.expression, settings.angleMode, ['x']);
+      if (res.ok) {
         return {
           ...fn,
-          compiled: parsed.compile(),
+          compiled: res.compiled,
         };
-      } catch {
-        return null;
       }
+      return null;
     });
-  }, [functions]);
+  }, [functions, settings.angleMode]);
 
   // Evaluate function f(x) safely for table
   const evalFuncAtX = useCallback(
@@ -165,8 +154,8 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
     ctx.lineTo(zeroX, height);
     ctx.stroke();
 
-    // Plot Functions using precompiled nodes and capped points (800)
-    const MAX_POINTS = Math.min(Math.round(width), 800);
+    // Plot Functions using precompiled safe AST nodes and capped points
+    const MAX_POINTS = Math.min(Math.round(width), MAX_GRAPH_SAMPLES);
     const step = (xMax - xMin) / MAX_POINTS;
 
     compiledFns.forEach((c) => {

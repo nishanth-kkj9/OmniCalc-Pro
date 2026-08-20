@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Copy, Check } from 'lucide-react';
 import { AppSettings } from '../types';
 import { evaluateExpression } from '../utils/calculator';
+import { MAX_ITERATIONS, NUMERICAL_EPSILON } from '../constants/limits';
 
 interface CalculusCalculatorProps {
   settings: AppSettings;
@@ -26,24 +27,30 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
   const [rootGuess, setRootGuess] = useState<string>('0.5');
   const [maxIter, setMaxIter] = useState<number>(10);
 
-  const formatNum = (n: number) => {
-    if (Math.abs(n) < 1e-12) return '0';
-    const prec = settings.precision || 6;
-    return Number(n.toFixed(prec)).toString();
-  };
+  const formatNum = useCallback(
+    (n: number) => {
+      if (Math.abs(n) < 1e-12) return '0';
+      const prec = settings.precision || 6;
+      return Number(n.toFixed(prec)).toString();
+    },
+    [settings.precision]
+  );
 
-  const evalAt = (expr: string, xVal: number): number | null => {
-    try {
-      const res = evaluateExpression(expr, settings.angleMode, 10, { x: xVal });
-      const num = parseFloat(res);
-      return isNaN(num) || !isFinite(num) ? null : num;
-    } catch {
-      return null;
-    }
-  };
+  const evalAt = useCallback(
+    (expr: string, xVal: number): number | null => {
+      try {
+        const res = evaluateExpression(expr, settings.angleMode, 10, { x: xVal });
+        const num = parseFloat(res);
+        return isNaN(num) || !isFinite(num) ? null : num;
+      } catch {
+        return null;
+      }
+    },
+    [settings.angleMode]
+  );
 
   // Numerical Definite Integration (Simpson's 1/3 Rule)
-  const computeIntegral = () => {
+  const intData = useMemo(() => {
     const a = parseFloat(intA);
     const b = parseFloat(intB);
     if (isNaN(a) || isNaN(b)) return { error: 'Invalid bounds.' };
@@ -76,10 +83,10 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
       h: formatNum(h),
       n,
     };
-  };
+  }, [intA, intB, intFunc, intSubdiv, evalAt, formatNum]);
 
   // Numerical Derivative with Central Difference & Richardson Extrapolation
-  const computeDerivative = () => {
+  const diffData = useMemo(() => {
     const x0 = parseFloat(diffX0);
     if (isNaN(x0)) return { error: 'Invalid x₀ value.' };
 
@@ -123,17 +130,18 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
       tangentLine,
       normalLine,
     };
-  };
+  }, [diffX0, diffFunc, evalAt, formatNum]);
 
   // Newton-Raphson Root Solver
-  const computeRoot = () => {
+  const rootData = useMemo(() => {
     let currentX = parseFloat(rootGuess);
     if (isNaN(currentX)) return { error: 'Invalid initial guess x₀.' };
 
     const iterations = [];
     const h = 1e-5;
+    const boundedMaxIter = Math.min(Math.max(1, maxIter), MAX_ITERATIONS);
 
-    for (let i = 0; i < maxIter; i++) {
+    for (let i = 0; i < boundedMaxIter; i++) {
       const fx = evalAt(rootFunc, currentX);
       if (fx === null) {
         return { error: `Function undefined at x = ${formatNum(currentX)}`, iterations };
@@ -163,24 +171,20 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
       });
 
       currentX = nextX;
-      if (err < 1e-10) break;
+      if (err < NUMERICAL_EPSILON || err < 1e-10) break;
     }
 
     return {
       root: formatNum(currentX),
       iterations,
     };
-  };
+  }, [rootGuess, maxIter, rootFunc, evalAt, formatNum]);
 
   const handleCopy = (id: string, text: string) => {
     navigator.clipboard.writeText(text);
     setCopied(id);
     setTimeout(() => setCopied(null), 2000);
   };
-
-  const intData = computeIntegral();
-  const diffData = computeDerivative();
-  const rootData = computeRoot();
 
   return (
     <div className="max-w-4xl mx-auto w-full p-4 flex flex-col gap-6">
@@ -214,7 +218,7 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
           <div className="flex flex-col gap-6">
             <div>
               <h3 className="text-base font-bold text-slate-100">Definite Numerical Integral</h3>
-              <p className="text-xs text-slate-400">Calculates area under the curve using Adaptive Simpson's and Trapezoidal rules</p>
+              <p className="text-xs text-slate-400">Calculates area under the curve using Composite Simpson's 1/3 Rule and Trapezoidal rules</p>
             </div>
 
             {/* Inputs */}

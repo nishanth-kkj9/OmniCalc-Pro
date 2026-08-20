@@ -152,15 +152,22 @@ class GlobalErrorHandler(QObject):
             self._handling = False
 
     def _notify(self, receiver: QObject, event: QEvent) -> bool:
+        if getattr(self, "_handling", False):
+            return self._original_notify(receiver, event)
+
         try:
             return self._original_notify(receiver, event)
         except Exception as e:
-            tb_str = "".join(traceback.format_exc())
-            msg = f"{type(e).__name__}: {e}"
-            logger.error(f"Qt event exception: {msg}\n{tb_str}")
-            self._log_crash(msg, tb_str)
-            self._show_crash_dialog(msg, tb_str)
-            return False
+            self._handling = True
+            try:
+                tb_str = "".join(traceback.format_exc())
+                msg = f"{type(e).__name__}: {e}"
+                logger.error(f"Qt event exception: {msg}\n{tb_str}")
+                self._log_crash(msg, tb_str)
+                self._show_crash_dialog(msg, tb_str)
+                return False
+            finally:
+                self._handling = False
 
     def _log_crash(self, msg: str, tb: str) -> None:
         try:

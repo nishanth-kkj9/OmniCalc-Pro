@@ -87,7 +87,7 @@ describe('Matrix Engine — Numerical Linear Algebra & Verification', () => {
     });
   });
 
-  describe('Matrix Inversion (Gauss-Jordan with Pivoting)', () => {
+  describe('Matrix Inversion & Full Precision', () => {
     it('inverts 2x2 matrix correctly', () => {
       const m = [
         [4, 7],
@@ -96,10 +96,10 @@ describe('Matrix Engine — Numerical Linear Algebra & Verification', () => {
       // det = 24 - 14 = 10. Inv = [[0.6, -0.7], [-0.2, 0.4]]
       const inv = invertMatrix(m);
       expect(inv).not.toBeNull();
-      expect(inv![0][0]).toBeCloseTo(0.6, 6);
-      expect(inv![0][1]).toBeCloseTo(-0.7, 6);
-      expect(inv![1][0]).toBeCloseTo(-0.2, 6);
-      expect(inv![1][1]).toBeCloseTo(0.4, 6);
+      expect(inv![0][0]).toBeCloseTo(0.6, 10);
+      expect(inv![0][1]).toBeCloseTo(-0.7, 10);
+      expect(inv![1][0]).toBeCloseTo(-0.2, 10);
+      expect(inv![1][1]).toBeCloseTo(0.4, 10);
     });
 
     it('returns null when inverting singular matrix', () => {
@@ -117,6 +117,25 @@ describe('Matrix Engine — Numerical Linear Algebra & Verification', () => {
         [0, 0, 1],
       ];
       expect(invertMatrix(I)).toEqual(I);
+    });
+
+    it('preserves full precision such that A * A^-1 is identity', () => {
+      const A = [
+        [1, 2, 3],
+        [0, 1, 4],
+        [5, 6, 0],
+      ];
+      const inv = invertMatrix(A);
+      expect(inv).not.toBeNull();
+      const product = multiplyMatrices(A, inv!);
+      expect(product).not.toBeNull();
+
+      for (let r = 0; r < 3; r++) {
+        for (let c = 0; c < 3; c++) {
+          const expected = r === c ? 1 : 0;
+          expect(product![r][c]).toBeCloseTo(expected, 10);
+        }
+      }
     });
   });
 

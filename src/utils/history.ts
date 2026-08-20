@@ -1,4 +1,4 @@
-import { HistoryItem, CalcMode, AppSettings } from '../types';
+import { HistoryItem, CalcMode, AppSettings, SETTINGS_STORAGE_KEY, LEGACY_SETTINGS_STORAGE_KEY } from '../types';
 
 const STORAGE_KEY = 'omnicalc_history_v1';
 
@@ -25,7 +25,7 @@ export function addHistory(
 
   if (autoSave === undefined) {
     try {
-      const savedSettings = localStorage.getItem('omnicalc_settings');
+      const savedSettings = localStorage.getItem(SETTINGS_STORAGE_KEY) || localStorage.getItem(LEGACY_SETTINGS_STORAGE_KEY);
       if (savedSettings) {
         const parsed = JSON.parse(savedSettings);
         if (parsed.autoSaveHistory === false) return getHistory();

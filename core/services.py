@@ -51,13 +51,19 @@ class ServiceLocator:
             raise KeyError(f"Service not registered: {name}")
 
         is_singleton = self._singletons.get(name, True)
-        if is_singleton and name in self._services:
-            return self._services[name]
+        if is_singleton:
+            if name in self._services:
+                return self._services[name]
+            with self._lock:
+                if name in self._services:
+                    return self._services[name]
+                instance = self._factories[name]()
+                self._services[name] = instance
+                logger.debug(f"Service created: {name} (singleton=True)")
+                return instance
 
         instance = self._factories[name]()
-        if is_singleton:
-            self._services[name] = instance
-        logger.debug(f"Service created: {name} (singleton={is_singleton})")
+        logger.debug(f"Service created: {name} (singleton=False)")
         return instance
 
     def has(self, name: str) -> bool:

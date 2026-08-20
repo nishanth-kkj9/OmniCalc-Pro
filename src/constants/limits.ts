@@ -13,6 +13,12 @@ export const MAX_NESTING_DEPTH = 25;
 /** Maximum numerical exponent allowed in power operations. Prevents floating point / BigInt computing lockups. */
 export const MAX_EXPONENT = 10000;
 
+/** Maximum input integer for factorial functions. 170! is ~7.257e306; 171! exceeds IEEE 754 float64 limit. */
+export const MAX_FACTORIAL_ARGUMENT = 170;
+
+/** Maximum input for gamma function. Inputs > 171 exceed IEEE 754 float64 limits. */
+export const MAX_GAMMA_ARGUMENT = 171;
+
 /** Maximum square matrix dimension (NxN) supported for linear algebra operations. */
 export const MAX_MATRIX_DIMENSION = 5;
 

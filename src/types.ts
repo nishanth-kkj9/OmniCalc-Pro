@@ -61,3 +61,6 @@ export type UnitCategory =
 
 export type BitWordSize = 64 | 32 | 16 | 8;
 export type NumberBase = 'HEX' | 'DEC' | 'OCT' | 'BIN';
+
+export const SETTINGS_STORAGE_KEY = 'omnicalc_settings_v2';
+export const LEGACY_SETTINGS_STORAGE_KEY = 'omnicalc_settings';

@@ -4,6 +4,7 @@ Safe Expression Evaluator - AST-based, no eval().
 Uses sympy's parser with restricted transformations for secure mathematical evaluation.
 No code execution possible - only mathematical expressions.
 """
+import atexit
 import math
 import re
 from typing import Any
@@ -26,9 +27,17 @@ logger = get_logger()
 # Maximum allowed exponent to prevent CPU/memory exhaustion attacks
 MAX_EXPONENT_VAL = 10000
 # Maximum allowed factorial input
-MAX_FACTORIAL_VAL = 1000
+MAX_FACTORIAL_VAL = 170
+# Maximum allowed gamma input
+MAX_GAMMA_VAL = 171
+# Maximum allowed exp input
+MAX_EXP_VAL = 709
 # Maximum allowed operator count
 MAX_OPERATOR_COUNT = 100
+
+# Global worker thread pool to avoid blocking shutdowns on timeout
+_EVAL_POOL = ThreadPoolExecutor(max_workers=2, thread_name_prefix="eval_worker")
+atexit.register(lambda: _EVAL_POOL.shutdown(wait=False))
 
 SAFE_FUNCTIONS = {
     "sin", "cos", "tan", "asin", "acos", "atan",
@@ -208,12 +217,32 @@ class SafeEvaluator:
             if exp_val > MAX_EXPONENT_VAL:
                 raise ValueError(f"Exponent {exp_val} exceeds safe limit ({MAX_EXPONENT_VAL})")
 
-        # 4. Check for oversized factorial inputs (e.g. factorial(100000))
+        # 4. Check for nested/crafted factorial or gamma calls (e.g. factorial(factorial(10)), factorial(9**5))
+        if re.search(r"factorial\s*\([^)]*(?:factorial|gamma|\^|\*\*)[^)]*\)", expr):
+            raise ValueError("Nested or exponential factorial arguments are not permitted")
+        if re.search(r"gamma\s*\([^)]*(?:factorial|gamma|\^|\*\*)[^)]*\)", expr):
+            raise ValueError("Nested or exponential gamma arguments are not permitted")
+
+        # 5. Check for oversized factorial inputs (e.g. factorial(100000))
         fact_matches = re.finditer(r"factorial\s*\(\s*(\d+)\s*\)", expr)
         for match in fact_matches:
             fact_val = int(match.group(1))
             if fact_val > MAX_FACTORIAL_VAL:
                 raise ValueError(f"Factorial input {fact_val} exceeds safe limit ({MAX_FACTORIAL_VAL})")
+
+        # 6. Check for oversized gamma inputs
+        gamma_matches = re.finditer(r"gamma\s*\(\s*(\d+)\s*\)", expr)
+        for match in gamma_matches:
+            gamma_val = int(match.group(1))
+            if gamma_val > MAX_GAMMA_VAL:
+                raise ValueError(f"Gamma input {gamma_val} exceeds safe limit ({MAX_GAMMA_VAL})")
+
+        # 7. Check for oversized exp inputs
+        exp_func_matches = re.finditer(r"exp\s*\(\s*(\d+)\s*\)", expr)
+        for match in exp_func_matches:
+            exp_fn_val = int(match.group(1))
+            if exp_fn_val > MAX_EXP_VAL:
+                raise ValueError(f"Exp input {exp_fn_val} exceeds safe limit ({MAX_EXP_VAL})")
 
     def _normalize(self, expr: str) -> str:
         if len(expr) > self.max_length:
@@ -289,20 +318,23 @@ class SafeEvaluator:
         return expr
 
     def evaluate(self, expr: str) -> float:
-        """Evaluate mathematical expression with strict timeout enforcement and complexity limits."""
+        """Evaluate mathematical expression with timeout enforcement and complexity limits.
+        
+        Uses a shared global thread pool to avoid blocking shutdowns on timeout.
+        """
         try:
             expr = self._prevalidate(expr)
 
-            # Fast path or timed execution using ThreadPoolExecutor for responsive timeout enforcement
+            # Fast path or timed execution using global _EVAL_POOL for responsive timeout enforcement
             if self.max_time <= 0:
                 return _worker_eval_task(expr, list(self._namespace.keys()), self.angle_mode)
 
-            with ThreadPoolExecutor(max_workers=1) as executor:
-                future = executor.submit(_worker_eval_task, expr, list(self._namespace.keys()), self.angle_mode)
-                try:
-                    return future.result(timeout=self.max_time)
-                except FuturesTimeoutError:
-                    raise TimeoutError(f"Evaluation exceeded {self.max_time}s limit")
+            future = _EVAL_POOL.submit(_worker_eval_task, expr, list(self._namespace.keys()), self.angle_mode)
+            try:
+                return future.result(timeout=self.max_time)
+            except FuturesTimeoutError:
+                future.cancel()
+                raise TimeoutError(f"Evaluation exceeded {self.max_time}s limit")
 
         except SympifyError as e:
             logger.warning(f"Parse error: {expr} -> {e}")

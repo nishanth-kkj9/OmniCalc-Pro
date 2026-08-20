@@ -2,6 +2,7 @@
  * High-performance, numerically stable Matrix linear algebra algorithms for OmniCalc Pro.
  * Replaces recursive Laplace expansion (O(N!)) with LU Decomposition / Gaussian Elimination (O(N^3))
  * with partial pivoting for numerical stability and zero-division resistance.
+ * Preserves full IEEE 754 float64 precision; display formatting is handled in the UI layer.
  */
 
 import { MAX_MATRIX_DIMENSION, NUMERICAL_EPSILON } from '../constants/limits';
@@ -144,7 +145,7 @@ export function computeDeterminant(mat: Matrix): { det: number; singular: boolea
     return { det: 0, singular: true };
   }
 
-  return { det: Number(det.toFixed(8)), singular: false };
+  return { det, singular: false };
 }
 
 /**
@@ -199,9 +200,9 @@ export function invertMatrix(mat: Matrix): Matrix | null {
     }
   }
 
-  // Extract right-hand inverted matrix
+  // Extract right-hand inverted matrix with full precision
   const inv: Matrix = Array.from({ length: n }, (_, r) =>
-    Array.from({ length: n }, (_, c) => Number(aug[r][c + n].toFixed(8)))
+    Array.from({ length: n }, (_, c) => aug[r][c + n])
   );
 
   return inv;
@@ -239,7 +240,7 @@ export function multiplyMatrices(a: Matrix, b: Matrix): Matrix | null {
       for (let k = 0; k < colsA; k++) {
         sum += a[i][k] * b[k][j];
       }
-      res[i][j] = Number(sum.toFixed(8));
+      res[i][j] = sum;
     }
   }
   return res;
@@ -255,7 +256,7 @@ export function addMatrices(a: Matrix, b: Matrix): Matrix | null {
     return null;
   }
 
-  return a.map((row, r) => row.map((val, c) => Number((val + b[r][c]).toFixed(8))));
+  return a.map((row, r) => row.map((val, c) => val + b[r][c]));
 }
 
 /**
@@ -268,5 +269,5 @@ export function subtractMatrices(a: Matrix, b: Matrix): Matrix | null {
     return null;
   }
 
-  return a.map((row, r) => row.map((val, c) => Number((val - b[r][c]).toFixed(8))));
+  return a.map((row, r) => row.map((val, c) => val - b[r][c]));
 }

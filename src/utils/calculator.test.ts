@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { evaluateExpression, evaluateWithResult, formatNumber } from './calculator';
+import {
+  evaluateExpression,
+  evaluateWithResult,
+  compileSafeExpression,
+  formatNumber,
+} from './calculator';
 
 describe('Calculator Evaluator', () => {
   describe('Trigonometry and Angle Modes', () => {
@@ -26,6 +31,45 @@ describe('Calculator Evaluator', () => {
       expect(evaluateExpression('cos(200)', 'GRAD')).toBe('-1');
       expect(evaluateExpression('tan(100)', 'GRAD')).toBe('NaN');
       expect(evaluateExpression('tan(300)', 'GRAD')).toBe('NaN');
+    });
+  });
+
+  describe('Mathematical Functions & Hyperbolics Coverage', () => {
+    it('evaluates hyperbolic functions', () => {
+      expect(evaluateExpression('sinh(0)', 'RAD')).toBe('0');
+      expect(evaluateExpression('cosh(0)', 'RAD')).toBe('1');
+      expect(evaluateExpression('tanh(0)', 'RAD')).toBe('0');
+      expect(evaluateExpression('asinh(0)', 'RAD')).toBe('0');
+      expect(evaluateExpression('acosh(1)', 'RAD')).toBe('0');
+      expect(evaluateExpression('atanh(0)', 'RAD')).toBe('0');
+    });
+
+    it('evaluates logarithms and roots', () => {
+      expect(evaluateExpression('log10(100)', 'RAD')).toBe('2');
+      expect(evaluateExpression('log(100)', 'RAD')).toBe('2');
+      expect(evaluateExpression('log2(8)', 'RAD')).toBe('3');
+      expect(evaluateExpression('ln(e)', 'RAD')).toBe('1');
+      expect(evaluateExpression('sqrt(25)', 'RAD')).toBe('5');
+      expect(evaluateExpression('cbrt(27)', 'RAD')).toBe('3');
+      expect(evaluateExpression('exp(0)', 'RAD')).toBe('1');
+      expect(evaluateExpression('abs(-42)', 'RAD')).toBe('42');
+      expect(evaluateExpression('sign(-15)', 'RAD')).toBe('-1');
+      expect(evaluateExpression('floor(3.7)', 'RAD')).toBe('3');
+      expect(evaluateExpression('ceil(3.2)', 'RAD')).toBe('4');
+      expect(evaluateExpression('round(3.5)', 'RAD')).toBe('4');
+    });
+
+    it('evaluates factorial and gamma within safe limits', () => {
+      expect(evaluateExpression('factorial(5)', 'RAD')).toBe('120');
+      expect(evaluateExpression('fact(4)', 'RAD')).toBe('24');
+      expect(evaluateExpression('gamma(5)', 'RAD')).toBe('24');
+      expect(evaluateExpression('gamma(1)', 'RAD')).toBe('1');
+    });
+
+    it('enforces limits on expensive factorial and gamma arguments', () => {
+      expect(evaluateWithResult('factorial(500)').ok).toBe(false);
+      expect(evaluateWithResult('fact(999999)').ok).toBe(false);
+      expect(evaluateWithResult('gamma(500)').ok).toBe(false);
     });
   });
 
@@ -65,7 +109,28 @@ describe('Calculator Evaluator', () => {
     });
   });
 
-  describe('evaluateWithResult (Typed Result Type)', () => {
+  describe('compileSafeExpression (Reusable Shared Compiler)', () => {
+    it('compiles safe mathematical function and evaluates with variable scope', () => {
+      const res = compileSafeExpression('x^2 + 2*x + 1', 'DEG', ['x']);
+      expect(res.ok).toBe(true);
+      if (res.ok) {
+        expect(res.compiled.evaluate({ x: 3 })).toBe(16);
+        expect(res.compiled.evaluate({ x: 0 })).toBe(1);
+      }
+    });
+
+    it('rejects unsafe AST injection during safe compilation', () => {
+      const res = compileSafeExpression('window.location = "http://evil.com"', 'DEG', ['x']);
+      expect(res.ok).toBe(false);
+    });
+
+    it('rejects arbitrary functions not in the allowlist', () => {
+      const res = compileSafeExpression('fetch("http://evil.com")', 'DEG', ['x']);
+      expect(res.ok).toBe(false);
+    });
+  });
+
+  describe('evaluateWithResult (Typed Result Type & Security Hardening)', () => {
     it('returns ok: true for valid expression', () => {
       const res = evaluateWithResult('2 + 3 * 4');
       expect(res.ok).toBe(true);
@@ -87,6 +152,7 @@ describe('Calculator Evaluator', () => {
       expect(evaluateWithResult('__proto__').ok).toBe(false);
       expect(evaluateWithResult('window.alert(1)').ok).toBe(false);
       expect(evaluateWithResult('eval("2+2")').ok).toBe(false);
+      expect(evaluateWithResult('globalThis.process').ok).toBe(false);
     });
 
     it('blocks deeply nested parentheses attacks', () => {

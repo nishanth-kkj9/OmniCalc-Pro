@@ -22,18 +22,30 @@ def ensure_dirs() -> None:
 
 
 def load_config() -> Dict[str, Any]:
+    default_config: Dict[str, Any] = {"theme": "dark", "font_size": 14, "angle_mode": "degrees"}
     if os.path.exists(CONFIG_PATH):
-        with open(CONFIG_PATH, 'r') as f:
-            logger.debug("Config file loaded.")
-            return json.load(f)
+        try:
+            with open(CONFIG_PATH, 'r', encoding='utf-8') as f:
+                cfg = json.load(f)
+                if isinstance(cfg, dict):
+                    logger.debug("Config file loaded.")
+                    return cfg
+                logger.warning("Config file is not a valid JSON object. Using defaults.")
+                return default_config
+        except (json.JSONDecodeError, IOError, OSError) as e:
+            logger.warning(f"Failed to read/parse config file ({e}). Using defaults.")
+            return default_config
     logger.warning("Config file not found. Using defaults.")
-    return {"theme": "dark", "font_size": 14, "angle_mode": "degrees"}
+    return default_config
 
 
 def save_config(cfg: Dict[str, Any]) -> None:
-    with open(CONFIG_PATH, 'w') as f:
-        json.dump(cfg, f, indent=2)
-    logger.debug("Configuration saved.")
+    try:
+        with open(CONFIG_PATH, 'w', encoding='utf-8') as f:
+            json.dump(cfg, f, indent=2)
+        logger.debug("Configuration saved.")
+    except (IOError, OSError) as e:
+        logger.error(f"Failed to save configuration: {e}")
 
 
 def safe_eval(expression: str, mode: str = "degrees") -> Union[float, str]:
