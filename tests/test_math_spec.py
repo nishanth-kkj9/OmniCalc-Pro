@@ -35,6 +35,9 @@ class TestMathSpecificationVectors(unittest.TestCase):
     def test_trigonometry_spec(self):
         self._run_spec_file("trigonometry.json")
 
+    def test_special_functions_spec(self):
+        self._run_spec_file("special_functions.json")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,6 +1,6 @@
 # Multi-stage Dockerfile for OmniCalc Pro Web Application
 # Stage 1: Build
-FROM node:20-alpine AS builder
+FROM node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293 AS builder
 WORKDIR /app
 
 COPY package*.json ./
@@ -10,7 +10,7 @@ COPY . .
 RUN npm run build
 
 # Stage 2: Production Nginx Server with Hardened Non-Root Security
-FROM nginx:alpine
+FROM nginx:alpine@sha256:fdbfdaea4fc323f44590e9afeb271da8c345a733bf44c4ad7861201676a95f42
 
 # Copy built static assets
 COPY --from=builder /app/dist /usr/share/nginx/html

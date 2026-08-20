@@ -47,10 +47,19 @@ logs/
 .coverage
 .pytest_cache/
 htmlcov/
+coverage/
+.vitest/
 
 # Type checking
 .mypy_cache/
 .dmypy.json
+*.tsbuildinfo
+
+# Node / Web
+node_modules/
+dist/
+build/
+
 
 # Jupyter
 .ipynb_checkpoints/

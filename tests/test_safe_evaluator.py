@@ -239,6 +239,33 @@ class TestSafeEvaluatorTimeoutDepth(unittest.TestCase):
         self.assertIn(-2, solutions)
         self.assertIn(2, solutions)
 
+    def test_concurrent_worker_pool_saturation_and_recovery(self):
+        """Stress test: submit concurrent expressions and verify thread pool handles load and recovers."""
+        import concurrent.futures
+        ev = SafeEvaluator()
+        ev.max_time = 2.0
+
+        expressions = [
+            "sin(30) + cos(60)",
+            "sqrt(144) * 2",
+            "tan(45) + log10(100)",
+            "2 ^ 8 + 3 ^ 3",
+            "exp(2) + sqrt(25)",
+            "abs(-50) / 2",
+        ] * 3
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=6) as client_pool:
+            futures = [client_pool.submit(ev.evaluate, expr) for expr in expressions]
+            results = [f.result(timeout=10.0) for f in futures]
+
+        self.assertEqual(len(results), len(expressions))
+        for r in results:
+            self.assertIsInstance(r, float)
+
+        # Confirm immediate recovery for subsequent evaluation
+        recovery_result = ev.evaluate("100 + 200")
+        self.assertEqual(recovery_result, 300.0)
+
 
 class TestParserBackwardCompat(unittest.TestCase):
     def test_math_parser_static(self):

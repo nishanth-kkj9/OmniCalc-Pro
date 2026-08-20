@@ -73,8 +73,8 @@
 git clone https://github.com/nishanth-kkj9/OmniCalc-Pro.git
 cd OmniCalc-Pro
 
-# Install dependencies
-npm install
+# Install exact dependencies using the committed lockfile
+npm ci
 
 # Start the development server
 npm run dev
@@ -101,6 +101,7 @@ npm run build
 ```
 
 #### Docker Deployment
+Docker builds and containerizes the static web application with hardened Nginx on port 3000 running as a non-root user with immutable image digests:
 ```bash
 # Build and run containerized web app
 docker build -t omnicalc-pro .

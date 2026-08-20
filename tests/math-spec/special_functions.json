@@ -1,0 +1,26 @@
+[
+  {
+    "name": "factorial_5",
+    "expr": "factorial(5)",
+    "expected": 120.0,
+    "angle_mode": "degrees"
+  },
+  {
+    "name": "abs_negative",
+    "expr": "abs(-42.5)",
+    "expected": 42.5,
+    "angle_mode": "degrees"
+  },
+  {
+    "name": "exp_one",
+    "expr": "exp(1)",
+    "expected": 2.718281828,
+    "angle_mode": "degrees"
+  },
+  {
+    "name": "cbrt_27",
+    "expr": "cbrt(27)",
+    "expected": 3.0,
+    "angle_mode": "degrees"
+  }
+]
