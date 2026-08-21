@@ -359,10 +359,26 @@ class SafeEvaluator:
 
     # --- Consolidated Symbolic Parsing and Solving ---
 
+    def _build_symbolic_namespace(self) -> dict[str, Any]:
+        """Namespace for symbolic expressions and solving containing sympy functions and constants."""
+        return {
+            "sin": sp.sin, "cos": sp.cos, "tan": sp.tan,
+            "asin": sp.asin, "acos": sp.acos, "atan": sp.atan,
+            "sinh": sp.sinh, "cosh": sp.cosh, "tanh": sp.tanh,
+            "asinh": sp.asinh, "acosh": sp.acosh, "atanh": sp.atanh,
+            "log": sp.log, "ln": sp.log,
+            "log10": lambda arg: sp.log(arg, 10),
+            "log2": lambda arg: sp.log(arg, 2),
+            "sqrt": sp.sqrt, "cbrt": sp.cbrt,
+            "exp": sp.exp, "abs": sp.Abs, "factorial": sp.factorial, "gamma": sp.gamma,
+            "pi": sp.pi, "e": sp.E, "tau": 2 * sp.pi, "inf": sp.oo, "nan": sp.nan,
+        }
+
     def parse_expression(self, expr: str):
         try:
             expr = self._prevalidate(expr.replace('^', '**'), allow_vars=True)
-            return sp.sympify(expr, evaluate=False)
+            sym_ns = self._build_symbolic_namespace()
+            return parse_expr(expr, transformations=TRANSFORMATIONS, local_dict=sym_ns, evaluate=False)
         except SympifyError as e:
             raise ValueError(f"Error parsing expression: {e}") from e
         except ValueError:
@@ -377,7 +393,9 @@ class SafeEvaluator:
         try:
             expr = self._prevalidate(expr, allow_vars=True)
             x = sp.Symbol(variable)
-            eq = sp.sympify(expr)
+            sym_ns = self._build_symbolic_namespace()
+            sym_ns[variable] = x
+            eq = parse_expr(expr, transformations=TRANSFORMATIONS, local_dict=sym_ns, evaluate=False)
             return sp.solve(eq, x)
         except SympifyError as e:
             raise ValueError(f"Error solving expression: {e}") from e

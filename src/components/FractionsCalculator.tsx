@@ -6,7 +6,9 @@ interface FractionsCalculatorProps {
   settings?: AppSettings;
 }
 
-export const FractionsCalculator: React.FC<FractionsCalculatorProps> = ({ settings: _settings }) => {
+export const FractionsCalculator: React.FC<FractionsCalculatorProps> = ({
+  settings: _settings,
+}) => {
   const [tab, setTab] = useState<'fractions' | 'gcd_lcm' | 'prime'>('fractions');
 
   // Fraction State
@@ -186,7 +188,9 @@ export const FractionsCalculator: React.FC<FractionsCalculatorProps> = ({ settin
 
     // Factors
     const f = getPrimeFactors(n);
-    const primeFactStr = f.map((x) => (x.exp > 1 ? `${x.base}^${x.exp}` : `${x.base}`)).join(' × ') || (n === 1 ? '1' : `${n}`);
+    const primeFactStr =
+      f.map((x) => (x.exp > 1 ? `${x.base}^${x.exp}` : `${x.base}`)).join(' × ') ||
+      (n === 1 ? '1' : `${n}`);
 
     // Next prime
     let nextP = n + 1;
@@ -226,9 +230,10 @@ export const FractionsCalculator: React.FC<FractionsCalculatorProps> = ({ settin
             onClick={() => setTab(item.id as any)}
             className={`
               px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border shadow-sm
-              ${tab === item.id
-                ? 'bg-sky-600 text-white border-sky-500 shadow-sky-600/20'
-                : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-white'
+              ${
+                tab === item.id
+                  ? 'bg-sky-600 text-white border-sky-500 shadow-sky-600/20'
+                  : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-white'
               }
             `}
           >
@@ -244,11 +249,21 @@ export const FractionsCalculator: React.FC<FractionsCalculatorProps> = ({ settin
           <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-base font-bold text-slate-100">Fraction Arithmetic & Simplification</h3>
-                <p className="text-xs text-slate-400">Perform exact fraction operations with mixed numbers and decimal outputs</p>
+                <h3 className="text-base font-bold text-slate-100">
+                  Fraction Arithmetic & Simplification
+                </h3>
+                <p className="text-xs text-slate-400">
+                  Perform exact fraction operations with mixed numbers and decimal outputs
+                </p>
               </div>
               <button
-                onClick={() => { setF1Num('3'); setF1Den('4'); setOp('+'); setF2Num('2'); setF2Den('5'); }}
+                onClick={() => {
+                  setF1Num('3');
+                  setF1Den('4');
+                  setOp('+');
+                  setF2Num('2');
+                  setF2Den('5');
+                }}
                 className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs flex items-center gap-1.5 border border-slate-700"
               >
                 <RefreshCw className="w-3.5 h-3.5" /> Example
@@ -281,7 +296,9 @@ export const FractionsCalculator: React.FC<FractionsCalculatorProps> = ({ settin
                     key={o}
                     onClick={() => setOp(o)}
                     className={`w-9 h-9 rounded-xl font-bold text-lg transition-all ${
-                      op === o ? 'bg-sky-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-800'
+                      op === o
+                        ? 'bg-sky-600 text-white shadow-md'
+                        : 'text-slate-400 hover:bg-slate-800'
                     }`}
                   >
                     {o}
@@ -317,7 +334,9 @@ export const FractionsCalculator: React.FC<FractionsCalculatorProps> = ({ settin
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col">
                         <span className="text-xs text-slate-400 mb-1">Simplified Fraction</span>
-                        <span className="text-3xl font-mono font-bold text-emerald-400">{fracRes.simplified}</span>
+                        <span className="text-3xl font-mono font-bold text-emerald-400">
+                          {fracRes.simplified}
+                        </span>
                       </div>
 
                       <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col">
@@ -329,7 +348,9 @@ export const FractionsCalculator: React.FC<FractionsCalculatorProps> = ({ settin
 
                       <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col">
                         <span className="text-xs text-slate-400 mb-1">Decimal Form</span>
-                        <span className="text-3xl font-mono font-bold text-amber-400">{fracRes.decimal}</span>
+                        <span className="text-3xl font-mono font-bold text-amber-400">
+                          {fracRes.decimal}
+                        </span>
                       </div>
                     </div>
 
@@ -349,8 +370,12 @@ export const FractionsCalculator: React.FC<FractionsCalculatorProps> = ({ settin
           <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-base font-bold text-slate-100">Greatest Common Divisor (GCD) & LCM</h3>
-                <p className="text-xs text-slate-400">Calculates GCD and LCM with prime factorizations</p>
+                <h3 className="text-base font-bold text-slate-100">
+                  Greatest Common Divisor (GCD) & LCM
+                </h3>
+                <p className="text-xs text-slate-400">
+                  Calculates GCD and LCM with prime factorizations
+                </p>
               </div>
               <button
                 onClick={() => setGcdInput('48, 180, 24')}
@@ -361,7 +386,9 @@ export const FractionsCalculator: React.FC<FractionsCalculatorProps> = ({ settin
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-slate-400">Enter Integers (comma or space separated)</label>
+              <label className="text-xs font-bold text-slate-400">
+                Enter Integers (comma or space separated)
+              </label>
               <input
                 type="text"
                 value={gcdInput}
@@ -379,21 +406,34 @@ export const FractionsCalculator: React.FC<FractionsCalculatorProps> = ({ settin
                   <>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl">
-                        <span className="text-xs text-slate-400 block mb-1">Greatest Common Divisor (GCD / GCF)</span>
-                        <span className="text-3xl font-mono font-bold text-emerald-400">{gcdRes.gcd}</span>
+                        <span className="text-xs text-slate-400 block mb-1">
+                          Greatest Common Divisor (GCD / GCF)
+                        </span>
+                        <span className="text-3xl font-mono font-bold text-emerald-400">
+                          {gcdRes.gcd}
+                        </span>
                       </div>
                       <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl">
-                        <span className="text-xs text-slate-400 block mb-1">Least Common Multiple (LCM)</span>
-                        <span className="text-3xl font-mono font-bold text-sky-400">{gcdRes.lcm}</span>
+                        <span className="text-xs text-slate-400 block mb-1">
+                          Least Common Multiple (LCM)
+                        </span>
+                        <span className="text-3xl font-mono font-bold text-sky-400">
+                          {gcdRes.lcm}
+                        </span>
                       </div>
                     </div>
 
                     {/* Factorizations */}
                     <div className="border-t border-slate-800 pt-3 flex flex-col gap-2">
-                      <span className="text-xs font-bold text-slate-400">Prime Factorizations:</span>
+                      <span className="text-xs font-bold text-slate-400">
+                        Prime Factorizations:
+                      </span>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         {gcdRes.factorizations?.map((f, idx) => (
-                          <div key={idx} className="p-2.5 bg-slate-900 border border-slate-800 rounded-xl font-mono text-xs text-slate-200">
+                          <div
+                            key={idx}
+                            className="p-2.5 bg-slate-900 border border-slate-800 rounded-xl font-mono text-xs text-slate-200"
+                          >
                             <span className="text-sky-400 font-bold">{f.num}</span> = {f.factors}
                           </div>
                         ))}
@@ -411,8 +451,12 @@ export const FractionsCalculator: React.FC<FractionsCalculatorProps> = ({ settin
           <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-base font-bold text-slate-100">Prime Number Analyzer & Factor Breakdown</h3>
-                <p className="text-xs text-slate-400">Tests primality, prime decomposition, and enumerates all divisors</p>
+                <h3 className="text-base font-bold text-slate-100">
+                  Prime Number Analyzer & Factor Breakdown
+                </h3>
+                <p className="text-xs text-slate-400">
+                  Tests primality, prime decomposition, and enumerates all divisors
+                </p>
               </div>
               <button
                 onClick={() => setPrimeInput('360')}
@@ -442,41 +486,62 @@ export const FractionsCalculator: React.FC<FractionsCalculatorProps> = ({ settin
                     <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl flex items-center justify-between">
                       <div>
                         <span className="text-xs text-slate-400 block">Primality Status</span>
-                        <span className={`text-2xl font-bold ${primeRes.isPrime ? 'text-emerald-400' : 'text-amber-400'}`}>
+                        <span
+                          className={`text-2xl font-bold ${primeRes.isPrime ? 'text-emerald-400' : 'text-amber-400'}`}
+                        >
                           {primeRes.isPrime ? 'Prime Number' : 'Composite Number'}
                         </span>
                       </div>
                       <div className="text-right">
                         <span className="text-xs text-slate-400 block">Prime Decomposition</span>
-                        <span className="text-lg font-mono font-bold text-sky-400">{primeRes.primeFactors}</span>
+                        <span className="text-lg font-mono font-bold text-sky-400">
+                          {primeRes.primeFactors}
+                        </span>
                       </div>
                     </div>
 
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                       <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
-                        <span className="text-[10px] text-slate-400 block">Total Divisors d(N)</span>
-                        <span className="text-lg font-mono font-bold text-slate-100">{primeRes.numDivisors}</span>
+                        <span className="text-[10px] text-slate-400 block">
+                          Total Divisors d(N)
+                        </span>
+                        <span className="text-lg font-mono font-bold text-slate-100">
+                          {primeRes.numDivisors}
+                        </span>
                       </div>
                       <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
-                        <span className="text-[10px] text-slate-400 block">Sum of Divisors σ(N)</span>
-                        <span className="text-lg font-mono font-bold text-slate-100">{primeRes.sumDivisors}</span>
+                        <span className="text-[10px] text-slate-400 block">
+                          Sum of Divisors σ(N)
+                        </span>
+                        <span className="text-lg font-mono font-bold text-slate-100">
+                          {primeRes.sumDivisors}
+                        </span>
                       </div>
                       <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
                         <span className="text-[10px] text-slate-400 block">Previous Prime</span>
-                        <span className="text-lg font-mono font-bold text-slate-300">{primeRes.prevPrime || 'None'}</span>
+                        <span className="text-lg font-mono font-bold text-slate-300">
+                          {primeRes.prevPrime || 'None'}
+                        </span>
                       </div>
                       <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
                         <span className="text-[10px] text-slate-400 block">Next Prime</span>
-                        <span className="text-lg font-mono font-bold text-emerald-400">{primeRes.nextPrime}</span>
+                        <span className="text-lg font-mono font-bold text-emerald-400">
+                          {primeRes.nextPrime}
+                        </span>
                       </div>
                     </div>
 
                     {/* All Divisors */}
                     <div className="border-t border-slate-800 pt-3 flex flex-col gap-1.5">
-                      <span className="text-xs font-bold text-slate-400">All Positive Divisors of {primeInput}:</span>
+                      <span className="text-xs font-bold text-slate-400">
+                        All Positive Divisors of {primeInput}:
+                      </span>
                       <div className="flex flex-wrap gap-1.5">
                         {primeRes.divisors?.map((d) => (
-                          <span key={d} className="px-2 py-0.5 bg-slate-900 border border-slate-800 text-slate-300 font-mono text-xs rounded-md">
+                          <span
+                            key={d}
+                            className="px-2 py-0.5 bg-slate-900 border border-slate-800 text-slate-300 font-mono text-xs rounded-md"
+                          >
                             {d}
                           </span>
                         ))}

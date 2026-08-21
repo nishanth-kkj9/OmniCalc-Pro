@@ -21,6 +21,38 @@
 
 ---
 
+## 🏛️ Architecture Overview
+
+OmniCalc Pro employs a **parallel dual-UI monorepo architecture**, allowing the application to be deployed either as a native cross-platform desktop application or as a client-side web application containerized with Nginx.
+
+```
+                   ┌────────────────────────────────────────┐
+                   │             OmniCalc Pro               │
+                   │    (Canonical Version: 2.1.0)          │
+                   └──────────────────┬─────────────────────┘
+                                      │
+               ┌──────────────────────┴──────────────────────┐
+               ▼                                             ▼
+┌─────────────────────────────┐               ┌─────────────────────────────┐
+│    Desktop Application      │               │       Web Application       │
+│      (Python + PySide6)     │               │     (React + TypeScript)    │
+├─────────────────────────────┤               ├─────────────────────────────┤
+│ • Entry: main.py            │               │ • Entry: src/main.tsx       │
+│ • UI: ui/ (Lazy Stacked UI) │               │ • UI: src/components/ (Lazy)│
+│ • Engines: core/            │               │ • Engines: src/utils/       │
+│ • Safe Evaluator: SymPy AST │               │ • Evaluator: MathJS + TS    │
+│ • Persistence: SQLite DB    │               │ • Persistence: LocalStorage │
+│ • Deploy: PyInstaller/Wheel │               │ • Deploy: Docker Nginx/Vite │
+└─────────────────────────────┘               └─────────────────────────────┘
+```
+
+- **Shared Domain Capabilities**: Both targets implement identical mathematical domains (Basic, Scientific, Graphing, Matrix, Programmer, Statistics, Finance, etc.).
+- **Independent Runtime Targets**:
+  - The **Desktop suite** is optimized for low-latency desktop workflows, frameless Windows 11 Mica integration, offline local SQLite persistence, and heavy symbolic calculus via SymPy.
+  - The **Web suite** is optimized for instant zero-install browser access, responsive mobile/desktop layouts, procedural Web Audio synthesizer clicks, and static Docker/CDN distribution.
+
+---
+
 ## ⚡ Mathematical & Calculation Engines
 
 | Category | Engine | Capabilities |

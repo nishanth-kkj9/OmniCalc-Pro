@@ -140,8 +140,18 @@ export function prewarmAudio() {
   const ctx = getAudioContext();
   if (!ctx) return;
 
-  const types: Array<'click' | 'equals' | 'clear' | 'error'> = ['click', 'equals', 'clear', 'error'];
-  const profiles: Array<'mechanical' | 'soft' | 'beep' | 'tap'> = ['mechanical', 'soft', 'beep', 'tap'];
+  const types: Array<'click' | 'equals' | 'clear' | 'error'> = [
+    'click',
+    'equals',
+    'clear',
+    'error',
+  ];
+  const profiles: Array<'mechanical' | 'soft' | 'beep' | 'tap'> = [
+    'mechanical',
+    'soft',
+    'beep',
+    'tap',
+  ];
 
   for (const p of profiles) {
     for (const t of types) {

@@ -44,9 +44,7 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
   };
 
   const updateFunction = (id: string, field: 'expression' | 'enabled', val: string | boolean) => {
-    setFunctions(
-      functions.map((f) => (f.id === id ? { ...f, [field]: val } : f))
-    );
+    setFunctions(functions.map((f) => (f.id === id ? { ...f, [field]: val } : f)));
   };
 
   // Compile expressions safely with central AST validator once to avoid re-parsing per pixel on every frame
@@ -255,14 +253,14 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
   const cardBg = isLight
     ? 'bg-white border-slate-200 shadow-sm'
     : isOled
-    ? 'bg-black border-zinc-800'
-    : 'bg-slate-900 border-slate-800 shadow-xl';
+      ? 'bg-black border-zinc-800'
+      : 'bg-slate-900 border-slate-800 shadow-xl';
 
   const subCardBg = isLight
     ? 'bg-slate-50 border-slate-200'
     : isOled
-    ? 'bg-zinc-950 border-zinc-800/80'
-    : 'bg-slate-800/60 border-slate-700/60';
+      ? 'bg-zinc-950 border-zinc-800/80'
+      : 'bg-slate-800/60 border-slate-700/60';
 
   const textHeading = isLight ? 'text-slate-900' : 'text-slate-100';
   const textMuted = isLight ? 'text-slate-500' : 'text-slate-400';
@@ -270,20 +268,22 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
   const btnSecondary = isLight
     ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-300'
     : isOled
-    ? 'bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border-zinc-800'
-    : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700/80';
+      ? 'bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border-zinc-800'
+      : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700/80';
 
   const inputBg = isLight
     ? 'bg-white border-slate-300 text-slate-900 focus:border-sky-500'
     : isOled
-    ? 'bg-zinc-900 border-zinc-700 text-slate-100 focus:border-sky-500'
-    : 'bg-slate-900 border-slate-700/80 text-slate-100 focus:border-sky-500';
+      ? 'bg-zinc-900 border-zinc-700 text-slate-100 focus:border-sky-500'
+      : 'bg-slate-900 border-slate-700/80 text-slate-100 focus:border-sky-500';
 
   return (
     <div className="max-w-5xl mx-auto w-full p-4 flex flex-col gap-5">
       {/* Function Input List */}
       <div className={`${cardBg} border rounded-3xl p-4 flex flex-col gap-3 transition-colors`}>
-        <div className={`flex items-center justify-between border-b ${isLight ? 'border-slate-200' : 'border-slate-800'} pb-3`}>
+        <div
+          className={`flex items-center justify-between border-b ${isLight ? 'border-slate-200' : 'border-slate-800'} pb-3`}
+        >
           <h3 className={`text-sm font-bold ${textHeading}`}>Equations (y = f(x))</h3>
           <button
             onClick={addFunction}
@@ -296,14 +296,20 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {functions.map((fn) => (
-            <div key={fn.id} className={`flex items-center gap-2 ${subCardBg} p-2 rounded-2xl border transition-colors`}>
+            <div
+              key={fn.id}
+              className={`flex items-center gap-2 ${subCardBg} p-2 rounded-2xl border transition-colors`}
+            >
               <input
                 type="checkbox"
                 checked={fn.enabled}
                 onChange={(e) => updateFunction(fn.id, 'enabled', e.target.checked)}
                 className="w-4 h-4 rounded accent-sky-500 cursor-pointer"
               />
-              <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: fn.color }} />
+              <span
+                className="w-3 h-3 rounded-full flex-shrink-0"
+                style={{ backgroundColor: fn.color }}
+              />
               <span className={`text-xs font-mono font-bold ${textMuted}`}>y =</span>
               <input
                 type="text"
@@ -326,8 +332,12 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
       </div>
 
       {/* Main Canvas Graph Display */}
-      <div className={`${cardBg} border rounded-3xl p-4 flex flex-col gap-3 relative transition-colors`}>
-        <div className={`flex flex-wrap items-center justify-between gap-2 border-b ${isLight ? 'border-slate-200' : 'border-slate-800'} pb-3`}>
+      <div
+        className={`${cardBg} border rounded-3xl p-4 flex flex-col gap-3 relative transition-colors`}
+      >
+        <div
+          className={`flex flex-wrap items-center justify-between gap-2 border-b ${isLight ? 'border-slate-200' : 'border-slate-800'} pb-3`}
+        >
           {/* Controls Bar */}
           <div className="flex items-center gap-1.5">
             <button
@@ -395,14 +405,18 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
 
           {/* Cursor readout */}
           {hoverCoords && (
-            <div className={`text-xs font-mono font-semibold ${isLight ? 'bg-sky-50 text-sky-700 border-sky-200' : 'bg-slate-800/80 text-sky-400 border-slate-700/60'} px-2.5 py-1 rounded-xl border`}>
+            <div
+              className={`text-xs font-mono font-semibold ${isLight ? 'bg-sky-50 text-sky-700 border-sky-200' : 'bg-slate-800/80 text-sky-400 border-slate-700/60'} px-2.5 py-1 rounded-xl border`}
+            >
               (X: {hoverCoords.x}, Y: {hoverCoords.y})
             </div>
           )}
         </div>
 
         {/* Canvas Element */}
-        <div className={`relative w-full aspect-[16/9] max-h-[460px] rounded-2xl overflow-hidden border ${isLight ? 'border-slate-200' : 'border-slate-800'}`}>
+        <div
+          className={`relative w-full aspect-[16/9] max-h-[460px] rounded-2xl overflow-hidden border ${isLight ? 'border-slate-200' : 'border-slate-800'}`}
+        >
           <canvas
             ref={canvasRef}
             width={800}
@@ -422,7 +436,9 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
           <h4 className={`text-sm font-bold ${textHeading} mb-3`}>Function Evaluation Table</h4>
           <table className="w-full text-xs font-mono border-collapse">
             <thead>
-              <tr className={`border-b ${isLight ? 'border-slate-200 text-slate-500' : 'border-slate-800 text-slate-400'}`}>
+              <tr
+                className={`border-b ${isLight ? 'border-slate-200 text-slate-500' : 'border-slate-800 text-slate-400'}`}
+              >
                 <th className="p-2 text-left">x</th>
                 {functions.map((fn) => (
                   <th key={fn.id} className="p-2 text-left" style={{ color: fn.color }}>
@@ -433,8 +449,13 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
             </thead>
             <tbody>
               {tableXValues.map((xv) => (
-                <tr key={xv} className={`border-b ${isLight ? 'border-slate-100 hover:bg-slate-50 text-slate-800' : 'border-slate-800/40 hover:bg-slate-800/40 text-slate-300'}`}>
-                  <td className={`p-2 font-bold ${isLight ? 'text-slate-900' : 'text-slate-100'}`}>{xv.toFixed(2)}</td>
+                <tr
+                  key={xv}
+                  className={`border-b ${isLight ? 'border-slate-100 hover:bg-slate-50 text-slate-800' : 'border-slate-800/40 hover:bg-slate-800/40 text-slate-300'}`}
+                >
+                  <td className={`p-2 font-bold ${isLight ? 'text-slate-900' : 'text-slate-100'}`}>
+                    {xv.toFixed(2)}
+                  </td>
                   {functions.map((fn) => {
                     const yv = fn.expression ? evalFuncAtX(fn.expression, xv) : null;
                     return (

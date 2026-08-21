@@ -155,7 +155,9 @@ const CATEGORY_UNITS: Record<UnitCategory, { base: string; units: Record<string,
   },
 };
 
-export const ConverterCalculator: React.FC<ConverterCalculatorProps> = ({ settings: _settings }) => {
+export const ConverterCalculator: React.FC<ConverterCalculatorProps> = ({
+  settings: _settings,
+}) => {
   const [category, setCategory] = useState<UnitCategory>('Length');
   const [fromUnit, setFromUnit] = useState<string>('m');
   const [toUnit, setToUnit] = useState<string>('ft');
@@ -220,9 +222,10 @@ export const ConverterCalculator: React.FC<ConverterCalculatorProps> = ({ settin
             onClick={() => changeCategory(cat)}
             className={`
               px-4 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border shadow-sm
-              ${category === cat
-                ? 'bg-sky-600 text-white border-sky-500 shadow-sky-600/20'
-                : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-white'
+              ${
+                category === cat
+                  ? 'bg-sky-600 text-white border-sky-500 shadow-sky-600/20'
+                  : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-white'
               }
             `}
           >
@@ -236,7 +239,9 @@ export const ConverterCalculator: React.FC<ConverterCalculatorProps> = ({ settin
         <div className="grid grid-cols-1 md:grid-cols-5 items-center gap-4">
           {/* Source Input */}
           <div className="md:col-span-2 flex flex-col gap-2">
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">From</label>
+            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+              From
+            </label>
             <input
               type="number"
               value={inputValue}

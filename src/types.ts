@@ -1,20 +1,20 @@
-export type CalcMode = 
-  | 'basic' 
-  | 'scientific' 
-  | 'programmer' 
-  | 'graphing' 
-  | 'converter' 
-  | 'finance' 
-  | 'matrix' 
-  | 'statistics' 
+export type CalcMode =
+  | 'basic'
+  | 'scientific'
+  | 'programmer'
+  | 'graphing'
+  | 'converter'
+  | 'finance'
+  | 'matrix'
+  | 'statistics'
   | 'equation'
   | 'calculus'
   | 'datetime'
   | 'health'
   | 'geometry'
   | 'fractions'
-  | 'formulas' 
-  | 'history' 
+  | 'formulas'
+  | 'history'
   | 'settings';
 
 export type AngleMode = 'DEG' | 'RAD' | 'GRAD';
@@ -44,16 +44,16 @@ export interface AppSettings {
   autoSaveHistory: boolean;
 }
 
-export type UnitCategory = 
-  | 'Length' 
-  | 'Weight' 
-  | 'Temperature' 
-  | 'Speed' 
-  | 'Storage' 
-  | 'Time' 
-  | 'Area' 
-  | 'Volume' 
-  | 'Pressure' 
+export type UnitCategory =
+  | 'Length'
+  | 'Weight'
+  | 'Temperature'
+  | 'Speed'
+  | 'Storage'
+  | 'Time'
+  | 'Area'
+  | 'Volume'
+  | 'Pressure'
   | 'Energy'
   | 'Power'
   | 'Data Rate'

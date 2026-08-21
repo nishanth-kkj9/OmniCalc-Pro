@@ -5,7 +5,13 @@ export function formatNumberWithSettings(
   settings?: Partial<AppSettings>
 ): string {
   if (typeof val === 'string') {
-    if (val === 'Error' || val === 'NaN' || val === 'Infinity' || val === '-Infinity' || val === '') {
+    if (
+      val === 'Error' ||
+      val === 'NaN' ||
+      val === 'Infinity' ||
+      val === '-Infinity' ||
+      val === ''
+    ) {
       return val;
     }
     const parsed = Number(val);
@@ -60,15 +66,18 @@ export function formatNumberWithSettings(
   return decimalPart ? `${integerPart}.${decimalPart}` : integerPart;
 }
 
-export const ACCENT_COLOR_MAP: Record<string, {
-  name: string;
-  primary: string;
-  hover: string;
-  ring: string;
-  bgLight: string;
-  border: string;
-  text: string;
-}> = {
+export const ACCENT_COLOR_MAP: Record<
+  string,
+  {
+    name: string;
+    primary: string;
+    hover: string;
+    ring: string;
+    bgLight: string;
+    border: string;
+    text: string;
+  }
+> = {
   sky: {
     name: 'Sky Blue',
     primary: '#0284c7',

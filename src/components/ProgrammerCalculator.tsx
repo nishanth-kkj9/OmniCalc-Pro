@@ -6,7 +6,9 @@ interface ProgrammerCalculatorProps {
   settings?: AppSettings;
 }
 
-export const ProgrammerCalculator: React.FC<ProgrammerCalculatorProps> = ({ settings: _settings }) => {
+export const ProgrammerCalculator: React.FC<ProgrammerCalculatorProps> = ({
+  settings: _settings,
+}) => {
   const [val, setVal] = useState<bigint>(0n);
   const [activeBase, setActiveBase] = useState<NumberBase>('DEC');
   const [wordSize, setWordSize] = useState<BitWordSize>(64);
@@ -74,7 +76,7 @@ export const ProgrammerCalculator: React.FC<ProgrammerCalculatorProps> = ({ sett
 
   const handleOp = (op: string) => {
     if (op === 'NOT') {
-      const res = (~val) & getMask(wordSize);
+      const res = ~val & getMask(wordSize);
       setVal(res);
       updateBufferFromVal(res, activeBase);
       addHistory(`NOT(${decString})`, res.toString(10), 'programmer');
@@ -92,15 +94,32 @@ export const ProgrammerCalculator: React.FC<ProgrammerCalculatorProps> = ({ sett
     const b = val;
 
     switch (operator) {
-      case 'AND': res = a & b; break;
-      case 'OR': res = a | b; break;
-      case 'XOR': res = a ^ b; break;
-      case 'NAND': res = ~(a & b); break;
-      case 'NOR': res = ~(a | b); break;
-      case 'XNOR': res = ~(a ^ b); break;
-      case 'LSH': res = a << b; break;
-      case 'RSH': res = a >> b; break;
-      default: return;
+      case 'AND':
+        res = a & b;
+        break;
+      case 'OR':
+        res = a | b;
+        break;
+      case 'XOR':
+        res = a ^ b;
+        break;
+      case 'NAND':
+        res = ~(a & b);
+        break;
+      case 'NOR':
+        res = ~(a | b);
+        break;
+      case 'XNOR':
+        res = ~(a ^ b);
+        break;
+      case 'LSH':
+        res = a << b;
+        break;
+      case 'RSH':
+        res = a >> b;
+        break;
+      default:
+        return;
     }
 
     res = res & getMask(wordSize);
@@ -119,7 +138,8 @@ export const ProgrammerCalculator: React.FC<ProgrammerCalculatorProps> = ({ sett
     return false;
   };
 
-  const btnClass = "h-11 font-mono font-bold text-sm sm:text-base rounded-xl transition-all duration-150 active:scale-95 flex items-center justify-center select-none shadow-sm disabled:opacity-30 disabled:pointer-events-none";
+  const btnClass =
+    'h-11 font-mono font-bold text-sm sm:text-base rounded-xl transition-all duration-150 active:scale-95 flex items-center justify-center select-none shadow-sm disabled:opacity-30 disabled:pointer-events-none';
 
   return (
     <div className="max-w-4xl mx-auto w-full p-4 flex flex-col gap-5">
@@ -136,9 +156,10 @@ export const ProgrammerCalculator: React.FC<ProgrammerCalculatorProps> = ({ sett
             onClick={() => switchBase(base)}
             className={`
               flex items-center justify-between px-3 py-2 rounded-xl cursor-pointer transition-all border
-              ${activeBase === base 
-                ? 'bg-sky-950/80 border-sky-500/60 text-sky-300 shadow-sm' 
-                : 'bg-slate-800/40 border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+              ${
+                activeBase === base
+                  ? 'bg-sky-950/80 border-sky-500/60 text-sky-300 shadow-sm'
+                  : 'bg-slate-800/40 border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-slate-200'
               }
             `}
           >
@@ -194,9 +215,10 @@ export const ProgrammerCalculator: React.FC<ProgrammerCalculatorProps> = ({ sett
                 onClick={() => toggleBit(bitPos)}
                 className={`
                   flex flex-col items-center justify-center p-1 rounded-lg border text-xs font-mono transition-all duration-100
-                  ${isBitSet 
-                    ? 'bg-sky-500 text-slate-950 font-bold border-sky-400 shadow-sm shadow-sky-500/30' 
-                    : 'bg-slate-800/80 text-slate-500 border-slate-700/60 hover:bg-slate-700 hover:text-slate-300'
+                  ${
+                    isBitSet
+                      ? 'bg-sky-500 text-slate-950 font-bold border-sky-400 shadow-sm shadow-sky-500/30'
+                      : 'bg-slate-800/80 text-slate-500 border-slate-700/60 hover:bg-slate-700 hover:text-slate-300'
                   }
                 `}
                 title={`Bit ${bitPos} (Value: ${1n << BigInt(bitPos)})`}
@@ -235,25 +257,110 @@ export const ProgrammerCalculator: React.FC<ProgrammerCalculatorProps> = ({ sett
         ))}
 
         {/* Row 3: Numbers 7 8 9 + Controls */}
-        <button disabled={isKeyDisabled('7')} onClick={() => handleDigit('7')} className={`${btnClass} bg-slate-800/90 text-slate-100 border border-slate-700/50 hover:bg-slate-700`}>7</button>
-        <button disabled={isKeyDisabled('8')} onClick={() => handleDigit('8')} className={`${btnClass} bg-slate-800/90 text-slate-100 border border-slate-700/50 hover:bg-slate-700`}>8</button>
-        <button disabled={isKeyDisabled('9')} onClick={() => handleDigit('9')} className={`${btnClass} bg-slate-800/90 text-slate-100 border border-slate-700/50 hover:bg-slate-700`}>9</button>
-        <button onClick={() => handleOp('NAND')} className={`${btnClass} bg-indigo-950/80 text-indigo-300 border border-indigo-800/60 hover:bg-indigo-900`}>NAND</button>
-        <button onClick={handleClear} className={`${btnClass} col-span-2 bg-rose-500/20 text-rose-400 border border-rose-500/30 hover:bg-rose-500/30`}>CLEAR</button>
+        <button
+          disabled={isKeyDisabled('7')}
+          onClick={() => handleDigit('7')}
+          className={`${btnClass} bg-slate-800/90 text-slate-100 border border-slate-700/50 hover:bg-slate-700`}
+        >
+          7
+        </button>
+        <button
+          disabled={isKeyDisabled('8')}
+          onClick={() => handleDigit('8')}
+          className={`${btnClass} bg-slate-800/90 text-slate-100 border border-slate-700/50 hover:bg-slate-700`}
+        >
+          8
+        </button>
+        <button
+          disabled={isKeyDisabled('9')}
+          onClick={() => handleDigit('9')}
+          className={`${btnClass} bg-slate-800/90 text-slate-100 border border-slate-700/50 hover:bg-slate-700`}
+        >
+          9
+        </button>
+        <button
+          onClick={() => handleOp('NAND')}
+          className={`${btnClass} bg-indigo-950/80 text-indigo-300 border border-indigo-800/60 hover:bg-indigo-900`}
+        >
+          NAND
+        </button>
+        <button
+          onClick={handleClear}
+          className={`${btnClass} col-span-2 bg-rose-500/20 text-rose-400 border border-rose-500/30 hover:bg-rose-500/30`}
+        >
+          CLEAR
+        </button>
 
         {/* Row 4: Numbers 4 5 6 */}
-        <button disabled={isKeyDisabled('4')} onClick={() => handleDigit('4')} className={`${btnClass} bg-slate-800/90 text-slate-100 border border-slate-700/50 hover:bg-slate-700`}>4</button>
-        <button disabled={isKeyDisabled('5')} onClick={() => handleDigit('5')} className={`${btnClass} bg-slate-800/90 text-slate-100 border border-slate-700/50 hover:bg-slate-700`}>5</button>
-        <button disabled={isKeyDisabled('6')} onClick={() => handleDigit('6')} className={`${btnClass} bg-slate-800/90 text-slate-100 border border-slate-700/50 hover:bg-slate-700`}>6</button>
-        <button onClick={() => handleOp('NOR')} className={`${btnClass} bg-indigo-950/80 text-indigo-300 border border-indigo-800/60 hover:bg-indigo-900`}>NOR</button>
-        <button onClick={() => handleOp('XNOR')} className={`${btnClass} col-span-2 bg-indigo-950/80 text-indigo-300 border border-indigo-800/60 hover:bg-indigo-900`}>XNOR</button>
+        <button
+          disabled={isKeyDisabled('4')}
+          onClick={() => handleDigit('4')}
+          className={`${btnClass} bg-slate-800/90 text-slate-100 border border-slate-700/50 hover:bg-slate-700`}
+        >
+          4
+        </button>
+        <button
+          disabled={isKeyDisabled('5')}
+          onClick={() => handleDigit('5')}
+          className={`${btnClass} bg-slate-800/90 text-slate-100 border border-slate-700/50 hover:bg-slate-700`}
+        >
+          5
+        </button>
+        <button
+          disabled={isKeyDisabled('6')}
+          onClick={() => handleDigit('6')}
+          className={`${btnClass} bg-slate-800/90 text-slate-100 border border-slate-700/50 hover:bg-slate-700`}
+        >
+          6
+        </button>
+        <button
+          onClick={() => handleOp('NOR')}
+          className={`${btnClass} bg-indigo-950/80 text-indigo-300 border border-indigo-800/60 hover:bg-indigo-900`}
+        >
+          NOR
+        </button>
+        <button
+          onClick={() => handleOp('XNOR')}
+          className={`${btnClass} col-span-2 bg-indigo-950/80 text-indigo-300 border border-indigo-800/60 hover:bg-indigo-900`}
+        >
+          XNOR
+        </button>
 
         {/* Row 5: Numbers 1 2 3 */}
-        <button disabled={isKeyDisabled('1')} onClick={() => handleDigit('1')} className={`${btnClass} bg-slate-800/90 text-slate-100 border border-slate-700/50 hover:bg-slate-700`}>1</button>
-        <button disabled={isKeyDisabled('2')} onClick={() => handleDigit('2')} className={`${btnClass} bg-slate-800/90 text-slate-100 border border-slate-700/50 hover:bg-slate-700`}>2</button>
-        <button disabled={isKeyDisabled('3')} onClick={() => handleDigit('3')} className={`${btnClass} bg-slate-800/90 text-slate-100 border border-slate-700/50 hover:bg-slate-700`}>3</button>
-        <button disabled={isKeyDisabled('0')} onClick={() => handleDigit('0')} className={`${btnClass} col-span-2 bg-slate-800/90 text-slate-100 border border-slate-700/50 hover:bg-slate-700`}>0</button>
-        <button onClick={handleEquals} className={`${btnClass} bg-gradient-to-r from-sky-500 to-indigo-600 text-white font-bold text-lg hover:from-sky-400 hover:to-indigo-500 shadow-md shadow-sky-500/20`}>=</button>
+        <button
+          disabled={isKeyDisabled('1')}
+          onClick={() => handleDigit('1')}
+          className={`${btnClass} bg-slate-800/90 text-slate-100 border border-slate-700/50 hover:bg-slate-700`}
+        >
+          1
+        </button>
+        <button
+          disabled={isKeyDisabled('2')}
+          onClick={() => handleDigit('2')}
+          className={`${btnClass} bg-slate-800/90 text-slate-100 border border-slate-700/50 hover:bg-slate-700`}
+        >
+          2
+        </button>
+        <button
+          disabled={isKeyDisabled('3')}
+          onClick={() => handleDigit('3')}
+          className={`${btnClass} bg-slate-800/90 text-slate-100 border border-slate-700/50 hover:bg-slate-700`}
+        >
+          3
+        </button>
+        <button
+          disabled={isKeyDisabled('0')}
+          onClick={() => handleDigit('0')}
+          className={`${btnClass} col-span-2 bg-slate-800/90 text-slate-100 border border-slate-700/50 hover:bg-slate-700`}
+        >
+          0
+        </button>
+        <button
+          onClick={handleEquals}
+          className={`${btnClass} bg-gradient-to-r from-sky-500 to-indigo-600 text-white font-bold text-lg hover:from-sky-400 hover:to-indigo-500 shadow-md shadow-sky-500/20`}
+        >
+          =
+        </button>
       </div>
     </div>
   );

@@ -38,7 +38,8 @@ export const HistoryPanel: React.FC<HistoryPanelProps> = ({ onSelectCalculation,
   };
 
   const exportJSON = () => {
-    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(historyItems, null, 2));
+    const dataStr =
+      'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(historyItems, null, 2));
     const dlAnchorElem = document.createElement('a');
     dlAnchorElem.setAttribute('href', dataStr);
     dlAnchorElem.setAttribute('download', `omnicalc-history-${Date.now()}.json`);
@@ -56,32 +57,36 @@ export const HistoryPanel: React.FC<HistoryPanelProps> = ({ onSelectCalculation,
   const cardBg = isLight
     ? 'bg-white border-slate-200 text-slate-900 shadow-sm'
     : isOled
-    ? 'bg-zinc-950 border-zinc-800 text-white'
-    : 'bg-slate-900 border-slate-800 text-slate-100 shadow-xl';
+      ? 'bg-zinc-950 border-zinc-800 text-white'
+      : 'bg-slate-900 border-slate-800 text-slate-100 shadow-xl';
 
   const inputBg = isLight
     ? 'bg-slate-50 border-slate-200 text-slate-900'
     : isOled
-    ? 'bg-zinc-900 border-zinc-800 text-white'
-    : 'bg-slate-800/80 border-slate-700/80 text-slate-100';
+      ? 'bg-zinc-900 border-zinc-800 text-white'
+      : 'bg-slate-800/80 border-slate-700/80 text-slate-100';
 
   const rowBg = isLight
     ? 'bg-white border-slate-200 hover:border-slate-300 text-slate-900'
     : isOled
-    ? 'bg-zinc-950 border-zinc-800/80 hover:border-zinc-700 text-white'
-    : 'bg-slate-900 border-slate-800/80 hover:border-slate-700 text-slate-100';
+      ? 'bg-zinc-950 border-zinc-800/80 hover:border-zinc-700 text-white'
+      : 'bg-slate-900 border-slate-800/80 hover:border-slate-700 text-slate-100';
 
   const btnSecondary = isLight
     ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-300'
     : isOled
-    ? 'bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border-zinc-800'
-    : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700/80';
+      ? 'bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border-zinc-800'
+      : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700/80';
 
   return (
     <div className="max-w-4xl mx-auto w-full p-4 flex flex-col gap-5">
       {/* Search & Filter Header */}
-      <div className={`${cardBg} border rounded-3xl p-4 flex flex-wrap items-center justify-between gap-3`}>
-        <div className={`flex items-center gap-2 flex-1 min-w-[200px] border px-3 py-2 rounded-2xl ${inputBg}`}>
+      <div
+        className={`${cardBg} border rounded-3xl p-4 flex flex-wrap items-center justify-between gap-3`}
+      >
+        <div
+          className={`flex items-center gap-2 flex-1 min-w-[200px] border px-3 py-2 rounded-2xl ${inputBg}`}
+        >
           <Search className={`w-4 h-4 ${isLight ? 'text-slate-400' : 'text-slate-400'}`} />
           <input
             type="text"
@@ -136,21 +141,32 @@ export const HistoryPanel: React.FC<HistoryPanelProps> = ({ onSelectCalculation,
             >
               <div className="flex flex-col gap-1 overflow-hidden">
                 <div className="flex items-center gap-2">
-                  <span 
+                  <span
                     className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border"
                     style={{
-                      backgroundColor: isLight ? 'rgba(2, 132, 199, 0.1)' : 'rgba(2, 132, 199, 0.2)',
+                      backgroundColor: isLight
+                        ? 'rgba(2, 132, 199, 0.1)'
+                        : 'rgba(2, 132, 199, 0.2)',
                       color: 'var(--accent)',
-                      borderColor: 'var(--accent)'
+                      borderColor: 'var(--accent)',
                     }}
                   >
                     {item.mode}
                   </span>
-                  <span className={`text-[10px] font-mono ${isLight ? 'text-slate-400' : 'text-slate-500'}`}>
-                    {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  <span
+                    className={`text-[10px] font-mono ${isLight ? 'text-slate-400' : 'text-slate-500'}`}
+                  >
+                    {new Date(item.timestamp).toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
                   </span>
                 </div>
-                <div className={`text-sm font-mono truncate ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>{item.expression}</div>
+                <div
+                  className={`text-sm font-mono truncate ${isLight ? 'text-slate-600' : 'text-slate-400'}`}
+                >
+                  {item.expression}
+                </div>
                 <div className="text-lg font-mono font-bold flex items-center gap-2">
                   <span>=</span>
                   <span style={{ color: 'var(--accent)' }}>{item.result}</span>
@@ -162,7 +178,9 @@ export const HistoryPanel: React.FC<HistoryPanelProps> = ({ onSelectCalculation,
                   <button
                     onClick={() => onSelectCalculation(item.expression)}
                     className={`p-2 rounded-xl transition-colors ${
-                      isLight ? 'text-slate-500 hover:text-sky-600 hover:bg-slate-100' : 'text-slate-400 hover:text-sky-400 hover:bg-slate-800'
+                      isLight
+                        ? 'text-slate-500 hover:text-sky-600 hover:bg-slate-100'
+                        : 'text-slate-400 hover:text-sky-400 hover:bg-slate-800'
                     }`}
                     title="Open in Calculator"
                   >
@@ -172,16 +190,24 @@ export const HistoryPanel: React.FC<HistoryPanelProps> = ({ onSelectCalculation,
                 <button
                   onClick={() => copyItem(item)}
                   className={`p-2 rounded-xl transition-colors ${
-                    isLight ? 'text-slate-500 hover:text-slate-900 hover:bg-slate-100' : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                    isLight
+                      ? 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
+                      : 'text-slate-400 hover:text-white hover:bg-slate-800'
                   }`}
                   title="Copy Entry"
                 >
-                  {copiedId === item.id ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+                  {copiedId === item.id ? (
+                    <Check className="w-4 h-4 text-emerald-500" />
+                  ) : (
+                    <Copy className="w-4 h-4" />
+                  )}
                 </button>
                 <button
                   onClick={() => handleDelete(item.id)}
                   className={`p-2 rounded-xl transition-colors ${
-                    isLight ? 'text-slate-400 hover:text-rose-500 hover:bg-slate-100' : 'text-slate-500 hover:text-rose-400 hover:bg-slate-800'
+                    isLight
+                      ? 'text-slate-400 hover:text-rose-500 hover:bg-slate-100'
+                      : 'text-slate-500 hover:text-rose-400 hover:bg-slate-800'
                   }`}
                   title="Delete Entry"
                 >

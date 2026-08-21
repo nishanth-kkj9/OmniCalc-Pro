@@ -7,7 +7,9 @@ interface EquationSolverProps {
 }
 
 export const EquationSolver: React.FC<EquationSolverProps> = ({ settings }) => {
-  const [solverType, setSolverType] = useState<'quadratic' | 'cubic' | 'linear2' | 'linear3'>('quadratic');
+  const [solverType, setSolverType] = useState<'quadratic' | 'cubic' | 'linear2' | 'linear3'>(
+    'quadratic'
+  );
   const [copied, setCopied] = useState<string | null>(null);
 
   // Quadratic State (ax^2 + bx + c = 0)
@@ -23,15 +25,28 @@ export const EquationSolver: React.FC<EquationSolverProps> = ({ settings }) => {
 
   // Linear 2x2
   const [l2, setL2] = useState({
-    a1: '2', b1: '3', c1: '13',
-    a2: '1', b2: '-2', c2: '-4',
+    a1: '2',
+    b1: '3',
+    c1: '13',
+    a2: '1',
+    b2: '-2',
+    c2: '-4',
   });
 
   // Linear 3x3
   const [l3, setL3] = useState({
-    a1: '1', b1: '2', c1: '3', d1: '14',
-    a2: '2', b2: '-1', c2: '1', d2: '3',
-    a3: '3', b3: '1', c3: '-1', d3: '2',
+    a1: '1',
+    b1: '2',
+    c1: '3',
+    d1: '14',
+    a2: '2',
+    b2: '-1',
+    c2: '1',
+    d2: '3',
+    a3: '3',
+    b3: '1',
+    c3: '-1',
+    d3: '2',
   });
 
   const handleCopy = (id: string, text: string) => {
@@ -62,7 +77,10 @@ export const EquationSolver: React.FC<EquationSolverProps> = ({ settings }) => {
       return {
         type: 'linear',
         roots: [`x = ${formatNum(x)}`],
-        steps: [`Reduced to linear equation: ${b}x + ${c} = 0`, `x = -(${c}) / ${b} = ${formatNum(x)}`],
+        steps: [
+          `Reduced to linear equation: ${b}x + ${c} = 0`,
+          `x = -(${c}) / ${b} = ${formatNum(x)}`,
+        ],
       };
     }
 
@@ -184,8 +202,12 @@ export const EquationSolver: React.FC<EquationSolverProps> = ({ settings }) => {
 
   // Solve 2x2
   const solveLinear2x2 = () => {
-    const a1 = parseFloat(l2.a1), b1 = parseFloat(l2.b1), c1 = parseFloat(l2.c1);
-    const a2 = parseFloat(l2.a2), b2 = parseFloat(l2.b2), c2 = parseFloat(l2.c2);
+    const a1 = parseFloat(l2.a1),
+      b1 = parseFloat(l2.b1),
+      c1 = parseFloat(l2.c1);
+    const a2 = parseFloat(l2.a2),
+      b2 = parseFloat(l2.b2),
+      c2 = parseFloat(l2.c2);
 
     if ([a1, b1, c1, a2, b2, c2].some(isNaN)) return null;
 
@@ -215,21 +237,34 @@ export const EquationSolver: React.FC<EquationSolverProps> = ({ settings }) => {
 
   // Solve 3x3 Determinant
   const det3 = (
-    m11: number, m12: number, m13: number,
-    m21: number, m22: number, m23: number,
-    m31: number, m32: number, m33: number
+    m11: number,
+    m12: number,
+    m13: number,
+    m21: number,
+    m22: number,
+    m23: number,
+    m31: number,
+    m32: number,
+    m33: number
   ) => {
     return (
-      m11 * (m22 * m33 - m23 * m32) -
-      m12 * (m21 * m33 - m23 * m31) +
-      m13 * (m21 * m32 - m22 * m31)
+      m11 * (m22 * m33 - m23 * m32) - m12 * (m21 * m33 - m23 * m31) + m13 * (m21 * m32 - m22 * m31)
     );
   };
 
   const solveLinear3x3 = () => {
-    const a1 = parseFloat(l3.a1), b1 = parseFloat(l3.b1), c1 = parseFloat(l3.c1), d1 = parseFloat(l3.d1);
-    const a2 = parseFloat(l3.a2), b2 = parseFloat(l3.b2), c2 = parseFloat(l3.c2), d2 = parseFloat(l3.d2);
-    const a3 = parseFloat(l3.a3), b3 = parseFloat(l3.b3), c3 = parseFloat(l3.c3), d3 = parseFloat(l3.d3);
+    const a1 = parseFloat(l3.a1),
+      b1 = parseFloat(l3.b1),
+      c1 = parseFloat(l3.c1),
+      d1 = parseFloat(l3.d1);
+    const a2 = parseFloat(l3.a2),
+      b2 = parseFloat(l3.b2),
+      c2 = parseFloat(l3.c2),
+      d2 = parseFloat(l3.d2);
+    const a3 = parseFloat(l3.a3),
+      b3 = parseFloat(l3.b3),
+      c3 = parseFloat(l3.c3),
+      d3 = parseFloat(l3.d3);
 
     if ([a1, b1, c1, d1, a2, b2, c2, d2, a3, b3, c3, d3].some(isNaN)) return null;
 
@@ -281,9 +316,10 @@ export const EquationSolver: React.FC<EquationSolverProps> = ({ settings }) => {
             onClick={() => setSolverType(tab.id as any)}
             className={`
               px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border shadow-sm
-              ${solverType === tab.id
-                ? 'bg-sky-600 text-white border-sky-500 shadow-sky-600/20'
-                : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-white'
+              ${
+                solverType === tab.id
+                  ? 'bg-sky-600 text-white border-sky-500 shadow-sky-600/20'
+                  : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-white'
               }
             `}
           >
@@ -303,7 +339,11 @@ export const EquationSolver: React.FC<EquationSolverProps> = ({ settings }) => {
                 <p className="text-xs text-slate-400">Standard form: ax² + bx + c = 0</p>
               </div>
               <button
-                onClick={() => { setQuadA('1'); setQuadB('-5'); setQuadC('6'); }}
+                onClick={() => {
+                  setQuadA('1');
+                  setQuadB('-5');
+                  setQuadC('6');
+                }}
                 className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs flex items-center gap-1.5 border border-slate-700"
                 title="Reset to example"
               >
@@ -355,19 +395,28 @@ export const EquationSolver: React.FC<EquationSolverProps> = ({ settings }) => {
                 ) : (
                   <>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Calculated Roots</span>
+                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                        Calculated Roots
+                      </span>
                       <button
                         onClick={() => handleCopy('quad', (quadRes.roots || []).join(', '))}
                         className="text-xs text-sky-400 hover:text-sky-300 flex items-center gap-1"
                       >
-                        {copied === 'quad' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                        {copied === 'quad' ? (
+                          <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        ) : (
+                          <Copy className="w-3.5 h-3.5" />
+                        )}
                         {copied === 'quad' ? 'Copied' : 'Copy'}
                       </button>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {quadRes.roots?.map((root, i) => (
-                        <div key={i} className="p-3.5 bg-slate-900 border border-slate-800 rounded-xl font-mono text-lg font-bold text-emerald-400">
+                        <div
+                          key={i}
+                          className="p-3.5 bg-slate-900 border border-slate-800 rounded-xl font-mono text-lg font-bold text-emerald-400"
+                        >
                           {root}
                         </div>
                       ))}
@@ -382,7 +431,9 @@ export const EquationSolver: React.FC<EquationSolverProps> = ({ settings }) => {
 
                     {/* Step by step */}
                     <div className="border-t border-slate-800 pt-3 flex flex-col gap-1.5">
-                      <span className="text-xs font-bold text-slate-400">Step-by-Step Breakdown:</span>
+                      <span className="text-xs font-bold text-slate-400">
+                        Step-by-Step Breakdown:
+                      </span>
                       {quadRes.steps?.map((step, idx) => (
                         <div key={idx} className="text-xs font-mono text-slate-300">
                           • {step}
@@ -405,7 +456,12 @@ export const EquationSolver: React.FC<EquationSolverProps> = ({ settings }) => {
                 <p className="text-xs text-slate-400">Standard form: ax³ + bx² + cx + d = 0</p>
               </div>
               <button
-                onClick={() => { setCubA('1'); setCubB('-6'); setCubC('11'); setCubD('-6'); }}
+                onClick={() => {
+                  setCubA('1');
+                  setCubB('-6');
+                  setCubC('11');
+                  setCubD('-6');
+                }}
                 className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs flex items-center gap-1.5 border border-slate-700"
               >
                 <RefreshCw className="w-3.5 h-3.5" /> Example
@@ -442,19 +498,28 @@ export const EquationSolver: React.FC<EquationSolverProps> = ({ settings }) => {
                 ) : (
                   <>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">All 3 Roots</span>
+                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                        All 3 Roots
+                      </span>
                       <button
                         onClick={() => handleCopy('cub', (cubRes.roots || []).join(', '))}
                         className="text-xs text-sky-400 hover:text-sky-300 flex items-center gap-1"
                       >
-                        {copied === 'cub' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                        {copied === 'cub' ? (
+                          <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        ) : (
+                          <Copy className="w-3.5 h-3.5" />
+                        )}
                         {copied === 'cub' ? 'Copied' : 'Copy'}
                       </button>
                     </div>
 
                     <div className="grid grid-cols-1 gap-2.5">
                       {cubRes.roots?.map((root, i) => (
-                        <div key={i} className="p-3 bg-slate-900 border border-slate-800 rounded-xl font-mono text-base font-bold text-emerald-400">
+                        <div
+                          key={i}
+                          className="p-3 bg-slate-900 border border-slate-800 rounded-xl font-mono text-base font-bold text-emerald-400"
+                        >
                           {root}
                         </div>
                       ))}
@@ -476,7 +541,9 @@ export const EquationSolver: React.FC<EquationSolverProps> = ({ settings }) => {
           <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-base font-bold text-slate-100">2×2 System of Linear Equations</h3>
+                <h3 className="text-base font-bold text-slate-100">
+                  2×2 System of Linear Equations
+                </h3>
                 <p className="text-xs text-slate-400">Solved via Cramer's Rule determinants</p>
               </div>
               <button
@@ -553,16 +620,22 @@ export const EquationSolver: React.FC<EquationSolverProps> = ({ settings }) => {
                     <div className="grid grid-cols-2 gap-3">
                       <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col">
                         <span className="text-xs text-slate-400">Value of x</span>
-                        <span className="text-2xl font-mono font-bold text-emerald-400">x = {l2Res.x}</span>
+                        <span className="text-2xl font-mono font-bold text-emerald-400">
+                          x = {l2Res.x}
+                        </span>
                       </div>
                       <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col">
                         <span className="text-xs text-slate-400">Value of y</span>
-                        <span className="text-2xl font-mono font-bold text-emerald-400">y = {l2Res.y}</span>
+                        <span className="text-2xl font-mono font-bold text-emerald-400">
+                          y = {l2Res.y}
+                        </span>
                       </div>
                     </div>
                     <div className="text-xs text-slate-400 flex items-center justify-between border-t border-slate-800 pt-3">
                       <span>Cramer Determinants:</span>
-                      <span className="font-mono text-slate-300">D = {l2Res.D}, Dx = {l2Res.Dx}, Dy = {l2Res.Dy}</span>
+                      <span className="font-mono text-slate-300">
+                        D = {l2Res.D}, Dx = {l2Res.Dx}, Dy = {l2Res.Dy}
+                      </span>
                     </div>
                   </>
                 )}
@@ -576,15 +649,30 @@ export const EquationSolver: React.FC<EquationSolverProps> = ({ settings }) => {
           <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-base font-bold text-slate-100">3×3 System of Linear Equations</h3>
-                <p className="text-xs text-slate-400">Enter coefficients for x, y, z and constants</p>
+                <h3 className="text-base font-bold text-slate-100">
+                  3×3 System of Linear Equations
+                </h3>
+                <p className="text-xs text-slate-400">
+                  Enter coefficients for x, y, z and constants
+                </p>
               </div>
               <button
-                onClick={() => setL3({
-                  a1: '1', b1: '2', c1: '3', d1: '14',
-                  a2: '2', b2: '-1', c2: '1', d2: '3',
-                  a3: '3', b3: '1', c3: '-1', d3: '2',
-                })}
+                onClick={() =>
+                  setL3({
+                    a1: '1',
+                    b1: '2',
+                    c1: '3',
+                    d1: '14',
+                    a2: '2',
+                    b2: '-1',
+                    c2: '1',
+                    d2: '3',
+                    a3: '3',
+                    b3: '1',
+                    c3: '-1',
+                    d3: '2',
+                  })
+                }
                 className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs flex items-center gap-1.5 border border-slate-700"
               >
                 <RefreshCw className="w-3.5 h-3.5" /> Example
@@ -593,26 +681,98 @@ export const EquationSolver: React.FC<EquationSolverProps> = ({ settings }) => {
 
             {/* Row 1 */}
             <div className="grid grid-cols-4 gap-2.5 items-center">
-              <input type="number" placeholder="a1" value={l3.a1} onChange={(e) => setL3({ ...l3, a1: e.target.value })} className="bg-slate-800 border border-slate-700 rounded-xl p-2.5 font-mono text-sm font-bold text-slate-100" />
-              <input type="number" placeholder="b1" value={l3.b1} onChange={(e) => setL3({ ...l3, b1: e.target.value })} className="bg-slate-800 border border-slate-700 rounded-xl p-2.5 font-mono text-sm font-bold text-slate-100" />
-              <input type="number" placeholder="c1" value={l3.c1} onChange={(e) => setL3({ ...l3, c1: e.target.value })} className="bg-slate-800 border border-slate-700 rounded-xl p-2.5 font-mono text-sm font-bold text-slate-100" />
-              <input type="number" placeholder="= d1" value={l3.d1} onChange={(e) => setL3({ ...l3, d1: e.target.value })} className="bg-slate-800 border border-sky-500/50 rounded-xl p-2.5 font-mono text-sm font-bold text-sky-300" />
+              <input
+                type="number"
+                placeholder="a1"
+                value={l3.a1}
+                onChange={(e) => setL3({ ...l3, a1: e.target.value })}
+                className="bg-slate-800 border border-slate-700 rounded-xl p-2.5 font-mono text-sm font-bold text-slate-100"
+              />
+              <input
+                type="number"
+                placeholder="b1"
+                value={l3.b1}
+                onChange={(e) => setL3({ ...l3, b1: e.target.value })}
+                className="bg-slate-800 border border-slate-700 rounded-xl p-2.5 font-mono text-sm font-bold text-slate-100"
+              />
+              <input
+                type="number"
+                placeholder="c1"
+                value={l3.c1}
+                onChange={(e) => setL3({ ...l3, c1: e.target.value })}
+                className="bg-slate-800 border border-slate-700 rounded-xl p-2.5 font-mono text-sm font-bold text-slate-100"
+              />
+              <input
+                type="number"
+                placeholder="= d1"
+                value={l3.d1}
+                onChange={(e) => setL3({ ...l3, d1: e.target.value })}
+                className="bg-slate-800 border border-sky-500/50 rounded-xl p-2.5 font-mono text-sm font-bold text-sky-300"
+              />
             </div>
 
             {/* Row 2 */}
             <div className="grid grid-cols-4 gap-2.5 items-center">
-              <input type="number" placeholder="a2" value={l3.a2} onChange={(e) => setL3({ ...l3, a2: e.target.value })} className="bg-slate-800 border border-slate-700 rounded-xl p-2.5 font-mono text-sm font-bold text-slate-100" />
-              <input type="number" placeholder="b2" value={l3.b2} onChange={(e) => setL3({ ...l3, b2: e.target.value })} className="bg-slate-800 border border-slate-700 rounded-xl p-2.5 font-mono text-sm font-bold text-slate-100" />
-              <input type="number" placeholder="c2" value={l3.c2} onChange={(e) => setL3({ ...l3, c2: e.target.value })} className="bg-slate-800 border border-slate-700 rounded-xl p-2.5 font-mono text-sm font-bold text-slate-100" />
-              <input type="number" placeholder="= d2" value={l3.d2} onChange={(e) => setL3({ ...l3, d2: e.target.value })} className="bg-slate-800 border border-sky-500/50 rounded-xl p-2.5 font-mono text-sm font-bold text-sky-300" />
+              <input
+                type="number"
+                placeholder="a2"
+                value={l3.a2}
+                onChange={(e) => setL3({ ...l3, a2: e.target.value })}
+                className="bg-slate-800 border border-slate-700 rounded-xl p-2.5 font-mono text-sm font-bold text-slate-100"
+              />
+              <input
+                type="number"
+                placeholder="b2"
+                value={l3.b2}
+                onChange={(e) => setL3({ ...l3, b2: e.target.value })}
+                className="bg-slate-800 border border-slate-700 rounded-xl p-2.5 font-mono text-sm font-bold text-slate-100"
+              />
+              <input
+                type="number"
+                placeholder="c2"
+                value={l3.c2}
+                onChange={(e) => setL3({ ...l3, c2: e.target.value })}
+                className="bg-slate-800 border border-slate-700 rounded-xl p-2.5 font-mono text-sm font-bold text-slate-100"
+              />
+              <input
+                type="number"
+                placeholder="= d2"
+                value={l3.d2}
+                onChange={(e) => setL3({ ...l3, d2: e.target.value })}
+                className="bg-slate-800 border border-sky-500/50 rounded-xl p-2.5 font-mono text-sm font-bold text-sky-300"
+              />
             </div>
 
             {/* Row 3 */}
             <div className="grid grid-cols-4 gap-2.5 items-center">
-              <input type="number" placeholder="a3" value={l3.a3} onChange={(e) => setL3({ ...l3, a3: e.target.value })} className="bg-slate-800 border border-slate-700 rounded-xl p-2.5 font-mono text-sm font-bold text-slate-100" />
-              <input type="number" placeholder="b3" value={l3.b3} onChange={(e) => setL3({ ...l3, b3: e.target.value })} className="bg-slate-800 border border-slate-700 rounded-xl p-2.5 font-mono text-sm font-bold text-slate-100" />
-              <input type="number" placeholder="c3" value={l3.c3} onChange={(e) => setL3({ ...l3, c3: e.target.value })} className="bg-slate-800 border border-slate-700 rounded-xl p-2.5 font-mono text-sm font-bold text-slate-100" />
-              <input type="number" placeholder="= d3" value={l3.d3} onChange={(e) => setL3({ ...l3, d3: e.target.value })} className="bg-slate-800 border border-sky-500/50 rounded-xl p-2.5 font-mono text-sm font-bold text-sky-300" />
+              <input
+                type="number"
+                placeholder="a3"
+                value={l3.a3}
+                onChange={(e) => setL3({ ...l3, a3: e.target.value })}
+                className="bg-slate-800 border border-slate-700 rounded-xl p-2.5 font-mono text-sm font-bold text-slate-100"
+              />
+              <input
+                type="number"
+                placeholder="b3"
+                value={l3.b3}
+                onChange={(e) => setL3({ ...l3, b3: e.target.value })}
+                className="bg-slate-800 border border-slate-700 rounded-xl p-2.5 font-mono text-sm font-bold text-slate-100"
+              />
+              <input
+                type="number"
+                placeholder="c3"
+                value={l3.c3}
+                onChange={(e) => setL3({ ...l3, c3: e.target.value })}
+                className="bg-slate-800 border border-slate-700 rounded-xl p-2.5 font-mono text-sm font-bold text-slate-100"
+              />
+              <input
+                type="number"
+                placeholder="= d3"
+                value={l3.d3}
+                onChange={(e) => setL3({ ...l3, d3: e.target.value })}
+                className="bg-slate-800 border border-sky-500/50 rounded-xl p-2.5 font-mono text-sm font-bold text-sky-300"
+              />
             </div>
 
             {/* Results */}
@@ -625,15 +785,21 @@ export const EquationSolver: React.FC<EquationSolverProps> = ({ settings }) => {
                     <div className="grid grid-cols-3 gap-3">
                       <div className="p-3.5 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col">
                         <span className="text-xs text-slate-400">x</span>
-                        <span className="text-xl font-mono font-bold text-emerald-400">x = {l3Res.x}</span>
+                        <span className="text-xl font-mono font-bold text-emerald-400">
+                          x = {l3Res.x}
+                        </span>
                       </div>
                       <div className="p-3.5 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col">
                         <span className="text-xs text-slate-400">y</span>
-                        <span className="text-xl font-mono font-bold text-emerald-400">y = {l3Res.y}</span>
+                        <span className="text-xl font-mono font-bold text-emerald-400">
+                          y = {l3Res.y}
+                        </span>
                       </div>
                       <div className="p-3.5 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col">
                         <span className="text-xs text-slate-400">z</span>
-                        <span className="text-xl font-mono font-bold text-emerald-400">z = {l3Res.z}</span>
+                        <span className="text-xl font-mono font-bold text-emerald-400">
+                          z = {l3Res.z}
+                        </span>
                       </div>
                     </div>
                     <div className="text-xs text-slate-400 flex items-center justify-between border-t border-slate-800 pt-3">

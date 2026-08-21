@@ -144,7 +144,12 @@ export const DateTimeCalculator: React.FC<DateTimeCalculatorProps> = ({ settings
       ageStr: `${y} Years, ${m} Months, ${d} Days`,
       totalDaysLived: totalDaysLived.toLocaleString(),
       daysUntilBday,
-      nextBdayFormatted: nextBday.toLocaleDateString(undefined, { weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' }),
+      nextBdayFormatted: nextBday.toLocaleDateString(undefined, {
+        weekday: 'short',
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+      }),
     };
   };
 
@@ -168,7 +173,10 @@ export const DateTimeCalculator: React.FC<DateTimeCalculatorProps> = ({ settings
     return {
       netTimeStr: `${fullH}h ${remM}m`,
       decimalHours: (Math.round(netHours * 100) / 100).toFixed(2),
-      earnings: earnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+      earnings: earnings.toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }),
     };
   };
 
@@ -192,9 +200,10 @@ export const DateTimeCalculator: React.FC<DateTimeCalculatorProps> = ({ settings
             onClick={() => setTab(item.id as any)}
             className={`
               px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border shadow-sm
-              ${tab === item.id
-                ? 'bg-sky-600 text-white border-sky-500 shadow-sky-600/20'
-                : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-white'
+              ${
+                tab === item.id
+                  ? 'bg-sky-600 text-white border-sky-500 shadow-sky-600/20'
+                  : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-white'
               }
             `}
           >
@@ -210,7 +219,9 @@ export const DateTimeCalculator: React.FC<DateTimeCalculatorProps> = ({ settings
           <div className="flex flex-col gap-6">
             <div>
               <h3 className="text-base font-bold text-slate-100">Date Difference Calculator</h3>
-              <p className="text-xs text-slate-400">Calculates precise calendar duration, working business days, and total hours</p>
+              <p className="text-xs text-slate-400">
+                Calculates precise calendar duration, working business days, and total hours
+              </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -239,33 +250,49 @@ export const DateTimeCalculator: React.FC<DateTimeCalculatorProps> = ({ settings
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl">
                     <span className="text-xs text-slate-400 block mb-1">Total Calendar Days</span>
-                    <span className="text-3xl font-mono font-bold text-emerald-400">{diffRes.totalDays} Days</span>
+                    <span className="text-3xl font-mono font-bold text-emerald-400">
+                      {diffRes.totalDays} Days
+                    </span>
                     <span className="text-xs text-slate-400 block mt-1">{diffRes.weeksFormat}</span>
                   </div>
                   <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl">
-                    <span className="text-xs text-slate-400 block mb-1">Business / Working Days</span>
-                    <span className="text-3xl font-mono font-bold text-sky-400">{diffRes.workDays} Work Days</span>
-                    <span className="text-xs text-slate-400 block mt-1">Excludes Saturdays & Sundays</span>
+                    <span className="text-xs text-slate-400 block mb-1">
+                      Business / Working Days
+                    </span>
+                    <span className="text-3xl font-mono font-bold text-sky-400">
+                      {diffRes.workDays} Work Days
+                    </span>
+                    <span className="text-xs text-slate-400 block mt-1">
+                      Excludes Saturdays & Sundays
+                    </span>
                   </div>
                 </div>
 
                 <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl">
-                  <span className="text-xs text-slate-400 block mb-1">Exact Age / Span Breakdown:</span>
+                  <span className="text-xs text-slate-400 block mb-1">
+                    Exact Age / Span Breakdown:
+                  </span>
                   <span className="text-lg font-bold text-slate-100">{diffRes.breakdown}</span>
                 </div>
 
                 <div className="grid grid-cols-3 gap-2 text-center border-t border-slate-800 pt-3">
                   <div className="p-2 bg-slate-900/60 rounded-xl">
                     <span className="text-[10px] text-slate-400 block">Total Hours</span>
-                    <span className="text-xs font-mono font-bold text-slate-200">{diffRes.totalHours} hrs</span>
+                    <span className="text-xs font-mono font-bold text-slate-200">
+                      {diffRes.totalHours} hrs
+                    </span>
                   </div>
                   <div className="p-2 bg-slate-900/60 rounded-xl">
                     <span className="text-[10px] text-slate-400 block">Total Minutes</span>
-                    <span className="text-xs font-mono font-bold text-slate-200">{diffRes.totalMinutes} min</span>
+                    <span className="text-xs font-mono font-bold text-slate-200">
+                      {diffRes.totalMinutes} min
+                    </span>
                   </div>
                   <div className="p-2 bg-slate-900/60 rounded-xl">
                     <span className="text-[10px] text-slate-400 block">Total Seconds</span>
-                    <span className="text-xs font-mono font-bold text-slate-200">{diffRes.totalSeconds} s</span>
+                    <span className="text-xs font-mono font-bold text-slate-200">
+                      {diffRes.totalSeconds} s
+                    </span>
                   </div>
                 </div>
               </div>
@@ -278,7 +305,9 @@ export const DateTimeCalculator: React.FC<DateTimeCalculatorProps> = ({ settings
           <div className="flex flex-col gap-6">
             <div>
               <h3 className="text-base font-bold text-slate-100">Add or Subtract from Date</h3>
-              <p className="text-xs text-slate-400">Calculate future or past deadlines with days, weeks, months, or years offset</p>
+              <p className="text-xs text-slate-400">
+                Calculate future or past deadlines with days, weeks, months, or years offset
+              </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -342,11 +371,15 @@ export const DateTimeCalculator: React.FC<DateTimeCalculatorProps> = ({ settings
 
             {addSubRes && (
               <div className="p-5 bg-slate-950 border border-slate-800 rounded-2xl flex flex-col gap-2">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Target Calculated Date</span>
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  Target Calculated Date
+                </span>
                 <div className="text-2xl sm:text-3xl font-bold text-sky-400">
                   {addSubRes.formatted}
                 </div>
-                <span className="text-xs font-mono text-slate-400">ISO Format: {addSubRes.iso}</span>
+                <span className="text-xs font-mono text-slate-400">
+                  ISO Format: {addSubRes.iso}
+                </span>
               </div>
             )}
           </div>
@@ -356,8 +389,12 @@ export const DateTimeCalculator: React.FC<DateTimeCalculatorProps> = ({ settings
         {tab === 'age' && (
           <div className="flex flex-col gap-6">
             <div>
-              <h3 className="text-base font-bold text-slate-100">Chronological Age & Birthday Countdown</h3>
-              <p className="text-xs text-slate-400">Calculates exact life milestones and days until next celebration</p>
+              <h3 className="text-base font-bold text-slate-100">
+                Chronological Age & Birthday Countdown
+              </h3>
+              <p className="text-xs text-slate-400">
+                Calculates exact life milestones and days until next celebration
+              </p>
             </div>
 
             <div className="flex flex-col gap-1.5 max-w-sm">
@@ -380,12 +417,20 @@ export const DateTimeCalculator: React.FC<DateTimeCalculatorProps> = ({ settings
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl">
                     <span className="text-xs text-slate-400 block mb-1">Total Days Lived</span>
-                    <span className="text-2xl font-mono font-bold text-sky-400">{ageRes.totalDaysLived} Days</span>
+                    <span className="text-2xl font-mono font-bold text-sky-400">
+                      {ageRes.totalDaysLived} Days
+                    </span>
                   </div>
                   <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl">
-                    <span className="text-xs text-slate-400 block mb-1">Next Birthday Countdown</span>
-                    <span className="text-2xl font-bold text-amber-400">{ageRes.daysUntilBday} Days Left</span>
-                    <span className="text-xs text-slate-400 block mt-1">{ageRes.nextBdayFormatted}</span>
+                    <span className="text-xs text-slate-400 block mb-1">
+                      Next Birthday Countdown
+                    </span>
+                    <span className="text-2xl font-bold text-amber-400">
+                      {ageRes.daysUntilBday} Days Left
+                    </span>
+                    <span className="text-xs text-slate-400 block mt-1">
+                      {ageRes.nextBdayFormatted}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -398,7 +443,9 @@ export const DateTimeCalculator: React.FC<DateTimeCalculatorProps> = ({ settings
           <div className="flex flex-col gap-6">
             <div>
               <h3 className="text-base font-bold text-slate-100">Work Hours & Wage Calculator</h3>
-              <p className="text-xs text-slate-400">Calculate net billable hours, lunch break deductions, and estimated shift pay</p>
+              <p className="text-xs text-slate-400">
+                Calculate net billable hours, lunch break deductions, and estimated shift pay
+              </p>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -450,11 +497,15 @@ export const DateTimeCalculator: React.FC<DateTimeCalculatorProps> = ({ settings
                 </div>
                 <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
                   <span className="text-xs text-slate-400 block mb-1">Decimal Hours</span>
-                  <span className="text-2xl font-mono font-bold text-sky-400">{workRes.decimalHours} hrs</span>
+                  <span className="text-2xl font-mono font-bold text-sky-400">
+                    {workRes.decimalHours} hrs
+                  </span>
                 </div>
                 <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
                   <span className="text-xs text-slate-400 block mb-1">Estimated Earnings</span>
-                  <span className="text-2xl font-mono font-bold text-emerald-400">${workRes.earnings}</span>
+                  <span className="text-2xl font-mono font-bold text-emerald-400">
+                    ${workRes.earnings}
+                  </span>
                 </div>
               </div>
             )}

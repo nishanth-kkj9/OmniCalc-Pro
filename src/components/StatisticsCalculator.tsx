@@ -6,8 +6,12 @@ interface StatisticsCalculatorProps {
   settings?: AppSettings;
 }
 
-export const StatisticsCalculator: React.FC<StatisticsCalculatorProps> = ({ settings: _settings }) => {
-  const [rawInput, setRawInput] = useState<string>('12, 15, 18, 22, 25, 25, 28, 30, 32, 35, 40, 45, 50');
+export const StatisticsCalculator: React.FC<StatisticsCalculatorProps> = ({
+  settings: _settings,
+}) => {
+  const [rawInput, setRawInput] = useState<string>(
+    '12, 15, 18, 22, 25, 25, 28, 30, 32, 35, 40, 45, 50'
+  );
 
   // Parse numbers safely
   const parseNumbers = (text: string): number[] => {
@@ -65,7 +69,9 @@ export const StatisticsCalculator: React.FC<StatisticsCalculatorProps> = ({ sett
     const histogramData = Array.from({ length: binCount }, (_, i) => {
       const bMin = min + i * binWidth;
       const bMax = bMin + binWidth;
-      const count = numbers.filter((v) => v >= bMin && (i === binCount - 1 ? v <= bMax : v < bMax)).length;
+      const count = numbers.filter(
+        (v) => v >= bMin && (i === binCount - 1 ? v <= bMax : v < bMax)
+      ).length;
       return {
         bin: `${bMin.toFixed(1)}-${bMax.toFixed(1)}`,
         count,
@@ -93,8 +99,10 @@ export const StatisticsCalculator: React.FC<StatisticsCalculatorProps> = ({ sett
 
   const loadPreset = (preset: 'scores' | 'temps' | 'sales') => {
     if (preset === 'scores') setRawInput('78, 85, 92, 65, 88, 95, 72, 80, 85, 90, 88, 76, 94');
-    else if (preset === 'temps') setRawInput('22.5, 24.1, 23.8, 25.0, 26.2, 24.5, 22.9, 21.8, 25.4');
-    else if (preset === 'sales') setRawInput('120, 150, 180, 130, 210, 250, 300, 280, 220, 190, 160');
+    else if (preset === 'temps')
+      setRawInput('22.5, 24.1, 23.8, 25.0, 26.2, 24.5, 22.9, 21.8, 25.4');
+    else if (preset === 'sales')
+      setRawInput('120, 150, 180, 130, 210, 250, 300, 280, 220, 190, 160');
   };
 
   return (
@@ -102,12 +110,29 @@ export const StatisticsCalculator: React.FC<StatisticsCalculatorProps> = ({ sett
       {/* Input Section */}
       <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl flex flex-col gap-3">
         <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-          <label className="text-sm font-bold text-slate-200">Dataset Input (Comma or Space Separated)</label>
+          <label className="text-sm font-bold text-slate-200">
+            Dataset Input (Comma or Space Separated)
+          </label>
           <div className="flex items-center gap-1.5 text-xs">
             <span className="text-slate-400 font-semibold">Presets:</span>
-            <button onClick={() => loadPreset('scores')} className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded-lg">Scores</button>
-            <button onClick={() => loadPreset('temps')} className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded-lg">Temps</button>
-            <button onClick={() => loadPreset('sales')} className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded-lg">Sales</button>
+            <button
+              onClick={() => loadPreset('scores')}
+              className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded-lg"
+            >
+              Scores
+            </button>
+            <button
+              onClick={() => loadPreset('temps')}
+              className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded-lg"
+            >
+              Temps
+            </button>
+            <button
+              onClick={() => loadPreset('sales')}
+              className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded-lg"
+            >
+              Sales
+            </button>
           </div>
         </div>
 
@@ -141,9 +166,16 @@ export const StatisticsCalculator: React.FC<StatisticsCalculatorProps> = ({ sett
               { label: 'Max Value', val: stats.max },
               { label: 'Range', val: stats.range.toFixed(2) },
             ].map(({ label, val }) => (
-              <div key={label} className="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 shadow-md flex flex-col justify-between">
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{label}</span>
-                <span className="text-base sm:text-lg font-mono font-bold text-sky-300 mt-1 truncate">{val}</span>
+              <div
+                key={label}
+                className="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 shadow-md flex flex-col justify-between"
+              >
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  {label}
+                </span>
+                <span className="text-base sm:text-lg font-mono font-bold text-sky-300 mt-1 truncate">
+                  {val}
+                </span>
               </div>
             ))}
           </div>
@@ -159,7 +191,11 @@ export const StatisticsCalculator: React.FC<StatisticsCalculatorProps> = ({ sett
                   <XAxis dataKey="bin" stroke="#64748b" tick={{ fontSize: 11 }} />
                   <YAxis stroke="#64748b" allowDecimals={false} tick={{ fontSize: 11 }} />
                   <Tooltip
-                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px' }}
+                    contentStyle={{
+                      backgroundColor: '#0f172a',
+                      borderColor: '#334155',
+                      borderRadius: '12px',
+                    }}
                     itemStyle={{ color: '#38bdf8' }}
                   />
                   <Bar dataKey="count" radius={[6, 6, 0, 0]}>

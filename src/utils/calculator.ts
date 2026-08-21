@@ -23,8 +23,7 @@ export interface CalculatorScope {
 }
 
 export type EvalResult =
-  | { ok: true; value: string }
-  | { ok: false; error: 'syntax' | 'math' | 'overflow' };
+  { ok: true; value: string } | { ok: false; error: 'syntax' | 'math' | 'overflow' };
 
 export interface CompiledSafeExpression {
   evaluate: (scope?: CalculatorScope) => number | null;
@@ -46,19 +45,53 @@ const ALLOWED_NODE_TYPES = new Set([
 
 // Whitelist of approved mathematical functions
 export const ALLOWED_FUNCTIONS = new Set([
-  'sin', 'cos', 'tan',
-  'asin', 'acos', 'atan',
-  'sinh', 'cosh', 'tanh',
-  'asinh', 'acosh', 'atanh',
-  'log', 'log10', 'ln', 'log2',
-  'exp', 'sqrt', 'cbrt', 'abs',
-  'mod', 'round', 'floor', 'ceil',
-  'fact', 'factorial', 'sign', 'gamma',
+  'sin',
+  'cos',
+  'tan',
+  'asin',
+  'acos',
+  'atan',
+  'sinh',
+  'cosh',
+  'tanh',
+  'asinh',
+  'acosh',
+  'atanh',
+  'log',
+  'log10',
+  'ln',
+  'log2',
+  'exp',
+  'sqrt',
+  'cbrt',
+  'abs',
+  'mod',
+  'round',
+  'floor',
+  'ceil',
+  'fact',
+  'factorial',
+  'sign',
+  'gamma',
 ]);
 
 // Whitelist of approved constants and variables
 export const ALLOWED_SYMBOLS = new Set([
-  'pi', 'PI', 'e', 'E', 'i', 'I', 'tau', 'phi', 'x', 'y', 'z', 't', 'n', 'r', 'k'
+  'pi',
+  'PI',
+  'e',
+  'E',
+  'i',
+  'I',
+  'tau',
+  'phi',
+  'x',
+  'y',
+  'z',
+  't',
+  'n',
+  'r',
+  'k',
 ]);
 
 /**
@@ -164,16 +197,10 @@ export function validateMathAst(node: MathNode, customScopeKeys: Set<string>): b
  * Standardizes symbols, percentage tokens, and square root notations.
  */
 export function sanitizeExpression(expr: string): string {
-  let sanitized = expr
-    .replace(/×/g, '*')
-    .replace(/÷/g, '/')
-    .replace(/π/g, 'pi')
-    .replace(/−/g, '-');
+  let sanitized = expr.replace(/×/g, '*').replace(/÷/g, '/').replace(/π/g, 'pi').replace(/−/g, '-');
 
   // Replace square root symbols like √(4) or √4 or √x
-  sanitized = sanitized
-    .replace(/√\(/g, 'sqrt(')
-    .replace(/√([0-9a-zA-Z.]+)/g, 'sqrt($1)');
+  sanitized = sanitized.replace(/√\(/g, 'sqrt(').replace(/√([0-9a-zA-Z.]+)/g, 'sqrt($1)');
 
   // Percentage conversion: e.g. 50% -> (50 * 0.01)
   sanitized = sanitized.replace(/(\d+(?:\.\d+)?)%/g, '($1 * 0.01)');
@@ -240,7 +267,11 @@ export function buildMathScope(angleMode: AngleMode = 'DEG'): Record<string, any
       ...baseScope,
       sin: (x: number) => {
         const modDeg = ((x % 360) + 360) % 360;
-        if (Math.abs(modDeg - 180) < 1e-10 || Math.abs(modDeg) < 1e-10 || Math.abs(modDeg - 360) < 1e-10) {
+        if (
+          Math.abs(modDeg - 180) < 1e-10 ||
+          Math.abs(modDeg) < 1e-10 ||
+          Math.abs(modDeg - 360) < 1e-10
+        ) {
           return 0;
         }
         return Math.sin((x * Math.PI) / 180);
@@ -268,7 +299,11 @@ export function buildMathScope(angleMode: AngleMode = 'DEG'): Record<string, any
       ...baseScope,
       sin: (x: number) => {
         const modGrad = ((x % 400) + 400) % 400;
-        if (Math.abs(modGrad - 200) < 1e-10 || Math.abs(modGrad) < 1e-10 || Math.abs(modGrad - 400) < 1e-10) {
+        if (
+          Math.abs(modGrad - 200) < 1e-10 ||
+          Math.abs(modGrad) < 1e-10 ||
+          Math.abs(modGrad - 400) < 1e-10
+        ) {
           return 0;
         }
         return Math.sin((x * Math.PI) / 200);
@@ -452,7 +487,11 @@ export function evaluateExpression(
   return 'Error';
 }
 
-export function formatNumber(val: number | string, precision: number = 6, settings?: Partial<AppSettings>): string {
+export function formatNumber(
+  val: number | string,
+  precision: number = 6,
+  settings?: Partial<AppSettings>
+): string {
   if (settings) {
     return formatNumberWithSettings(val, settings);
   }

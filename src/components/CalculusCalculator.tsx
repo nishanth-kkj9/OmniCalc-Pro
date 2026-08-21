@@ -155,7 +155,10 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
       const fPrime = (fxh - fxmh) / (2 * h);
       if (Math.abs(fPrime) < 1e-14) {
         iterations.push({ iter: i + 1, x: currentX, fx, fPrime, nextX: currentX, error: 0 });
-        return { error: 'Derivative reached 0 (tangent is horizontal). Cannot continue.', iterations };
+        return {
+          error: 'Derivative reached 0 (tangent is horizontal). Cannot continue.',
+          iterations,
+        };
       }
 
       const nextX = currentX - fx / fPrime;
@@ -192,7 +195,7 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
       <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
         {[
           { id: 'integral', label: 'Definite Integral ∫ f(x) dx' },
-          { id: 'derivative', label: 'Derivative & Tangents f\'(x)' },
+          { id: 'derivative', label: "Derivative & Tangents f'(x)" },
           { id: 'root', label: 'Newton-Raphson Root Finder' },
         ].map((tab) => (
           <button
@@ -200,9 +203,10 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
             onClick={() => setCalcTab(tab.id as any)}
             className={`
               px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border shadow-sm
-              ${calcTab === tab.id
-                ? 'bg-sky-600 text-white border-sky-500 shadow-sky-600/20'
-                : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-white'
+              ${
+                calcTab === tab.id
+                  ? 'bg-sky-600 text-white border-sky-500 shadow-sky-600/20'
+                  : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-white'
               }
             `}
           >
@@ -218,7 +222,10 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
           <div className="flex flex-col gap-6">
             <div>
               <h3 className="text-base font-bold text-slate-100">Definite Numerical Integral</h3>
-              <p className="text-xs text-slate-400">Calculates area under the curve using Composite Simpson's 1/3 Rule and Trapezoidal rules</p>
+              <p className="text-xs text-slate-400">
+                Calculates area under the curve using Composite Simpson's 1/3 Rule and Trapezoidal
+                rules
+              </p>
             </div>
 
             {/* Inputs */}
@@ -255,7 +262,8 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
 
             {/* Formatted Integral */}
             <div className="p-4 bg-slate-950/90 border border-slate-800 rounded-2xl flex items-center justify-center font-mono text-lg font-bold text-sky-400">
-              ∫<sub className="text-xs font-normal">{intA}</sub><sup className="text-xs font-normal">{intB}</sup> ({intFunc}) dx
+              ∫<sub className="text-xs font-normal">{intA}</sub>
+              <sup className="text-xs font-normal">{intB}</sup> ({intFunc}) dx
             </div>
 
             {/* Results */}
@@ -266,24 +274,38 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
                 ) : (
                   <>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Definite Integral Result</span>
+                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                        Definite Integral Result
+                      </span>
                       <button
                         onClick={() => handleCopy('int', intData.result || '')}
                         className="text-xs text-sky-400 hover:text-sky-300 flex items-center gap-1"
                       >
-                        {copied === 'int' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                        {copied === 'int' ? (
+                          <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        ) : (
+                          <Copy className="w-3.5 h-3.5" />
+                        )}
                         {copied === 'int' ? 'Copied' : 'Copy'}
                       </button>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col gap-1">
-                        <span className="text-xs text-slate-400">Simpson's 1/3 Rule (High Accuracy)</span>
-                        <span className="text-3xl font-mono font-bold text-emerald-400">{intData.result}</span>
+                        <span className="text-xs text-slate-400">
+                          Simpson's 1/3 Rule (High Accuracy)
+                        </span>
+                        <span className="text-3xl font-mono font-bold text-emerald-400">
+                          {intData.result}
+                        </span>
                       </div>
                       <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col gap-1">
-                        <span className="text-xs text-slate-400">Trapezoidal Rule Approximation</span>
-                        <span className="text-3xl font-mono font-bold text-sky-400">{intData.trapResult}</span>
+                        <span className="text-xs text-slate-400">
+                          Trapezoidal Rule Approximation
+                        </span>
+                        <span className="text-3xl font-mono font-bold text-sky-400">
+                          {intData.trapResult}
+                        </span>
                       </div>
                     </div>
 
@@ -302,8 +324,12 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
         {calcTab === 'derivative' && (
           <div className="flex flex-col gap-6">
             <div>
-              <h3 className="text-base font-bold text-slate-100">Numerical Derivative & Tangent Line</h3>
-              <p className="text-xs text-slate-400">Calculates 1st & 2nd order derivatives, tangent line, and normal line equations</p>
+              <h3 className="text-base font-bold text-slate-100">
+                Numerical Derivative & Tangent Line
+              </h3>
+              <p className="text-xs text-slate-400">
+                Calculates 1st & 2nd order derivatives, tangent line, and normal line equations
+              </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
@@ -337,26 +363,42 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div className="p-3.5 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col">
                         <span className="text-xs text-slate-400">Value f(x₀)</span>
-                        <span className="text-xl font-mono font-bold text-slate-100">{diffData.f0}</span>
+                        <span className="text-xl font-mono font-bold text-slate-100">
+                          {diffData.f0}
+                        </span>
                       </div>
                       <div className="p-3.5 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col">
-                        <span className="text-xs text-slate-400">1st Derivative f'(x₀) [Slope]</span>
-                        <span className="text-xl font-mono font-bold text-emerald-400">{diffData.d1}</span>
+                        <span className="text-xs text-slate-400">
+                          1st Derivative f'(x₀) [Slope]
+                        </span>
+                        <span className="text-xl font-mono font-bold text-emerald-400">
+                          {diffData.d1}
+                        </span>
                       </div>
                       <div className="p-3.5 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col">
                         <span className="text-xs text-slate-400">2nd Derivative f''(x₀)</span>
-                        <span className="text-xl font-mono font-bold text-sky-400">{diffData.d2}</span>
+                        <span className="text-xl font-mono font-bold text-sky-400">
+                          {diffData.d2}
+                        </span>
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 border-t border-slate-800 pt-3">
                       <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
-                        <span className="text-xs text-slate-400 block mb-1">Tangent Line Equation:</span>
-                        <span className="font-mono text-sm font-bold text-emerald-400">{diffData.tangentLine}</span>
+                        <span className="text-xs text-slate-400 block mb-1">
+                          Tangent Line Equation:
+                        </span>
+                        <span className="font-mono text-sm font-bold text-emerald-400">
+                          {diffData.tangentLine}
+                        </span>
                       </div>
                       <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
-                        <span className="text-xs text-slate-400 block mb-1">Normal Line Equation:</span>
-                        <span className="font-mono text-sm font-bold text-sky-400">{diffData.normalLine}</span>
+                        <span className="text-xs text-slate-400 block mb-1">
+                          Normal Line Equation:
+                        </span>
+                        <span className="font-mono text-sm font-bold text-sky-400">
+                          {diffData.normalLine}
+                        </span>
                       </div>
                     </div>
                   </>
@@ -371,7 +413,9 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
           <div className="flex flex-col gap-6">
             <div>
               <h3 className="text-base font-bold text-slate-100">Newton-Raphson Method</h3>
-              <p className="text-xs text-slate-400">Iterative algorithm for finding roots where f(x) = 0</p>
+              <p className="text-xs text-slate-400">
+                Iterative algorithm for finding roots where f(x) = 0
+              </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
@@ -416,14 +460,22 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
                 {rootData.root && (
                   <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl flex items-center justify-between">
                     <div>
-                      <span className="text-xs text-slate-400 block">Converged Root (f(x) ≈ 0)</span>
-                      <span className="text-2xl font-mono font-bold text-emerald-400">x ≈ {rootData.root}</span>
+                      <span className="text-xs text-slate-400 block">
+                        Converged Root (f(x) ≈ 0)
+                      </span>
+                      <span className="text-2xl font-mono font-bold text-emerald-400">
+                        x ≈ {rootData.root}
+                      </span>
                     </div>
                     <button
                       onClick={() => handleCopy('root', rootData.root || '')}
                       className="px-3 py-1.5 bg-slate-800 text-xs text-slate-200 rounded-xl border border-slate-700 flex items-center gap-1.5"
                     >
-                      {copied === 'root' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                      {copied === 'root' ? (
+                        <Check className="w-3.5 h-3.5 text-emerald-400" />
+                      ) : (
+                        <Copy className="w-3.5 h-3.5" />
+                      )}
                       {copied === 'root' ? 'Copied' : 'Copy'}
                     </button>
                   </div>
@@ -449,7 +501,9 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
                           <td className="p-2.5 text-slate-200">{formatNum(row.x)}</td>
                           <td className="p-2.5 text-sky-400">{formatNum(row.fx)}</td>
                           <td className="p-2.5 text-slate-300">{formatNum(row.fPrime)}</td>
-                          <td className="p-2.5 text-emerald-400 font-bold">{formatNum(row.nextX)}</td>
+                          <td className="p-2.5 text-emerald-400 font-bold">
+                            {formatNum(row.nextX)}
+                          </td>
                           <td className="p-2.5 text-slate-400">{row.error.toExponential(2)}</td>
                         </tr>
                       ))}

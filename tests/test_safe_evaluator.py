@@ -239,6 +239,31 @@ class TestSafeEvaluatorTimeoutDepth(unittest.TestCase):
         self.assertIn(-2, solutions)
         self.assertIn(2, solutions)
 
+    def test_symbolic_namespace_restriction(self):
+        """SEC-01 Regression: Ensure disallowed tokens and non-math namespaces are rejected."""
+        ev = SafeEvaluator()
+        # Disallowed identifiers in solve
+        with self.assertRaises(ValueError):
+            ev.solve("__import__('os').system('ls')", "x")
+        with self.assertRaises(ValueError):
+            ev.solve("eval('1+1')", "x")
+        with self.assertRaises(ValueError):
+            ev.solve("open('/etc/passwd')", "x")
+        with self.assertRaises(ValueError):
+            ev.solve("getattr(x, '__class__')", "x")
+
+        # Disallowed identifiers in parse_expression
+        with self.assertRaises(ValueError):
+            ev.parse_expression("__import__('os').system('ls')")
+        with self.assertRaises(ValueError):
+            ev.parse_expression("Symbol('x').__class__")
+
+        # Valid symbolic formulas with multi-math functions
+        parsed = ev.parse_expression("sin(x) + cos(x) + sqrt(x) + exp(x)")
+        self.assertIsNotNone(parsed)
+        roots = ev.solve("x - 10", "x")
+        self.assertEqual(roots, [10])
+
     def test_concurrent_worker_pool_saturation_and_recovery(self):
         """Stress test: submit concurrent expressions and verify thread pool handles load and recovers."""
         import concurrent.futures

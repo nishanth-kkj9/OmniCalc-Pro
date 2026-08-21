@@ -10,6 +10,7 @@ from utils.helpers import load_config, save_config
 from utils.logger import get_logger
 from core.history_manager import get_history_manager
 import atexit
+import importlib
 
 logger = get_logger()
 
@@ -174,17 +175,17 @@ class MainWindow(QMainWindow):
         v_layout.addWidget(content)
 
         self.page_factories = [
-            ("Dashboard", lambda: __import__("ui.dashboard", fromlist=["DashboardPage"]).DashboardPage()),
-            ("Basic", lambda: __import__("ui.basic_page", fromlist=["BasicPage"]).BasicPage(self.config)),
-            ("Scientific", lambda: __import__("ui.scientific_page", fromlist=["ScientificPage"]).ScientificPage(self.config)),
-            ("Graph", lambda: __import__("ui.graph_page", fromlist=["GraphPage"]).GraphPage()),
-            ("Converter", lambda: __import__("ui.converter_page", fromlist=["ConverterPage"]).ConverterPage()),
-            ("Programmer", lambda: __import__("ui.programmer_page", fromlist=["ProgrammerPage"]).ProgrammerPage()),
-            ("Matrix", lambda: __import__("ui.matrix_page", fromlist=["MatrixPage"]).MatrixPage()),
-            ("Statistics", lambda: __import__("ui.statistics_page", fromlist=["StatisticsPage"]).StatisticsPage()),
-            ("Finance", lambda: __import__("ui.finance_page", fromlist=["FinancePage"]).FinancePage()),
-            ("History", lambda: __import__("ui.history_page", fromlist=["HistoryPage"]).HistoryPage()),
-            ("Settings", lambda: __import__("ui.settings_page", fromlist=["SettingsPage"]).SettingsPage())
+            ("Dashboard", lambda: getattr(importlib.import_module("ui.dashboard"), "DashboardPage")()),
+            ("Basic", lambda: getattr(importlib.import_module("ui.basic_page"), "BasicPage")(self.config)),
+            ("Scientific", lambda: getattr(importlib.import_module("ui.scientific_page"), "ScientificPage")(self.config)),
+            ("Graph", lambda: getattr(importlib.import_module("ui.graph_page"), "GraphPage")()),
+            ("Converter", lambda: getattr(importlib.import_module("ui.converter_page"), "ConverterPage")()),
+            ("Programmer", lambda: getattr(importlib.import_module("ui.programmer_page"), "ProgrammerPage")()),
+            ("Matrix", lambda: getattr(importlib.import_module("ui.matrix_page"), "MatrixPage")()),
+            ("Statistics", lambda: getattr(importlib.import_module("ui.statistics_page"), "StatisticsPage")()),
+            ("Finance", lambda: getattr(importlib.import_module("ui.finance_page"), "FinancePage")()),
+            ("History", lambda: getattr(importlib.import_module("ui.history_page"), "HistoryPage")()),
+            ("Settings", lambda: getattr(importlib.import_module("ui.settings_page"), "SettingsPage")())
         ]
         self.pages_created = [False] * len(self.page_factories)
         self.current_idx = -1

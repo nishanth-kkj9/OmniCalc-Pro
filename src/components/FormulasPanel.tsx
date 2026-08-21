@@ -1,14 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { 
-  Copy, 
-  Check, 
-  Search, 
-  BookOpen, 
-  Sparkles,
-  Hash,
-  Layers,
-  HelpCircle
-} from 'lucide-react';
+import { Copy, Check, Search, BookOpen, Sparkles, Hash, Layers, HelpCircle } from 'lucide-react';
 import { AppSettings, CalcMode } from '../types';
 
 export interface FormulaConstantItem {
@@ -17,17 +8,17 @@ export interface FormulaConstantItem {
   symbol?: string;
   formula: string;
   description: string;
-  category: 
-    | 'Constants' 
-    | 'Calculus' 
-    | 'Algebra' 
-    | 'Geometry & Trig' 
-    | 'Matrix & Vectors' 
-    | 'Statistics' 
-    | 'Physics & Chem' 
-    | 'Computer Science' 
-    | 'Finance' 
-    | 'Health & Bio' 
+  category:
+    | 'Constants'
+    | 'Calculus'
+    | 'Algebra'
+    | 'Geometry & Trig'
+    | 'Matrix & Vectors'
+    | 'Statistics'
+    | 'Physics & Chem'
+    | 'Computer Science'
+    | 'Finance'
+    | 'Health & Bio'
     | 'Unit Factors';
   numericValue?: string;
   unit?: string;
@@ -51,7 +42,8 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     description: 'Ratio of a circle circumference to its diameter in Euclidean space',
     category: 'Constants',
     relatedModes: ['basic', 'scientific', 'geometry', 'calculus', 'graphing'],
-    notes: 'Used in circle geometry, trigonometric radians, Fourier transforms, and Gaussian distributions.'
+    notes:
+      'Used in circle geometry, trigonometric radians, Fourier transforms, and Gaussian distributions.',
   },
   {
     id: 'const_e',
@@ -62,7 +54,8 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     description: 'Base of the natural logarithm; rate of continuous growth',
     category: 'Constants',
     relatedModes: ['scientific', 'calculus', 'finance', 'graphing', 'statistics'],
-    notes: 'Derivative of e^x is e^x; essential for exponential decay, continuous compounding, and calculus.'
+    notes:
+      'Derivative of e^x is e^x; essential for exponential decay, continuous compounding, and calculus.',
   },
   {
     id: 'const_phi',
@@ -73,7 +66,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     description: 'Geometric proportion where (a+b)/a = a/b',
     category: 'Constants',
     relatedModes: ['scientific', 'geometry', 'fractions'],
-    notes: 'Occurs in Fibonacci sequences, pentagram geometry, and aesthetic design scaling.'
+    notes: 'Occurs in Fibonacci sequences, pentagram geometry, and aesthetic design scaling.',
   },
   {
     id: 'const_c',
@@ -85,7 +78,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     description: 'Universal physical constant; maximum speed at which energy and matter travel',
     category: 'Constants',
     relatedModes: ['scientific', 'converter'],
-    notes: 'Defines the meter in SI units; foundational in Einstein relativity (E = mc²).'
+    notes: 'Defines the meter in SI units; foundational in Einstein relativity (E = mc²).',
   },
   {
     id: 'const_h',
@@ -97,7 +90,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     description: 'Quantum of electromagnetic action relating photon energy to frequency (E = hf)',
     category: 'Constants',
     relatedModes: ['scientific', 'calculus'],
-    notes: 'Defines the kilogram in the revised SI system.'
+    notes: 'Defines the kilogram in the revised SI system.',
   },
   {
     id: 'const_hbar',
@@ -108,7 +101,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     unit: 'J·s',
     description: 'Action quantum per radian, central to quantum mechanics and angular momentum',
     category: 'Constants',
-    relatedModes: ['scientific', 'calculus']
+    relatedModes: ['scientific', 'calculus'],
   },
   {
     id: 'const_g',
@@ -120,7 +113,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     description: 'Nominal acceleration of free fall at Earth sea level at 45° latitude',
     category: 'Constants',
     relatedModes: ['scientific', 'converter', 'health'],
-    notes: 'Used in weight = mass × g, projectile kinematics, and hydrostatic pressure.'
+    notes: 'Used in weight = mass × g, projectile kinematics, and hydrostatic pressure.',
   },
   {
     id: 'const_G_big',
@@ -129,9 +122,10 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     formula: 'G = 6.67430(15) × 10⁻¹¹ N·m²/kg²',
     numericValue: '6.67430e-11',
     unit: 'N·m²/kg²',
-    description: 'Proportionality factor in Newton law of universal gravitation and Einstein field equations',
+    description:
+      'Proportionality factor in Newton law of universal gravitation and Einstein field equations',
     category: 'Constants',
-    relatedModes: ['scientific', 'calculus']
+    relatedModes: ['scientific', 'calculus'],
   },
   {
     id: 'const_na',
@@ -142,7 +136,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     unit: 'mol⁻¹',
     description: 'Number of constituent particles per mole of substance',
     category: 'Constants',
-    relatedModes: ['scientific', 'converter']
+    relatedModes: ['scientific', 'converter'],
   },
   {
     id: 'const_kb',
@@ -153,7 +147,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     unit: 'J/K',
     description: 'Relates mean kinetic energy of gas particles with thermodynamic temperature',
     category: 'Constants',
-    relatedModes: ['scientific', 'statistics']
+    relatedModes: ['scientific', 'statistics'],
   },
   {
     id: 'const_gas_r',
@@ -164,7 +158,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     unit: 'J/(mol·K)',
     description: 'Molar gas constant used in PV = nRT state equations',
     category: 'Constants',
-    relatedModes: ['scientific', 'converter']
+    relatedModes: ['scientific', 'converter'],
   },
   {
     id: 'const_charge_e',
@@ -175,7 +169,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     unit: 'C',
     description: 'Electric charge carried by a single proton or electron magnitude',
     category: 'Constants',
-    relatedModes: ['scientific', 'converter', 'programmer']
+    relatedModes: ['scientific', 'converter', 'programmer'],
   },
   {
     id: 'const_atm',
@@ -186,7 +180,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     unit: 'Pa',
     description: 'Standard reference atmospheric pressure at sea level',
     category: 'Constants',
-    relatedModes: ['converter', 'scientific']
+    relatedModes: ['converter', 'scientific'],
   },
   {
     id: 'const_sqrt2',
@@ -196,7 +190,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     numericValue: '1.41421356237309504880',
     description: 'Length of the hypotenuse of an isosceles right triangle with unit legs',
     category: 'Constants',
-    relatedModes: ['basic', 'scientific', 'geometry', 'fractions']
+    relatedModes: ['basic', 'scientific', 'geometry', 'fractions'],
   },
   {
     id: 'const_gamma',
@@ -206,7 +200,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     numericValue: '0.57721566490153286060',
     description: 'Limiting difference between harmonic series and natural logarithm',
     category: 'Constants',
-    relatedModes: ['calculus', 'scientific']
+    relatedModes: ['calculus', 'scientific'],
   },
 
   // ==================== CALCULUS & NUMERICAL ANALYSIS ====================
@@ -217,31 +211,31 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     description: 'Derivative of polynomial terms for any real exponent n',
     category: 'Calculus',
     relatedModes: ['calculus', 'scientific', 'graphing'],
-    notes: 'Fundamental building block for differentiating polynomial expressions.'
+    notes: 'Fundamental building block for differentiating polynomial expressions.',
   },
   {
     id: 'calc_deriv_product',
     name: 'Product Rule (Leibniz)',
-    formula: 'd/dx [u · v] = u\' · v + u · v\'',
+    formula: "d/dx [u · v] = u' · v + u · v'",
     description: 'Derivative of the product of two differentiable functions',
     category: 'Calculus',
-    relatedModes: ['calculus', 'graphing']
+    relatedModes: ['calculus', 'graphing'],
   },
   {
     id: 'calc_deriv_quotient',
     name: 'Quotient Rule',
-    formula: 'd/dx [u / v] = (u\' · v - u · v\') / v²',
+    formula: "d/dx [u / v] = (u' · v - u · v') / v²",
     description: 'Derivative of ratio of two functions where denominator v ≠ 0',
     category: 'Calculus',
-    relatedModes: ['calculus', 'graphing']
+    relatedModes: ['calculus', 'graphing'],
   },
   {
     id: 'calc_deriv_chain',
     name: 'Chain Rule (Composite Functions)',
-    formula: 'd/dx [f(g(x))] = f\'(g(x)) · g\'(x)',
+    formula: "d/dx [f(g(x))] = f'(g(x)) · g'(x)",
     description: 'Derivative of nested or composite functions',
     category: 'Calculus',
-    relatedModes: ['calculus', 'graphing']
+    relatedModes: ['calculus', 'graphing'],
   },
   {
     id: 'calc_integ_power',
@@ -249,7 +243,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     formula: '∫ x^n dx = (x^(n+1)) / (n+1) + C, (n ≠ -1)',
     description: 'Indefinite integral of polynomial powers; for n = -1, integral is ln|x| + C',
     category: 'Calculus',
-    relatedModes: ['calculus', 'graphing']
+    relatedModes: ['calculus', 'graphing'],
   },
   {
     id: 'calc_integ_parts',
@@ -257,7 +251,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     formula: '∫ u dv = u·v - ∫ v du',
     description: 'Transforms integration of product into simpler integrals',
     category: 'Calculus',
-    relatedModes: ['calculus']
+    relatedModes: ['calculus'],
   },
   {
     id: 'calc_simpson',
@@ -265,15 +259,15 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     formula: '∫[a,b] f(x)dx ≈ (h/3) [f(x₀) + 4∑f(x_odd) + 2∑f(x_even) + f(x_n)]',
     description: 'High-accuracy numerical integration approximating curves via parabolic arcs',
     category: 'Calculus',
-    relatedModes: ['calculus', 'scientific']
+    relatedModes: ['calculus', 'scientific'],
   },
   {
     id: 'calc_newton',
     name: 'Newton–Raphson Root Finding',
-    formula: 'x_(n+1) = x_n - f(x_n) / f\'(x_n)',
+    formula: "x_(n+1) = x_n - f(x_n) / f'(x_n)",
     description: 'Iterative quadratic convergence algorithm for finding equation roots f(x) = 0',
     category: 'Calculus',
-    relatedModes: ['calculus', 'equation', 'scientific']
+    relatedModes: ['calculus', 'equation', 'scientific'],
   },
   {
     id: 'calc_taylor',
@@ -281,7 +275,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     formula: 'f(x) = ∑[k=0..∞] (f^(k)(a) / k!) · (x - a)^k',
     description: 'Representation of a smooth function as an infinite sum of polynomial derivatives',
     category: 'Calculus',
-    relatedModes: ['calculus', 'scientific', 'graphing']
+    relatedModes: ['calculus', 'scientific', 'graphing'],
   },
 
   // ==================== ALGEBRA & POLYNOMIALS ====================
@@ -289,9 +283,10 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     id: 'alg_quad',
     name: 'Quadratic Formula & Discriminant',
     formula: 'x = (-b ± √(b² - 4ac)) / (2a), Δ = b² - 4ac',
-    description: 'Exact roots for ax² + bx + c = 0; Δ > 0 (2 real), Δ = 0 (1 real), Δ < 0 (complex)',
+    description:
+      'Exact roots for ax² + bx + c = 0; Δ > 0 (2 real), Δ = 0 (1 real), Δ < 0 (complex)',
     category: 'Algebra',
-    relatedModes: ['equation', 'basic', 'scientific', 'graphing']
+    relatedModes: ['equation', 'basic', 'scientific', 'graphing'],
   },
   {
     id: 'alg_vieta',
@@ -299,7 +294,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     formula: 'x₁ + x₂ = -b/a,  x₁ · x₂ = c/a',
     description: 'Relates polynomial coefficients directly to sums and products of roots',
     category: 'Algebra',
-    relatedModes: ['equation', 'fractions']
+    relatedModes: ['equation', 'fractions'],
   },
   {
     id: 'alg_binomial',
@@ -307,7 +302,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     formula: '(a + b)^n = ∑[k=0..n] (n C k) · a^(n-k) · b^k',
     description: 'Algebraic expansion of powers of a binomial using combination coefficients',
     category: 'Algebra',
-    relatedModes: ['fractions', 'statistics', 'scientific']
+    relatedModes: ['fractions', 'statistics', 'scientific'],
   },
   {
     id: 'alg_log_rules',
@@ -315,7 +310,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     formula: 'log(xy) = log(x) + log(y),  log(x/y) = log(x) - log(y),  log(x^k) = k·log(x)',
     description: 'Fundamental algebraic simplification identities for logarithms across any base',
     category: 'Algebra',
-    relatedModes: ['scientific', 'calculus', 'graphing']
+    relatedModes: ['scientific', 'calculus', 'graphing'],
   },
   {
     id: 'alg_ap_gp',
@@ -323,7 +318,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     formula: 'S_AP = (n/2)[2a + (n-1)d],  S_GP = a(1 - r^n) / (1 - r)',
     description: 'Formulas for finite sum of arithmetic progression and geometric progression',
     category: 'Algebra',
-    relatedModes: ['scientific', 'finance', 'fractions']
+    relatedModes: ['scientific', 'finance', 'fractions'],
   },
 
   // ==================== GEOMETRY & TRIGONOMETRY ====================
@@ -333,7 +328,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     formula: 'a² + b² = c²,  d = √((x₂ - x₁)² + (y₂ - y₁)²)',
     description: 'Fundamental relation among sides in right triangle and Cartesian 2D distance',
     category: 'Geometry & Trig',
-    relatedModes: ['geometry', 'scientific', 'graphing', 'basic']
+    relatedModes: ['geometry', 'scientific', 'graphing', 'basic'],
   },
   {
     id: 'geo_trig_identity',
@@ -341,7 +336,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     formula: 'sin²(θ) + cos²(θ) = 1,  1 + tan²(θ) = sec²(θ),  1 + cot²(θ) = csc²(θ)',
     description: 'Core identities connecting sine, cosine, tangent, and secant functions',
     category: 'Geometry & Trig',
-    relatedModes: ['geometry', 'scientific', 'calculus']
+    relatedModes: ['geometry', 'scientific', 'calculus'],
   },
   {
     id: 'geo_double_angle',
@@ -349,15 +344,16 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     formula: 'sin(2θ) = 2sin(θ)cos(θ),  cos(2θ) = cos²(θ) - sin²(θ) = 2cos²(θ) - 1',
     description: 'Simplifies trigonometric terms with doubled frequency angles',
     category: 'Geometry & Trig',
-    relatedModes: ['geometry', 'scientific', 'calculus']
+    relatedModes: ['geometry', 'scientific', 'calculus'],
   },
   {
     id: 'geo_law_sines_cosines',
     name: 'Law of Sines & Law of Cosines',
     formula: 'a/sin(A) = b/sin(B) = c/sin(C),  c² = a² + b² - 2ab·cos(C)',
-    description: 'Solves arbitrary oblique non-right triangles given side/angle combinations (SAS, SSS, ASA)',
+    description:
+      'Solves arbitrary oblique non-right triangles given side/angle combinations (SAS, SSS, ASA)',
     category: 'Geometry & Trig',
-    relatedModes: ['geometry', 'scientific']
+    relatedModes: ['geometry', 'scientific'],
   },
   {
     id: 'geo_heron',
@@ -365,7 +361,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     formula: 'Area = √(s(s - a)(s - b)(s - c)),  s = (a + b + c) / 2',
     description: 'Computes exact triangle area given only the three side lengths without heights',
     category: 'Geometry & Trig',
-    relatedModes: ['geometry', 'scientific']
+    relatedModes: ['geometry', 'scientific'],
   },
   {
     id: 'geo_sphere_cylinder',
@@ -373,7 +369,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     formula: 'V_sphere = (4/3)πr³,  V_cylinder = πr²h,  V_cone = (1/3)πr²h',
     description: 'Standard 3D solid geometry volume and surface area equations',
     category: 'Geometry & Trig',
-    relatedModes: ['geometry', 'scientific', 'converter']
+    relatedModes: ['geometry', 'scientific', 'converter'],
   },
 
   // ==================== MATRIX & LINEAR ALGEBRA ====================
@@ -381,9 +377,10 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     id: 'mat_det_2x2_3x3',
     name: 'Matrix Determinant (2×2 & 3×3)',
     formula: 'det([a b; c d]) = ad - bc,  det(A) = a(ei-fh) - b(di-fg) + c(dh-eg)',
-    description: 'Scalar value characterizing linear transformation scale and invertibility (det ≠ 0)',
+    description:
+      'Scalar value characterizing linear transformation scale and invertibility (det ≠ 0)',
     category: 'Matrix & Vectors',
-    relatedModes: ['matrix', 'equation', 'scientific']
+    relatedModes: ['matrix', 'equation', 'scientific'],
   },
   {
     id: 'mat_inverse',
@@ -391,15 +388,16 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     formula: 'A⁻¹ = (1 / det(A)) · adj(A),  A · A⁻¹ = I',
     description: 'Multiplicative inverse matrix exists if and only if determinant is non-zero',
     category: 'Matrix & Vectors',
-    relatedModes: ['matrix', 'equation']
+    relatedModes: ['matrix', 'equation'],
   },
   {
     id: 'mat_dot_cross',
     name: 'Vector Dot Product & Cross Product',
     formula: 'A · B = |A||B|cos(θ) = ∑(a_i·b_i),  |A × B| = |A||B|sin(θ)',
-    description: 'Dot product yields scalar projection; cross product yields orthogonal normal vector in 3D',
+    description:
+      'Dot product yields scalar projection; cross product yields orthogonal normal vector in 3D',
     category: 'Matrix & Vectors',
-    relatedModes: ['matrix', 'geometry', 'scientific']
+    relatedModes: ['matrix', 'geometry', 'scientific'],
   },
   {
     id: 'mat_eigen',
@@ -407,7 +405,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     formula: 'det(A - λI) = 0,  A · v = λ · v',
     description: 'Scalar roots λ for which non-zero eigenvector v undergoes pure scaling',
     category: 'Matrix & Vectors',
-    relatedModes: ['matrix', 'equation']
+    relatedModes: ['matrix', 'equation'],
   },
 
   // ==================== STATISTICS & PROBABILITY ====================
@@ -417,7 +415,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     formula: 's = √[ ∑(x_i - x̄)² / (n - 1) ],  σ = √[ ∑(x_i - μ)² / N ]',
     description: 'Measure of the amount of variation or dispersion of a set of values from mean',
     category: 'Statistics',
-    relatedModes: ['statistics', 'scientific']
+    relatedModes: ['statistics', 'scientific'],
   },
   {
     id: 'stat_zscore',
@@ -425,31 +423,34 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     formula: 'Z = (X - μ) / σ',
     description: 'Number of standard deviations an observation X is from the distribution mean μ',
     category: 'Statistics',
-    relatedModes: ['statistics', 'health']
+    relatedModes: ['statistics', 'health'],
   },
   {
     id: 'stat_bayes',
     name: "Bayes' Theorem",
     formula: 'P(A|B) = [ P(B|A) · P(A) ] / P(B)',
-    description: 'Determines conditional probability of event A given prior knowledge and new evidence B',
+    description:
+      'Determines conditional probability of event A given prior knowledge and new evidence B',
     category: 'Statistics',
-    relatedModes: ['statistics', 'fractions']
+    relatedModes: ['statistics', 'fractions'],
   },
   {
     id: 'stat_comb_perm',
     name: 'Combinations & Permutations',
     formula: 'nCr = n! / (r!(n - r)!),  nPr = n! / (n - r)!',
-    description: 'Selection count where order does not matter (combinations) or matters (permutations)',
+    description:
+      'Selection count where order does not matter (combinations) or matters (permutations)',
     category: 'Statistics',
-    relatedModes: ['statistics', 'fractions', 'scientific']
+    relatedModes: ['statistics', 'fractions', 'scientific'],
   },
   {
     id: 'stat_pearson',
     name: "Pearson's Correlation Coefficient",
     formula: 'r = ∑((x - x̄)(y - ȳ)) / [ √(∑(x - x̄)²) · √(∑(y - ȳ)²) ]',
-    description: 'Linear correlation metric bounded between -1 (negative) and +1 (perfect positive)',
+    description:
+      'Linear correlation metric bounded between -1 (negative) and +1 (perfect positive)',
     category: 'Statistics',
-    relatedModes: ['statistics', 'graphing']
+    relatedModes: ['statistics', 'graphing'],
   },
 
   // ==================== COMPUTER SCIENCE & BINARY ====================
@@ -457,25 +458,28 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     id: 'cs_twos_comp',
     name: "Two's Complement Signed Negation",
     formula: '-X = ~X + 1 = (NOT X) + 1',
-    description: 'Standard binary representation for signed integers in computer hardware arithmetic',
+    description:
+      'Standard binary representation for signed integers in computer hardware arithmetic',
     category: 'Computer Science',
-    relatedModes: ['programmer']
+    relatedModes: ['programmer'],
   },
   {
     id: 'cs_bit_shifts',
     name: 'Bitwise Shift Scaling',
     formula: 'X << k = X · 2^k,  X >> k = ⌊X / 2^k⌋',
-    description: 'Left shift multiplies by powers of two; right shift performs unsigned integer division',
+    description:
+      'Left shift multiplies by powers of two; right shift performs unsigned integer division',
     category: 'Computer Science',
-    relatedModes: ['programmer']
+    relatedModes: ['programmer'],
   },
   {
     id: 'cs_shannon',
     name: 'Shannon Information Entropy',
     formula: 'H(X) = -∑[i=1..n] P(x_i) · log₂(P(x_i))',
-    description: 'Average level of information, surprise, or uncertainty in random variable outcome',
+    description:
+      'Average level of information, surprise, or uncertainty in random variable outcome',
     category: 'Computer Science',
-    relatedModes: ['programmer', 'statistics', 'scientific']
+    relatedModes: ['programmer', 'statistics', 'scientific'],
   },
   {
     id: 'cs_powers2',
@@ -483,7 +487,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     formula: '2¹⁰ = 1,024 (1 KiB), 2²⁰ = 1,048,576 (1 MiB), 2³² = 4,294,967,296, 2⁶⁴ ≈ 1.844×10¹⁹',
     description: 'Key binary memory boundaries, word limits, and address space capacities',
     category: 'Computer Science',
-    relatedModes: ['programmer', 'converter']
+    relatedModes: ['programmer', 'converter'],
   },
 
   // ==================== FINANCE & ECONOMICS ====================
@@ -491,17 +495,19 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     id: 'fin_emi_loan',
     name: 'Loan EMI / Amortization Formula',
     formula: 'EMI = [ P · r · (1 + r)^n ] / [ (1 + r)^n - 1 ]',
-    description: 'Fixed monthly installment on principal P at monthly interest rate r over n periods',
+    description:
+      'Fixed monthly installment on principal P at monthly interest rate r over n periods',
     category: 'Finance',
-    relatedModes: ['finance', 'scientific']
+    relatedModes: ['finance', 'scientific'],
   },
   {
     id: 'fin_compound_int',
     name: 'Compound Interest & Continuous Compounding',
     formula: 'A = P(1 + r/n)^(nt),  A_continuous = P · e^(rt)',
-    description: 'Total accrued balance with periodic frequency compounding or continuous exponential growth',
+    description:
+      'Total accrued balance with periodic frequency compounding or continuous exponential growth',
     category: 'Finance',
-    relatedModes: ['finance', 'scientific']
+    relatedModes: ['finance', 'scientific'],
   },
   {
     id: 'fin_rule_72',
@@ -509,7 +515,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     formula: 'Years to Double ≈ 72 / (Annual Interest Rate %)',
     description: 'Quick accurate mental estimation for investment capital doubling period',
     category: 'Finance',
-    relatedModes: ['finance', 'basic']
+    relatedModes: ['finance', 'basic'],
   },
   {
     id: 'fin_cagr',
@@ -517,7 +523,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     formula: 'CAGR = (Ending Value / Beginning Value)^(1 / Years) - 1',
     description: 'Smoothed annualized rate of return across multiple investment holding periods',
     category: 'Finance',
-    relatedModes: ['finance', 'statistics']
+    relatedModes: ['finance', 'statistics'],
   },
 
   // ==================== HEALTH & BIOMETRICS ====================
@@ -525,25 +531,28 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     id: 'hlth_bmi',
     name: 'Body Mass Index (BMI)',
     formula: 'BMI = weight(kg) / (height(m))² = [weight(lbs) / (height(in))²] × 703',
-    description: 'Standard screening metric categorizing underweight (<18.5), normal (18.5-24.9), overweight (25-29.9), obese (≥30)',
+    description:
+      'Standard screening metric categorizing underweight (<18.5), normal (18.5-24.9), overweight (25-29.9), obese (≥30)',
     category: 'Health & Bio',
-    relatedModes: ['health', 'converter']
+    relatedModes: ['health', 'converter'],
   },
   {
     id: 'hlth_mifflin',
     name: 'Mifflin-St Jeor BMR Equation',
     formula: 'BMR_men = 10w + 6.25h - 5a + 5,  BMR_women = 10w + 6.25h - 5a - 161',
-    description: 'Gold-standard formula predicting basal metabolic rate (weight in kg, height in cm, age in years)',
+    description:
+      'Gold-standard formula predicting basal metabolic rate (weight in kg, height in cm, age in years)',
     category: 'Health & Bio',
-    relatedModes: ['health', 'basic']
+    relatedModes: ['health', 'basic'],
   },
   {
     id: 'hlth_karvonen',
     name: 'Karvonen Target Heart Rate Zone',
     formula: 'Target HR = [ (HR_max - HR_rest) × Intensity% ] + HR_rest,  HR_max = 220 - Age',
-    description: 'Calculates cardio training heart rate training zones factoring individual resting heart rate',
+    description:
+      'Calculates cardio training heart rate training zones factoring individual resting heart rate',
     category: 'Health & Bio',
-    relatedModes: ['health']
+    relatedModes: ['health'],
   },
 
   // ==================== UNIT FACTORS & CONVERSIONS ====================
@@ -555,7 +564,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     unit: 'm/inch',
     description: 'Precise international imperial to metric conversion multipliers',
     category: 'Unit Factors',
-    relatedModes: ['converter', 'basic']
+    relatedModes: ['converter', 'basic'],
   },
   {
     id: 'unit_mass',
@@ -565,7 +574,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     unit: 'kg/lb',
     description: 'Standard international mass definition relating pounds to kilograms',
     category: 'Unit Factors',
-    relatedModes: ['converter']
+    relatedModes: ['converter'],
   },
   {
     id: 'unit_temp',
@@ -573,7 +582,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     formula: '°F = (°C × 9/5) + 32,  °C = (°F - 32) × 5/9,  K = °C + 273.15',
     description: 'Equations converting between Celsius, Fahrenheit, and absolute Kelvin',
     category: 'Unit Factors',
-    relatedModes: ['converter', 'scientific']
+    relatedModes: ['converter', 'scientific'],
   },
   {
     id: 'unit_energy',
@@ -581,10 +590,11 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     formula: '1 eV = 1.602176634×10⁻¹⁹ J,  1 cal = 4.184 J,  1 kWh = 3,600,000 J',
     numericValue: '4.184',
     unit: 'J/cal',
-    description: 'Conversion rates across electron-volts, thermochemical calories, and kilowatt-hours',
+    description:
+      'Conversion rates across electron-volts, thermochemical calories, and kilowatt-hours',
     category: 'Unit Factors',
-    relatedModes: ['converter', 'scientific']
-  }
+    relatedModes: ['converter', 'scientific'],
+  },
 ];
 
 export const FormulasPanel: React.FC<FormulasPanelProps> = ({ settings, onNavigateMode }) => {
@@ -603,7 +613,7 @@ export const FormulasPanel: React.FC<FormulasPanelProps> = ({ settings, onNaviga
     'Computer Science',
     'Finance',
     'Health & Bio',
-    'Unit Factors'
+    'Unit Factors',
   ];
 
   const handleCopy = (id: string, textToCopy: string) => {
@@ -633,17 +643,17 @@ export const FormulasPanel: React.FC<FormulasPanelProps> = ({ settings, onNaviga
   const isLight = settings?.theme === 'light';
   const isOled = settings?.theme === 'oled';
 
-  const cardBg = isLight 
-    ? 'bg-white border-slate-200 shadow-sm' 
-    : isOled 
-    ? 'bg-black border-zinc-800' 
-    : 'bg-slate-900 border-slate-800 shadow-xl';
+  const cardBg = isLight
+    ? 'bg-white border-slate-200 shadow-sm'
+    : isOled
+      ? 'bg-black border-zinc-800'
+      : 'bg-slate-900 border-slate-800 shadow-xl';
 
   const innerBoxBg = isLight
     ? 'bg-slate-50 border-slate-200'
     : isOled
-    ? 'bg-zinc-950 border-zinc-800/80'
-    : 'bg-slate-950 border-slate-800';
+      ? 'bg-zinc-950 border-zinc-800/80'
+      : 'bg-slate-950 border-slate-800';
 
   const textHeading = isLight ? 'text-slate-900' : 'text-slate-100';
   const textBody = isLight ? 'text-slate-600' : 'text-slate-400';
@@ -652,13 +662,15 @@ export const FormulasPanel: React.FC<FormulasPanelProps> = ({ settings, onNaviga
   const btnAction = isLight
     ? 'bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-900 border-slate-200'
     : isOled
-    ? 'bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border-zinc-800'
-    : 'bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border-slate-700';
+      ? 'bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border-zinc-800'
+      : 'bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border-slate-700';
 
   return (
     <div className="max-w-6xl mx-auto w-full p-4 flex flex-col gap-6">
       {/* Top Banner / Summary */}
-      <div className={`${cardBg} border rounded-3xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-colors`}>
+      <div
+        className={`${cardBg} border rounded-3xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-colors`}
+      >
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="p-2 rounded-xl bg-sky-500/10 text-sky-500 border border-sky-500/20">
@@ -669,12 +681,15 @@ export const FormulasPanel: React.FC<FormulasPanelProps> = ({ settings, onNaviga
             </h1>
           </div>
           <p className={`text-xs ${textBody} max-w-2xl`}>
-            Comprehensive reference across physics, calculus, geometry, matrix algebra, statistics, computer science, finance, and unit constants supporting every section of OmniCalc Pro.
+            Comprehensive reference across physics, calculus, geometry, matrix algebra, statistics,
+            computer science, finance, and unit constants supporting every section of OmniCalc Pro.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
-          <div className={`px-3.5 py-1.5 rounded-2xl ${isLight ? 'bg-slate-100 border-slate-200 text-slate-700' : 'bg-slate-800/80 border-slate-700/80 text-slate-300'} border text-xs font-semibold flex items-center gap-2`}>
+          <div
+            className={`px-3.5 py-1.5 rounded-2xl ${isLight ? 'bg-slate-100 border-slate-200 text-slate-700' : 'bg-slate-800/80 border-slate-700/80 text-slate-300'} border text-xs font-semibold flex items-center gap-2`}
+          >
             <Sparkles className="w-4 h-4 text-amber-500" />
             <span>{FORMULAS_AND_CONSTANTS_DATABASE.length} Curated Items</span>
           </div>
@@ -685,7 +700,9 @@ export const FormulasPanel: React.FC<FormulasPanelProps> = ({ settings, onNaviga
       <div className={`${cardBg} border rounded-3xl p-4 flex flex-col gap-3 transition-colors`}>
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           {/* Search Box */}
-          <div className={`flex items-center gap-2 w-full md:w-80 ${isLight ? 'bg-slate-100 border-slate-200 text-slate-900' : 'bg-slate-800/90 border-slate-700/80 text-slate-100'} border px-3.5 py-2.5 rounded-2xl shadow-inner`}>
+          <div
+            className={`flex items-center gap-2 w-full md:w-80 ${isLight ? 'bg-slate-100 border-slate-200 text-slate-900' : 'bg-slate-800/90 border-slate-700/80 text-slate-100'} border px-3.5 py-2.5 rounded-2xl shadow-inner`}
+          >
             <Search className={`w-4 h-4 ${textMuted}`} />
             <input
               type="text"
@@ -695,7 +712,7 @@ export const FormulasPanel: React.FC<FormulasPanelProps> = ({ settings, onNaviga
               className={`bg-transparent border-none text-xs ${isLight ? 'text-slate-900 placeholder-slate-400' : 'text-slate-100 placeholder-slate-400'} focus:outline-none w-full`}
             />
             {search && (
-              <button 
+              <button
                 onClick={() => setSearch('')}
                 className="text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 px-1 font-bold"
               >
@@ -705,7 +722,8 @@ export const FormulasPanel: React.FC<FormulasPanelProps> = ({ settings, onNaviga
           </div>
 
           <div className={`text-xs font-medium ${textMuted}`}>
-            Showing <strong className="text-sky-500 font-bold">{filtered.length}</strong> of {FORMULAS_AND_CONSTANTS_DATABASE.length}
+            Showing <strong className="text-sky-500 font-bold">{filtered.length}</strong> of{' '}
+            {FORMULAS_AND_CONSTANTS_DATABASE.length}
           </div>
         </div>
 
@@ -717,13 +735,14 @@ export const FormulasPanel: React.FC<FormulasPanelProps> = ({ settings, onNaviga
               onClick={() => setSelectedCat(cat)}
               className={`
                 px-3.5 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border shadow-xs flex-shrink-0
-                ${selectedCat === cat
-                  ? 'bg-sky-600 text-white border-sky-500 shadow-sky-600/20'
-                  : isLight
-                  ? 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200 hover:text-slate-900'
-                  : isOled
-                  ? 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:bg-zinc-800 hover:text-white'
-                  : 'bg-slate-800/80 text-slate-400 border-slate-700 hover:bg-slate-700 hover:text-white'
+                ${
+                  selectedCat === cat
+                    ? 'bg-sky-600 text-white border-sky-500 shadow-sky-600/20'
+                    : isLight
+                      ? 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200 hover:text-slate-900'
+                      : isOled
+                        ? 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:bg-zinc-800 hover:text-white'
+                        : 'bg-slate-800/80 text-slate-400 border-slate-700 hover:bg-slate-700 hover:text-white'
                 }
               `}
             >
@@ -762,17 +781,19 @@ export const FormulasPanel: React.FC<FormulasPanelProps> = ({ settings, onNaviga
                     </div>
                   </div>
 
-                  <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${isLight ? 'bg-sky-50 text-sky-700 border-sky-200' : 'bg-slate-800 text-sky-400 border-slate-700'} border whitespace-nowrap flex-shrink-0`}>
+                  <span
+                    className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${isLight ? 'bg-sky-50 text-sky-700 border-sky-200' : 'bg-slate-800 text-sky-400 border-slate-700'} border whitespace-nowrap flex-shrink-0`}
+                  >
                     {item.category}
                   </span>
                 </div>
 
-                <p className={`text-xs ${textBody} mt-1 leading-relaxed`}>
-                  {item.description}
-                </p>
+                <p className={`text-xs ${textBody} mt-1 leading-relaxed`}>{item.description}</p>
 
                 {item.notes && (
-                  <p className={`text-[11px] ${textMuted} italic ${isLight ? 'bg-slate-100/70 border-slate-200' : 'bg-slate-950/40 border-slate-800/60'} p-2 rounded-xl border mt-1`}>
+                  <p
+                    className={`text-[11px] ${textMuted} italic ${isLight ? 'bg-slate-100/70 border-slate-200' : 'bg-slate-950/40 border-slate-800/60'} p-2 rounded-xl border mt-1`}
+                  >
                     💡 {item.notes}
                   </p>
                 )}
@@ -781,7 +802,9 @@ export const FormulasPanel: React.FC<FormulasPanelProps> = ({ settings, onNaviga
               {/* Formula & Values Box */}
               <div className={`${innerBoxBg} border rounded-2xl p-3 flex flex-col gap-2`}>
                 <div className="flex items-center justify-between gap-2">
-                  <div className={`overflow-x-auto scrollbar-none font-mono text-xs font-bold ${isLight ? 'text-sky-700' : 'text-sky-300'} py-0.5`}>
+                  <div
+                    className={`overflow-x-auto scrollbar-none font-mono text-xs font-bold ${isLight ? 'text-sky-700' : 'text-sky-300'} py-0.5`}
+                  >
                     {item.formula}
                   </div>
 
@@ -816,8 +839,12 @@ export const FormulasPanel: React.FC<FormulasPanelProps> = ({ settings, onNaviga
                 </div>
 
                 {/* Connected Section Badges */}
-                <div className={`flex items-center gap-1.5 flex-wrap pt-1.5 border-t ${isLight ? 'border-slate-200' : 'border-slate-800/80'}`}>
-                  <span className={`text-[10px] ${textMuted} font-semibold flex items-center gap-1`}>
+                <div
+                  className={`flex items-center gap-1.5 flex-wrap pt-1.5 border-t ${isLight ? 'border-slate-200' : 'border-slate-800/80'}`}
+                >
+                  <span
+                    className={`text-[10px] ${textMuted} font-semibold flex items-center gap-1`}
+                  >
                     <Layers className="w-3 h-3 text-sky-500" />
                     Works with:
                   </span>
@@ -839,11 +866,16 @@ export const FormulasPanel: React.FC<FormulasPanelProps> = ({ settings, onNaviga
       </div>
 
       {filtered.length === 0 && (
-        <div className={`${cardBg} border rounded-3xl p-12 text-center flex flex-col items-center justify-center gap-3`}>
+        <div
+          className={`${cardBg} border rounded-3xl p-12 text-center flex flex-col items-center justify-center gap-3`}
+        >
           <HelpCircle className="w-10 h-10 text-slate-400" />
-          <h4 className={`text-base font-bold ${textHeading}`}>No matching formulas or constants</h4>
+          <h4 className={`text-base font-bold ${textHeading}`}>
+            No matching formulas or constants
+          </h4>
           <p className={`text-xs ${textMuted} max-w-sm`}>
-            Try searching for a different keyword like "integral", "derivative", "pi", "gravity", "EMI", or "binary".
+            Try searching for a different keyword like "integral", "derivative", "pi", "gravity",
+            "EMI", or "binary".
           </p>
           <button
             onClick={() => {

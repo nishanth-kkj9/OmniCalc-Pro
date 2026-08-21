@@ -1,29 +1,29 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Search, 
-  Calculator, 
-  Sparkles, 
-  Divide, 
-  Triangle, 
-  Equal, 
-  Sigma, 
-  LineChart, 
-  Grid, 
-  BarChart2, 
-  Binary, 
-  ArrowLeftRight, 
-  DollarSign, 
-  Calendar, 
-  Heart, 
-  BookOpen, 
-  History, 
+import {
+  Search,
+  Calculator,
+  Sparkles,
+  Divide,
+  Triangle,
+  Equal,
+  Sigma,
+  LineChart,
+  Grid,
+  BarChart2,
+  Binary,
+  ArrowLeftRight,
+  DollarSign,
+  Calendar,
+  Heart,
+  BookOpen,
+  History,
   Settings,
   ArrowRight,
   Sun,
   Moon,
   Volume2,
   VolumeX,
-  Keyboard
+  Keyboard,
 } from 'lucide-react';
 import { CalcMode, AppSettings } from '../types';
 
@@ -96,7 +96,16 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       category: 'Engines & Calculators',
       icon: <Triangle className="w-4 h-4 text-purple-500" />,
       action: () => onSelectMode('geometry'),
-      keywords: ['geometry', 'triangle', 'pythagoras', 'area', 'volume', 'shapes', 'angles', 'hypotenuse'],
+      keywords: [
+        'geometry',
+        'triangle',
+        'pythagoras',
+        'area',
+        'volume',
+        'shapes',
+        'angles',
+        'hypotenuse',
+      ],
     },
     {
       id: 'equation',
@@ -114,7 +123,15 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       category: 'Engines & Calculators',
       icon: <Sigma className="w-4 h-4 text-blue-500" />,
       action: () => onSelectMode('calculus'),
-      keywords: ['calculus', 'integral', 'derivative', 'tangent', 'newton', 'limit', 'area under curve'],
+      keywords: [
+        'calculus',
+        'integral',
+        'derivative',
+        'tangent',
+        'newton',
+        'limit',
+        'area under curve',
+      ],
     },
     {
       id: 'graphing',
@@ -132,7 +149,16 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       category: 'Engines & Calculators',
       icon: <Grid className="w-4 h-4 text-indigo-500" />,
       action: () => onSelectMode('matrix'),
-      keywords: ['matrix', 'determinant', 'inverse', 'transpose', 'multiplication', 'linear algebra', '2x2', '3x3'],
+      keywords: [
+        'matrix',
+        'determinant',
+        'inverse',
+        'transpose',
+        'multiplication',
+        'linear algebra',
+        '2x2',
+        '3x3',
+      ],
     },
     {
       id: 'statistics',
@@ -141,7 +167,16 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       category: 'Engines & Calculators',
       icon: <BarChart2 className="w-4 h-4 text-yellow-500" />,
       action: () => onSelectMode('statistics'),
-      keywords: ['stats', 'statistics', 'mean', 'median', 'mode', 'std dev', 'variance', 'quartiles'],
+      keywords: [
+        'stats',
+        'statistics',
+        'mean',
+        'median',
+        'mode',
+        'std dev',
+        'variance',
+        'quartiles',
+      ],
     },
     {
       id: 'programmer',
@@ -150,7 +185,19 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       category: 'Engines & Calculators',
       icon: <Binary className="w-4 h-4 text-cyan-500" />,
       action: () => onSelectMode('programmer'),
-      keywords: ['programmer', 'binary', 'hex', 'hexadecimal', 'octal', 'bitwise', 'and', 'or', 'xor', 'not', 'shift'],
+      keywords: [
+        'programmer',
+        'binary',
+        'hex',
+        'hexadecimal',
+        'octal',
+        'bitwise',
+        'and',
+        'or',
+        'xor',
+        'not',
+        'shift',
+      ],
     },
     {
       id: 'converter',
@@ -159,7 +206,18 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       category: 'Engines & Calculators',
       icon: <ArrowLeftRight className="w-4 h-4 text-emerald-400" />,
       action: () => onSelectMode('converter'),
-      keywords: ['converter', 'units', 'meters', 'feet', 'kg', 'pounds', 'celsius', 'fahrenheit', 'megabytes', 'gigabytes'],
+      keywords: [
+        'converter',
+        'units',
+        'meters',
+        'feet',
+        'kg',
+        'pounds',
+        'celsius',
+        'fahrenheit',
+        'megabytes',
+        'gigabytes',
+      ],
     },
     {
       id: 'finance',
@@ -168,7 +226,18 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       category: 'Engines & Calculators',
       icon: <DollarSign className="w-4 h-4 text-green-500" />,
       action: () => onSelectMode('finance'),
-      keywords: ['finance', 'loan', 'emi', 'mortgage', 'compound interest', 'sip', 'tax', 'gst', 'discount', 'money'],
+      keywords: [
+        'finance',
+        'loan',
+        'emi',
+        'mortgage',
+        'compound interest',
+        'sip',
+        'tax',
+        'gst',
+        'discount',
+        'money',
+      ],
     },
     {
       id: 'datetime',
@@ -177,16 +246,37 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       category: 'Engines & Calculators',
       icon: <Calendar className="w-4 h-4 text-orange-500" />,
       action: () => onSelectMode('datetime'),
-      keywords: ['date', 'time', 'duration', 'business days', 'holidays', 'shift', 'wage', 'hours', 'milestone'],
+      keywords: [
+        'date',
+        'time',
+        'duration',
+        'business days',
+        'holidays',
+        'shift',
+        'wage',
+        'hours',
+        'milestone',
+      ],
     },
     {
       id: 'health',
       title: 'Health & Fitness Suite',
-      subtitle: 'BMI category, BMR & TDEE calorie deficit/surplus, target heart rate zones (Karvonen)',
+      subtitle:
+        'BMI category, BMR & TDEE calorie deficit/surplus, target heart rate zones (Karvonen)',
       category: 'Engines & Calculators',
       icon: <Heart className="w-4 h-4 text-rose-500" />,
       action: () => onSelectMode('health'),
-      keywords: ['health', 'bmi', 'bmr', 'tdee', 'calories', 'weight', 'heart rate', 'fitness', 'cardio'],
+      keywords: [
+        'health',
+        'bmi',
+        'bmr',
+        'tdee',
+        'calories',
+        'weight',
+        'heart rate',
+        'fitness',
+        'cardio',
+      ],
     },
     {
       id: 'formulas',
@@ -195,7 +285,15 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       category: 'Formulas & Reference',
       icon: <BookOpen className="w-4 h-4 text-sky-400" />,
       action: () => onSelectMode('formulas'),
-      keywords: ['formulas', 'constants', 'physics', 'speed of light', 'gravitation', 'planck', 'cheat sheet'],
+      keywords: [
+        'formulas',
+        'constants',
+        'physics',
+        'speed of light',
+        'gravitation',
+        'planck',
+        'cheat sheet',
+      ],
     },
     {
       id: 'history',
@@ -245,10 +343,18 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
     },
     {
       id: 'action-toggle-sound',
-      title: settings.soundEnabled ? 'Mute Mechanical Audio Sounds' : 'Enable Mechanical Key Sounds',
-      subtitle: settings.soundEnabled ? 'Disable tactile click sound effects' : 'Enable rich synthesized audio feedback',
+      title: settings.soundEnabled
+        ? 'Mute Mechanical Audio Sounds'
+        : 'Enable Mechanical Key Sounds',
+      subtitle: settings.soundEnabled
+        ? 'Disable tactile click sound effects'
+        : 'Enable rich synthesized audio feedback',
       category: 'Quick Actions',
-      icon: settings.soundEnabled ? <VolumeX className="w-4 h-4 text-rose-400" /> : <Volume2 className="w-4 h-4 text-emerald-400" />,
+      icon: settings.soundEnabled ? (
+        <VolumeX className="w-4 h-4 text-rose-400" />
+      ) : (
+        <Volume2 className="w-4 h-4 text-emerald-400" />
+      ),
       action: () => onUpdateSettings({ soundEnabled: !settings.soundEnabled }),
       keywords: ['sound', 'audio', 'mute', 'click', 'volume', 'feedback'],
     },
@@ -315,36 +421,38 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
 
   if (!isOpen) return null;
 
-  const modalBg = isLight 
-    ? 'bg-white border-slate-200 text-slate-900 shadow-2xl' 
-    : isOled 
-    ? 'bg-zinc-950 border-zinc-800 text-white shadow-2xl' 
-    : 'bg-slate-900 border-slate-800 text-slate-100 shadow-2xl';
+  const modalBg = isLight
+    ? 'bg-white border-slate-200 text-slate-900 shadow-2xl'
+    : isOled
+      ? 'bg-zinc-950 border-zinc-800 text-white shadow-2xl'
+      : 'bg-slate-900 border-slate-800 text-slate-100 shadow-2xl';
 
   const itemHover = isLight
     ? 'hover:bg-slate-100 text-slate-800'
     : isOled
-    ? 'hover:bg-zinc-900 text-zinc-200'
-    : 'hover:bg-slate-800/80 text-slate-200';
+      ? 'hover:bg-zinc-900 text-zinc-200'
+      : 'hover:bg-slate-800/80 text-slate-200';
 
   const itemActive = isLight
     ? 'bg-sky-50 text-slate-900 border-sky-200 shadow-xs'
     : isOled
-    ? 'bg-zinc-900 text-white border-zinc-700 shadow-xs'
-    : 'bg-sky-950/60 text-white border-sky-600/40 shadow-xs';
+      ? 'bg-zinc-900 text-white border-zinc-700 shadow-xs'
+      : 'bg-sky-950/60 text-white border-sky-600/40 shadow-xs';
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 px-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-150"
       onClick={onClose}
     >
-      <div 
+      <div
         className={`w-full max-w-2xl rounded-3xl border ${modalBg} overflow-hidden flex flex-col max-h-[80vh] transition-all`}
         onClick={(e) => e.stopPropagation()}
         onKeyDown={handleKeyDown}
       >
         {/* Search Header */}
-        <div className={`p-4 border-b ${isLight ? 'border-slate-200' : 'border-slate-800'} flex items-center gap-3`}>
+        <div
+          className={`p-4 border-b ${isLight ? 'border-slate-200' : 'border-slate-800'} flex items-center gap-3`}
+        >
           <Search className={`w-5 h-5 ${isLight ? 'text-slate-400' : 'text-slate-400'}`} />
           <input
             ref={inputRef}
@@ -354,7 +462,9 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
             placeholder="Type a mathematical engine, formula, or tool... (e.g. Graph, BMI, Matrix, Loan, Hex)"
             className={`flex-1 bg-transparent border-none text-sm sm:text-base font-medium focus:outline-none ${isLight ? 'text-slate-900 placeholder-slate-400' : 'text-slate-100 placeholder-slate-400'}`}
           />
-          <kbd className={`px-2 py-1 rounded-lg text-[10px] font-mono font-bold uppercase ${isLight ? 'bg-slate-100 text-slate-600 border border-slate-300' : 'bg-slate-800 text-slate-400 border border-slate-700'}`}>
+          <kbd
+            className={`px-2 py-1 rounded-lg text-[10px] font-mono font-bold uppercase ${isLight ? 'bg-slate-100 text-slate-600 border border-slate-300' : 'bg-slate-800 text-slate-400 border border-slate-700'}`}
+          >
             ESC
           </kbd>
         </div>
@@ -381,24 +491,34 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className={`p-2 rounded-xl flex-shrink-0 ${isLight ? 'bg-slate-100' : isOled ? 'bg-zinc-900' : 'bg-slate-800'}`}>
+                    <div
+                      className={`p-2 rounded-xl flex-shrink-0 ${isLight ? 'bg-slate-100' : isOled ? 'bg-zinc-900' : 'bg-slate-800'}`}
+                    >
                       {cmd.icon}
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className={`text-sm font-bold truncate ${isLight ? 'text-slate-900' : 'text-slate-100'}`}>
+                        <span
+                          className={`text-sm font-bold truncate ${isLight ? 'text-slate-900' : 'text-slate-100'}`}
+                        >
                           {cmd.title}
                         </span>
-                        <span className={`text-[10px] px-2 py-0.5 rounded-full uppercase font-bold tracking-wider ${isLight ? 'bg-slate-100 text-slate-500' : 'bg-slate-800/80 text-slate-400'}`}>
+                        <span
+                          className={`text-[10px] px-2 py-0.5 rounded-full uppercase font-bold tracking-wider ${isLight ? 'bg-slate-100 text-slate-500' : 'bg-slate-800/80 text-slate-400'}`}
+                        >
                           {cmd.category}
                         </span>
                       </div>
-                      <p className={`text-xs truncate mt-0.5 ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                      <p
+                        className={`text-xs truncate mt-0.5 ${isLight ? 'text-slate-500' : 'text-slate-400'}`}
+                      >
                         {cmd.subtitle}
                       </p>
                     </div>
                   </div>
-                  <ArrowRight className={`w-4 h-4 flex-shrink-0 transition-transform ${isSelected ? 'translate-x-1 text-sky-500 opacity-100' : 'opacity-0'}`} />
+                  <ArrowRight
+                    className={`w-4 h-4 flex-shrink-0 transition-transform ${isSelected ? 'translate-x-1 text-sky-500 opacity-100' : 'opacity-0'}`}
+                  />
                 </button>
               );
             })
@@ -406,14 +526,14 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         </div>
 
         {/* Footer shortcuts hint */}
-        <div className={`p-3 border-t ${isLight ? 'border-slate-200 text-slate-500 bg-slate-50' : 'border-slate-800 text-slate-400 bg-slate-950/60'} flex items-center justify-between text-xs`}>
+        <div
+          className={`p-3 border-t ${isLight ? 'border-slate-200 text-slate-500 bg-slate-50' : 'border-slate-800 text-slate-400 bg-slate-950/60'} flex items-center justify-between text-xs`}
+        >
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1 font-mono text-[11px]">
               <Keyboard className="w-3.5 h-3.5" /> Navigate: ↑ / ↓
             </span>
-            <span className="flex items-center gap-1 font-mono text-[11px]">
-              Select: ↵ Enter
-            </span>
+            <span className="flex items-center gap-1 font-mono text-[11px]">Select: ↵ Enter</span>
           </div>
           <span className="text-[11px] font-medium" style={{ color: 'var(--accent)' }}>
             OmniCalc Quick Jump

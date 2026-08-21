@@ -22,7 +22,14 @@ export const DEFAULT_SETTINGS: AppSettings = {
 };
 
 const VALID_THEMES: ReadonlySet<string> = new Set(['dark', 'light', 'oled']);
-const VALID_ACCENTS: ReadonlySet<string> = new Set(['sky', 'emerald', 'violet', 'amber', 'rose', 'cyan']);
+const VALID_ACCENTS: ReadonlySet<string> = new Set([
+  'sky',
+  'emerald',
+  'violet',
+  'amber',
+  'rose',
+  'cyan',
+]);
 const VALID_ANGLE_MODES: ReadonlySet<string> = new Set(['DEG', 'RAD', 'GRAD']);
 const VALID_NOTATIONS: ReadonlySet<string> = new Set(['standard', 'scientific', 'engineering']);
 const VALID_THOUSANDS: ReadonlySet<string> = new Set(['comma', 'space', 'period', 'none']);
@@ -58,61 +65,71 @@ export function sanitizeSettings(raw: unknown): AppSettings {
 
   const obj = raw as Record<string, unknown>;
 
-  const theme = typeof obj.theme === 'string' && VALID_THEMES.has(obj.theme)
-    ? (obj.theme as AppSettings['theme'])
-    : DEFAULT_SETTINGS.theme;
+  const theme =
+    typeof obj.theme === 'string' && VALID_THEMES.has(obj.theme)
+      ? (obj.theme as AppSettings['theme'])
+      : DEFAULT_SETTINGS.theme;
 
-  const accentColor = typeof obj.accentColor === 'string' && VALID_ACCENTS.has(obj.accentColor)
-    ? (obj.accentColor as AppSettings['accentColor'])
-    : DEFAULT_SETTINGS.accentColor;
+  const accentColor =
+    typeof obj.accentColor === 'string' && VALID_ACCENTS.has(obj.accentColor)
+      ? (obj.accentColor as AppSettings['accentColor'])
+      : DEFAULT_SETTINGS.accentColor;
 
-  const angleMode = typeof obj.angleMode === 'string' && VALID_ANGLE_MODES.has(obj.angleMode)
-    ? (obj.angleMode as AngleMode)
-    : DEFAULT_SETTINGS.angleMode;
+  const angleMode =
+    typeof obj.angleMode === 'string' && VALID_ANGLE_MODES.has(obj.angleMode)
+      ? (obj.angleMode as AngleMode)
+      : DEFAULT_SETTINGS.angleMode;
 
-  const precision = typeof obj.precision === 'number' && Number.isFinite(obj.precision)
-    ? Math.max(0, Math.min(12, Math.round(obj.precision)))
-    : DEFAULT_SETTINGS.precision;
+  const precision =
+    typeof obj.precision === 'number' && Number.isFinite(obj.precision)
+      ? Math.max(0, Math.min(12, Math.round(obj.precision)))
+      : DEFAULT_SETTINGS.precision;
 
-  const notation = typeof obj.notation === 'string' && VALID_NOTATIONS.has(obj.notation)
-    ? (obj.notation as AppSettings['notation'])
-    : DEFAULT_SETTINGS.notation;
+  const notation =
+    typeof obj.notation === 'string' && VALID_NOTATIONS.has(obj.notation)
+      ? (obj.notation as AppSettings['notation'])
+      : DEFAULT_SETTINGS.notation;
 
-  const thousandsSeparator = typeof obj.thousandsSeparator === 'string' && VALID_THOUSANDS.has(obj.thousandsSeparator)
-    ? (obj.thousandsSeparator as AppSettings['thousandsSeparator'])
-    : DEFAULT_SETTINGS.thousandsSeparator;
+  const thousandsSeparator =
+    typeof obj.thousandsSeparator === 'string' && VALID_THOUSANDS.has(obj.thousandsSeparator)
+      ? (obj.thousandsSeparator as AppSettings['thousandsSeparator'])
+      : DEFAULT_SETTINGS.thousandsSeparator;
 
-  const fontSize = typeof obj.fontSize === 'string' && VALID_FONT_SIZES.has(obj.fontSize)
-    ? (obj.fontSize as AppSettings['fontSize'])
-    : DEFAULT_SETTINGS.fontSize;
+  const fontSize =
+    typeof obj.fontSize === 'string' && VALID_FONT_SIZES.has(obj.fontSize)
+      ? (obj.fontSize as AppSettings['fontSize'])
+      : DEFAULT_SETTINGS.fontSize;
 
-  const soundEnabled = typeof obj.soundEnabled === 'boolean'
-    ? obj.soundEnabled
-    : DEFAULT_SETTINGS.soundEnabled;
+  const soundEnabled =
+    typeof obj.soundEnabled === 'boolean' ? obj.soundEnabled : DEFAULT_SETTINGS.soundEnabled;
 
-  const soundVolume = typeof obj.soundVolume === 'number' && Number.isFinite(obj.soundVolume)
-    ? Math.max(0, Math.min(1, obj.soundVolume))
-    : DEFAULT_SETTINGS.soundVolume;
+  const soundVolume =
+    typeof obj.soundVolume === 'number' && Number.isFinite(obj.soundVolume)
+      ? Math.max(0, Math.min(1, obj.soundVolume))
+      : DEFAULT_SETTINGS.soundVolume;
 
-  const soundProfile = typeof obj.soundProfile === 'string' && VALID_SOUND_PROFILES.has(obj.soundProfile)
-    ? (obj.soundProfile as AppSettings['soundProfile'])
-    : DEFAULT_SETTINGS.soundProfile;
+  const soundProfile =
+    typeof obj.soundProfile === 'string' && VALID_SOUND_PROFILES.has(obj.soundProfile)
+      ? (obj.soundProfile as AppSettings['soundProfile'])
+      : DEFAULT_SETTINGS.soundProfile;
 
-  const hapticFeedback = typeof obj.hapticFeedback === 'boolean'
-    ? obj.hapticFeedback
-    : DEFAULT_SETTINGS.hapticFeedback;
+  const hapticFeedback =
+    typeof obj.hapticFeedback === 'boolean' ? obj.hapticFeedback : DEFAULT_SETTINGS.hapticFeedback;
 
-  const defaultMode = typeof obj.defaultMode === 'string' && VALID_CALC_MODES.has(obj.defaultMode)
-    ? (obj.defaultMode as CalcMode)
-    : DEFAULT_SETTINGS.defaultMode;
+  const defaultMode =
+    typeof obj.defaultMode === 'string' && VALID_CALC_MODES.has(obj.defaultMode)
+      ? (obj.defaultMode as CalcMode)
+      : DEFAULT_SETTINGS.defaultMode;
 
-  const maxHistoryItems = typeof obj.maxHistoryItems === 'number' && Number.isFinite(obj.maxHistoryItems)
-    ? Math.max(1, Math.min(1000, Math.round(obj.maxHistoryItems)))
-    : DEFAULT_SETTINGS.maxHistoryItems;
+  const maxHistoryItems =
+    typeof obj.maxHistoryItems === 'number' && Number.isFinite(obj.maxHistoryItems)
+      ? Math.max(1, Math.min(1000, Math.round(obj.maxHistoryItems)))
+      : DEFAULT_SETTINGS.maxHistoryItems;
 
-  const autoSaveHistory = typeof obj.autoSaveHistory === 'boolean'
-    ? obj.autoSaveHistory
-    : DEFAULT_SETTINGS.autoSaveHistory;
+  const autoSaveHistory =
+    typeof obj.autoSaveHistory === 'boolean'
+      ? obj.autoSaveHistory
+      : DEFAULT_SETTINGS.autoSaveHistory;
 
   return {
     theme,
@@ -152,12 +169,15 @@ export function migrateSettings(raw: unknown, sourceVersion?: number): AppSettin
     const migrated: Partial<AppSettings> = {};
 
     if (typeof legacy.theme === 'string') migrated.theme = legacy.theme as AppSettings['theme'];
-    if (typeof legacy.accentColor === 'string') migrated.accentColor = legacy.accentColor as AppSettings['accentColor'];
+    if (typeof legacy.accentColor === 'string')
+      migrated.accentColor = legacy.accentColor as AppSettings['accentColor'];
     if (typeof legacy.angleMode === 'string') migrated.angleMode = legacy.angleMode as AngleMode;
     if (typeof legacy.precision === 'number') migrated.precision = legacy.precision;
     if (typeof legacy.soundEnabled === 'boolean') migrated.soundEnabled = legacy.soundEnabled;
-    if (typeof legacy.autoSaveHistory === 'boolean') migrated.autoSaveHistory = legacy.autoSaveHistory;
-    if (typeof legacy.defaultMode === 'string') migrated.defaultMode = legacy.defaultMode as CalcMode;
+    if (typeof legacy.autoSaveHistory === 'boolean')
+      migrated.autoSaveHistory = legacy.autoSaveHistory;
+    if (typeof legacy.defaultMode === 'string')
+      migrated.defaultMode = legacy.defaultMode as CalcMode;
 
     return sanitizeSettings({ ...DEFAULT_SETTINGS, ...migrated });
   }
@@ -182,7 +202,7 @@ export function loadInitialSettings(storage?: Storage): AppSettings {
       const parsed = JSON.parse(saved);
       if (parsed && typeof parsed === 'object') {
         const version = typeof parsed.__v === 'number' ? parsed.__v : undefined;
-        
+
         if (version === SETTINGS_VERSION) {
           return sanitizeSettings(parsed);
         }

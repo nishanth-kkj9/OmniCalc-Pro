@@ -1,4 +1,10 @@
-import { HistoryItem, CalcMode, AppSettings, SETTINGS_STORAGE_KEY, LEGACY_SETTINGS_STORAGE_KEY } from '../types';
+import {
+  HistoryItem,
+  CalcMode,
+  AppSettings,
+  SETTINGS_STORAGE_KEY,
+  LEGACY_SETTINGS_STORAGE_KEY,
+} from '../types';
 
 const STORAGE_KEY = 'omnicalc_history_v1';
 
@@ -12,20 +18,22 @@ export function getHistory(): HistoryItem[] {
 }
 
 export function addHistory(
-  expression: string, 
-  result: string, 
+  expression: string,
+  result: string,
   mode: CalcMode,
   settings?: Partial<AppSettings>
 ): HistoryItem[] {
   if (!expression || !result || result === 'Error') return getHistory();
-  
+
   // Check settings if autoSave is disabled
   const autoSave = settings?.autoSaveHistory;
   let maxItems = settings?.maxHistoryItems || 100;
 
   if (autoSave === undefined) {
     try {
-      const savedSettings = localStorage.getItem(SETTINGS_STORAGE_KEY) || localStorage.getItem(LEGACY_SETTINGS_STORAGE_KEY);
+      const savedSettings =
+        localStorage.getItem(SETTINGS_STORAGE_KEY) ||
+        localStorage.getItem(LEGACY_SETTINGS_STORAGE_KEY);
       if (savedSettings) {
         const parsed = JSON.parse(savedSettings);
         if (parsed.autoSaveHistory === false) return getHistory();
@@ -67,7 +75,7 @@ export function clearHistory(): HistoryItem[] {
 }
 
 export function deleteHistoryItem(id: string): HistoryItem[] {
-  const current = getHistory().filter(item => item.id !== id);
+  const current = getHistory().filter((item) => item.id !== id);
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(current));
   } catch (e) {

@@ -10,23 +10,54 @@ import { loadInitialSettings, saveSettings } from './utils/settings';
 import { Loader2, AlertCircle } from 'lucide-react';
 
 // Lazy load the 17 engine views for optimal bundle splitting and fast initial render
-const BasicCalculator = lazy(() => import('./components/BasicCalculator').then(m => ({ default: m.BasicCalculator })));
-const ScientificCalculator = lazy(() => import('./components/ScientificCalculator').then(m => ({ default: m.ScientificCalculator })));
-const FractionsCalculator = lazy(() => import('./components/FractionsCalculator').then(m => ({ default: m.FractionsCalculator })));
-const GeometryCalculator = lazy(() => import('./components/GeometryCalculator').then(m => ({ default: m.GeometryCalculator })));
-const EquationSolver = lazy(() => import('./components/EquationSolver').then(m => ({ default: m.EquationSolver })));
-const CalculusCalculator = lazy(() => import('./components/CalculusCalculator').then(m => ({ default: m.CalculusCalculator })));
-const GraphingCalculator = lazy(() => import('./components/GraphingCalculator').then(m => ({ default: m.GraphingCalculator })));
-const ProgrammerCalculator = lazy(() => import('./components/ProgrammerCalculator').then(m => ({ default: m.ProgrammerCalculator })));
-const ConverterCalculator = lazy(() => import('./components/ConverterCalculator').then(m => ({ default: m.ConverterCalculator })));
-const FinanceCalculator = lazy(() => import('./components/FinanceCalculator').then(m => ({ default: m.FinanceCalculator })));
-const DateTimeCalculator = lazy(() => import('./components/DateTimeCalculator').then(m => ({ default: m.DateTimeCalculator })));
-const HealthCalculator = lazy(() => import('./components/HealthCalculator').then(m => ({ default: m.HealthCalculator })));
-const MatrixCalculator = lazy(() => import('./components/MatrixCalculator').then(m => ({ default: m.MatrixCalculator })));
-const StatisticsCalculator = lazy(() => import('./components/StatisticsCalculator').then(m => ({ default: m.StatisticsCalculator })));
-const FormulasPanel = lazy(() => import('./components/FormulasPanel').then(m => ({ default: m.FormulasPanel })));
-const HistoryPanel = lazy(() => import('./components/HistoryPanel').then(m => ({ default: m.HistoryPanel })));
-
+const BasicCalculator = lazy(() =>
+  import('./components/BasicCalculator').then((m) => ({ default: m.BasicCalculator }))
+);
+const ScientificCalculator = lazy(() =>
+  import('./components/ScientificCalculator').then((m) => ({ default: m.ScientificCalculator }))
+);
+const FractionsCalculator = lazy(() =>
+  import('./components/FractionsCalculator').then((m) => ({ default: m.FractionsCalculator }))
+);
+const GeometryCalculator = lazy(() =>
+  import('./components/GeometryCalculator').then((m) => ({ default: m.GeometryCalculator }))
+);
+const EquationSolver = lazy(() =>
+  import('./components/EquationSolver').then((m) => ({ default: m.EquationSolver }))
+);
+const CalculusCalculator = lazy(() =>
+  import('./components/CalculusCalculator').then((m) => ({ default: m.CalculusCalculator }))
+);
+const GraphingCalculator = lazy(() =>
+  import('./components/GraphingCalculator').then((m) => ({ default: m.GraphingCalculator }))
+);
+const ProgrammerCalculator = lazy(() =>
+  import('./components/ProgrammerCalculator').then((m) => ({ default: m.ProgrammerCalculator }))
+);
+const ConverterCalculator = lazy(() =>
+  import('./components/ConverterCalculator').then((m) => ({ default: m.ConverterCalculator }))
+);
+const FinanceCalculator = lazy(() =>
+  import('./components/FinanceCalculator').then((m) => ({ default: m.FinanceCalculator }))
+);
+const DateTimeCalculator = lazy(() =>
+  import('./components/DateTimeCalculator').then((m) => ({ default: m.DateTimeCalculator }))
+);
+const HealthCalculator = lazy(() =>
+  import('./components/HealthCalculator').then((m) => ({ default: m.HealthCalculator }))
+);
+const MatrixCalculator = lazy(() =>
+  import('./components/MatrixCalculator').then((m) => ({ default: m.MatrixCalculator }))
+);
+const StatisticsCalculator = lazy(() =>
+  import('./components/StatisticsCalculator').then((m) => ({ default: m.StatisticsCalculator }))
+);
+const FormulasPanel = lazy(() =>
+  import('./components/FormulasPanel').then((m) => ({ default: m.FormulasPanel }))
+);
+const HistoryPanel = lazy(() =>
+  import('./components/HistoryPanel').then((m) => ({ default: m.HistoryPanel }))
+);
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -62,7 +93,8 @@ class EngineErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySta
             </div>
             <h3 className="text-base font-bold text-rose-400 mb-2">Engine Render Error</h3>
             <p className="text-sm text-slate-400 mb-4">
-              This calculation engine encountered an unexpected rendering issue. You can switch to another mode or reload the view.
+              This calculation engine encountered an unexpected rendering issue. You can switch to
+              another mode or reload the view.
             </p>
             <button
               onClick={() => this.setState({ hasError: false })}
@@ -82,9 +114,17 @@ function EngineLoadingFallback({ theme }: { theme: string }) {
   const isLight = theme === 'light';
   const isOled = theme === 'oled';
   return (
-    <div className="flex flex-col items-center justify-center min-h-[360px] p-8 gap-3" role="status" aria-live="polite">
-      <Loader2 className={`w-8 h-8 animate-spin ${isLight ? 'text-slate-400' : isOled ? 'text-zinc-600' : 'text-slate-500'}`} />
-      <span className={`text-xs font-mono tracking-wider uppercase ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+    <div
+      className="flex flex-col items-center justify-center min-h-[360px] p-8 gap-3"
+      role="status"
+      aria-live="polite"
+    >
+      <Loader2
+        className={`w-8 h-8 animate-spin ${isLight ? 'text-slate-400' : isOled ? 'text-zinc-600' : 'text-slate-500'}`}
+      />
+      <span
+        className={`text-xs font-mono tracking-wider uppercase ${isLight ? 'text-slate-500' : 'text-slate-400'}`}
+      >
         Loading Engine...
       </span>
     </div>
@@ -142,7 +182,8 @@ export function App() {
 
       // Quick Theme toggle: Ctrl+T or Cmd+T (if not typing in input)
       const target = e.target as HTMLElement;
-      const isInput = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
+      const isInput =
+        target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
       if (!isInput && (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 't') {
         e.preventDefault();
         setSettings((prev) => ({
@@ -161,14 +202,17 @@ export function App() {
   useEffect(() => {
     const handleGlobalClick = (e: MouseEvent) => {
       prewarmAudio();
-      const target = (e.target as HTMLElement)?.closest('button, [role="button"], input[type="button"]');
+      const target = (e.target as HTMLElement)?.closest(
+        'button, [role="button"], input[type="button"]'
+      );
       if (target && settings.soundEnabled) {
         const text = target.textContent?.trim() || '';
-        const soundType = (text === '=' || text === 'Calculate' || text === 'Solve')
-          ? 'equals'
-          : (text === 'C' || text === 'AC' || text === 'CE')
-          ? 'clear'
-          : 'click';
+        const soundType =
+          text === '=' || text === 'Calculate' || text === 'Solve'
+            ? 'equals'
+            : text === 'C' || text === 'AC' || text === 'CE'
+              ? 'clear'
+              : 'click';
         playClickSound(soundType, settings.soundVolume, settings.soundProfile);
         if (settings.hapticFeedback && 'vibrate' in navigator) {
           try {
@@ -192,11 +236,13 @@ export function App() {
     settings.theme === 'oled'
       ? 'bg-black text-white'
       : settings.theme === 'light'
-      ? 'bg-slate-100 text-slate-900'
-      : 'bg-slate-950 text-slate-100';
+        ? 'bg-slate-100 text-slate-900'
+        : 'bg-slate-950 text-slate-100';
 
   return (
-    <div className={`min-h-screen ${bgClass} flex flex-col lg:flex-row font-sans antialiased transition-colors duration-150`}>
+    <div
+      className={`min-h-screen ${bgClass} flex flex-col lg:flex-row font-sans antialiased transition-colors duration-150`}
+    >
       {/* Sidebar Navigation */}
       <Sidebar
         currentMode={currentMode}
@@ -240,9 +286,9 @@ export function App() {
               {currentMode === 'matrix' && <MatrixCalculator settings={settings} />}
               {currentMode === 'statistics' && <StatisticsCalculator settings={settings} />}
               {currentMode === 'formulas' && (
-                <FormulasPanel 
-                  settings={settings} 
-                  onNavigateMode={(mode) => setCurrentMode(mode)} 
+                <FormulasPanel
+                  settings={settings}
+                  onNavigateMode={(mode) => setCurrentMode(mode)}
                 />
               )}
               {currentMode === 'history' && (

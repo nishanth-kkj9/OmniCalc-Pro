@@ -37,11 +37,7 @@ export const MatrixCalculator: React.FC<MatrixCalculatorProps> = ({ settings: _s
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   // Resize matrix
-  const resizeMatrix = (
-    target: 'A' | 'B',
-    newR: number,
-    newC: number
-  ) => {
+  const resizeMatrix = (target: 'A' | 'B', newR: number, newC: number) => {
     if (newR < 1 || newR > 5 || newC < 1 || newC > 5) return;
 
     if (target === 'A') {
@@ -169,21 +165,46 @@ export const MatrixCalculator: React.FC<MatrixCalculatorProps> = ({ settings: _s
         {/* Matrix A Card */}
         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl flex flex-col gap-4">
           <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-            <h3 className="text-sm font-bold text-sky-400">Matrix A ({rowsA} × {colsA})</h3>
+            <h3 className="text-sm font-bold text-sky-400">
+              Matrix A ({rowsA} × {colsA})
+            </h3>
             <div className="flex items-center gap-1.5 text-xs text-slate-400 font-mono">
               <span>Rows:</span>
-              <button onClick={() => resizeMatrix('A', rowsA - 1, colsA)} className="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 rounded font-bold">-</button>
+              <button
+                onClick={() => resizeMatrix('A', rowsA - 1, colsA)}
+                className="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 rounded font-bold"
+              >
+                -
+              </button>
               <span>{rowsA}</span>
-              <button onClick={() => resizeMatrix('A', rowsA + 1, colsA)} className="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 rounded font-bold">+</button>
+              <button
+                onClick={() => resizeMatrix('A', rowsA + 1, colsA)}
+                className="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 rounded font-bold"
+              >
+                +
+              </button>
               <span className="ml-2">Cols:</span>
-              <button onClick={() => resizeMatrix('A', rowsA, colsA - 1)} className="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 rounded font-bold">-</button>
+              <button
+                onClick={() => resizeMatrix('A', rowsA, colsA - 1)}
+                className="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 rounded font-bold"
+              >
+                -
+              </button>
               <span>{colsA}</span>
-              <button onClick={() => resizeMatrix('A', rowsA, colsA + 1)} className="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 rounded font-bold">+</button>
+              <button
+                onClick={() => resizeMatrix('A', rowsA, colsA + 1)}
+                className="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 rounded font-bold"
+              >
+                +
+              </button>
             </div>
           </div>
 
           <div className="flex justify-center p-2">
-            <div className="grid gap-2 border-x-2 border-sky-500/80 px-3 py-2 rounded-lg" style={{ gridTemplateColumns: `repeat(${colsA}, minmax(0, 1fr))` }}>
+            <div
+              className="grid gap-2 border-x-2 border-sky-500/80 px-3 py-2 rounded-lg"
+              style={{ gridTemplateColumns: `repeat(${colsA}, minmax(0, 1fr))` }}
+            >
               {matA.map((row, r) =>
                 row.map((cell, c) => (
                   <input
@@ -199,30 +220,70 @@ export const MatrixCalculator: React.FC<MatrixCalculatorProps> = ({ settings: _s
           </div>
 
           <div className="flex items-center gap-2 pt-1">
-            <button onClick={() => handleDet('A')} className="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl border border-slate-700">det(A)</button>
-            <button onClick={() => handleInverse('A')} className="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl border border-slate-700">A⁻¹</button>
-            <button onClick={() => handleTranspose('A')} className="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl border border-slate-700">Aᵀ</button>
+            <button
+              onClick={() => handleDet('A')}
+              className="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl border border-slate-700"
+            >
+              det(A)
+            </button>
+            <button
+              onClick={() => handleInverse('A')}
+              className="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl border border-slate-700"
+            >
+              A⁻¹
+            </button>
+            <button
+              onClick={() => handleTranspose('A')}
+              className="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl border border-slate-700"
+            >
+              Aᵀ
+            </button>
           </div>
         </div>
 
         {/* Matrix B Card */}
         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl flex flex-col gap-4">
           <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-            <h3 className="text-sm font-bold text-indigo-400">Matrix B ({rowsB} × {colsB})</h3>
+            <h3 className="text-sm font-bold text-indigo-400">
+              Matrix B ({rowsB} × {colsB})
+            </h3>
             <div className="flex items-center gap-1.5 text-xs text-slate-400 font-mono">
               <span>Rows:</span>
-              <button onClick={() => resizeMatrix('B', rowsB - 1, colsB)} className="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 rounded font-bold">-</button>
+              <button
+                onClick={() => resizeMatrix('B', rowsB - 1, colsB)}
+                className="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 rounded font-bold"
+              >
+                -
+              </button>
               <span>{rowsB}</span>
-              <button onClick={() => resizeMatrix('B', rowsB + 1, colsB)} className="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 rounded font-bold">+</button>
+              <button
+                onClick={() => resizeMatrix('B', rowsB + 1, colsB)}
+                className="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 rounded font-bold"
+              >
+                +
+              </button>
               <span className="ml-2">Cols:</span>
-              <button onClick={() => resizeMatrix('B', rowsB, colsB - 1)} className="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 rounded font-bold">-</button>
+              <button
+                onClick={() => resizeMatrix('B', rowsB, colsB - 1)}
+                className="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 rounded font-bold"
+              >
+                -
+              </button>
               <span>{colsB}</span>
-              <button onClick={() => resizeMatrix('B', rowsB, colsB + 1)} className="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 rounded font-bold">+</button>
+              <button
+                onClick={() => resizeMatrix('B', rowsB, colsB + 1)}
+                className="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 rounded font-bold"
+              >
+                +
+              </button>
             </div>
           </div>
 
           <div className="flex justify-center p-2">
-            <div className="grid gap-2 border-x-2 border-indigo-500/80 px-3 py-2 rounded-lg" style={{ gridTemplateColumns: `repeat(${colsB}, minmax(0, 1fr))` }}>
+            <div
+              className="grid gap-2 border-x-2 border-indigo-500/80 px-3 py-2 rounded-lg"
+              style={{ gridTemplateColumns: `repeat(${colsB}, minmax(0, 1fr))` }}
+            >
               {matB.map((row, r) =>
                 row.map((cell, c) => (
                   <input
@@ -238,22 +299,46 @@ export const MatrixCalculator: React.FC<MatrixCalculatorProps> = ({ settings: _s
           </div>
 
           <div className="flex items-center gap-2 pt-1">
-            <button onClick={() => handleDet('B')} className="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl border border-slate-700">det(B)</button>
-            <button onClick={() => handleInverse('B')} className="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl border border-slate-700">B⁻¹</button>
-            <button onClick={() => handleTranspose('B')} className="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl border border-slate-700">Bᵀ</button>
+            <button
+              onClick={() => handleDet('B')}
+              className="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl border border-slate-700"
+            >
+              det(B)
+            </button>
+            <button
+              onClick={() => handleInverse('B')}
+              className="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl border border-slate-700"
+            >
+              B⁻¹
+            </button>
+            <button
+              onClick={() => handleTranspose('B')}
+              className="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl border border-slate-700"
+            >
+              Bᵀ
+            </button>
           </div>
         </div>
       </div>
 
       {/* Main Action Buttons */}
       <div className="flex items-center justify-center gap-3">
-        <button onClick={handleAdd} className="px-6 py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-bold text-sm rounded-2xl shadow-md shadow-sky-600/25 transition-all">
+        <button
+          onClick={handleAdd}
+          className="px-6 py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-bold text-sm rounded-2xl shadow-md shadow-sky-600/25 transition-all"
+        >
           A + B
         </button>
-        <button onClick={handleSub} className="px-6 py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-bold text-sm rounded-2xl shadow-md shadow-sky-600/25 transition-all">
+        <button
+          onClick={handleSub}
+          className="px-6 py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-bold text-sm rounded-2xl shadow-md shadow-sky-600/25 transition-all"
+        >
           A − B
         </button>
-        <button onClick={handleMul} className="px-6 py-2.5 bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-bold text-sm rounded-2xl shadow-md shadow-sky-500/20 transition-all">
+        <button
+          onClick={handleMul}
+          className="px-6 py-2.5 bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-bold text-sm rounded-2xl shadow-md shadow-sky-500/20 transition-all"
+        >
           A × B
         </button>
       </div>
@@ -268,14 +353,18 @@ export const MatrixCalculator: React.FC<MatrixCalculatorProps> = ({ settings: _s
       {/* Result Display */}
       {resultMat !== null && (
         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col items-center gap-3">
-          <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest">{resultLabel}</h4>
+          <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+            {resultLabel}
+          </h4>
           {typeof resultMat === 'number' ? (
             <div className="text-3xl font-mono font-bold text-sky-400">{resultMat}</div>
           ) : (
             <div className="border-x-2 border-emerald-400 px-4 py-3 rounded-xl bg-slate-800/60 shadow-inner">
               <div
                 className="grid gap-2"
-                style={{ gridTemplateColumns: `repeat(${resultMat[0]?.length || 1}, minmax(0, 1fr))` }}
+                style={{
+                  gridTemplateColumns: `repeat(${resultMat[0]?.length || 1}, minmax(0, 1fr))`,
+                }}
               >
                 {resultMat.map((row, r) =>
                   row.map((cell, c) => (

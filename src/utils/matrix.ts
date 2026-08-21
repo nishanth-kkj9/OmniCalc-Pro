@@ -19,7 +19,12 @@ export interface LUDecompositionResult {
 /**
  * Validates matrix dimensions and returns bounds.
  */
-export function validateMatrix(m: Matrix): { valid: boolean; rows: number; cols: number; error?: string } {
+export function validateMatrix(m: Matrix): {
+  valid: boolean;
+  rows: number;
+  cols: number;
+  error?: string;
+} {
   if (!Array.isArray(m) || m.length === 0 || !Array.isArray(m[0])) {
     return { valid: false, rows: 0, cols: 0, error: 'Invalid or empty matrix structure.' };
   }
@@ -27,7 +32,12 @@ export function validateMatrix(m: Matrix): { valid: boolean; rows: number; cols:
   const cols = m[0].length;
 
   if (rows > MAX_MATRIX_DIMENSION || cols > MAX_MATRIX_DIMENSION) {
-    return { valid: false, rows, cols, error: `Matrix dimension exceeds maximum limit of ${MAX_MATRIX_DIMENSION}x${MAX_MATRIX_DIMENSION}.` };
+    return {
+      valid: false,
+      rows,
+      cols,
+      error: `Matrix dimension exceeds maximum limit of ${MAX_MATRIX_DIMENSION}x${MAX_MATRIX_DIMENSION}.`,
+    };
   }
 
   for (let r = 0; r < rows; r++) {
@@ -214,9 +224,7 @@ export function invertMatrix(mat: Matrix): Matrix | null {
 export function transposeMatrix(mat: Matrix): Matrix {
   const rows = mat.length;
   const cols = mat[0].length;
-  return Array.from({ length: cols }, (_, i) =>
-    Array.from({ length: rows }, (_, j) => mat[j][i])
-  );
+  return Array.from({ length: cols }, (_, i) => Array.from({ length: rows }, (_, j) => mat[j][i]));
 }
 
 /**
@@ -252,7 +260,12 @@ export function multiplyMatrices(a: Matrix, b: Matrix): Matrix | null {
 export function addMatrices(a: Matrix, b: Matrix): Matrix | null {
   const checkA = validateMatrix(a);
   const checkB = validateMatrix(b);
-  if (!checkA.valid || !checkB.valid || checkA.rows !== checkB.rows || checkA.cols !== checkB.cols) {
+  if (
+    !checkA.valid ||
+    !checkB.valid ||
+    checkA.rows !== checkB.rows ||
+    checkA.cols !== checkB.cols
+  ) {
     return null;
   }
 
@@ -265,7 +278,12 @@ export function addMatrices(a: Matrix, b: Matrix): Matrix | null {
 export function subtractMatrices(a: Matrix, b: Matrix): Matrix | null {
   const checkA = validateMatrix(a);
   const checkB = validateMatrix(b);
-  if (!checkA.valid || !checkB.valid || checkA.rows !== checkB.rows || checkA.cols !== checkB.cols) {
+  if (
+    !checkA.valid ||
+    !checkB.valid ||
+    checkA.rows !== checkB.rows ||
+    checkA.cols !== checkB.cols
+  ) {
     return null;
   }
 

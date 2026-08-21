@@ -15,13 +15,17 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
   const [sideC, setSideC] = useState<string>('7');
 
   // 2D Shapes State
-  const [shape2D, setShape2D] = useState<'circle' | 'sector' | 'ellipse' | 'trapezoid' | 'polygon'>('circle');
+  const [shape2D, setShape2D] = useState<'circle' | 'sector' | 'ellipse' | 'trapezoid' | 'polygon'>(
+    'circle'
+  );
   const [val2D1, setVal2D1] = useState<string>('5'); // radius / a / base1
   const [val2D2, setVal2D2] = useState<string>('8'); // angle / b / base2
   const [val2D3, setVal2D3] = useState<string>('4'); // height / sides
 
   // 3D Shapes State
-  const [shape3D, setShape3D] = useState<'sphere' | 'cylinder' | 'cone' | 'prism' | 'pyramid'>('cylinder');
+  const [shape3D, setShape3D] = useState<'sphere' | 'cylinder' | 'cone' | 'prism' | 'pyramid'>(
+    'cylinder'
+  );
   const [val3D1, setVal3D1] = useState<string>('4'); // radius / length
   const [val3D2, setVal3D2] = useState<string>('10'); // height / width
   const [val3D3, setVal3D3] = useState<string>('6'); // height for prism
@@ -44,7 +48,10 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
 
     // Triangle inequality
     if (a + b <= c || a + c <= b || b + c <= a) {
-      return { error: 'Invalid triangle: the sum of any two sides must be strictly greater than the third side.' };
+      return {
+        error:
+          'Invalid triangle: the sum of any two sides must be strictly greater than the third side.',
+      };
     }
 
     // Law of Cosines
@@ -138,7 +145,8 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
         { label: 'Total Perimeter (L + 2r)', value: formatNum(perim) },
       ];
     } else if (shape2D === 'ellipse') {
-      const a = v1, b = v2;
+      const a = v1,
+        b = v2;
       const area = Math.PI * a * b;
       // Ramanujan approx for circumference
       const h = Math.pow(a - b, 2) / Math.pow(a + b, 2);
@@ -146,10 +154,15 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
       return [
         { label: 'Area (A = πab)', value: formatNum(area) },
         { label: 'Circumference (Ramanujan approx)', value: formatNum(circ) },
-        { label: 'Eccentricity (e = √(1 - b²/a²))', value: a >= b ? formatNum(Math.sqrt(1 - (b * b) / (a * a))) : 'N/A' },
+        {
+          label: 'Eccentricity (e = √(1 - b²/a²))',
+          value: a >= b ? formatNum(Math.sqrt(1 - (b * b) / (a * a))) : 'N/A',
+        },
       ];
     } else if (shape2D === 'trapezoid') {
-      const a = v1, b = v2, h = v3;
+      const a = v1,
+        b = v2,
+        h = v3;
       const area = ((a + b) / 2) * h;
       return [
         { label: 'Area (A = (a + b)/2 · h)', value: formatNum(area) },
@@ -157,7 +170,8 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
       ];
     } else {
       // Regular Polygon (n sides of length s)
-      const s = v1, n = Math.max(3, Math.round(v2));
+      const s = v1,
+        n = Math.max(3, Math.round(v2));
       const perim = n * s;
       const apothem = s / (2 * Math.tan(Math.PI / n));
       const area = 0.5 * perim * apothem;
@@ -184,7 +198,8 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
         { label: 'Surface Area (A = 4πr²)', value: formatNum(surface) },
       ];
     } else if (shape3D === 'cylinder') {
-      const r = v1, h = v2;
+      const r = v1,
+        h = v2;
       const vol = Math.PI * r * r * h;
       const latArea = 2 * Math.PI * r * h;
       const totArea = latArea + 2 * Math.PI * r * r;
@@ -194,7 +209,8 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
         { label: 'Total Surface Area (2πrh + 2πr²)', value: formatNum(totArea) },
       ];
     } else if (shape3D === 'cone') {
-      const r = v1, h = v2;
+      const r = v1,
+        h = v2;
       const slant = Math.sqrt(r * r + h * h);
       const vol = (1 / 3) * Math.PI * r * r * h;
       const latArea = Math.PI * r * slant;
@@ -205,7 +221,9 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
         { label: 'Total Surface Area (πrs + πr²)', value: formatNum(totArea) },
       ];
     } else if (shape3D === 'prism') {
-      const l = v1, w = v2, h = v3;
+      const l = v1,
+        w = v2,
+        h = v3;
       const vol = l * w * h;
       const surf = 2 * (l * w + l * h + w * h);
       const diag = Math.sqrt(l * l + w * w + h * h);
@@ -216,7 +234,8 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
       ];
     } else {
       // Pyramid (Square base side s, height h)
-      const s = v1, h = v2;
+      const s = v1,
+        h = v2;
       const vol = (1 / 3) * s * s * h;
       const slant = Math.sqrt(Math.pow(s / 2, 2) + h * h);
       const latArea = 2 * s * slant;
@@ -247,9 +266,10 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
             onClick={() => setTab(item.id as any)}
             className={`
               px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border shadow-sm
-              ${tab === item.id
-                ? 'bg-sky-600 text-white border-sky-500 shadow-sky-600/20'
-                : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-white'
+              ${
+                tab === item.id
+                  ? 'bg-sky-600 text-white border-sky-500 shadow-sky-600/20'
+                  : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-white'
               }
             `}
           >
@@ -266,10 +286,17 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-base font-bold text-slate-100">Triangle Geometry Solver</h3>
-                <p className="text-xs text-slate-400">Computes all angles, area, inradius, circumradius, and renders dynamic geometric diagram</p>
+                <p className="text-xs text-slate-400">
+                  Computes all angles, area, inradius, circumradius, and renders dynamic geometric
+                  diagram
+                </p>
               </div>
               <button
-                onClick={() => { setSideA('5'); setSideB('6'); setSideC('7'); }}
+                onClick={() => {
+                  setSideA('5');
+                  setSideB('6');
+                  setSideC('7');
+                }}
                 className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs flex items-center gap-1.5 border border-slate-700"
               >
                 <RefreshCw className="w-3.5 h-3.5" /> Example (5, 6, 7)
@@ -323,33 +350,74 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
                             className="fill-sky-500/20 stroke-sky-400 stroke-2"
                           />
                           {/* Vertex Points */}
-                          <circle cx={triData.pA?.x} cy={triData.pA?.y} r="4" className="fill-emerald-400" />
-                          <circle cx={triData.pB?.x} cy={triData.pB?.y} r="4" className="fill-emerald-400" />
-                          <circle cx={triData.pC?.x} cy={triData.pC?.y} r="4" className="fill-emerald-400" />
+                          <circle
+                            cx={triData.pA?.x}
+                            cy={triData.pA?.y}
+                            r="4"
+                            className="fill-emerald-400"
+                          />
+                          <circle
+                            cx={triData.pB?.x}
+                            cy={triData.pB?.y}
+                            r="4"
+                            className="fill-emerald-400"
+                          />
+                          <circle
+                            cx={triData.pC?.x}
+                            cy={triData.pC?.y}
+                            r="4"
+                            className="fill-emerald-400"
+                          />
 
                           {/* Vertex Labels */}
-                          <text x={(triData.pA?.x || 0) - 12} y={(triData.pA?.y || 0) + 14} className="fill-slate-300 text-[10px] font-bold">A (α: {triData.alphaDeg})</text>
-                          <text x={(triData.pB?.x || 0) + 4} y={(triData.pB?.y || 0) + 14} className="fill-slate-300 text-[10px] font-bold">B (β: {triData.betaDeg})</text>
-                          <text x={(triData.pC?.x || 0) - 15} y={(triData.pC?.y || 0) - 10} className="fill-slate-300 text-[10px] font-bold">C (γ: {triData.gammaDeg})</text>
+                          <text
+                            x={(triData.pA?.x || 0) - 12}
+                            y={(triData.pA?.y || 0) + 14}
+                            className="fill-slate-300 text-[10px] font-bold"
+                          >
+                            A (α: {triData.alphaDeg})
+                          </text>
+                          <text
+                            x={(triData.pB?.x || 0) + 4}
+                            y={(triData.pB?.y || 0) + 14}
+                            className="fill-slate-300 text-[10px] font-bold"
+                          >
+                            B (β: {triData.betaDeg})
+                          </text>
+                          <text
+                            x={(triData.pC?.x || 0) - 15}
+                            y={(triData.pC?.y || 0) - 10}
+                            className="fill-slate-300 text-[10px] font-bold"
+                          >
+                            C (γ: {triData.gammaDeg})
+                          </text>
                         </svg>
                       </div>
 
                       <div className="grid grid-cols-2 gap-2.5">
                         <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
                           <span className="text-[10px] text-slate-400 block">Total Area (A)</span>
-                          <span className="text-lg font-mono font-bold text-emerald-400">{triData.area}</span>
+                          <span className="text-lg font-mono font-bold text-emerald-400">
+                            {triData.area}
+                          </span>
                         </div>
                         <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
                           <span className="text-[10px] text-slate-400 block">Perimeter (P)</span>
-                          <span className="text-lg font-mono font-bold text-sky-400">{triData.perimeter}</span>
+                          <span className="text-lg font-mono font-bold text-sky-400">
+                            {triData.perimeter}
+                          </span>
                         </div>
                         <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
                           <span className="text-[10px] text-slate-400 block">Inradius (r)</span>
-                          <span className="text-lg font-mono font-bold text-slate-200">{triData.inradius}</span>
+                          <span className="text-lg font-mono font-bold text-slate-200">
+                            {triData.inradius}
+                          </span>
                         </div>
                         <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
                           <span className="text-[10px] text-slate-400 block">Circumradius (R)</span>
-                          <span className="text-lg font-mono font-bold text-slate-200">{triData.circumradius}</span>
+                          <span className="text-lg font-mono font-bold text-slate-200">
+                            {triData.circumradius}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -386,7 +454,12 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
               {shape2D === 'circle' && (
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-bold text-slate-400">Radius (r)</label>
-                  <input type="number" value={val2D1} onChange={(e) => setVal2D1(e.target.value)} className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100" />
+                  <input
+                    type="number"
+                    value={val2D1}
+                    onChange={(e) => setVal2D1(e.target.value)}
+                    className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                  />
                 </div>
               )}
 
@@ -394,11 +467,21 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
                 <>
                   <div className="flex flex-col gap-1">
                     <label className="text-xs font-bold text-slate-400">Radius (r)</label>
-                    <input type="number" value={val2D1} onChange={(e) => setVal2D1(e.target.value)} className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100" />
+                    <input
+                      type="number"
+                      value={val2D1}
+                      onChange={(e) => setVal2D1(e.target.value)}
+                      className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                    />
                   </div>
                   <div className="flex flex-col gap-1">
                     <label className="text-xs font-bold text-slate-400">Central Angle (°)</label>
-                    <input type="number" value={val2D2} onChange={(e) => setVal2D2(e.target.value)} className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100" />
+                    <input
+                      type="number"
+                      value={val2D2}
+                      onChange={(e) => setVal2D2(e.target.value)}
+                      className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                    />
                   </div>
                 </>
               )}
@@ -407,11 +490,21 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
                 <>
                   <div className="flex flex-col gap-1">
                     <label className="text-xs font-bold text-slate-400">Semi-Major Axis (a)</label>
-                    <input type="number" value={val2D1} onChange={(e) => setVal2D1(e.target.value)} className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100" />
+                    <input
+                      type="number"
+                      value={val2D1}
+                      onChange={(e) => setVal2D1(e.target.value)}
+                      className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                    />
                   </div>
                   <div className="flex flex-col gap-1">
                     <label className="text-xs font-bold text-slate-400">Semi-Minor Axis (b)</label>
-                    <input type="number" value={val2D2} onChange={(e) => setVal2D2(e.target.value)} className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100" />
+                    <input
+                      type="number"
+                      value={val2D2}
+                      onChange={(e) => setVal2D2(e.target.value)}
+                      className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                    />
                   </div>
                 </>
               )}
@@ -420,15 +513,30 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
                 <>
                   <div className="flex flex-col gap-1">
                     <label className="text-xs font-bold text-slate-400">Base a</label>
-                    <input type="number" value={val2D1} onChange={(e) => setVal2D1(e.target.value)} className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100" />
+                    <input
+                      type="number"
+                      value={val2D1}
+                      onChange={(e) => setVal2D1(e.target.value)}
+                      className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                    />
                   </div>
                   <div className="flex flex-col gap-1">
                     <label className="text-xs font-bold text-slate-400">Base b</label>
-                    <input type="number" value={val2D2} onChange={(e) => setVal2D2(e.target.value)} className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100" />
+                    <input
+                      type="number"
+                      value={val2D2}
+                      onChange={(e) => setVal2D2(e.target.value)}
+                      className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                    />
                   </div>
                   <div className="flex flex-col gap-1">
                     <label className="text-xs font-bold text-slate-400">Height h</label>
-                    <input type="number" value={val2D3} onChange={(e) => setVal2D3(e.target.value)} className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100" />
+                    <input
+                      type="number"
+                      value={val2D3}
+                      onChange={(e) => setVal2D3(e.target.value)}
+                      className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                    />
                   </div>
                 </>
               )}
@@ -437,11 +545,22 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
                 <>
                   <div className="flex flex-col gap-1">
                     <label className="text-xs font-bold text-slate-400">Side Length (s)</label>
-                    <input type="number" value={val2D1} onChange={(e) => setVal2D1(e.target.value)} className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100" />
+                    <input
+                      type="number"
+                      value={val2D1}
+                      onChange={(e) => setVal2D1(e.target.value)}
+                      className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                    />
                   </div>
                   <div className="flex flex-col gap-1">
                     <label className="text-xs font-bold text-slate-400">Number of Sides (n)</label>
-                    <input type="number" min="3" value={val2D2} onChange={(e) => setVal2D2(e.target.value)} className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100" />
+                    <input
+                      type="number"
+                      min="3"
+                      value={val2D2}
+                      onChange={(e) => setVal2D2(e.target.value)}
+                      className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                    />
                   </div>
                 </>
               )}
@@ -485,7 +604,12 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
               {shape3D === 'sphere' && (
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-bold text-slate-400">Radius (r)</label>
-                  <input type="number" value={val3D1} onChange={(e) => setVal3D1(e.target.value)} className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100" />
+                  <input
+                    type="number"
+                    value={val3D1}
+                    onChange={(e) => setVal3D1(e.target.value)}
+                    className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                  />
                 </div>
               )}
 
@@ -493,11 +617,21 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
                 <>
                   <div className="flex flex-col gap-1">
                     <label className="text-xs font-bold text-slate-400">Radius (r)</label>
-                    <input type="number" value={val3D1} onChange={(e) => setVal3D1(e.target.value)} className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100" />
+                    <input
+                      type="number"
+                      value={val3D1}
+                      onChange={(e) => setVal3D1(e.target.value)}
+                      className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                    />
                   </div>
                   <div className="flex flex-col gap-1">
                     <label className="text-xs font-bold text-slate-400">Height (h)</label>
-                    <input type="number" value={val3D2} onChange={(e) => setVal3D2(e.target.value)} className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100" />
+                    <input
+                      type="number"
+                      value={val3D2}
+                      onChange={(e) => setVal3D2(e.target.value)}
+                      className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                    />
                   </div>
                 </>
               )}
@@ -506,15 +640,30 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
                 <>
                   <div className="flex flex-col gap-1">
                     <label className="text-xs font-bold text-slate-400">Length (l)</label>
-                    <input type="number" value={val3D1} onChange={(e) => setVal3D1(e.target.value)} className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100" />
+                    <input
+                      type="number"
+                      value={val3D1}
+                      onChange={(e) => setVal3D1(e.target.value)}
+                      className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                    />
                   </div>
                   <div className="flex flex-col gap-1">
                     <label className="text-xs font-bold text-slate-400">Width (w)</label>
-                    <input type="number" value={val3D2} onChange={(e) => setVal3D2(e.target.value)} className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100" />
+                    <input
+                      type="number"
+                      value={val3D2}
+                      onChange={(e) => setVal3D2(e.target.value)}
+                      className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                    />
                   </div>
                   <div className="flex flex-col gap-1">
                     <label className="text-xs font-bold text-slate-400">Height (h)</label>
-                    <input type="number" value={val3D3} onChange={(e) => setVal3D3(e.target.value)} className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100" />
+                    <input
+                      type="number"
+                      value={val3D3}
+                      onChange={(e) => setVal3D3(e.target.value)}
+                      className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                    />
                   </div>
                 </>
               )}
@@ -523,11 +672,21 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
                 <>
                   <div className="flex flex-col gap-1">
                     <label className="text-xs font-bold text-slate-400">Base Side (s)</label>
-                    <input type="number" value={val3D1} onChange={(e) => setVal3D1(e.target.value)} className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100" />
+                    <input
+                      type="number"
+                      value={val3D1}
+                      onChange={(e) => setVal3D1(e.target.value)}
+                      className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                    />
                   </div>
                   <div className="flex flex-col gap-1">
                     <label className="text-xs font-bold text-slate-400">Pyramid Height (h)</label>
-                    <input type="number" value={val3D2} onChange={(e) => setVal3D2(e.target.value)} className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100" />
+                    <input
+                      type="number"
+                      value={val3D2}
+                      onChange={(e) => setVal3D2(e.target.value)}
+                      className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                    />
                   </div>
                 </>
               )}

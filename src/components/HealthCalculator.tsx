@@ -14,7 +14,7 @@ export const HealthCalculator: React.FC<HealthCalculatorProps> = ({ settings: _s
   const [age, setAge] = useState<number>(28);
   const [weightKg, setWeightKg] = useState<number>(72);
   const [heightCm, setHeightCm] = useState<number>(175);
-  
+
   // Imperial fields
   const [weightLbs, setWeightLbs] = useState<number>(160);
   const [heightFt, setHeightFt] = useState<number>(5);
@@ -123,11 +123,41 @@ export const HealthCalculator: React.FC<HealthCalculatorProps> = ({ settings: _s
     const reserve = maxHr - (restingHr || 65);
 
     const zones = [
-      { name: 'Warm Up / Recovery', range: '50% - 60%', min: Math.round(restingHr + reserve * 0.5), max: Math.round(restingHr + reserve * 0.6), color: 'text-sky-400' },
-      { name: 'Fat Burning / Aerobic Base', range: '60% - 70%', min: Math.round(restingHr + reserve * 0.6), max: Math.round(restingHr + reserve * 0.7), color: 'text-emerald-400' },
-      { name: 'Aerobic Endurance', range: '70% - 80%', min: Math.round(restingHr + reserve * 0.7), max: Math.round(restingHr + reserve * 0.8), color: 'text-amber-400' },
-      { name: 'Anaerobic / Lactate Threshold', range: '80% - 90%', min: Math.round(restingHr + reserve * 0.8), max: Math.round(restingHr + reserve * 0.9), color: 'text-orange-400' },
-      { name: 'Maximum Effort / VO2 Max', range: '90% - 100%', min: Math.round(restingHr + reserve * 0.9), max: maxHr, color: 'text-rose-400' },
+      {
+        name: 'Warm Up / Recovery',
+        range: '50% - 60%',
+        min: Math.round(restingHr + reserve * 0.5),
+        max: Math.round(restingHr + reserve * 0.6),
+        color: 'text-sky-400',
+      },
+      {
+        name: 'Fat Burning / Aerobic Base',
+        range: '60% - 70%',
+        min: Math.round(restingHr + reserve * 0.6),
+        max: Math.round(restingHr + reserve * 0.7),
+        color: 'text-emerald-400',
+      },
+      {
+        name: 'Aerobic Endurance',
+        range: '70% - 80%',
+        min: Math.round(restingHr + reserve * 0.7),
+        max: Math.round(restingHr + reserve * 0.8),
+        color: 'text-amber-400',
+      },
+      {
+        name: 'Anaerobic / Lactate Threshold',
+        range: '80% - 90%',
+        min: Math.round(restingHr + reserve * 0.8),
+        max: Math.round(restingHr + reserve * 0.9),
+        color: 'text-orange-400',
+      },
+      {
+        name: 'Maximum Effort / VO2 Max',
+        range: '90% - 100%',
+        min: Math.round(restingHr + reserve * 0.9),
+        max: maxHr,
+        color: 'text-rose-400',
+      },
     ];
 
     return {
@@ -155,9 +185,10 @@ export const HealthCalculator: React.FC<HealthCalculatorProps> = ({ settings: _s
               onClick={() => setTab(item.id as any)}
               className={`
                 px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border shadow-sm
-                ${tab === item.id
-                  ? 'bg-sky-600 text-white border-sky-500 shadow-sky-600/20'
-                  : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-white'
+                ${
+                  tab === item.id
+                    ? 'bg-sky-600 text-white border-sky-500 shadow-sky-600/20'
+                    : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-white'
                 }
               `}
             >
@@ -170,7 +201,9 @@ export const HealthCalculator: React.FC<HealthCalculatorProps> = ({ settings: _s
           <button
             onClick={() => setUnitSystem('metric')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              unitSystem === 'metric' ? 'bg-sky-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
+              unitSystem === 'metric'
+                ? 'bg-sky-600 text-white shadow-sm'
+                : 'text-slate-400 hover:text-slate-200'
             }`}
           >
             Metric (kg, cm)
@@ -178,7 +211,9 @@ export const HealthCalculator: React.FC<HealthCalculatorProps> = ({ settings: _s
           <button
             onClick={() => setUnitSystem('imperial')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              unitSystem === 'imperial' ? 'bg-sky-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
+              unitSystem === 'imperial'
+                ? 'bg-sky-600 text-white shadow-sm'
+                : 'text-slate-400 hover:text-slate-200'
             }`}
           >
             Imperial (lbs, ft/in)
@@ -221,7 +256,9 @@ export const HealthCalculator: React.FC<HealthCalculatorProps> = ({ settings: _s
           {unitSystem === 'metric' ? (
             <>
               <div className="flex flex-col gap-1">
-                <label className="text-[11px] font-bold text-slate-400 uppercase">Weight (kg)</label>
+                <label className="text-[11px] font-bold text-slate-400 uppercase">
+                  Weight (kg)
+                </label>
                 <input
                   type="number"
                   value={weightKg}
@@ -230,7 +267,9 @@ export const HealthCalculator: React.FC<HealthCalculatorProps> = ({ settings: _s
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-[11px] font-bold text-slate-400 uppercase">Height (cm)</label>
+                <label className="text-[11px] font-bold text-slate-400 uppercase">
+                  Height (cm)
+                </label>
                 <input
                   type="number"
                   value={heightCm}
@@ -242,7 +281,9 @@ export const HealthCalculator: React.FC<HealthCalculatorProps> = ({ settings: _s
           ) : (
             <>
               <div className="flex flex-col gap-1">
-                <label className="text-[11px] font-bold text-slate-400 uppercase">Weight (lbs)</label>
+                <label className="text-[11px] font-bold text-slate-400 uppercase">
+                  Weight (lbs)
+                </label>
                 <input
                   type="number"
                   value={weightLbs}
@@ -251,7 +292,9 @@ export const HealthCalculator: React.FC<HealthCalculatorProps> = ({ settings: _s
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-[11px] font-bold text-slate-400 uppercase">Height (ft & in)</label>
+                <label className="text-[11px] font-bold text-slate-400 uppercase">
+                  Height (ft & in)
+                </label>
                 <div className="grid grid-cols-2 gap-1">
                   <input
                     type="number"
@@ -279,17 +322,25 @@ export const HealthCalculator: React.FC<HealthCalculatorProps> = ({ settings: _s
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-base font-bold text-slate-100">Body Mass Index (BMI)</h3>
-                <p className="text-xs text-slate-400">Standard WHO weight-for-height classification</p>
+                <p className="text-xs text-slate-400">
+                  Standard WHO weight-for-height classification
+                </p>
               </div>
-              <span className={`px-3 py-1 rounded-full text-xs font-bold border ${bmiData.badgeBg}`}>
+              <span
+                className={`px-3 py-1 rounded-full text-xs font-bold border ${bmiData.badgeBg}`}
+              >
                 {bmiData.category}
               </span>
             </div>
 
             {/* Score & Visual Gauge */}
             <div className="p-6 bg-slate-950 border border-slate-800 rounded-2xl flex flex-col items-center gap-4">
-              <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">Your BMI Score</span>
-              <span className={`text-6xl font-mono font-bold ${bmiData.colorClass}`}>{bmiData.bmi}</span>
+              <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">
+                Your BMI Score
+              </span>
+              <span className={`text-6xl font-mono font-bold ${bmiData.colorClass}`}>
+                {bmiData.bmi}
+              </span>
 
               {/* Progress Bar Gauge */}
               <div className="w-full max-w-md flex flex-col gap-1.5">
@@ -327,8 +378,12 @@ export const HealthCalculator: React.FC<HealthCalculatorProps> = ({ settings: _s
         {tab === 'tdee' && tdeeData && (
           <div className="flex flex-col gap-6">
             <div>
-              <h3 className="text-base font-bold text-slate-100">BMR & Daily Energy Expenditure (TDEE)</h3>
-              <p className="text-xs text-slate-400">Calculates basal metabolic rate and daily calorie targets based on your goals</p>
+              <h3 className="text-base font-bold text-slate-100">
+                BMR & Daily Energy Expenditure (TDEE)
+              </h3>
+              <p className="text-xs text-slate-400">
+                Calculates basal metabolic rate and daily calorie targets based on your goals
+              </p>
             </div>
 
             {/* Activity & Goal Selectors */}
@@ -366,37 +421,51 @@ export const HealthCalculator: React.FC<HealthCalculatorProps> = ({ settings: _s
             {/* Target Calorie Hero */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl">
-                <span className="text-xs text-slate-400 block mb-1">Basal Metabolic Rate (BMR)</span>
+                <span className="text-xs text-slate-400 block mb-1">
+                  Basal Metabolic Rate (BMR)
+                </span>
                 <span className="text-2xl font-mono font-bold text-slate-200">{tdeeData.bmr}</span>
                 <span className="text-[11px] text-slate-500 block">kcal/day at rest</span>
               </div>
               <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl">
                 <span className="text-xs text-slate-400 block mb-1">Maintenance (TDEE)</span>
-                <span className="text-2xl font-mono font-bold text-sky-400">{tdeeData.maintenance}</span>
+                <span className="text-2xl font-mono font-bold text-sky-400">
+                  {tdeeData.maintenance}
+                </span>
                 <span className="text-[11px] text-slate-500 block">kcal/day</span>
               </div>
               <div className="p-4 bg-slate-950 border border-sky-500/30 rounded-2xl">
                 <span className="text-xs text-slate-400 block mb-1">Recommended Goal Target</span>
-                <span className="text-2xl font-mono font-bold text-emerald-400">{tdeeData.targetCal}</span>
+                <span className="text-2xl font-mono font-bold text-emerald-400">
+                  {tdeeData.targetCal}
+                </span>
                 <span className="text-[11px] text-emerald-500/80 block">kcal/day</span>
               </div>
             </div>
 
             {/* Macro Breakdown */}
             <div className="p-5 bg-slate-950 border border-slate-800 rounded-2xl flex flex-col gap-3">
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Suggested Daily Macronutrient Split</span>
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                Suggested Daily Macronutrient Split
+              </span>
               <div className="grid grid-cols-3 gap-3 text-center">
                 <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
                   <span className="text-xs text-slate-400 block">Protein (30%)</span>
-                  <span className="text-xl font-mono font-bold text-sky-400">{tdeeData.proteinG}g</span>
+                  <span className="text-xl font-mono font-bold text-sky-400">
+                    {tdeeData.proteinG}g
+                  </span>
                 </div>
                 <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
                   <span className="text-xs text-slate-400 block">Carbohydrates (40%)</span>
-                  <span className="text-xl font-mono font-bold text-amber-400">{tdeeData.carbsG}g</span>
+                  <span className="text-xl font-mono font-bold text-amber-400">
+                    {tdeeData.carbsG}g
+                  </span>
                 </div>
                 <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
                   <span className="text-xs text-slate-400 block">Fats (30%)</span>
-                  <span className="text-xl font-mono font-bold text-pink-400">{tdeeData.fatsG}g</span>
+                  <span className="text-xl font-mono font-bold text-pink-400">
+                    {tdeeData.fatsG}g
+                  </span>
                 </div>
               </div>
             </div>
@@ -408,8 +477,12 @@ export const HealthCalculator: React.FC<HealthCalculatorProps> = ({ settings: _s
           <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-base font-bold text-slate-100">Cardiovascular Target Heart Rate Zones</h3>
-                <p className="text-xs text-slate-400">Calculated with Tanaka Maximum HR and Karvonen Heart Rate Reserve</p>
+                <h3 className="text-base font-bold text-slate-100">
+                  Cardiovascular Target Heart Rate Zones
+                </h3>
+                <p className="text-xs text-slate-400">
+                  Calculated with Tanaka Maximum HR and Karvonen Heart Rate Reserve
+                </p>
               </div>
               <div className="flex items-center gap-2">
                 <label className="text-xs text-slate-400">Resting HR:</label>
@@ -423,7 +496,9 @@ export const HealthCalculator: React.FC<HealthCalculatorProps> = ({ settings: _s
             </div>
 
             <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-400">Estimated Maximum Heart Rate (HR_max):</span>
+              <span className="text-xs font-bold text-slate-400">
+                Estimated Maximum Heart Rate (HR_max):
+              </span>
               <span className="text-xl font-mono font-bold text-rose-400">{hrData.maxHr} BPM</span>
             </div>
 
