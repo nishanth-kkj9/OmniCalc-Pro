@@ -10,6 +10,7 @@ assignees: ''
 A clear and concise description of what the bug is.
 
 **Steps to Reproduce**
+
 1. Select engine '...'
 2. Enter expression '...'
 3. Click/Press '...'
@@ -19,6 +20,7 @@ A clear and concise description of what the bug is.
 A clear and concise description of what you expected to happen.
 
 **Environment (please complete the following information):**
+
 - Platform: [Web / Desktop]
 - OS: [e.g. Windows 11, macOS, Linux]
 - Browser / Python version: [e.g. Chrome 120, Python 3.12]

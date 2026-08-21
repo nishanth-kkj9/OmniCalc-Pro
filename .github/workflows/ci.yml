@@ -15,6 +15,46 @@ permissions:
   contents: read
 
 jobs:
+  version-consistency:
+    name: Version & Metadata Consistency
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Set up Node.js 20.x
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Verify Version Synchronization
+        run: |
+          VERSION_FILE=$(cat VERSION | tr -d '[:space:]')
+          PKG_VERSION=$(node -p "require('./package.json').version")
+
+          echo "VERSION file: $VERSION_FILE"
+          echo "package.json: $PKG_VERSION"
+
+          if [ "$VERSION_FILE" != "$PKG_VERSION" ]; then
+            echo "::error::Version mismatch: VERSION ($VERSION_FILE) != package.json ($PKG_VERSION)"
+            exit 1
+          fi
+
+          if ! grep -q "APP_VERSION = '$VERSION_FILE'" src/constants/version.ts; then
+            echo "::error::src/constants/version.ts does not match canonical version $VERSION_FILE"
+            exit 1
+          fi
+
+          if ! grep -q "version = \"$VERSION_FILE\"" pyproject.toml; then
+            echo "::error::pyproject.toml does not match canonical version $VERSION_FILE"
+            exit 1
+          fi
+
+          echo "All version declarations synchronized successfully at v$VERSION_FILE."
+
   web-lint:
     name: Web Linter & Format Check
     runs-on: ubuntu-latest
@@ -35,6 +75,9 @@ jobs:
 
       - name: Run ESLint
         run: npm run lint
+
+      - name: Verify Code Formatting
+        run: npm run format:check
 
   web-test:
     name: Web Unit Tests & Coverage
@@ -57,7 +100,7 @@ jobs:
       - name: Run Vitest Unit Tests & Coverage
         run: npm run coverage
 
-  web-ci:
+  web-build:
     name: Web Build & Typecheck
     runs-on: ubuntu-latest
     permissions:
@@ -76,7 +119,7 @@ jobs:
         run: npm ci
 
       - name: TypeScript Typecheck
-        run: npx tsc --noEmit
+        run: npm run typecheck
 
       - name: Build Web Application
         run: npm run build
@@ -88,6 +131,27 @@ jobs:
           path: dist/
           if-no-files-found: error
           retention-days: 7
+
+  docker-build:
+    name: Docker Build & Smoke Test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
+
+      - name: Build Production Docker Image
+        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6.15.0
+        with:
+          context: .
+          load: true
+          tags: omnicalc-pro:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   python-lint:
     name: Python Linting & Type Analysis
@@ -102,7 +166,7 @@ jobs:
       - name: Set up Python 3.12
         uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 # v5.4.0
         with:
-          python-version: "3.12"
+          python-version: '3.12'
           cache: 'pip'
 
       - name: Install Python Dependencies
@@ -126,11 +190,11 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ["3.10", "3.11", "3.12"]
+        python-version: ['3.10', '3.11', '3.12']
 
     env:
       QT_QPA_PLATFORM: offscreen
-      QT_LOGGING_RULES: "*.debug=false;qt.qpa.*=false"
+      QT_LOGGING_RULES: '*.debug=false;qt.qpa.*=false'
       MPLBACKEND: Agg
 
     steps:
@@ -180,3 +244,18 @@ jobs:
         if: runner.os != 'Linux'
         run: |
           python -m pytest tests/ -v --tb=short
+
+  ci-gate:
+    name: CI Pipeline Status Check
+    needs:
+      [version-consistency, web-lint, web-test, web-build, docker-build, python-lint, python-test]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Status of All CI Jobs
+        run: |
+          if [[ "${{ contains(needs.*.result, 'failure') }}" == "true" || "${{ contains(needs.*.result, 'cancelled') }}" == "true" ]]; then
+            echo "CI pipeline failed. Check individual job logs for details."
+            exit 1
+          fi
+          echo "All CI pipeline checks passed successfully."
