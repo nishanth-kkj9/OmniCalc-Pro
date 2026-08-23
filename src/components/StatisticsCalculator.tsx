@@ -109,27 +109,27 @@ export const StatisticsCalculator: React.FC<StatisticsCalculatorProps> = ({
     <div className="max-w-4xl mx-auto w-full p-4 flex flex-col gap-6">
       {/* Input Section */}
       <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl flex flex-col gap-3">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
           <label className="text-sm font-bold text-slate-200">
             Dataset Input (Comma or Space Separated)
           </label>
-          <div className="flex items-center gap-1.5 text-xs">
-            <span className="text-slate-400 font-semibold">Presets:</span>
+          <div className="flex flex-wrap items-center gap-1.5 text-xs">
+            <span className="text-slate-400 font-semibold flex-shrink-0">Presets:</span>
             <button
               onClick={() => loadPreset('scores')}
-              className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded-lg"
+              className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded-lg flex-shrink-0"
             >
               Scores
             </button>
             <button
               onClick={() => loadPreset('temps')}
-              className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded-lg"
+              className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded-lg flex-shrink-0"
             >
               Temps
             </button>
             <button
               onClick={() => loadPreset('sales')}
-              className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded-lg"
+              className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded-lg flex-shrink-0"
             >
               Sales
             </button>

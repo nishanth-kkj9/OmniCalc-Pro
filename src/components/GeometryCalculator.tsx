@@ -265,7 +265,7 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
             key={item.id}
             onClick={() => setTab(item.id as any)}
             className={`
-              px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border shadow-sm
+              px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border shadow-sm flex-shrink-0
               ${
                 tab === item.id
                   ? 'bg-sky-600 text-white border-sky-500 shadow-sky-600/20'
@@ -283,7 +283,7 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
         {/* TRIANGLE SOLVER */}
         {tab === 'triangle' && (
           <div className="flex flex-col gap-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <h3 className="text-base font-bold text-slate-100">Triangle Geometry Solver</h3>
                 <p className="text-xs text-slate-400">
@@ -297,7 +297,7 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
                   setSideB('6');
                   setSideC('7');
                 }}
-                className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs flex items-center gap-1.5 border border-slate-700"
+                className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs flex items-center gap-1.5 border border-slate-700 flex-shrink-0"
               >
                 <RefreshCw className="w-3.5 h-3.5" /> Example (5, 6, 7)
               </button>

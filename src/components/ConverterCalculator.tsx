@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { ArrowLeftRight, Copy, Check } from 'lucide-react';
+import { ArrowLeftRight, Copy, Check, Atom, Layers } from 'lucide-react';
 import { UnitCategory, AppSettings } from '../types';
+import { PhysicalUnitsCalculator } from './PhysicalUnitsCalculator';
 
 interface ConverterCalculatorProps {
-  settings?: AppSettings;
+  settings: AppSettings;
 }
 
 interface UnitDef {
@@ -155,9 +156,8 @@ const CATEGORY_UNITS: Record<UnitCategory, { base: string; units: Record<string,
   },
 };
 
-export const ConverterCalculator: React.FC<ConverterCalculatorProps> = ({
-  settings: _settings,
-}) => {
+export const ConverterCalculator: React.FC<ConverterCalculatorProps> = ({ settings }) => {
+  const [engineMode, setEngineMode] = useState<'standard' | 'physical'>('standard');
   const [category, setCategory] = useState<UnitCategory>('Length');
   const [fromUnit, setFromUnit] = useState<string>('m');
   const [toUnit, setToUnit] = useState<string>('ft');
@@ -212,103 +212,152 @@ export const ConverterCalculator: React.FC<ConverterCalculatorProps> = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const isLight = settings.theme === 'light';
+  const isOled = settings.theme === 'oled';
+
+  const cardBg = isLight
+    ? 'bg-white border-slate-200 text-slate-900 shadow-sm'
+    : isOled
+      ? 'bg-zinc-950 border-zinc-800 text-white'
+      : 'bg-slate-900 border-slate-800 text-slate-100 shadow-xl';
+
+  const inputBg = isLight
+    ? 'bg-slate-100 border-slate-300 text-slate-900 focus:border-sky-500'
+    : isOled
+      ? 'bg-zinc-900 border-zinc-700 text-white focus:border-sky-500'
+      : 'bg-slate-800 border-slate-700 text-slate-100 focus:border-sky-500';
+
   return (
-    <div className="max-w-3xl mx-auto w-full p-4 flex flex-col gap-6">
-      {/* Category Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-        {(Object.keys(CATEGORY_UNITS) as UnitCategory[]).map((cat) => (
-          <button
-            key={cat}
-            onClick={() => changeCategory(cat)}
-            className={`
-              px-4 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border shadow-sm
-              ${
-                category === cat
-                  ? 'bg-sky-600 text-white border-sky-500 shadow-sky-600/20'
-                  : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-white'
-              }
-            `}
-          >
-            {cat}
-          </button>
-        ))}
+    <div className="max-w-4xl mx-auto w-full p-4 flex flex-col gap-6">
+      {/* Top Selector: Standard Converter vs Physics Dimensional Engine */}
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => setEngineMode('standard')}
+          className={`px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border shadow-sm flex items-center gap-2 ${
+            engineMode === 'standard'
+              ? 'bg-sky-600 text-white border-sky-500 shadow-sky-600/20'
+              : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-white'
+          }`}
+        >
+          <Layers className="w-4 h-4" /> Standard Unit Converter
+        </button>
+        <button
+          onClick={() => setEngineMode('physical')}
+          className={`px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border shadow-sm flex items-center gap-2 ${
+            engineMode === 'physical'
+              ? 'bg-sky-600 text-white border-sky-500 shadow-sky-600/20'
+              : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-white'
+          }`}
+        >
+          <Atom className="w-4 h-4" /> Physical Dimensional Unit Engine & Arithmetic
+        </button>
       </div>
 
-      {/* Main Conversion Card */}
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col gap-6">
-        <div className="grid grid-cols-1 md:grid-cols-5 items-center gap-4">
-          {/* Source Input */}
-          <div className="md:col-span-2 flex flex-col gap-2">
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-              From
-            </label>
-            <input
-              type="number"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              className="w-full bg-slate-800/90 border border-slate-700/80 rounded-2xl p-4 text-2xl font-mono font-bold text-slate-100 focus:outline-none focus:border-sky-500"
-            />
-            <select
-              value={fromUnit}
-              onChange={(e) => setFromUnit(e.target.value)}
-              className="w-full bg-slate-800 border border-slate-700/80 rounded-xl p-3 text-sm font-semibold text-slate-200 focus:outline-none focus:border-sky-500 cursor-pointer"
-            >
-              {Object.values(unitsObj).map((u) => (
-                <option key={u.code} value={u.code}>
-                  {u.name} ({u.code})
-                </option>
-              ))}
-            </select>
+      {engineMode === 'physical' ? (
+        <PhysicalUnitsCalculator settings={settings} />
+      ) : (
+        <>
+          {/* Category Tabs */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+            {(Object.keys(CATEGORY_UNITS) as UnitCategory[]).map((cat) => (
+              <button
+                key={cat}
+                onClick={() => changeCategory(cat)}
+                className={`
+                  px-4 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border shadow-sm flex-shrink-0
+                  ${
+                    category === cat
+                      ? 'bg-sky-600 text-white border-sky-500 shadow-sky-600/20'
+                      : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-white'
+                  }
+                `}
+              >
+                {cat}
+              </button>
+            ))}
           </div>
 
-          {/* Swap Button */}
-          <div className="flex justify-center md:col-span-1">
-            <button
-              onClick={swapUnits}
-              className="p-3 bg-sky-600/20 hover:bg-sky-600/30 text-sky-400 border border-sky-500/30 rounded-2xl transition-all active:scale-95"
-              title="Swap Units"
-            >
-              <ArrowLeftRight className="w-5 h-5" />
-            </button>
-          </div>
+          {/* Main Conversion Card */}
+          <div className={`${cardBg} border rounded-3xl p-6 shadow-xl flex flex-col gap-6`}>
+            <div className="grid grid-cols-1 md:grid-cols-5 items-center gap-4">
+              {/* Source Input */}
+              <div className="md:col-span-2 flex flex-col gap-2">
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  From
+                </label>
+                <input
+                  type="number"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  className={`w-full ${inputBg} rounded-2xl p-4 text-2xl font-mono font-bold focus:outline-none`}
+                />
+                <select
+                  value={fromUnit}
+                  onChange={(e) => setFromUnit(e.target.value)}
+                  className={`w-full ${inputBg} rounded-xl p-3 text-sm font-semibold focus:outline-none cursor-pointer`}
+                >
+                  {Object.values(unitsObj).map((u) => (
+                    <option key={u.code} value={u.code}>
+                      {u.name} ({u.code})
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-          {/* Target Output */}
-          <div className="md:col-span-2 flex flex-col gap-2">
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">To</label>
-            <div className="w-full bg-slate-800/50 border border-slate-700/50 rounded-2xl p-4 text-2xl font-mono font-bold text-sky-300 truncate">
-              {outputValue}
+              {/* Swap Button */}
+              <div className="flex justify-center md:col-span-1">
+                <button
+                  onClick={swapUnits}
+                  className="p-3 bg-sky-600/20 hover:bg-sky-600/30 text-sky-400 border border-sky-500/30 rounded-2xl transition-all active:scale-95 shadow-sm"
+                  title="Swap Units"
+                >
+                  <ArrowLeftRight className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Target Output */}
+              <div className="md:col-span-2 flex flex-col gap-2">
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  To
+                </label>
+                <div
+                  className={`w-full ${inputBg} rounded-2xl p-4 text-2xl font-mono font-bold text-sky-400 truncate`}
+                >
+                  {outputValue}
+                </div>
+                <select
+                  value={toUnit}
+                  onChange={(e) => setToUnit(e.target.value)}
+                  className={`w-full ${inputBg} rounded-xl p-3 text-sm font-semibold focus:outline-none cursor-pointer`}
+                >
+                  {Object.values(unitsObj).map((u) => (
+                    <option key={u.code} value={u.code}>
+                      {u.name} ({u.code})
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
-            <select
-              value={toUnit}
-              onChange={(e) => setToUnit(e.target.value)}
-              className="w-full bg-slate-800 border border-slate-700/80 rounded-xl p-3 text-sm font-semibold text-slate-200 focus:outline-none focus:border-sky-500 cursor-pointer"
-            >
-              {Object.values(unitsObj).map((u) => (
-                <option key={u.code} value={u.code}>
-                  {u.name} ({u.code})
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
 
-        {/* Result Action Bar */}
-        <div className="flex items-center justify-between border-t border-slate-800/80 pt-4">
-          <div className="text-sm font-semibold text-slate-300">
-            {inputValue} <span className="text-slate-500">{unitsObj[fromUnit]?.name}</span> ={' '}
-            <span className="text-sky-400 font-mono font-bold">{outputValue}</span>{' '}
-            <span className="text-slate-500">{unitsObj[toUnit]?.name}</span>
-          </div>
+            {/* Result Action Bar */}
+            <div className="flex items-center justify-between border-t border-slate-800/80 pt-4">
+              <div className="text-sm font-semibold text-slate-300">
+                {inputValue} <span className="text-slate-500">{unitsObj[fromUnit]?.name}</span> ={' '}
+                <span className="text-sky-400 font-mono font-bold">{outputValue}</span>{' '}
+                <span className="text-slate-500">{unitsObj[toUnit]?.name}</span>
+              </div>
 
-          <button
-            onClick={copyResult}
-            className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl flex items-center gap-2 border border-slate-700/80 transition-all"
-          >
-            {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-            {copied ? 'Copied!' : 'Copy Result'}
-          </button>
-        </div>
-      </div>
+              <button
+                onClick={copyResult}
+                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl flex items-center gap-2 border border-slate-700/80 transition-all"
+              >
+                {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                {copied ? 'Copied!' : 'Copy Result'}
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };

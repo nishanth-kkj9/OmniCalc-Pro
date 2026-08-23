@@ -184,7 +184,7 @@ export const HealthCalculator: React.FC<HealthCalculatorProps> = ({ settings: _s
               key={item.id}
               onClick={() => setTab(item.id as any)}
               className={`
-                px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border shadow-sm
+                px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border shadow-sm flex-shrink-0
                 ${
                   tab === item.id
                     ? 'bg-sky-600 text-white border-sky-500 shadow-sky-600/20'
@@ -197,10 +197,10 @@ export const HealthCalculator: React.FC<HealthCalculatorProps> = ({ settings: _s
           ))}
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 p-1 rounded-2xl flex items-center gap-1">
+        <div className="bg-slate-900 border border-slate-800 p-1 rounded-2xl flex items-center gap-1 flex-shrink-0">
           <button
             onClick={() => setUnitSystem('metric')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex-shrink-0 ${
               unitSystem === 'metric'
                 ? 'bg-sky-600 text-white shadow-sm'
                 : 'text-slate-400 hover:text-slate-200'
@@ -210,7 +210,7 @@ export const HealthCalculator: React.FC<HealthCalculatorProps> = ({ settings: _s
           </button>
           <button
             onClick={() => setUnitSystem('imperial')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex-shrink-0 ${
               unitSystem === 'imperial'
                 ? 'bg-sky-600 text-white shadow-sm'
                 : 'text-slate-400 hover:text-slate-200'

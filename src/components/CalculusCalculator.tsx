@@ -1,8 +1,10 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { Copy, Check } from 'lucide-react';
+import { Copy, Check, Download, FileText, ChevronDown, ChevronUp } from 'lucide-react';
 import { AppSettings } from '../types';
 import { evaluateExpression } from '../utils/calculator';
 import { MAX_ITERATIONS, NUMERICAL_EPSILON } from '../constants/limits';
+import { ExportModal } from './ExportModal';
+import { ExportReportData } from '../utils/exportEngine';
 
 interface CalculusCalculatorProps {
   settings: AppSettings;
@@ -11,6 +13,8 @@ interface CalculusCalculatorProps {
 export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings }) => {
   const [calcTab, setCalcTab] = useState<'integral' | 'derivative' | 'root'>('integral');
   const [copied, setCopied] = useState<string | null>(null);
+  const [showSteps, setShowSteps] = useState<boolean>(true);
+  const [exportData, setExportData] = useState<ExportReportData | null>(null);
 
   // Definite Integral State
   const [intFunc, setIntFunc] = useState<string>('x^2 + 2*x + 1');
@@ -49,7 +53,28 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
     [settings.angleMode]
   );
 
-  // Numerical Definite Integration (Simpson's 1/3 Rule)
+  const isLight = settings.theme === 'light';
+  const isOled = settings.theme === 'oled';
+
+  const cardBg = isLight
+    ? 'bg-white border-slate-200 text-slate-900 shadow-sm'
+    : isOled
+      ? 'bg-zinc-950 border-zinc-800 text-white'
+      : 'bg-slate-900 border-slate-800 text-slate-100 shadow-xl';
+
+  const subCardBg = isLight
+    ? 'bg-slate-50 border-slate-200'
+    : isOled
+      ? 'bg-zinc-900 border-zinc-800'
+      : 'bg-slate-950 border-slate-800';
+
+  const inputBg = isLight
+    ? 'bg-slate-100 border-slate-300 text-slate-900 focus:border-sky-500'
+    : isOled
+      ? 'bg-zinc-900 border-zinc-700 text-white focus:border-sky-500'
+      : 'bg-slate-800 border-slate-700 text-slate-100 focus:border-sky-500';
+
+  // Numerical Definite Integration (Simpson's 1/3 Rule & Trapezoid)
   const intData = useMemo(() => {
     const a = parseFloat(intA);
     const b = parseFloat(intB);
@@ -82,6 +107,15 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
       trapResult: formatNum(trapTotal),
       h: formatNum(h),
       n,
+      steps: [
+        `Interval: [a = ${a}, b = ${b}] with n = ${n} subdivisions (step size h = ${formatNum(h)})`,
+        `Simpson's 1/3 Formula: (h / 3) · [f(x₀) + 4∑f(x_odd) + 2∑f(x_even) + f(x_n)]`,
+        `Boundary Values: f(${a}) = ${formatNum(fa)}, f(${b}) = ${formatNum(fb)}`,
+        `Weighted Sum = ${formatNum(simpsonSum)}`,
+        `Simpson Integral = (${formatNum(h)} / 3) · ${formatNum(simpsonSum)} = ${formatNum(simpsonTotal)}`,
+        `Trapezoidal Rule Comparison = ${formatNum(trapTotal)}`,
+      ],
+      latex: `\\int_{${a}}^{${b}} \\left( ${intFunc} \\right) dx \\approx ${formatNum(simpsonTotal)}`,
     };
   }, [intA, intB, intFunc, intSubdiv, evalAt, formatNum]);
 
@@ -120,7 +154,7 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
       const normalIntercept = f0 - normalSlope * x0;
       normalLine = `y = ${formatNum(normalSlope)}x ${normalIntercept >= 0 ? '+' : '-'} ${formatNum(Math.abs(normalIntercept))}`;
     } else {
-      normalLine = `x = ${formatNum(x0)} (Vertical)`;
+      normalLine = `x = ${formatNum(x0)} (Vertical Line)`;
     }
 
     return {
@@ -129,6 +163,19 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
       d2: formatNum(d2),
       tangentLine,
       normalLine,
+      steps: [
+        `Evaluation Point: x₀ = ${x0}`,
+        `Base Function Value: f(${x0}) = ${formatNum(f0)}`,
+        `Five-Point Central Stencil with h = ${h}:`,
+        `   f'(x₀) = [-f(x+2h) + 8f(x+h) - 8f(x-h) + f(x-2h)] / (12h) = ${formatNum(d1)}`,
+        `Second Derivative Concavity Check:`,
+        `   f''(x₀) = ${formatNum(d2)} (${d2 > 0 ? 'Concave Upwards / Local Minima' : d2 < 0 ? 'Concave Downwards / Local Maxima' : 'Inflection candidate'})`,
+        `Tangent Line at (x₀, f(x₀)): Point-Slope form y - f(x₀) = f'(x₀)(x - x₀)`,
+        `   ${tangentLine}`,
+        `Normal (Perpendicular) Line: Slope m_perp = -1 / f'(x₀) = ${Math.abs(d1) > 1e-12 ? formatNum(-1 / d1) : 'undefined'}`,
+        `   ${normalLine}`,
+      ],
+      latex: `\\left. \\frac{d}{dx} \\left( ${diffFunc} \\right) \\right|_{x = ${x0}} = ${formatNum(d1)}`,
     };
   }, [diffX0, diffFunc, evalAt, formatNum]);
 
@@ -180,6 +227,11 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
     return {
       root: formatNum(currentX),
       iterations,
+      steps: iterations.map(
+        (it) =>
+          `Iteration ${it.iter}: x_${it.iter - 1} = ${formatNum(it.x)}, f(x) = ${formatNum(it.fx)}, f'(x) = ${formatNum(it.fPrime)} ➔ x_${it.iter} = ${formatNum(it.nextX)} (Error: ${it.error.toExponential(2)})`
+      ),
+      latex: `f(x) = ${rootFunc} = 0 \\implies x \\approx ${formatNum(currentX)}`,
     };
   }, [rootGuess, maxIter, rootFunc, evalAt, formatNum]);
 
@@ -202,7 +254,7 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
             key={tab.id}
             onClick={() => setCalcTab(tab.id as any)}
             className={`
-              px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border shadow-sm
+              px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border shadow-sm flex-shrink-0
               ${
                 calcTab === tab.id
                   ? 'bg-sky-600 text-white border-sky-500 shadow-sky-600/20'
@@ -216,16 +268,42 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
       </div>
 
       {/* Main Content Card */}
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col gap-6">
+      <div className={`${cardBg} border rounded-3xl p-6 shadow-xl flex flex-col gap-6`}>
         {/* INTEGRAL CALCULATOR */}
         {calcTab === 'integral' && (
           <div className="flex flex-col gap-6">
-            <div>
-              <h3 className="text-base font-bold text-slate-100">Definite Numerical Integral</h3>
-              <p className="text-xs text-slate-400">
-                Calculates area under the curve using Composite Simpson's 1/3 Rule and Trapezoidal
-                rules
-              </p>
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
+              <div>
+                <h3 className="text-base font-bold text-slate-100">Definite Numerical Integral</h3>
+                <p className="text-xs text-slate-400">
+                  Calculates area under curve via Composite Simpson's 1/3 Rule & Trapezoidal sums
+                </p>
+              </div>
+
+              {intData && !intData.error && (
+                <button
+                  onClick={() => {
+                    setExportData({
+                      title: 'Definite Numerical Integration',
+                      engine: 'Calculus Suite',
+                      timestamp: Date.now(),
+                      inputDescription: `∫ [${intA} to ${intB}] (${intFunc}) dx`,
+                      resultSummary: `${intData.result}`,
+                      latex: intData.latex,
+                      steps: intData.steps,
+                      metadata: {
+                        'Simpson Result': intData.result || '',
+                        'Trapezoidal Result': intData.trapResult || '',
+                        'Subdivisions n': `${intData.n}`,
+                        'Step Size h': intData.h || '',
+                      },
+                    });
+                  }}
+                  className="px-3 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md shadow-sky-600/20 flex-shrink-0"
+                >
+                  <Download className="w-3.5 h-3.5" /> Export Report
+                </button>
+              )}
             </div>
 
             {/* Inputs */}
@@ -237,7 +315,7 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
                   value={intFunc}
                   onChange={(e) => setIntFunc(e.target.value)}
                   placeholder="e.g. x^2 + 2*x + 1 or sin(x)"
-                  className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-sm font-bold text-slate-100 focus:outline-none focus:border-sky-500"
+                  className={`${inputBg} rounded-2xl p-3 font-mono text-sm font-bold focus:outline-none`}
                 />
               </div>
               <div className="flex flex-col gap-1.5">
@@ -246,7 +324,7 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
                   type="number"
                   value={intA}
                   onChange={(e) => setIntA(e.target.value)}
-                  className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-sm font-bold text-slate-100 focus:outline-none focus:border-sky-500"
+                  className={`${inputBg} rounded-2xl p-3 font-mono text-sm font-bold focus:outline-none`}
                 />
               </div>
               <div className="flex flex-col gap-1.5">
@@ -255,7 +333,7 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
                   type="number"
                   value={intB}
                   onChange={(e) => setIntB(e.target.value)}
-                  className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-sm font-bold text-slate-100 focus:outline-none focus:border-sky-500"
+                  className={`${inputBg} rounded-2xl p-3 font-mono text-sm font-bold focus:outline-none`}
                 />
               </div>
             </div>
@@ -268,7 +346,7 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
 
             {/* Results */}
             {intData && (
-              <div className="flex flex-col gap-4 bg-slate-950 border border-slate-800 rounded-2xl p-5">
+              <div className={`flex flex-col gap-4 ${subCardBg} border rounded-2xl p-5`}>
                 {intData.error ? (
                   <div className="text-rose-400 text-sm font-semibold">{intData.error}</div>
                 ) : (
@@ -309,9 +387,28 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
                       </div>
                     </div>
 
-                    <div className="text-xs text-slate-400 flex items-center justify-between border-t border-slate-800 pt-3">
-                      <span>Subdivisions: {intData.n} intervals</span>
-                      <span>Step Size h = {intData.h}</span>
+                    {/* Step by Step Breakdown */}
+                    <div className="border-t border-slate-800 pt-3 flex flex-col gap-2">
+                      <button
+                        onClick={() => setShowSteps(!showSteps)}
+                        className="flex items-center justify-between text-xs font-bold text-slate-300 hover:text-white"
+                      >
+                        <span className="flex items-center gap-1.5">
+                          <FileText className="w-3.5 h-3.5 text-sky-400" />
+                          Step-by-Step Integration Derivation
+                        </span>
+                        {showSteps ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                      </button>
+
+                      {showSteps && (
+                        <div className="flex flex-col gap-1.5 mt-1 bg-slate-900/60 p-3 rounded-xl border border-slate-800/80">
+                          {intData.steps?.map((step, idx) => (
+                            <div key={idx} className="text-xs font-mono text-slate-300">
+                              • {step}
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </>
                 )}
@@ -323,13 +420,40 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
         {/* DERIVATIVE CALCULATOR */}
         {calcTab === 'derivative' && (
           <div className="flex flex-col gap-6">
-            <div>
-              <h3 className="text-base font-bold text-slate-100">
-                Numerical Derivative & Tangent Line
-              </h3>
-              <p className="text-xs text-slate-400">
-                Calculates 1st & 2nd order derivatives, tangent line, and normal line equations
-              </p>
+            <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
+              <div>
+                <h3 className="text-base font-bold text-slate-100">
+                  Numerical Derivative & Tangent Line
+                </h3>
+                <p className="text-xs text-slate-400">
+                  Calculates 1st & 2nd order derivatives, tangent line, and normal line equations
+                </p>
+              </div>
+
+              {diffData && !diffData.error && (
+                <button
+                  onClick={() => {
+                    setExportData({
+                      title: 'Derivative & Tangent Analysis',
+                      engine: 'Calculus Suite',
+                      timestamp: Date.now(),
+                      inputDescription: `d/dx (${diffFunc}) at x₀ = ${diffX0}`,
+                      resultSummary: `f'(x₀) = ${diffData.d1}, Tangent: ${diffData.tangentLine}`,
+                      latex: diffData.latex,
+                      steps: diffData.steps,
+                      metadata: {
+                        '1st Derivative': diffData.d1 || '',
+                        '2nd Derivative': diffData.d2 || '',
+                        'Tangent Line': diffData.tangentLine || '',
+                        'Normal Line': diffData.normalLine || '',
+                      },
+                    });
+                  }}
+                  className="px-3 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md shadow-sky-600/20"
+                >
+                  <Download className="w-3.5 h-3.5" /> Export Report
+                </button>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
@@ -340,7 +464,7 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
                   value={diffFunc}
                   onChange={(e) => setDiffFunc(e.target.value)}
                   placeholder="e.g. sin(x) + x^2"
-                  className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-sm font-bold text-slate-100 focus:outline-none focus:border-sky-500"
+                  className={`${inputBg} rounded-2xl p-3 font-mono text-sm font-bold focus:outline-none`}
                 />
               </div>
               <div className="flex flex-col gap-1.5">
@@ -349,13 +473,13 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
                   type="number"
                   value={diffX0}
                   onChange={(e) => setDiffX0(e.target.value)}
-                  className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-sm font-bold text-slate-100 focus:outline-none focus:border-sky-500"
+                  className={`${inputBg} rounded-2xl p-3 font-mono text-sm font-bold focus:outline-none`}
                 />
               </div>
             </div>
 
             {diffData && (
-              <div className="flex flex-col gap-4 bg-slate-950 border border-slate-800 rounded-2xl p-5">
+              <div className={`flex flex-col gap-4 ${subCardBg} border rounded-2xl p-5`}>
                 {diffData.error ? (
                   <div className="text-rose-400 text-sm font-semibold">{diffData.error}</div>
                 ) : (
@@ -401,6 +525,16 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
                         </span>
                       </div>
                     </div>
+
+                    {/* Step-by-Step Breakdown */}
+                    <div className="border-t border-slate-800 pt-3 flex flex-col gap-1.5">
+                      <span className="text-xs font-bold text-slate-400">Derivative Derivation Steps:</span>
+                      {diffData.steps?.map((step, idx) => (
+                        <div key={idx} className="text-xs font-mono text-slate-300">
+                          • {step}
+                        </div>
+                      ))}
+                    </div>
                   </>
                 )}
               </div>
@@ -411,11 +545,49 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
         {/* ROOT FINDER */}
         {calcTab === 'root' && (
           <div className="flex flex-col gap-6">
-            <div>
-              <h3 className="text-base font-bold text-slate-100">Newton-Raphson Method</h3>
-              <p className="text-xs text-slate-400">
-                Iterative algorithm for finding roots where f(x) = 0
-              </p>
+            <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
+              <div>
+                <h3 className="text-base font-bold text-slate-100">Newton-Raphson Method</h3>
+                <p className="text-xs text-slate-400">
+                  Iterative algorithm for finding roots where f(x) = 0
+                </p>
+              </div>
+
+              {rootData && !rootData.error && (
+                <button
+                  onClick={() => {
+                    const headers = ['Iteration', 'x_n', 'f(x_n)', "f'(x_n)", 'x_(n+1)', '|Δx|'];
+                    const rows = (rootData.iterations || []).map((it) => [
+                      it.iter,
+                      formatNum(it.x),
+                      formatNum(it.fx),
+                      formatNum(it.fPrime),
+                      formatNum(it.nextX),
+                      it.error.toExponential(4),
+                    ]);
+
+                    setExportData({
+                      title: 'Newton-Raphson Root Convergence',
+                      engine: 'Calculus Suite',
+                      timestamp: Date.now(),
+                      inputDescription: `${rootFunc} = 0, initial guess x₀ = ${rootGuess}`,
+                      resultSummary: `x ≈ ${rootData.root}`,
+                      latex: rootData.latex,
+                      steps: rootData.steps,
+                      tableHeaders: headers,
+                      tableRows: rows,
+                      metadata: {
+                        'Initial Guess x₀': rootGuess,
+                        'Total Iterations': `${rows.length}`,
+                        'Final Root': rootData.root || '',
+                      },
+                    });
+                  }}
+                  className="px-3 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md shadow-sky-600/20"
+                >
+                  <Download className="w-3.5 h-3.5" /> Export Table & Report
+                </button>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
@@ -426,7 +598,7 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
                   value={rootFunc}
                   onChange={(e) => setRootFunc(e.target.value)}
                   placeholder="e.g. cos(x) - x"
-                  className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-sm font-bold text-slate-100"
+                  className={`${inputBg} rounded-2xl p-3 font-mono text-sm font-bold`}
                 />
               </div>
               <div className="flex flex-col gap-1.5">
@@ -435,7 +607,7 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
                   type="number"
                   value={rootGuess}
                   onChange={(e) => setRootGuess(e.target.value)}
-                  className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-sm font-bold text-slate-100"
+                  className={`${inputBg} rounded-2xl p-3 font-mono text-sm font-bold`}
                 />
               </div>
               <div className="flex flex-col gap-1.5">
@@ -446,13 +618,13 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
                   max="50"
                   value={maxIter}
                   onChange={(e) => setMaxIter(parseInt(e.target.value) || 10)}
-                  className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-sm font-bold text-slate-100"
+                  className={`${inputBg} rounded-2xl p-3 font-mono text-sm font-bold`}
                 />
               </div>
             </div>
 
             {rootData && (
-              <div className="flex flex-col gap-4 bg-slate-950 border border-slate-800 rounded-2xl p-5">
+              <div className={`flex flex-col gap-4 ${subCardBg} border rounded-2xl p-5`}>
                 {rootData.error && (
                   <div className="text-amber-400 text-xs font-semibold">{rootData.error}</div>
                 )}
@@ -515,6 +687,16 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
           </div>
         )}
       </div>
+
+      {/* Export Modal */}
+      {exportData && (
+        <ExportModal
+          isOpen={!!exportData}
+          onClose={() => setExportData(null)}
+          data={exportData}
+          settings={settings}
+        />
+      )}
     </div>
   );
 };

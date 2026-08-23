@@ -100,7 +100,7 @@ export const FinanceCalculator: React.FC<FinanceCalculatorProps> = ({ settings: 
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`
-              px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border shadow-sm
+              px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border shadow-sm flex-shrink-0
               ${
                 activeTab === tab.id
                   ? 'bg-sky-600 text-white border-sky-500 shadow-sky-600/20'

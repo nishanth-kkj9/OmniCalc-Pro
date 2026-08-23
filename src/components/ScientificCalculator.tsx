@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Delete, Copy, Check } from 'lucide-react';
+import { Delete, Copy, Check, History, ChevronUp, ChevronDown, Keyboard } from 'lucide-react';
 import { evaluateExpression } from '../utils/calculator';
-import { addHistory } from '../utils/history';
+import { addHistory, getHistory } from '../utils/history';
 import { formatNumberWithSettings } from '../utils/formatting';
-import { AppSettings, AngleMode } from '../types';
+import { AppSettings, AngleMode, HistoryItem } from '../types';
 
 interface ScientificCalculatorProps {
   settings: AppSettings;
@@ -21,6 +21,18 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({
   const [memory, setMemory] = useState<number>(0);
   const [isEvaluated, setIsEvaluated] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
+  const [showHistoryTape, setShowHistoryTape] = useState<boolean>(false);
+  const [recentHistory, setRecentHistory] = useState<HistoryItem[]>([]);
+  const [showKeyboardHints, setShowKeyboardHints] = useState<boolean>(false);
+
+  const refreshHistory = useCallback(() => {
+    const list = getHistory().filter((h) => h.mode === 'basic' || h.mode === 'scientific');
+    setRecentHistory(list.slice(0, 8));
+  }, []);
+
+  useEffect(() => {
+    refreshHistory();
+  }, [refreshHistory]);
 
   useEffect(() => {
     if (!expression.trim()) {
@@ -83,8 +95,20 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({
       setRawResult(finalVal);
       setDisplayResult(formatted);
       setIsEvaluated(true);
+      refreshHistory();
     }
-  }, [expression, settings]);
+  }, [expression, settings, refreshHistory]);
+
+  const handleRecallHistory = (item: HistoryItem) => {
+    setExpression(item.expression);
+    setRawResult(item.result);
+    setDisplayResult(item.result);
+    setIsEvaluated(true);
+  };
+
+  const openParens = (expression.match(/\(/g) || []).length;
+  const closeParens = (expression.match(/\)/g) || []).length;
+  const unclosedParens = Math.max(0, openParens - closeParens);
 
   // Physical Keyboard Handling
   useEffect(() => {
@@ -207,17 +231,17 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({
         : 'text-3xl sm:text-4xl';
 
   return (
-    <div className="max-w-2xl mx-auto w-full p-2 sm:p-4 flex flex-col gap-4">
+    <div className="max-w-2xl mx-auto w-full p-2 sm:p-4 flex flex-col gap-3.5">
       {/* Display Screen */}
       <div
-        className={`${screenBg} border rounded-3xl p-5 flex flex-col justify-end min-h-[140px] text-right overflow-hidden relative transition-colors shadow-lg group`}
+        className={`${screenBg} border rounded-3xl p-4 sm:p-5 flex flex-col justify-between min-h-[145px] text-right overflow-hidden relative transition-colors shadow-lg group`}
       >
         {/* Top Badges and Copy Action */}
-        <div className="flex items-center justify-between absolute top-3.5 left-4 right-4">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-2 w-full mb-2">
+          <div className="flex flex-wrap items-center gap-1.5">
             <button
               onClick={toggleAngleMode}
-              className="px-2 py-0.5 rounded-full border shadow-xs text-xs font-semibold hover:opacity-80 transition-opacity"
+              className="px-2.5 py-0.5 rounded-full border shadow-xs text-xs font-bold hover:opacity-80 transition-opacity flex-shrink-0"
               style={{
                 backgroundColor: isLight ? 'rgba(2, 132, 199, 0.1)' : 'rgba(2, 132, 199, 0.2)',
                 color: 'var(--accent)',
@@ -227,9 +251,16 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({
             >
               {settings.angleMode}
             </button>
+
+            {unclosedParens > 0 && (
+              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 flex-shrink-0">
+                ( {unclosedParens} open
+              </span>
+            )}
+
             {memory !== 0 && (
               <span
-                className="text-[10px] font-bold px-2 py-0.5 rounded-full border shadow-xs"
+                className="text-[10px] font-bold px-2 py-0.5 rounded-full border shadow-xs flex-shrink-0"
                 style={{
                   backgroundColor: isLight ? 'rgba(2, 132, 199, 0.1)' : 'rgba(2, 132, 199, 0.25)',
                   color: 'var(--accent)',
@@ -239,52 +270,118 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({
                 M = {memory}
               </span>
             )}
+
+            <button
+              onClick={() => setShowHistoryTape(!showHistoryTape)}
+              className={`px-2 py-1 rounded-lg border text-[11px] font-semibold flex items-center gap-1.5 transition-all flex-shrink-0 ${
+                showHistoryTape
+                  ? 'bg-sky-500/20 text-sky-400 border-sky-500/40'
+                  : isLight
+                    ? 'bg-slate-100 text-slate-600 hover:bg-slate-200 border-slate-200'
+                    : 'bg-slate-800 text-slate-400 hover:bg-slate-700 border-slate-700/80'
+              }`}
+              title="Toggle Quick History Tape"
+            >
+              <History className="w-3 h-3 flex-shrink-0" />
+              <span className="hidden sm:inline">Tape</span>
+              {showHistoryTape ? <ChevronUp className="w-3 h-3 flex-shrink-0" /> : <ChevronDown className="w-3 h-3 flex-shrink-0" />}
+            </button>
           </div>
 
-          <button
-            onClick={handleCopy}
-            className={`p-1.5 rounded-xl border text-xs font-medium flex items-center gap-1.5 transition-all opacity-80 group-hover:opacity-100 ${
-              isLight
-                ? 'bg-slate-100 hover:bg-slate-200 text-slate-600 border-slate-200'
-                : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700/80'
-            }`}
-            title="Copy Result to Clipboard"
-          >
-            {copied ? (
-              <>
-                <Check className="w-3.5 h-3.5 text-emerald-500" />
-                <span className="text-[11px] text-emerald-500 font-bold">Copied</span>
-              </>
-            ) : (
-              <>
-                <Copy className="w-3.5 h-3.5" />
-                <span className="text-[11px] hidden sm:inline">Copy</span>
-              </>
-            )}
-          </button>
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            <button
+              onClick={handleCopy}
+              className={`p-1.5 px-2 rounded-xl border text-xs font-medium flex items-center gap-1.5 transition-all opacity-85 group-hover:opacity-100 ${
+                isLight
+                  ? 'bg-slate-100 hover:bg-slate-200 text-slate-600 border-slate-200'
+                  : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700/80'
+              }`}
+              title="Copy Result to Clipboard"
+            >
+              {copied ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
+                  <span className="text-[11px] text-emerald-500 font-bold">Copied</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span className="text-[11px] hidden sm:inline">Copy</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Expression Crumb */}
         <div
-          className={`text-sm font-mono h-6 overflow-x-auto whitespace-nowrap scrollbar-none mt-4 ${isLight ? 'text-slate-500' : 'text-slate-400'}`}
+          className={`text-sm font-mono h-6 overflow-x-auto whitespace-nowrap scrollbar-none my-1 ${isLight ? 'text-slate-500' : 'text-slate-400'}`}
         >
           {expression || ' '}
         </div>
 
         {/* Main Display Output */}
         <div
-          className={`${fontSizeClass} font-bold font-mono tracking-tight overflow-x-auto whitespace-nowrap scrollbar-none py-1 ${isLight ? 'text-slate-900' : 'text-slate-100'}`}
+          className={`${fontSizeClass} font-bold font-mono tracking-tight overflow-x-auto whitespace-nowrap scrollbar-none py-1 tabular-nums ${isLight ? 'text-slate-900' : 'text-slate-100'}`}
         >
           {displayResult || '0'}
         </div>
       </div>
 
+      {/* Quick History Tape Drawer */}
+      {showHistoryTape && (
+        <div
+          className={`p-3 rounded-2xl border transition-all ${
+            isLight
+              ? 'bg-slate-50 border-slate-200'
+              : isOled
+                ? 'bg-zinc-950 border-zinc-800'
+                : 'bg-slate-900/90 border-slate-800'
+          }`}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+              <History className="w-3 h-3 text-sky-400" />
+              Quick Tape (Click to Insert)
+            </span>
+            <span className="text-[10px] text-slate-500 font-mono">{recentHistory.length} items</span>
+          </div>
+
+          {recentHistory.length === 0 ? (
+            <p className="text-xs text-slate-400 text-center py-2">No recent calculations yet.</p>
+          ) : (
+            <div className="max-h-36 overflow-y-auto space-y-1.5 pr-1">
+              {recentHistory.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => handleRecallHistory(item)}
+                  className={`w-full text-left p-2 rounded-xl text-xs font-mono flex items-center justify-between transition-all group ${
+                    isLight
+                      ? 'bg-white hover:bg-sky-50 text-slate-800 border border-slate-200'
+                      : isOled
+                        ? 'bg-zinc-900 hover:bg-zinc-800 text-slate-200 border border-zinc-800'
+                        : 'bg-slate-800/80 hover:bg-slate-700/80 text-slate-200 border border-slate-700/60'
+                  }`}
+                >
+                  <span className="truncate text-slate-400 group-hover:text-slate-200">
+                    {item.expression} =
+                  </span>
+                  <span className="font-bold text-sky-400 ml-2 whitespace-nowrap">
+                    {item.result}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Control Bar */}
-      <div className={`flex items-center justify-between p-2 rounded-2xl border ${controlBarBg}`}>
-        <div className="flex items-center gap-2">
+      <div className={`flex flex-wrap items-center justify-between gap-2 p-2 rounded-2xl border ${controlBarBg}`}>
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => setIsSecond(!isSecond)}
-            className={`px-3 py-1.5 text-xs font-bold rounded-xl border transition-all active:scale-95 ${
+            className={`px-3 py-1.5 text-xs font-bold rounded-xl border transition-all active:scale-95 flex-shrink-0 ${
               isSecond
                 ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-md shadow-amber-500/20'
                 : isLight
@@ -292,11 +389,11 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({
                   : 'bg-slate-800 text-slate-300 border-slate-700 hover:text-white'
             }`}
           >
-            2nd
+            2nd {isSecond && '●'}
           </button>
           <button
             onClick={toggleAngleMode}
-            className={`px-3 py-1.5 text-xs font-bold rounded-xl border transition-all active:scale-95 ${
+            className={`px-3 py-1.5 text-xs font-bold rounded-xl border transition-all active:scale-95 flex-shrink-0 ${
               isLight
                 ? 'bg-white text-sky-600 border-slate-300 hover:bg-slate-50'
                 : isOled
@@ -308,7 +405,7 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({
           </button>
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex flex-wrap items-center gap-1.5">
           {['MC', 'MR', 'M+', 'M-'].map((m) => (
             <button
               key={m}
@@ -319,7 +416,7 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({
                 else if (m === 'M+') setMemory((p) => p + currentVal);
                 else if (m === 'M-') setMemory((p) => p - currentVal);
               }}
-              className={memBtnClass}
+              className={`${memBtnClass} flex-shrink-0`}
             >
               {m}
             </button>
@@ -385,7 +482,7 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({
           onClick={handleClear}
           className={`${btnClass} bg-rose-500/15 hover:bg-rose-500/25 active:bg-rose-500/35 text-rose-500 border border-rose-500/30 font-bold`}
         >
-          C
+          {expression ? 'C' : 'AC'}
         </button>
         <button onClick={handleBackspace} className={fnBtnClass}>
           <Delete className="w-5 h-5" />
@@ -493,6 +590,37 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({
           =
         </button>
       </div>
+
+      {/* Keyboard Shortcuts Hint Bar */}
+      <div className="flex items-center justify-between text-[11px] text-slate-500 px-1 pt-1">
+        <button
+          onClick={() => setShowKeyboardHints(!showKeyboardHints)}
+          className="flex items-center gap-1.5 hover:text-slate-400 transition-colors"
+        >
+          <Keyboard className="w-3.5 h-3.5" />
+          <span>{showKeyboardHints ? 'Hide Shortcuts' : 'Scientific Shortcuts'}</span>
+        </button>
+        <span className="font-mono text-[10px]">sin, cos, tan, log, ln, ^ supported</span>
+      </div>
+
+      {showKeyboardHints && (
+        <div
+          className={`p-2.5 rounded-xl border text-[11px] space-y-1 ${
+            isLight
+              ? 'bg-slate-100/90 border-slate-200 text-slate-700'
+              : 'bg-slate-900/80 border-slate-800 text-slate-300'
+          }`}
+        >
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 font-mono text-[10px]">
+            <div><kbd className="font-bold text-sky-400">0-9</kbd> : Numbers</div>
+            <div><kbd className="font-bold text-sky-400">+ - * /</kbd> : Operators</div>
+            <div><kbd className="font-bold text-sky-400">^</kbd> : Power / Exponent</div>
+            <div><kbd className="font-bold text-sky-400">( )</kbd> : Parentheses</div>
+            <div><kbd className="font-bold text-sky-400">Enter / =</kbd> : Solve</div>
+            <div><kbd className="font-bold text-sky-400">Backspace</kbd> : Delete</div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

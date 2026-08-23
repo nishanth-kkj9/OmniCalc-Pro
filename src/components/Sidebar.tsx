@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Calculator,
   Binary,
@@ -12,6 +12,7 @@ import {
   Settings,
   Sparkles,
   ChevronRight,
+  ChevronDown,
   Equal,
   Sigma,
   Calendar,
@@ -20,6 +21,8 @@ import {
   Divide,
   Search,
   X,
+  Star,
+  Pin,
 } from 'lucide-react';
 import { CalcMode, AppSettings } from '../types';
 import { APP_NAME, APP_VERSION } from '../constants/version';
@@ -38,6 +41,7 @@ interface MenuItem {
   icon: React.ReactNode;
   group: 'Core & Math' | 'Advanced & Science' | 'Practical & Life' | 'Tools & Reference';
   keywords?: string;
+  badge?: string;
 }
 
 const MENU_ITEMS: MenuItem[] = [
@@ -45,28 +49,28 @@ const MENU_ITEMS: MenuItem[] = [
   {
     mode: 'basic',
     label: 'Basic Calculator',
-    icon: <Calculator className="w-4 h-4" />,
+    icon: <Calculator className="w-4 h-4 text-sky-400" />,
     group: 'Core & Math',
     keywords: 'arithmetic standard memory plus minus',
   },
   {
     mode: 'scientific',
     label: 'Scientific Calculator',
-    icon: <Sparkles className="w-4 h-4" />,
+    icon: <Sparkles className="w-4 h-4 text-amber-400" />,
     group: 'Core & Math',
     keywords: 'trig sin cos tan log exponent power',
   },
   {
     mode: 'fractions',
     label: 'Fractions & Number Theory',
-    icon: <Divide className="w-4 h-4" />,
+    icon: <Divide className="w-4 h-4 text-emerald-400" />,
     group: 'Core & Math',
     keywords: 'fraction ratio gcd lcm prime factor',
   },
   {
     mode: 'geometry',
     label: 'Triangle & Geometry Solver',
-    icon: <Triangle className="w-4 h-4" />,
+    icon: <Triangle className="w-4 h-4 text-purple-400" />,
     group: 'Core & Math',
     keywords: 'geometry triangle pythagoras area perimeter volume',
   },
@@ -75,42 +79,42 @@ const MENU_ITEMS: MenuItem[] = [
   {
     mode: 'equation',
     label: 'Equation & System Solver',
-    icon: <Equal className="w-4 h-4" />,
+    icon: <Equal className="w-4 h-4 text-rose-400" />,
     group: 'Advanced & Science',
     keywords: 'roots quadratic linear system matrix cramer',
   },
   {
     mode: 'calculus',
     label: 'Calculus & Numerical Suite',
-    icon: <Sigma className="w-4 h-4" />,
+    icon: <Sigma className="w-4 h-4 text-blue-400" />,
     group: 'Advanced & Science',
     keywords: 'integral derivative tangent newton simpson',
   },
   {
     mode: 'graphing',
     label: 'Graphing Calculator',
-    icon: <LineChart className="w-4 h-4" />,
+    icon: <LineChart className="w-4 h-4 text-teal-400" />,
     group: 'Advanced & Science',
     keywords: 'plot graph curve cartesian table coordinate',
   },
   {
     mode: 'matrix',
     label: 'Matrix Calculator',
-    icon: <Grid className="w-4 h-4" />,
+    icon: <Grid className="w-4 h-4 text-violet-400" />,
     group: 'Advanced & Science',
     keywords: 'matrix determinant inverse transpose eigenvalues',
   },
   {
     mode: 'statistics',
     label: 'Statistics Calculator',
-    icon: <BarChart2 className="w-4 h-4" />,
+    icon: <BarChart2 className="w-4 h-4 text-sky-400" />,
     group: 'Advanced & Science',
     keywords: 'stats mean median mode variance std dev',
   },
   {
     mode: 'programmer',
     label: 'Programmer Calculator',
-    icon: <Binary className="w-4 h-4" />,
+    icon: <Binary className="w-4 h-4 text-indigo-400" />,
     group: 'Advanced & Science',
     keywords: 'hex binary octal bitwise logic bit mask',
   },
@@ -119,28 +123,28 @@ const MENU_ITEMS: MenuItem[] = [
   {
     mode: 'converter',
     label: 'Unit Converter',
-    icon: <ArrowLeftRight className="w-4 h-4" />,
+    icon: <ArrowLeftRight className="w-4 h-4 text-cyan-400" />,
     group: 'Practical & Life',
     keywords: 'convert length mass weight temp temperature storage data speed',
   },
   {
     mode: 'finance',
     label: 'Finance & Loan EMI',
-    icon: <DollarSign className="w-4 h-4" />,
+    icon: <DollarSign className="w-4 h-4 text-emerald-400" />,
     group: 'Practical & Life',
     keywords: 'mortgage emi interest compound sip tax gst discount',
   },
   {
     mode: 'datetime',
     label: 'Date & Time Calculator',
-    icon: <Calendar className="w-4 h-4" />,
+    icon: <Calendar className="w-4 h-4 text-amber-400" />,
     group: 'Practical & Life',
     keywords: 'date time duration days business age countdown shift',
   },
   {
     mode: 'health',
     label: 'Health, BMI & TDEE',
-    icon: <Heart className="w-4 h-4" />,
+    icon: <Heart className="w-4 h-4 text-rose-400" />,
     group: 'Practical & Life',
     keywords: 'bmi bmr tdee calories heart rate fitness',
   },
@@ -149,25 +153,27 @@ const MENU_ITEMS: MenuItem[] = [
   {
     mode: 'formulas',
     label: 'Formulas & Constants',
-    icon: <BookOpen className="w-4 h-4" />,
+    icon: <BookOpen className="w-4 h-4 text-indigo-400" />,
     group: 'Tools & Reference',
     keywords: 'physics cheat sheet math physical constants speed of light',
   },
   {
     mode: 'history',
     label: 'Calculation History',
-    icon: <History className="w-4 h-4" />,
+    icon: <History className="w-4 h-4 text-slate-400" />,
     group: 'Tools & Reference',
     keywords: 'logs export csv recent audit past',
   },
   {
     mode: 'settings',
     label: 'Settings & Preferences',
-    icon: <Settings className="w-4 h-4" />,
+    icon: <Settings className="w-4 h-4 text-slate-400" />,
     group: 'Tools & Reference',
     keywords: 'theme accent precision angle haptics audio',
   },
 ];
+
+const DEFAULT_PINNED: CalcMode[] = ['basic', 'scientific', 'graphing', 'converter', 'finance'];
 
 export const Sidebar: React.FC<SidebarProps> = ({
   currentMode,
@@ -177,6 +183,36 @@ export const Sidebar: React.FC<SidebarProps> = ({
   settings,
 }) => {
   const [filterText, setFilterText] = useState('');
+  const [pinnedModes, setPinnedModes] = useState<CalcMode[]>(() => {
+    try {
+      const saved = localStorage.getItem('omnicalc_pinned_modes');
+      return saved ? JSON.parse(saved) : DEFAULT_PINNED;
+    } catch {
+      return DEFAULT_PINNED;
+    }
+  });
+
+  const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('omnicalc_pinned_modes', JSON.stringify(pinnedModes));
+    } catch {
+      // ignore
+    }
+  }, [pinnedModes]);
+
+  const togglePin = (e: React.MouseEvent, mode: CalcMode) => {
+    e.stopPropagation();
+    setPinnedModes((prev) =>
+      prev.includes(mode) ? prev.filter((m) => m !== mode) : [...prev, mode]
+    );
+  };
+
+  const toggleGroup = (group: string) => {
+    setCollapsedGroups((prev) => ({ ...prev, [group]: !prev[group] }));
+  };
+
   const groups = [
     'Core & Math',
     'Advanced & Science',
@@ -226,6 +262,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     );
   });
 
+  const pinnedItems = MENU_ITEMS.filter((item) => pinnedModes.includes(item.mode));
+
   return (
     <>
       {/* Mobile Backdrop */}
@@ -248,7 +286,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* App Title Header */}
         <div className={`p-4 border-b ${headerBorder} flex items-center justify-between`}>
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-sky-500/20">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-500 via-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-md shadow-sky-500/25">
               <Calculator className="w-5 h-5" />
             </div>
             <div>
@@ -257,8 +295,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
               >
                 OmniCalc Pro
               </h1>
-              <p className="text-[11px] font-medium" style={{ color: 'var(--accent)' }}>
-                17 Mathematical Engines
+              <p className="text-[11px] font-medium flex items-center gap-1.5" style={{ color: 'var(--accent)' }}>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                17 Specialized Engines
               </p>
             </div>
           </div>
@@ -289,56 +328,140 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Navigation items grouped */}
-        <div className="flex-1 overflow-y-auto py-2 px-2 space-y-4">
-          {groups.map((groupName) => {
-            const items = filteredItems.filter((m) => m.group === groupName);
-            if (items.length === 0) return null;
-
-            return (
-              <div key={groupName} className="space-y-1">
-                <div className="flex items-center justify-between px-3 py-1">
-                  <span
-                    className={`text-[10px] font-bold uppercase tracking-wider ${groupLabelColor}`}
-                  >
-                    {groupName}
-                  </span>
-                  <span
-                    className={`text-[9px] font-mono font-bold px-1.5 py-0.2 rounded-full ${isLight ? 'bg-slate-100 text-slate-500' : 'bg-slate-800 text-slate-400'}`}
-                  >
-                    {items.length}
-                  </span>
-                </div>
-                {items.map((item) => {
+        <div className="flex-1 overflow-y-auto py-2 px-2 space-y-3.5">
+          {/* Pinned / Quick Access Bar (if not filtering) */}
+          {!filterText.trim() && pinnedItems.length > 0 && (
+            <div className="space-y-1">
+              <div className="flex items-center justify-between px-3 py-1">
+                <span
+                  className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 ${groupLabelColor}`}
+                >
+                  <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
+                  Quick Pinned
+                </span>
+                <span className="text-[9px] font-mono text-slate-500">
+                  {pinnedItems.length}
+                </span>
+              </div>
+              <div className="space-y-0.5">
+                {pinnedItems.map((item) => {
                   const isActive = currentMode === item.mode;
                   return (
                     <button
-                      key={item.mode}
+                      key={`pinned-${item.mode}`}
                       onClick={() => {
                         onSelectMode(item.mode);
                         if (onCloseMobile) onCloseMobile();
                       }}
                       style={isActive ? { backgroundColor: 'var(--accent)' } : undefined}
                       className={`
-                        w-full flex items-center justify-between px-3 py-2 rounded-xl font-medium text-xs transition-all duration-150 active:scale-[0.98]
+                        w-full flex items-center justify-between px-3 py-1.5 rounded-xl font-medium text-xs transition-all duration-150 active:scale-[0.98] group
                         ${isActive ? 'text-white shadow-md font-semibold' : idleBtnClass}
                       `}
                     >
                       <div className="flex items-center gap-2.5">
-                        <span
-                          className={
-                            isActive ? 'text-white' : isLight ? 'text-slate-500' : 'text-slate-400'
-                          }
-                        >
+                        <span className={isActive ? 'text-white' : ''}>
                           {item.icon}
                         </span>
                         <span className="truncate">{item.label}</span>
                       </div>
-                      {isActive && (
-                        <ChevronRight className="w-3.5 h-3.5 opacity-75 flex-shrink-0" />
-                      )}
+                      <div className="flex items-center gap-1">
+                        <span
+                          onClick={(e) => togglePin(e, item.mode)}
+                          className="opacity-0 group-hover:opacity-100 p-0.5 hover:text-amber-400 transition-opacity"
+                          title="Unpin from top"
+                        >
+                          <Pin className="w-3 h-3 rotate-45 text-amber-400 fill-amber-400" />
+                        </span>
+                        {isActive && (
+                          <ChevronRight className="w-3.5 h-3.5 opacity-75 flex-shrink-0" />
+                        )}
+                      </div>
                     </button>
                   );
                 })}
+              </div>
+            </div>
+          )}
+
+          {/* Categorized Groups */}
+          {groups.map((groupName) => {
+            const items = filteredItems.filter((m) => m.group === groupName);
+            if (items.length === 0) return null;
+            const isCollapsed = collapsedGroups[groupName] && !filterText.trim();
+
+            return (
+              <div key={groupName} className="space-y-1">
+                <button
+                  onClick={() => toggleGroup(groupName)}
+                  className="w-full flex items-center justify-between px-3 py-1 text-left rounded-lg hover:bg-slate-500/10 transition-colors"
+                >
+                  <span
+                    className={`text-[10px] font-bold uppercase tracking-wider ${groupLabelColor}`}
+                  >
+                    {groupName}
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span
+                      className={`text-[9px] font-mono font-bold px-1.5 py-0.2 rounded-full ${isLight ? 'bg-slate-100 text-slate-500' : 'bg-slate-800 text-slate-400'}`}
+                    >
+                      {items.length}
+                    </span>
+                    <ChevronDown
+                      className={`w-3 h-3 text-slate-400 transition-transform duration-200 ${
+                        isCollapsed ? '-rotate-90' : ''
+                      }`}
+                    />
+                  </div>
+                </button>
+
+                {!isCollapsed && (
+                  <div className="space-y-0.5">
+                    {items.map((item) => {
+                      const isActive = currentMode === item.mode;
+                      const isPinned = pinnedModes.includes(item.mode);
+                      return (
+                        <button
+                          key={item.mode}
+                          onClick={() => {
+                            onSelectMode(item.mode);
+                            if (onCloseMobile) onCloseMobile();
+                          }}
+                          style={isActive ? { backgroundColor: 'var(--accent)' } : undefined}
+                          className={`
+                            w-full flex items-center justify-between px-3 py-2 rounded-xl font-medium text-xs transition-all duration-150 active:scale-[0.98] group
+                            ${isActive ? 'text-white shadow-md font-semibold' : idleBtnClass}
+                          `}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <span className={isActive ? 'text-white' : ''}>
+                              {item.icon}
+                            </span>
+                            <span className="truncate">{item.label}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <span
+                              onClick={(e) => togglePin(e, item.mode)}
+                              className={`p-0.5 rounded transition-opacity ${
+                                isPinned
+                                  ? 'text-amber-400 opacity-80 hover:opacity-100'
+                                  : 'opacity-0 group-hover:opacity-60 hover:opacity-100 text-slate-400 hover:text-amber-400'
+                              }`}
+                              title={isPinned ? 'Unpin' : 'Pin to quick favorites'}
+                            >
+                              <Pin
+                                className={`w-3 h-3 ${isPinned ? 'fill-amber-400 rotate-45' : ''}`}
+                              />
+                            </span>
+                            {isActive && (
+                              <ChevronRight className="w-3.5 h-3.5 opacity-75 flex-shrink-0" />
+                            )}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             );
           })}
@@ -351,8 +474,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Footer info */}
-        <div className={`p-3 border-t text-[11px] text-center ${footerColor}`}>
-          {APP_NAME} v{APP_VERSION} • Multi-Engine Suite
+        <div className={`p-3 border-t text-[11px] text-center flex items-center justify-between px-4 ${footerColor}`}>
+          <span>{APP_NAME} v{APP_VERSION}</span>
+          <span className="font-mono text-[10px] text-slate-500">⌘K Search</span>
         </div>
       </aside>
     </>

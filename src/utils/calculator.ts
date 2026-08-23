@@ -85,6 +85,8 @@ export const ALLOWED_SYMBOLS = new Set([
   'I',
   'tau',
   'phi',
+  'theta',
+  'θ',
   'x',
   'y',
   'z',
@@ -197,7 +199,12 @@ export function validateMathAst(node: MathNode, customScopeKeys: Set<string>): b
  * Standardizes symbols, percentage tokens, and square root notations.
  */
 export function sanitizeExpression(expr: string): string {
-  let sanitized = expr.replace(/×/g, '*').replace(/÷/g, '/').replace(/π/g, 'pi').replace(/−/g, '-');
+  let sanitized = expr
+    .replace(/×/g, '*')
+    .replace(/÷/g, '/')
+    .replace(/π/g, 'pi')
+    .replace(/θ/g, 'theta')
+    .replace(/−/g, '-');
 
   // Replace square root symbols like √(4) or √4 or √x
   sanitized = sanitized.replace(/√\(/g, 'sqrt(').replace(/√([0-9a-zA-Z.]+)/g, 'sqrt($1)');

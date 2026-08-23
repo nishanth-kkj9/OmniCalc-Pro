@@ -229,7 +229,7 @@ export const FractionsCalculator: React.FC<FractionsCalculatorProps> = ({
             key={item.id}
             onClick={() => setTab(item.id as any)}
             className={`
-              px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border shadow-sm
+              px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border shadow-sm flex-shrink-0
               ${
                 tab === item.id
                   ? 'bg-sky-600 text-white border-sky-500 shadow-sky-600/20'
@@ -247,7 +247,7 @@ export const FractionsCalculator: React.FC<FractionsCalculatorProps> = ({
         {/* FRACTION ARITHMETIC */}
         {tab === 'fractions' && (
           <div className="flex flex-col gap-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <h3 className="text-base font-bold text-slate-100">
                   Fraction Arithmetic & Simplification
@@ -264,7 +264,7 @@ export const FractionsCalculator: React.FC<FractionsCalculatorProps> = ({
                   setF2Num('2');
                   setF2Den('5');
                 }}
-                className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs flex items-center gap-1.5 border border-slate-700"
+                className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs flex items-center gap-1.5 border border-slate-700 flex-shrink-0"
               >
                 <RefreshCw className="w-3.5 h-3.5" /> Example
               </button>

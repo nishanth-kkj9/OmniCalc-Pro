@@ -199,7 +199,7 @@ export const DateTimeCalculator: React.FC<DateTimeCalculatorProps> = ({ settings
             key={item.id}
             onClick={() => setTab(item.id as any)}
             className={`
-              px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border shadow-sm
+              px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border shadow-sm flex-shrink-0
               ${
                 tab === item.id
                   ? 'bg-sky-600 text-white border-sky-500 shadow-sky-600/20'
