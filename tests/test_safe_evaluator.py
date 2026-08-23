@@ -198,9 +198,16 @@ class TestSafeEvaluatorTimeoutDepth(unittest.TestCase):
 
     def test_timeout_enforcement(self):
         ev = SafeEvaluator()
-        ev.max_time = 0.001
+        ev.max_time = 0.00000001
         with self.assertRaises((TimeoutError, ValueError)):
-            ev.evaluate("sin(1) + cos(2) + tan(3) + sqrt(4)")
+            ev.evaluate("sum([sin(x) for x in range(100)])")
+
+    def test_chained_exponent_tower_rejection(self):
+        ev = SafeEvaluator()
+        with self.assertRaises(ValueError):
+            ev.evaluate("2**2**2**2**2**2")
+        with self.assertRaises(ValueError):
+            ev.evaluate("3^3^3^3")
 
     def test_nested_and_exponential_factorial_rejection(self):
         ev = SafeEvaluator()

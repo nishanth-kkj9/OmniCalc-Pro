@@ -210,7 +210,11 @@ class SafeEvaluator:
             if token in BLOCKED_IDENTIFIERS or token.startswith("__"):
                 raise ValueError(f"Disallowed token or identifier: {token}")
 
-        # 3. Check for oversized exponents (e.g. 10**100000 or 2^99999)
+        # 3. Check for oversized exponents and chained exponent towers (e.g. 10**100000 or 2**2**2**2**2)
+        # Reject chained exponentiation towers without parentheses (e.g. a**b**c or a^b^c)
+        if re.search(r"(?:\*\*|\^)[^\+\-\*\/\%\(\)]*(?:\*\*|\^)", expr):
+            raise ValueError("Chained exponent towers are not permitted due to complexity limits")
+
         exp_matches = re.finditer(r"(?:\*\*|\^)\s*(\d+)", expr)
         for match in exp_matches:
             exp_val = int(match.group(1))

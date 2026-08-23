@@ -241,11 +241,14 @@ class MainWindow(QMainWindow):
 
     def _copy_result(self):
         current_page = self.stack.currentWidget()
+        if current_page is None:
+            return
         if hasattr(current_page, 'copy_result'):
-            current_page.copy_result()
+            getattr(current_page, 'copy_result')()
             show_toast(self, "Result copied to clipboard", ToastType.SUCCESS, 1500)
         elif hasattr(current_page, 'display'):
-            text = current_page.display.text()
+            display_obj = getattr(current_page, 'display')
+            text = display_obj.text() if hasattr(display_obj, 'text') else ""
             if text:
                 from utils.helpers import copy_to_clipboard
                 copy_to_clipboard(text)
@@ -253,21 +256,29 @@ class MainWindow(QMainWindow):
 
     def _paste_input(self):
         current_page = self.stack.currentWidget()
+        if current_page is None:
+            return
         if hasattr(current_page, 'paste_input'):
-            current_page.paste_input()
+            getattr(current_page, 'paste_input')()
         elif hasattr(current_page, 'display'):
             from utils.helpers import paste_from_clipboard
             text = paste_from_clipboard()
             if text:
-                current_page.display.setText(text)
+                display_obj = getattr(current_page, 'display')
+                if hasattr(display_obj, 'setText'):
+                    display_obj.setText(text)
                 show_toast(self, "Pasted from clipboard", ToastType.INFO, 1500)
 
     def _clear_current_page(self):
         current_page = self.stack.currentWidget()
+        if current_page is None:
+            return
         if hasattr(current_page, 'clear_expression'):
-            current_page.clear_expression()
+            getattr(current_page, 'clear_expression')()
         elif hasattr(current_page, 'display'):
-            current_page.display.clear()
+            display_obj = getattr(current_page, 'display')
+            if hasattr(display_obj, 'clear'):
+                display_obj.clear()
 
     def _toggle_fullscreen(self):
         if self.isFullScreen():

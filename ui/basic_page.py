@@ -79,7 +79,7 @@ class BasicPage(QWidget):
                 try:
                     res = safe_eval(f"({self.expression})*-1", self.config.get("angle_mode", "degrees"))
                     self.expression = str(res)
-                except:
+                except (ValueError, TypeError, ZeroDivisionError, OverflowError):
                     self.expression = f"({self.expression})*-1"
         elif t == "=":
             logger.info(f"Executing: {self.expression}")
@@ -109,7 +109,7 @@ class BasicPage(QWidget):
                 self.memory += float(current)
                 self._update_memory_label()
                 logger.debug(f"M+: {current}, memory now: {self.memory}")
-            except:
+            except (ValueError, TypeError, ZeroDivisionError, OverflowError):
                 pass
         elif t == "M-":
             try:
@@ -117,7 +117,7 @@ class BasicPage(QWidget):
                 self.memory -= float(current)
                 self._update_memory_label()
                 logger.debug(f"M-: {current}, memory now: {self.memory}")
-            except:
+            except (ValueError, TypeError, ZeroDivisionError, OverflowError):
                 pass
         else:
             self.expression += t
