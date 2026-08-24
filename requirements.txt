@@ -1,13 +1,13 @@
 # Core Framework
-PySide6~=6.6.0
+PySide6>=6.6,<6.12
 
 # Scientific Computing
-numpy~=1.26.0
-sympy~=1.13.0
-matplotlib~=3.8.0
+numpy>=1.26,<2.3
+sympy>=1.13,<1.15
+matplotlib>=3.8,<3.11
 
 # Utilities
-pyperclip~=1.8.2
+pyperclip>=1.8.2,<1.12.0
 
 # Dev dependencies are in pyproject.toml under [project.optional-dependencies] dev:
 #   pip install -e ".[dev]"
