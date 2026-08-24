@@ -197,10 +197,30 @@ class TestSafeEvaluatorTimeoutDepth(unittest.TestCase):
         self.assertEqual(result, 4.0)
 
     def test_timeout_enforcement(self):
-        ev = SafeEvaluator()
-        ev.max_time = 0.00000001
-        with self.assertRaises((TimeoutError, ValueError)):
-            ev.evaluate("sum([sin(x) for x in range(100)])")
+        """TEST-01: Verifies timeout enforcement reaches evaluator worker, surfaces via public API, and pool recovers."""
+        import time
+
+        def slow_worker_mock(expr, keys, angle_mode, custom_ns=None):
+            time.sleep(0.05)
+            return 42.0
+
+        ev = SafeEvaluator(eval_worker_func=slow_worker_mock)
+        ev.max_time = 0.001
+
+        # Must raise ValueError with timeout message when evaluated directly
+        with self.assertRaises(ValueError) as ctx:
+            ev.evaluate("2 + 2")
+        self.assertIn("exceeded", str(ctx.exception).lower())
+
+        # Surfaced via evaluate_safe as formatted error string
+        safe_res = ev.evaluate_safe("2 + 2")
+        self.assertIsInstance(safe_res, str)
+        self.assertTrue(safe_res.startswith("Error:"))
+        self.assertIn("exceeded", safe_res.lower())
+
+        # Worker pool remains usable: normal calculation immediately after timeout succeeds
+        normal_ev = SafeEvaluator()
+        self.assertEqual(normal_ev.evaluate("10 + 20"), 30.0)
 
     def test_chained_exponent_tower_rejection(self):
         ev = SafeEvaluator()
@@ -297,6 +317,28 @@ class TestSafeEvaluatorTimeoutDepth(unittest.TestCase):
         # Confirm immediate recovery for subsequent evaluation
         recovery_result = ev.evaluate("100 + 200")
         self.assertEqual(recovery_result, 300.0)
+
+    def test_repeated_timeout_workload_and_recovery(self):
+        """PERF-01: Verify repeated timeouts do not permanently corrupt worker pool or block subsequent evaluations."""
+        import time
+
+        def slow_worker_mock(expr, keys, angle_mode, custom_ns=None):
+            time.sleep(0.02)
+            return 99.0
+
+        ev_timeout = SafeEvaluator(eval_worker_func=slow_worker_mock)
+        ev_timeout.max_time = 0.001
+
+        # Run 5 consecutive timed-out evaluations
+        for _ in range(5):
+            with self.assertRaises(ValueError):
+                ev_timeout.evaluate("sin(30) + cos(60)")
+
+        # Normal evaluator with real worker task recovers immediately
+        time.sleep(0.05)  # allow any remaining mock sleeps to conclude
+        normal_ev = SafeEvaluator()
+        self.assertEqual(normal_ev.evaluate("50 * 2"), 100.0)
+        self.assertEqual(normal_ev.evaluate("sqrt(64)"), 8.0)
 
 
 class TestParserBackwardCompat(unittest.TestCase):

@@ -74,9 +74,27 @@ const PARAMETRIC_PRESETS = [
   { label: 'Lissajous (3:2)', x: 'cos(3*t)', y: 'sin(2*t)', tMin: 0, tMax: 6.2831853 },
   { label: 'Lissajous (5:4)', x: 'sin(5*t)', y: 'cos(4*t)', tMin: 0, tMax: 6.2831853 },
   { label: 'Astroid (Star)', x: '3 * cos(t)^3', y: '3 * sin(t)^3', tMin: 0, tMax: 6.2831853 },
-  { label: 'Trefoil Knot Projection', x: 'sin(t) + 2*sin(2*t)', y: 'cos(t) - 2*cos(2*t)', tMin: 0, tMax: 6.2831853 },
-  { label: 'Hypocycloid (Deltoid)', x: '2*cos(t) + cos(2*t)', y: '2*sin(t) - sin(2*t)', tMin: 0, tMax: 6.2831853 },
-  { label: 'Spiral of Archimedes', x: '0.5 * t * cos(t)', y: '0.5 * t * sin(t)', tMin: 0, tMax: 18.84955 },
+  {
+    label: 'Trefoil Knot Projection',
+    x: 'sin(t) + 2*sin(2*t)',
+    y: 'cos(t) - 2*cos(2*t)',
+    tMin: 0,
+    tMax: 6.2831853,
+  },
+  {
+    label: 'Hypocycloid (Deltoid)',
+    x: '2*cos(t) + cos(2*t)',
+    y: '2*sin(t) - sin(2*t)',
+    tMin: 0,
+    tMax: 6.2831853,
+  },
+  {
+    label: 'Spiral of Archimedes',
+    x: '0.5 * t * cos(t)',
+    y: '0.5 * t * sin(t)',
+    tMin: 0,
+    tMax: 18.84955,
+  },
 ];
 
 const SURFACE_3D_PRESETS = [
@@ -108,7 +126,9 @@ const REGRESSION_PRESETS = [
 ];
 
 export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings }) => {
-  const [graphMode, setGraphMode] = useState<'cartesian' | 'polar' | 'parametric' | '3d' | 'regression'>('cartesian');
+  const [graphMode, setGraphMode] = useState<
+    'cartesian' | 'polar' | 'parametric' | '3d' | 'regression'
+  >('cartesian');
   const [exportData, setExportData] = useState<ExportReportData | null>(null);
 
   // 2D Cartesian State
@@ -121,7 +141,12 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
   const [yMin, setYMin] = useState<number>(-10);
   const [yMax, setYMax] = useState<number>(10);
   const [hoverCoords, setHoverCoords] = useState<{ x: number; y: number } | null>(null);
-  const [snappedPoint, setSnappedPoint] = useState<{ x: number; y: number; fnId: string; slope: number } | null>(null);
+  const [snappedPoint, setSnappedPoint] = useState<{
+    x: number;
+    y: number;
+    fnId: string;
+    slope: number;
+  } | null>(null);
   const [showTable, setShowTable] = useState<boolean>(false);
   const [showExtremaRoots, setShowExtremaRoots] = useState<boolean>(true);
   const [showIntersections, setShowIntersections] = useState<boolean>(true);
@@ -133,7 +158,14 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
 
   // Dragging / Pan State for 2D
   const [isPanning2D, setIsPanning2D] = useState<boolean>(false);
-  const [panStart, setPanStart] = useState<{ x: number; y: number; xMin: number; xMax: number; yMin: number; yMax: number }>({
+  const [panStart, setPanStart] = useState<{
+    x: number;
+    y: number;
+    xMin: number;
+    xMax: number;
+    yMin: number;
+    yMax: number;
+  }>({
     x: 0,
     y: 0,
     xMin: -10,
@@ -157,16 +189,22 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
   const [paramCurrentT, setParamCurrentT] = useState<number>(0);
 
   // 3D Surface State: z = f(x, y)
-  const [surfaceExpr, setSurfaceExpr] = useState<string>('sin(sqrt(x^2 + y^2)) / (sqrt(x^2 + y^2) + 0.1)');
+  const [surfaceExpr, setSurfaceExpr] = useState<string>(
+    'sin(sqrt(x^2 + y^2)) / (sqrt(x^2 + y^2) + 0.1)'
+  );
   const [rotAlpha, setRotAlpha] = useState<number>(35); // Azimuth deg
   const [rotBeta, setRotBeta] = useState<number>(45); // Elevation deg
   const [isDragging3D, setIsDragging3D] = useState<boolean>(false);
   const [dragStart, setDragStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [is3DAutoRotating, setIs3DAutoRotating] = useState<boolean>(false);
-  const [surfaceGridDensity, setSurfaceGridDensity] = useState<'coarse' | 'medium' | 'fine'>('medium');
+  const [surfaceGridDensity, setSurfaceGridDensity] = useState<'coarse' | 'medium' | 'fine'>(
+    'medium'
+  );
 
   // Data Regression State
-  const [regressionModelType, setRegressionModelType] = useState<'linear' | 'quadratic' | 'exponential' | 'power'>('linear');
+  const [regressionModelType, setRegressionModelType] = useState<
+    'linear' | 'quadratic' | 'exponential' | 'power'
+  >('linear');
   const [scatterPoints, setScatterPoints] = useState<string>(
     '1.0, 2.1\n2.0, 3.9\n3.0, 6.2\n4.0, 8.1\n5.0, 9.8\n6.0, 12.3'
   );
@@ -235,7 +273,10 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
 
   // Safe expression evaluator using compiled functions or fallback
   const evalCompiled = useCallback(
-    (compiled: { evaluate: (scope?: any) => number | null } | null, scope: Record<string, number>): number | null => {
+    (
+      compiled: { evaluate: (scope?: any) => number | null } | null,
+      scope: Record<string, number>
+    ): number | null => {
       if (!compiled) return null;
       try {
         const val = compiled.evaluate(scope);
@@ -264,7 +305,10 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
     if (functions.length >= 6) return;
     const newId = 'f' + (functions.length + 1);
     const color = COLORS[functions.length % COLORS.length];
-    setFunctions([...functions, { id: newId, expression: '', color, enabled: true, showDerivative: false }]);
+    setFunctions([
+      ...functions,
+      { id: newId, expression: '', color, enabled: true, showDerivative: false },
+    ]);
   };
 
   const removeFunction = (id: string) => {
@@ -294,7 +338,11 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
     if (pts.length < 2) return null;
 
     const n = pts.length;
-    let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0, sumY2 = 0;
+    let sumX = 0,
+      sumY = 0,
+      sumXY = 0,
+      sumX2 = 0,
+      sumY2 = 0;
     pts.forEach((p) => {
       sumX += p.x;
       sumY += p.y;
@@ -313,7 +361,8 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
     const rPearson = denomY > 0 ? (n * sumXY - sumX * sumY) / Math.sqrt(denom * denomY) : 1;
     const meanY = sumY / n;
 
-    let ssTot = 0, ssResLin = 0;
+    let ssTot = 0,
+      ssResLin = 0;
     pts.forEach((p) => {
       const yPred = slope * p.x + intercept;
       ssTot += Math.pow(p.y - meanY, 2);
@@ -322,7 +371,9 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
     const r2Lin = ssTot > 1e-12 ? Math.max(0, 1 - ssResLin / ssTot) : 1;
 
     // Quadratic fit: y = a x^2 + b x + c via normal equations
-    let sumX3 = 0, sumX4 = 0, sumX2Y = 0;
+    let sumX3 = 0,
+      sumX4 = 0,
+      sumX2Y = 0;
     pts.forEach((p) => {
       const x2 = p.x * p.x;
       sumX3 += x2 * p.x;
@@ -330,7 +381,11 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
       sumX2Y += x2 * p.y;
     });
 
-    let quadA = 0, quadB = 0, quadC = 0, r2Quad = 0, hasQuad = false;
+    let quadA = 0,
+      quadB = 0,
+      quadC = 0,
+      r2Quad = 0,
+      hasQuad = false;
     // 3x3 determinant system for quadratic
     const dQuad =
       sumX4 * (sumX2 * n - sumX * sumX) -
@@ -365,11 +420,17 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
     }
 
     // Exponential fit: y = a * exp(b * x) -> ln(y) = ln(a) + b * x
-    let expA = 0, expB = 0, r2Exp = 0, hasExp = false;
+    let expA = 0,
+      expB = 0,
+      r2Exp = 0,
+      hasExp = false;
     const validExpPts = pts.filter((p) => p.y > 0);
     if (validExpPts.length >= 2) {
       const nExp = validExpPts.length;
-      let sX = 0, sLnY = 0, sXLnY = 0, sX2 = 0;
+      let sX = 0,
+        sLnY = 0,
+        sXLnY = 0,
+        sX2 = 0;
       validExpPts.forEach((p) => {
         const lnY = Math.log(p.y);
         sX += p.x;
@@ -432,7 +493,8 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
     if (graphMode !== 'cartesian') return null;
 
     const roots: { fnId: string; color: string; x: number; y: number }[] = [];
-    const extrema: { fnId: string; color: string; x: number; y: number; type: 'min' | 'max' }[] = [];
+    const extrema: { fnId: string; color: string; x: number; y: number; type: 'min' | 'max' }[] =
+      [];
     const intersections: { fn1: string; fn2: string; x: number; y: number }[] = [];
 
     const activeFns = functions
@@ -458,7 +520,8 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
           if (prevY * curY <= 0 && Math.abs(curY - prevY) < 10) {
             // Newton-Raphson or Bisection refine
             let rX = curX;
-            let low = prevX, high = curX;
+            let low = prevX,
+              high = curX;
             for (let b = 0; b < 10; b++) {
               const mid = (low + high) / 2;
               const yMid = evalCompiled(compiled, { x: mid }) ?? 0;
@@ -475,7 +538,12 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
             }
             const rY = evalCompiled(compiled, { x: rX }) ?? 0;
             if (Math.abs(rY) < 0.1) {
-              roots.push({ fnId: fn.expression || fn.id, color: fn.color, x: Math.round(rX * 1000) / 1000, y: 0 });
+              roots.push({
+                fnId: fn.expression || fn.id,
+                color: fn.color,
+                x: Math.round(rX * 1000) / 1000,
+                y: 0,
+              });
             }
           }
 
@@ -607,7 +675,16 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
         area: netIntegral,
       };
     }
-  }, [shadeArea, shadeBetweenCurves, shadeA, shadeB, graphMode, functions, compiledCartesianFns, evalCompiled]);
+  }, [
+    shadeArea,
+    shadeBetweenCurves,
+    shadeA,
+    shadeB,
+    graphMode,
+    functions,
+    compiledCartesianFns,
+    evalCompiled,
+  ]);
 
   // Master Render Canvas Loop with High-DPI Support
   const drawGraph = useCallback(() => {
@@ -640,8 +717,10 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
       const radA = (rotAlpha * Math.PI) / 180;
       const radB = (rotBeta * Math.PI) / 180;
 
-      const cosA = Math.cos(radA), sinA = Math.sin(radA);
-      const cosB = Math.cos(radB), sinB = Math.sin(radB);
+      const cosA = Math.cos(radA),
+        sinA = Math.sin(radA);
+      const cosB = Math.cos(radB),
+        sinB = Math.sin(radB);
 
       const project = (x: number, y: number, z: number) => {
         const xRot = x * cosA - y * sinA;
@@ -657,18 +736,26 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
         return { x: screenX, y: screenY, depth: yRot * sinB + zRot * cosB };
       };
 
-      const gridSize = surfaceGridDensity === 'fine' ? 38 : surfaceGridDensity === 'medium' ? 28 : 20;
+      const gridSize =
+        surfaceGridDensity === 'fine' ? 38 : surfaceGridDensity === 'medium' ? 28 : 20;
       const range = 6;
       const step = (2 * range) / gridSize;
 
-      const gridPoints: { x: number; y: number; z: number; proj: { x: number; y: number; depth: number } }[][] = [];
+      const gridPoints: {
+        x: number;
+        y: number;
+        z: number;
+        proj: { x: number; y: number; depth: number };
+      }[][] = [];
 
       for (let i = 0; i <= gridSize; i++) {
         const row = [];
         const x = -range + i * step;
         for (let j = 0; j <= gridSize; j++) {
           const y = -range + j * step;
-          const zVal = compiledSurfaceFn ? (evalCompiled(compiledSurfaceFn, { x, y }) ?? 0) : (evalExprFallback(surfaceExpr, { x, y }) ?? 0);
+          const zVal = compiledSurfaceFn
+            ? (evalCompiled(compiledSurfaceFn, { x, y }) ?? 0)
+            : (evalExprFallback(surfaceExpr, { x, y }) ?? 0);
           const proj = project(x, y, zVal * 1.8);
           row.push({ x, y, z: zVal, proj });
         }
@@ -819,12 +906,22 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
       }
 
       // Radial angle rays (30, 45, 60, 90 deg)
-      [Math.PI / 6, Math.PI / 4, Math.PI / 3, (2 * Math.PI) / 3, (3 * Math.PI) / 4, (5 * Math.PI) / 6].forEach((angle) => {
+      [
+        Math.PI / 6,
+        Math.PI / 4,
+        Math.PI / 3,
+        (2 * Math.PI) / 3,
+        (3 * Math.PI) / 4,
+        (5 * Math.PI) / 6,
+      ].forEach((angle) => {
         ctx.beginPath();
         ctx.moveTo(toCanvasX(0), toCanvasY(0));
         ctx.lineTo(toCanvasX(maxRadius * Math.cos(angle)), toCanvasY(maxRadius * Math.sin(angle)));
         ctx.moveTo(toCanvasX(0), toCanvasY(0));
-        ctx.lineTo(toCanvasX(maxRadius * Math.cos(angle + Math.PI)), toCanvasY(maxRadius * Math.sin(angle + Math.PI)));
+        ctx.lineTo(
+          toCanvasX(maxRadius * Math.cos(angle + Math.PI)),
+          toCanvasY(maxRadius * Math.sin(angle + Math.PI))
+        );
         ctx.stroke();
       });
       ctx.setLineDash([]);
@@ -865,7 +962,9 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
       // Sweeping trace particle if animated
       if (isPolarAnimating && polarAnimProgress < 1) {
         const curTheta = effectiveMaxTheta;
-        const rCur = compiledPolarFn ? (evalCompiled(compiledPolarFn, { theta: curTheta }) ?? 0) : 0;
+        const rCur = compiledPolarFn
+          ? (evalCompiled(compiledPolarFn, { theta: curTheta }) ?? 0)
+          : 0;
         const px = rCur * Math.cos(curTheta);
         const py = rCur * Math.sin(curTheta);
         ctx.fillStyle = '#f43f5e';
@@ -889,8 +988,12 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
 
       for (let i = 0; i <= paramSteps; i++) {
         const t = tMin + (i / paramSteps) * (effectiveTMax - tMin);
-        const px = compiledParamX ? evalCompiled(compiledParamX, { t, x: t }) : evalExprFallback(paramX, { t });
-        const py = compiledParamY ? evalCompiled(compiledParamY, { t, x: t }) : evalExprFallback(paramY, { t });
+        const px = compiledParamX
+          ? evalCompiled(compiledParamX, { t, x: t })
+          : evalExprFallback(paramX, { t });
+        const py = compiledParamY
+          ? evalCompiled(compiledParamY, { t, x: t })
+          : evalExprFallback(paramY, { t });
 
         if (px !== null && py !== null && isFinite(px) && isFinite(py)) {
           const cx = toCanvasX(px);
@@ -995,7 +1098,10 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
           // Shading between function 1 and function 2
           ctx.fillStyle = 'rgba(168, 85, 247, 0.25)';
           ctx.beginPath();
-          ctx.moveTo(toCanvasX(startX), toCanvasY(evalCompiled(activeFns[0].compiled, { x: startX }) ?? 0));
+          ctx.moveTo(
+            toCanvasX(startX),
+            toCanvasY(evalCompiled(activeFns[0].compiled, { x: startX }) ?? 0)
+          );
 
           for (let x = startX; x <= endX; x += step) {
             const y = evalCompiled(activeFns[0].compiled, { x }) ?? 0;
@@ -1037,12 +1143,21 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
 
         for (let i = 0; i <= samples; i++) {
           const xVal = xMin + i * step;
-          const yVal = compiled ? evalCompiled(compiled, { x: xVal }) : evalExprFallback(fn.expression, { x: xVal });
+          const yVal = compiled
+            ? evalCompiled(compiled, { x: xVal })
+            : evalExprFallback(fn.expression, { x: xVal });
 
           // Asymptote jump suppression: if yVal explodes or jumps across poles, lift the pen
-          const isJump = lastY !== null && yVal !== null && Math.abs(yVal - lastY) > (yMax - yMin) * 0.8;
+          const isJump =
+            lastY !== null && yVal !== null && Math.abs(yVal - lastY) > (yMax - yMin) * 0.8;
 
-          if (yVal !== null && isFinite(yVal) && yVal >= yMin - 100 && yVal <= yMax + 100 && !isJump) {
+          if (
+            yVal !== null &&
+            isFinite(yVal) &&
+            yVal >= yMin - 100 &&
+            yVal <= yMax + 100 &&
+            !isJump
+          ) {
             const cx = toCanvasX(xVal);
             const cy = toCanvasY(yVal);
             if (!isDrawing) {
@@ -1144,12 +1259,18 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
       if (showTangentAtCursor && hoverCoords && functions.length > 0 && functions[0].enabled) {
         const compiled = compiledCartesianFns[0];
         const x0 = hoverCoords.x;
-        const y0 = compiled ? evalCompiled(compiled, { x: x0 }) : evalExprFallback(functions[0].expression, { x: x0 });
+        const y0 = compiled
+          ? evalCompiled(compiled, { x: x0 })
+          : evalExprFallback(functions[0].expression, { x: x0 });
 
         if (y0 !== null && isFinite(y0)) {
           const h = 1e-4;
-          const yp = compiled ? evalCompiled(compiled, { x: x0 + h }) : evalExprFallback(functions[0].expression, { x: x0 + h });
-          const ym = compiled ? evalCompiled(compiled, { x: x0 - h }) : evalExprFallback(functions[0].expression, { x: x0 - h });
+          const yp = compiled
+            ? evalCompiled(compiled, { x: x0 + h })
+            : evalExprFallback(functions[0].expression, { x: x0 + h });
+          const ym = compiled
+            ? evalCompiled(compiled, { x: x0 - h })
+            : evalExprFallback(functions[0].expression, { x: x0 - h });
 
           if (yp !== null && ym !== null) {
             const slope = (yp - ym) / (2 * h);
@@ -1438,11 +1559,31 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
       {/* Mode Switcher Tabs */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
         {[
-          { id: 'cartesian', label: '2D Cartesian (y = f(x))', icon: <Layers className="w-4 h-4 flex-shrink-0" /> },
-          { id: '3d', label: '3D Surface (z = f(x, y))', icon: <Box className="w-4 h-4 flex-shrink-0" /> },
-          { id: 'polar', label: 'Polar Curves (r = f(θ))', icon: <Compass className="w-4 h-4 flex-shrink-0" /> },
-          { id: 'parametric', label: 'Parametric (x(t), y(t))', icon: <Sparkles className="w-4 h-4 flex-shrink-0" /> },
-          { id: 'regression', label: 'Data Scatter & Regression', icon: <TrendingUp className="w-4 h-4 flex-shrink-0" /> },
+          {
+            id: 'cartesian',
+            label: '2D Cartesian (y = f(x))',
+            icon: <Layers className="w-4 h-4 flex-shrink-0" />,
+          },
+          {
+            id: '3d',
+            label: '3D Surface (z = f(x, y))',
+            icon: <Box className="w-4 h-4 flex-shrink-0" />,
+          },
+          {
+            id: 'polar',
+            label: 'Polar Curves (r = f(θ))',
+            icon: <Compass className="w-4 h-4 flex-shrink-0" />,
+          },
+          {
+            id: 'parametric',
+            label: 'Parametric (x(t), y(t))',
+            icon: <Sparkles className="w-4 h-4 flex-shrink-0" />,
+          },
+          {
+            id: 'regression',
+            label: 'Data Scatter & Regression',
+            icon: <TrendingUp className="w-4 h-4 flex-shrink-0" />,
+          },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -1476,7 +1617,9 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
               <div>
                 <h3 className="text-sm font-bold text-slate-100">Cartesian Functions y = f(x)</h3>
-                <p className="text-xs text-slate-400">Add multiple functions, derivative overlays, roots & critical points</p>
+                <p className="text-xs text-slate-400">
+                  Add multiple functions, derivative overlays, roots & critical points
+                </p>
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
@@ -1492,7 +1635,9 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
 
             {/* Presets Bar */}
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs scrollbar-none">
-              <span className="text-slate-400 font-bold px-1 whitespace-nowrap flex-shrink-0">Presets:</span>
+              <span className="text-slate-400 font-bold px-1 whitespace-nowrap flex-shrink-0">
+                Presets:
+              </span>
               {CARTESIAN_PRESETS.map((p) => (
                 <button
                   key={p.label}
@@ -1526,7 +1671,11 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
                       className="text-slate-400 hover:text-white"
                       title={fn.enabled ? 'Disable Curve' : 'Enable Curve'}
                     >
-                      {fn.enabled ? <Eye className="w-4 h-4 text-sky-400" /> : <EyeOff className="w-4 h-4 text-slate-500" />}
+                      {fn.enabled ? (
+                        <Eye className="w-4 h-4 text-sky-400" />
+                      ) : (
+                        <EyeOff className="w-4 h-4 text-slate-500" />
+                      )}
                     </button>
                     <span
                       className="w-3.5 h-3.5 rounded-full flex-shrink-0"
@@ -1556,7 +1705,9 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
                       <input
                         type="checkbox"
                         checked={!!fn.showDerivative}
-                        onChange={(e) => updateFunction(fn.id, { showDerivative: e.target.checked })}
+                        onChange={(e) =>
+                          updateFunction(fn.id, { showDerivative: e.target.checked })
+                        }
                         className="rounded accent-sky-500"
                       />
                       <span>Show Derivative y'</span>
@@ -1666,8 +1817,12 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
           <div className="flex flex-col gap-3">
             <div className="flex flex-wrap items-center justify-between border-b border-slate-800/80 pb-2 gap-2">
               <div>
-                <h3 className="text-sm font-bold text-slate-100">3D Multivariable Surface Plotter</h3>
-                <p className="text-xs text-slate-400">Plot z = f(x, y) with depth-sorted shading & 360° interactive orbit</p>
+                <h3 className="text-sm font-bold text-slate-100">
+                  3D Multivariable Surface Plotter
+                </h3>
+                <p className="text-xs text-slate-400">
+                  Plot z = f(x, y) with depth-sorted shading & 360° interactive orbit
+                </p>
               </div>
 
               <div className="flex items-center gap-2">
@@ -1679,7 +1834,11 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
                       : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
                   }`}
                 >
-                  {is3DAutoRotating ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                  {is3DAutoRotating ? (
+                    <Pause className="w-3.5 h-3.5" />
+                  ) : (
+                    <Play className="w-3.5 h-3.5" />
+                  )}
                   {is3DAutoRotating ? 'Pause Orbit' : 'Auto Orbit'}
                 </button>
               </div>
@@ -1687,7 +1846,9 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
 
             {/* 3D Presets */}
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs scrollbar-none">
-              <span className="text-slate-400 font-bold px-1 whitespace-nowrap flex-shrink-0">Presets:</span>
+              <span className="text-slate-400 font-bold px-1 whitespace-nowrap flex-shrink-0">
+                Presets:
+              </span>
               {SURFACE_3D_PRESETS.map((p) => (
                 <button
                   key={p.label}
@@ -1715,7 +1876,9 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
                     key={density}
                     onClick={() => setSurfaceGridDensity(density)}
                     className={`px-2 py-1 rounded-lg capitalize font-semibold ${
-                      surfaceGridDensity === density ? 'bg-sky-600 text-white' : 'text-slate-400 hover:text-white'
+                      surfaceGridDensity === density
+                        ? 'bg-sky-600 text-white'
+                        : 'text-slate-400 hover:text-white'
                     }`}
                   >
                     {density}
@@ -1734,7 +1897,9 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
             <div className="flex flex-wrap items-center justify-between border-b border-slate-800/80 pb-2 gap-2">
               <div>
                 <h3 className="text-sm font-bold text-slate-100">Polar Coordinate Curves</h3>
-                <p className="text-xs text-slate-400">Plot r = f(θ) with polar rings & animated angular sweep</p>
+                <p className="text-xs text-slate-400">
+                  Plot r = f(θ) with polar rings & animated angular sweep
+                </p>
               </div>
 
               <div className="flex items-center gap-2">
@@ -1752,7 +1917,9 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
 
             {/* Polar Presets */}
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs scrollbar-none">
-              <span className="text-slate-400 font-bold px-1 whitespace-nowrap flex-shrink-0">Presets:</span>
+              <span className="text-slate-400 font-bold px-1 whitespace-nowrap flex-shrink-0">
+                Presets:
+              </span>
               {POLAR_PRESETS.map((p) => (
                 <button
                   key={p.label}
@@ -1798,7 +1965,9 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
             <div className="flex flex-wrap items-center justify-between border-b border-slate-800/80 pb-2 gap-2">
               <div>
                 <h3 className="text-sm font-bold text-slate-100">Parametric Curve System</h3>
-                <p className="text-xs text-slate-400">Define system (x(t), y(t)) over parameter interval t with live particle tracer</p>
+                <p className="text-xs text-slate-400">
+                  Define system (x(t), y(t)) over parameter interval t with live particle tracer
+                </p>
               </div>
 
               <div className="flex items-center gap-2">
@@ -1810,7 +1979,11 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
                       : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
                   }`}
                 >
-                  {isParamAnimating ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                  {isParamAnimating ? (
+                    <Pause className="w-3.5 h-3.5" />
+                  ) : (
+                    <Play className="w-3.5 h-3.5" />
+                  )}
                   {isParamAnimating ? 'Pause Tracer' : 'Play Tracer'}
                 </button>
               </div>
@@ -1818,7 +1991,9 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
 
             {/* Parametric Presets */}
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs scrollbar-none">
-              <span className="text-slate-400 font-bold px-1 whitespace-nowrap flex-shrink-0">Presets:</span>
+              <span className="text-slate-400 font-bold px-1 whitespace-nowrap flex-shrink-0">
+                Presets:
+              </span>
               {PARAMETRIC_PRESETS.map((p) => (
                 <button
                   key={p.label}
@@ -1887,7 +2062,9 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
             <div className="flex flex-wrap items-center justify-between border-b border-slate-800/80 pb-2 gap-2">
               <div>
                 <h3 className="text-sm font-bold text-slate-100">Scatter Points & Curve Fitting</h3>
-                <p className="text-xs text-slate-400">Least-squares regression with Pearson correlation & R² goodness of fit</p>
+                <p className="text-xs text-slate-400">
+                  Least-squares regression with Pearson correlation & R² goodness of fit
+                </p>
               </div>
 
               {/* Model Type Selector */}
@@ -1911,7 +2088,9 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
 
             {/* Regression Presets */}
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs scrollbar-none">
-              <span className="text-slate-400 font-bold px-1 whitespace-nowrap flex-shrink-0">Datasets:</span>
+              <span className="text-slate-400 font-bold px-1 whitespace-nowrap flex-shrink-0">
+                Datasets:
+              </span>
               {REGRESSION_PRESETS.map((p) => (
                 <button
                   key={p.label}
@@ -1925,7 +2104,9 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-slate-400">Data Points (x, y per line)</label>
+                <label className="text-xs font-bold text-slate-400">
+                  Data Points (x, y per line)
+                </label>
                 <textarea
                   rows={5}
                   value={scatterPoints}
@@ -1958,9 +2139,9 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
 
                   <div className="text-xl font-mono font-bold text-emerald-400">
                     {regressionModelType === 'quadratic'
-                      ? regressionResults.quadratic?.formula ?? 'Need ≥ 3 points'
+                      ? (regressionResults.quadratic?.formula ?? 'Need ≥ 3 points')
                       : regressionModelType === 'exponential'
-                        ? regressionResults.exponential?.formula ?? 'Need y > 0 points'
+                        ? (regressionResults.exponential?.formula ?? 'Need y > 0 points')
                         : regressionResults.linear.formula}
                   </div>
 
@@ -2034,7 +2215,9 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
             <button
               onClick={() => setShowTable(!showTable)}
               className={`p-2 rounded-xl border transition-all shadow-sm flex-shrink-0 ${
-                showTable ? 'bg-sky-600 text-white border-sky-500' : 'bg-slate-800 text-slate-200 border-slate-700'
+                showTable
+                  ? 'bg-sky-600 text-white border-sky-500'
+                  : 'bg-slate-800 text-slate-200 border-slate-700'
               }`}
               title="Toggle Evaluation Table"
             >
@@ -2049,14 +2232,19 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
             </button>
             <button
               onClick={() => {
-                const tableHeaders = ['x', ...functions.filter((f) => f.enabled).map((f) => `y = ${f.expression}`)];
+                const tableHeaders = [
+                  'x',
+                  ...functions.filter((f) => f.enabled).map((f) => `y = ${f.expression}`),
+                ];
                 const tableRows = tableRowsData.map((xv) => [
                   xv.toFixed(2),
                   ...functions
                     .filter((f) => f.enabled)
                     .map((f, idx) => {
                       const compiled = compiledCartesianFns[idx];
-                      const yv = compiled ? evalCompiled(compiled, { x: xv }) : evalExprFallback(f.expression, { x: xv });
+                      const yv = compiled
+                        ? evalCompiled(compiled, { x: xv })
+                        : evalExprFallback(f.expression, { x: xv });
                       return yv !== null ? yv.toFixed(4) : 'undefined';
                     }),
                 ]);
@@ -2067,7 +2255,10 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
                   timestamp: Date.now(),
                   inputDescription:
                     graphMode === 'cartesian'
-                      ? functions.filter((f) => f.enabled).map((f) => `y = ${f.expression}`).join('; ')
+                      ? functions
+                          .filter((f) => f.enabled)
+                          .map((f) => `y = ${f.expression}`)
+                          .join('; ')
                       : graphMode === '3d'
                         ? `z = ${surfaceExpr}`
                         : graphMode === 'polar'
@@ -2080,7 +2271,9 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
                     'Graph Mode': graphMode,
                     'X-Domain': `[${xMin.toFixed(2)}, ${xMax.toFixed(2)}]`,
                     'Y-Range': `[${yMin.toFixed(2)}, ${yMax.toFixed(2)}]`,
-                    ...(computedAreaResult ? { 'Integral Area': computedAreaResult.area.toFixed(5) } : {}),
+                    ...(computedAreaResult
+                      ? { 'Integral Area': computedAreaResult.area.toFixed(5) }
+                      : {}),
                   },
                 });
               }}
@@ -2280,7 +2473,10 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
             </thead>
             <tbody>
               {tableRowsData.map((xv) => (
-                <tr key={xv} className="border-b border-slate-800/40 hover:bg-slate-800/40 text-slate-300">
+                <tr
+                  key={xv}
+                  className="border-b border-slate-800/40 hover:bg-slate-800/40 text-slate-300"
+                >
                   <td className="p-2 font-bold text-slate-100">{xv.toFixed(2)}</td>
                   {functions.map((fn, idx) => {
                     const compiled = compiledCartesianFns[idx];

@@ -1,6 +1,6 @@
 /**
  * OmniCalc Pro - Physical Unit Engine with Dimensional Consistency Checking
- * 
+ *
  * Features:
  * - 7 SI Base Dimensions: [Mass, Length, Time, Current, Temperature, Substance, Luminosity]
  * - Compound unit arithmetic (multiplication, division, exponentiation)
@@ -92,7 +92,7 @@ export function areDimensionsEqual(a: DimensionVector, b: DimensionVector): bool
 export function formatDimensionVector(dim: DimensionVector): string {
   const symbols = ['M', 'L', 'T', 'I', 'Θ', 'N', 'J'];
   const parts: string[] = [];
-  
+
   dim.forEach((exp, idx) => {
     if (exp !== 0) {
       if (exp === 1) parts.push(`[${symbols[idx]}]`);
@@ -142,8 +142,20 @@ export const UNIT_DICTIONARY: Record<string, PhysicalUnit> = {
   yd: { symbol: 'yd', name: 'Yard', category: 'Length', dimensions: LENGTH, scale: 0.9144 },
   ft: { symbol: 'ft', name: 'Foot', category: 'Length', dimensions: LENGTH, scale: 0.3048 },
   in: { symbol: 'in', name: 'Inch', category: 'Length', dimensions: LENGTH, scale: 0.0254 },
-  ly: { symbol: 'ly', name: 'Light Year', category: 'Length', dimensions: LENGTH, scale: 9.4607e15 },
-  au: { symbol: 'au', name: 'Astronomical Unit', category: 'Length', dimensions: LENGTH, scale: 1.495978707e11 },
+  ly: {
+    symbol: 'ly',
+    name: 'Light Year',
+    category: 'Length',
+    dimensions: LENGTH,
+    scale: 9.4607e15,
+  },
+  au: {
+    symbol: 'au',
+    name: 'Astronomical Unit',
+    category: 'Length',
+    dimensions: LENGTH,
+    scale: 1.495978707e11,
+  },
 
   // Mass (Base: kg)
   kg: { symbol: 'kg', name: 'Kilogram', category: 'Mass', dimensions: MASS, scale: 1 },
@@ -173,19 +185,45 @@ export const UNIT_DICTIONARY: Record<string, PhysicalUnit> = {
 
   // Temperature (Base: K)
   K: { symbol: 'K', name: 'Kelvin', category: 'Temperature', dimensions: TEMPERATURE, scale: 1 },
-  degC: { symbol: 'degC', name: 'Celsius', category: 'Temperature', dimensions: TEMPERATURE, scale: 1, offset: 273.15 },
-  degF: { symbol: 'degF', name: 'Fahrenheit', category: 'Temperature', dimensions: TEMPERATURE, scale: 5/9, offset: 459.67 * (5/9) },
+  degC: {
+    symbol: 'degC',
+    name: 'Celsius',
+    category: 'Temperature',
+    dimensions: TEMPERATURE,
+    scale: 1,
+    offset: 273.15,
+  },
+  degF: {
+    symbol: 'degF',
+    name: 'Fahrenheit',
+    category: 'Temperature',
+    dimensions: TEMPERATURE,
+    scale: 5 / 9,
+    offset: 459.67 * (5 / 9),
+  },
 
   // Amount & Luminosity
   mol: { symbol: 'mol', name: 'Mole', category: 'Substance', dimensions: SUBSTANCE, scale: 1 },
-  kmol: { symbol: 'kmol', name: 'Kilomole', category: 'Substance', dimensions: SUBSTANCE, scale: 1000 },
+  kmol: {
+    symbol: 'kmol',
+    name: 'Kilomole',
+    category: 'Substance',
+    dimensions: SUBSTANCE,
+    scale: 1000,
+  },
   cd: { symbol: 'cd', name: 'Candela', category: 'Luminosity', dimensions: LUMINOUS, scale: 1 },
 
   // Force (Base: N = kg*m/s^2)
   N: { symbol: 'N', name: 'Newton', category: 'Force', dimensions: FORCE_DIM, scale: 1 },
   kN: { symbol: 'kN', name: 'Kilonewton', category: 'Force', dimensions: FORCE_DIM, scale: 1000 },
   dyn: { symbol: 'dyn', name: 'Dyne', category: 'Force', dimensions: FORCE_DIM, scale: 1e-5 },
-  lbf: { symbol: 'lbf', name: 'Pound-Force', category: 'Force', dimensions: FORCE_DIM, scale: 4.448222 },
+  lbf: {
+    symbol: 'lbf',
+    name: 'Pound-Force',
+    category: 'Force',
+    dimensions: FORCE_DIM,
+    scale: 4.448222,
+  },
 
   // Energy / Work (Base: J = N*m)
   J: { symbol: 'J', name: 'Joule', category: 'Energy', dimensions: ENERGY_DIM, scale: 1 },
@@ -193,14 +231,56 @@ export const UNIT_DICTIONARY: Record<string, PhysicalUnit> = {
   MJ: { symbol: 'MJ', name: 'Megajoule', category: 'Energy', dimensions: ENERGY_DIM, scale: 1e6 },
   GJ: { symbol: 'GJ', name: 'Gigajoule', category: 'Energy', dimensions: ENERGY_DIM, scale: 1e9 },
   cal: { symbol: 'cal', name: 'Calorie', category: 'Energy', dimensions: ENERGY_DIM, scale: 4.184 },
-  kcal: { symbol: 'kcal', name: 'Kilocalorie (Food Cal)', category: 'Energy', dimensions: ENERGY_DIM, scale: 4184 },
+  kcal: {
+    symbol: 'kcal',
+    name: 'Kilocalorie (Food Cal)',
+    category: 'Energy',
+    dimensions: ENERGY_DIM,
+    scale: 4184,
+  },
   Wh: { symbol: 'Wh', name: 'Watt-hour', category: 'Energy', dimensions: ENERGY_DIM, scale: 3600 },
-  kWh: { symbol: 'kWh', name: 'Kilowatt-hour', category: 'Energy', dimensions: ENERGY_DIM, scale: 3.6e6 },
-  eV: { symbol: 'eV', name: 'Electronvolt', category: 'Energy', dimensions: ENERGY_DIM, scale: 1.602176634e-19 },
-  keV: { symbol: 'keV', name: 'Kiloelectronvolt', category: 'Energy', dimensions: ENERGY_DIM, scale: 1.602176634e-16 },
-  MeV: { symbol: 'MeV', name: 'Megaelectronvolt', category: 'Energy', dimensions: ENERGY_DIM, scale: 1.602176634e-13 },
-  BTU: { symbol: 'BTU', name: 'British Thermal Unit', category: 'Energy', dimensions: ENERGY_DIM, scale: 1055.06 },
-  'ft-lbf': { symbol: 'ft-lbf', name: 'Foot-Pound', category: 'Energy', dimensions: ENERGY_DIM, scale: 1.355818 },
+  kWh: {
+    symbol: 'kWh',
+    name: 'Kilowatt-hour',
+    category: 'Energy',
+    dimensions: ENERGY_DIM,
+    scale: 3.6e6,
+  },
+  eV: {
+    symbol: 'eV',
+    name: 'Electronvolt',
+    category: 'Energy',
+    dimensions: ENERGY_DIM,
+    scale: 1.602176634e-19,
+  },
+  keV: {
+    symbol: 'keV',
+    name: 'Kiloelectronvolt',
+    category: 'Energy',
+    dimensions: ENERGY_DIM,
+    scale: 1.602176634e-16,
+  },
+  MeV: {
+    symbol: 'MeV',
+    name: 'Megaelectronvolt',
+    category: 'Energy',
+    dimensions: ENERGY_DIM,
+    scale: 1.602176634e-13,
+  },
+  BTU: {
+    symbol: 'BTU',
+    name: 'British Thermal Unit',
+    category: 'Energy',
+    dimensions: ENERGY_DIM,
+    scale: 1055.06,
+  },
+  'ft-lbf': {
+    symbol: 'ft-lbf',
+    name: 'Foot-Pound',
+    category: 'Energy',
+    dimensions: ENERGY_DIM,
+    scale: 1.355818,
+  },
 
   // Power (Base: W = J/s)
   W: { symbol: 'W', name: 'Watt', category: 'Power', dimensions: POWER_DIM, scale: 1 },
@@ -208,61 +288,253 @@ export const UNIT_DICTIONARY: Record<string, PhysicalUnit> = {
   kW: { symbol: 'kW', name: 'Kilowatt', category: 'Power', dimensions: POWER_DIM, scale: 1000 },
   MW: { symbol: 'MW', name: 'Megawatt', category: 'Power', dimensions: POWER_DIM, scale: 1e6 },
   GW: { symbol: 'GW', name: 'Gigawatt', category: 'Power', dimensions: POWER_DIM, scale: 1e9 },
-  hp: { symbol: 'hp', name: 'Horsepower (Mechanical)', category: 'Power', dimensions: POWER_DIM, scale: 745.699872 },
+  hp: {
+    symbol: 'hp',
+    name: 'Horsepower (Mechanical)',
+    category: 'Power',
+    dimensions: POWER_DIM,
+    scale: 745.699872,
+  },
 
   // Pressure (Base: Pa = N/m^2)
   Pa: { symbol: 'Pa', name: 'Pascal', category: 'Pressure', dimensions: PRESSURE_DIM, scale: 1 },
-  kPa: { symbol: 'kPa', name: 'Kilopascal', category: 'Pressure', dimensions: PRESSURE_DIM, scale: 1000 },
-  MPa: { symbol: 'MPa', name: 'Megapascal', category: 'Pressure', dimensions: PRESSURE_DIM, scale: 1e6 },
+  kPa: {
+    symbol: 'kPa',
+    name: 'Kilopascal',
+    category: 'Pressure',
+    dimensions: PRESSURE_DIM,
+    scale: 1000,
+  },
+  MPa: {
+    symbol: 'MPa',
+    name: 'Megapascal',
+    category: 'Pressure',
+    dimensions: PRESSURE_DIM,
+    scale: 1e6,
+  },
   bar: { symbol: 'bar', name: 'Bar', category: 'Pressure', dimensions: PRESSURE_DIM, scale: 1e5 },
-  mbar: { symbol: 'mbar', name: 'Millibar', category: 'Pressure', dimensions: PRESSURE_DIM, scale: 100 },
-  atm: { symbol: 'atm', name: 'Atmosphere (standard)', category: 'Pressure', dimensions: PRESSURE_DIM, scale: 101325 },
-  psi: { symbol: 'psi', name: 'Pound / sq inch', category: 'Pressure', dimensions: PRESSURE_DIM, scale: 6894.757 },
-  torr: { symbol: 'torr', name: 'Torr (mmHg)', category: 'Pressure', dimensions: PRESSURE_DIM, scale: 133.322 },
+  mbar: {
+    symbol: 'mbar',
+    name: 'Millibar',
+    category: 'Pressure',
+    dimensions: PRESSURE_DIM,
+    scale: 100,
+  },
+  atm: {
+    symbol: 'atm',
+    name: 'Atmosphere (standard)',
+    category: 'Pressure',
+    dimensions: PRESSURE_DIM,
+    scale: 101325,
+  },
+  psi: {
+    symbol: 'psi',
+    name: 'Pound / sq inch',
+    category: 'Pressure',
+    dimensions: PRESSURE_DIM,
+    scale: 6894.757,
+  },
+  torr: {
+    symbol: 'torr',
+    name: 'Torr (mmHg)',
+    category: 'Pressure',
+    dimensions: PRESSURE_DIM,
+    scale: 133.322,
+  },
 
   // Electrical
   V: { symbol: 'V', name: 'Volt', category: 'Voltage', dimensions: VOLTAGE_DIM, scale: 1 },
-  mV: { symbol: 'mV', name: 'Millivolt', category: 'Voltage', dimensions: VOLTAGE_DIM, scale: 0.001 },
+  mV: {
+    symbol: 'mV',
+    name: 'Millivolt',
+    category: 'Voltage',
+    dimensions: VOLTAGE_DIM,
+    scale: 0.001,
+  },
   kV: { symbol: 'kV', name: 'Kilovolt', category: 'Voltage', dimensions: VOLTAGE_DIM, scale: 1000 },
-  ohm: { symbol: 'ohm', name: 'Ohm (Ω)', category: 'Resistance', dimensions: RESISTANCE_DIM, scale: 1 },
-  kohm: { symbol: 'kohm', name: 'Kiloohm (kΩ)', category: 'Resistance', dimensions: RESISTANCE_DIM, scale: 1000 },
-  Mohm: { symbol: 'Mohm', name: 'Megaohm (MΩ)', category: 'Resistance', dimensions: RESISTANCE_DIM, scale: 1e6 },
+  ohm: {
+    symbol: 'ohm',
+    name: 'Ohm (Ω)',
+    category: 'Resistance',
+    dimensions: RESISTANCE_DIM,
+    scale: 1,
+  },
+  kohm: {
+    symbol: 'kohm',
+    name: 'Kiloohm (kΩ)',
+    category: 'Resistance',
+    dimensions: RESISTANCE_DIM,
+    scale: 1000,
+  },
+  Mohm: {
+    symbol: 'Mohm',
+    name: 'Megaohm (MΩ)',
+    category: 'Resistance',
+    dimensions: RESISTANCE_DIM,
+    scale: 1e6,
+  },
   F: { symbol: 'F', name: 'Farad', category: 'Capacitance', dimensions: CAPACITANCE_DIM, scale: 1 },
-  uF: { symbol: 'uF', name: 'Microfarad', category: 'Capacitance', dimensions: CAPACITANCE_DIM, scale: 1e-6 },
-  nF: { symbol: 'nF', name: 'Nanofarad', category: 'Capacitance', dimensions: CAPACITANCE_DIM, scale: 1e-9 },
-  pF: { symbol: 'pF', name: 'Picofarad', category: 'Capacitance', dimensions: CAPACITANCE_DIM, scale: 1e-12 },
+  uF: {
+    symbol: 'uF',
+    name: 'Microfarad',
+    category: 'Capacitance',
+    dimensions: CAPACITANCE_DIM,
+    scale: 1e-6,
+  },
+  nF: {
+    symbol: 'nF',
+    name: 'Nanofarad',
+    category: 'Capacitance',
+    dimensions: CAPACITANCE_DIM,
+    scale: 1e-9,
+  },
+  pF: {
+    symbol: 'pF',
+    name: 'Picofarad',
+    category: 'Capacitance',
+    dimensions: CAPACITANCE_DIM,
+    scale: 1e-12,
+  },
   C: { symbol: 'C', name: 'Coulomb', category: 'Charge', dimensions: CHARGE_DIM, scale: 1 },
-  mAh: { symbol: 'mAh', name: 'Milliampere-hour', category: 'Charge', dimensions: CHARGE_DIM, scale: 3.6 },
-  Ah: { symbol: 'Ah', name: 'Ampere-hour', category: 'Charge', dimensions: CHARGE_DIM, scale: 3600 },
+  mAh: {
+    symbol: 'mAh',
+    name: 'Milliampere-hour',
+    category: 'Charge',
+    dimensions: CHARGE_DIM,
+    scale: 3.6,
+  },
+  Ah: {
+    symbol: 'Ah',
+    name: 'Ampere-hour',
+    category: 'Charge',
+    dimensions: CHARGE_DIM,
+    scale: 3600,
+  },
 
   // Frequency
   Hz: { symbol: 'Hz', name: 'Hertz', category: 'Frequency', dimensions: FREQUENCY_DIM, scale: 1 },
-  kHz: { symbol: 'kHz', name: 'Kilohertz', category: 'Frequency', dimensions: FREQUENCY_DIM, scale: 1000 },
-  MHz: { symbol: 'MHz', name: 'Megahertz', category: 'Frequency', dimensions: FREQUENCY_DIM, scale: 1e6 },
-  GHz: { symbol: 'GHz', name: 'Gigahertz', category: 'Frequency', dimensions: FREQUENCY_DIM, scale: 1e9 },
-  rpm: { symbol: 'rpm', name: 'Revolutions / minute', category: 'Frequency', dimensions: FREQUENCY_DIM, scale: 1/60 },
+  kHz: {
+    symbol: 'kHz',
+    name: 'Kilohertz',
+    category: 'Frequency',
+    dimensions: FREQUENCY_DIM,
+    scale: 1000,
+  },
+  MHz: {
+    symbol: 'MHz',
+    name: 'Megahertz',
+    category: 'Frequency',
+    dimensions: FREQUENCY_DIM,
+    scale: 1e6,
+  },
+  GHz: {
+    symbol: 'GHz',
+    name: 'Gigahertz',
+    category: 'Frequency',
+    dimensions: FREQUENCY_DIM,
+    scale: 1e9,
+  },
+  rpm: {
+    symbol: 'rpm',
+    name: 'Revolutions / minute',
+    category: 'Frequency',
+    dimensions: FREQUENCY_DIM,
+    scale: 1 / 60,
+  },
 
   // Area & Volume
-  'm2': { symbol: 'm2', name: 'Square Meter', category: 'Area', dimensions: AREA_DIM, scale: 1 },
-  'km2': { symbol: 'km2', name: 'Square Kilometer', category: 'Area', dimensions: AREA_DIM, scale: 1e6 },
-  'cm2': { symbol: 'cm2', name: 'Square Centimeter', category: 'Area', dimensions: AREA_DIM, scale: 1e-4 },
-  'ha': { symbol: 'ha', name: 'Hectare', category: 'Area', dimensions: AREA_DIM, scale: 1e4 },
-  'acre': { symbol: 'acre', name: 'Acre', category: 'Area', dimensions: AREA_DIM, scale: 4046.8564224 },
-  'ft2': { symbol: 'ft2', name: 'Square Foot', category: 'Area', dimensions: AREA_DIM, scale: 0.09290304 },
-  'in2': { symbol: 'in2', name: 'Square Inch', category: 'Area', dimensions: AREA_DIM, scale: 0.00064516 },
+  m2: { symbol: 'm2', name: 'Square Meter', category: 'Area', dimensions: AREA_DIM, scale: 1 },
+  km2: {
+    symbol: 'km2',
+    name: 'Square Kilometer',
+    category: 'Area',
+    dimensions: AREA_DIM,
+    scale: 1e6,
+  },
+  cm2: {
+    symbol: 'cm2',
+    name: 'Square Centimeter',
+    category: 'Area',
+    dimensions: AREA_DIM,
+    scale: 1e-4,
+  },
+  ha: { symbol: 'ha', name: 'Hectare', category: 'Area', dimensions: AREA_DIM, scale: 1e4 },
+  acre: {
+    symbol: 'acre',
+    name: 'Acre',
+    category: 'Area',
+    dimensions: AREA_DIM,
+    scale: 4046.8564224,
+  },
+  ft2: {
+    symbol: 'ft2',
+    name: 'Square Foot',
+    category: 'Area',
+    dimensions: AREA_DIM,
+    scale: 0.09290304,
+  },
+  in2: {
+    symbol: 'in2',
+    name: 'Square Inch',
+    category: 'Area',
+    dimensions: AREA_DIM,
+    scale: 0.00064516,
+  },
 
-  'm3': { symbol: 'm3', name: 'Cubic Meter', category: 'Volume', dimensions: VOLUME_DIM, scale: 1 },
-  'L': { symbol: 'L', name: 'Liter', category: 'Volume', dimensions: VOLUME_DIM, scale: 0.001 },
-  'mL': { symbol: 'mL', name: 'Milliliter', category: 'Volume', dimensions: VOLUME_DIM, scale: 1e-6 },
-  'gal': { symbol: 'gal', name: 'US Gallon', category: 'Volume', dimensions: VOLUME_DIM, scale: 0.003785411784 },
-  'floz': { symbol: 'floz', name: 'Fluid Ounce', category: 'Volume', dimensions: VOLUME_DIM, scale: 0.0000295735295625 },
+  m3: { symbol: 'm3', name: 'Cubic Meter', category: 'Volume', dimensions: VOLUME_DIM, scale: 1 },
+  L: { symbol: 'L', name: 'Liter', category: 'Volume', dimensions: VOLUME_DIM, scale: 0.001 },
+  mL: { symbol: 'mL', name: 'Milliliter', category: 'Volume', dimensions: VOLUME_DIM, scale: 1e-6 },
+  gal: {
+    symbol: 'gal',
+    name: 'US Gallon',
+    category: 'Volume',
+    dimensions: VOLUME_DIM,
+    scale: 0.003785411784,
+  },
+  floz: {
+    symbol: 'floz',
+    name: 'Fluid Ounce',
+    category: 'Volume',
+    dimensions: VOLUME_DIM,
+    scale: 0.0000295735295625,
+  },
 
   // Velocity
-  'm/s': { symbol: 'm/s', name: 'Meter per second', category: 'Velocity', dimensions: VELOCITY_DIM, scale: 1 },
-  'km/h': { symbol: 'km/h', name: 'Kilometer per hour', category: 'Velocity', dimensions: VELOCITY_DIM, scale: 1/3.6 },
-  'mph': { symbol: 'mph', name: 'Mile per hour', category: 'Velocity', dimensions: VELOCITY_DIM, scale: 0.44704 },
-  'knot': { symbol: 'knot', name: 'Knot', category: 'Velocity', dimensions: VELOCITY_DIM, scale: 0.514444444 },
-  'ft/s': { symbol: 'ft/s', name: 'Foot per second', category: 'Velocity', dimensions: VELOCITY_DIM, scale: 0.3048 },
+  'm/s': {
+    symbol: 'm/s',
+    name: 'Meter per second',
+    category: 'Velocity',
+    dimensions: VELOCITY_DIM,
+    scale: 1,
+  },
+  'km/h': {
+    symbol: 'km/h',
+    name: 'Kilometer per hour',
+    category: 'Velocity',
+    dimensions: VELOCITY_DIM,
+    scale: 1 / 3.6,
+  },
+  mph: {
+    symbol: 'mph',
+    name: 'Mile per hour',
+    category: 'Velocity',
+    dimensions: VELOCITY_DIM,
+    scale: 0.44704,
+  },
+  knot: {
+    symbol: 'knot',
+    name: 'Knot',
+    category: 'Velocity',
+    dimensions: VELOCITY_DIM,
+    scale: 0.514444444,
+  },
+  'ft/s': {
+    symbol: 'ft/s',
+    name: 'Foot per second',
+    category: 'Velocity',
+    dimensions: VELOCITY_DIM,
+    scale: 0.3048,
+  },
 };
 
 // Physics Constants Catalog
@@ -278,7 +550,7 @@ export const PHYSICS_CONSTANTS: PhysicsConstant[] = [
   {
     symbol: 'G',
     name: 'Newtonian Gravitational Constant',
-    value: 6.67430e-11,
+    value: 6.6743e-11,
     unit: 'm³/(kg·s²)',
     description: 'Universal gravitational coupling constant',
     dimensions: [-1, 3, -2, 0, 0, 0, 0],
@@ -491,9 +763,7 @@ export const PHYSICS_FORMULAS: PhysicsFormula[] = [
     category: 'Relativity',
     formulaLatex: 'E = m c^2',
     description: 'Rest-mass energy equivalent of matter',
-    variables: [
-      { symbol: 'm', name: 'Rest Mass', unit: 'kg', defaultValue: 0.001 },
-    ],
+    variables: [{ symbol: 'm', name: 'Rest Mass', unit: 'kg', defaultValue: 0.001 }],
     calculate: (inputs) => {
       const m = inputs['m'] || 0;
       const c = 299792458;
@@ -517,9 +787,7 @@ export const PHYSICS_FORMULAS: PhysicsFormula[] = [
     category: 'Quantum',
     formulaLatex: 'E = h \\cdot f = \\frac{h c}{\\lambda}',
     description: 'Energy carried by a single photon of frequency f',
-    variables: [
-      { symbol: 'f', name: 'Frequency', unit: 'Hz', defaultValue: 5e14 },
-    ],
+    variables: [{ symbol: 'f', name: 'Frequency', unit: 'Hz', defaultValue: 5e14 }],
     calculate: (inputs) => {
       const f = inputs['f'] || 0;
       const h = 6.62607015e-34;
@@ -563,12 +831,12 @@ export function convertPhysicalUnit(
   let baseVal = val;
   if (uFrom.category === 'Temperature') {
     if (fromSymbol === 'degC') baseVal = val + 273.15;
-    else if (fromSymbol === 'degF') baseVal = (val - 32) * (5/9) + 273.15;
+    else if (fromSymbol === 'degF') baseVal = (val - 32) * (5 / 9) + 273.15;
     else baseVal = val;
 
     let res = baseVal;
     if (toSymbol === 'degC') res = baseVal - 273.15;
-    else if (toSymbol === 'degF') res = (baseVal - 273.15) * (9/5) + 32;
+    else if (toSymbol === 'degF') res = (baseVal - 273.15) * (9 / 5) + 32;
     else res = baseVal;
 
     return { success: true, result: res };

@@ -43,12 +43,15 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
 
   const handleCopy = () => {
     const valToCopy = displayResult || rawResult || '0';
-    navigator.clipboard.writeText(valToCopy).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    }).catch(() => {
-      // Fallback or ignore clipboard error silently
-    });
+    navigator.clipboard
+      .writeText(valToCopy)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      })
+      .catch(() => {
+        // Fallback or ignore clipboard error silently
+      });
   };
 
   const handleInput = useCallback(
@@ -226,7 +229,11 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
             >
               <History className="w-3 h-3 flex-shrink-0" />
               <span className="hidden sm:inline">Tape</span>
-              {showHistoryTape ? <ChevronUp className="w-3 h-3 flex-shrink-0" /> : <ChevronDown className="w-3 h-3 flex-shrink-0" />}
+              {showHistoryTape ? (
+                <ChevronUp className="w-3 h-3 flex-shrink-0" />
+              ) : (
+                <ChevronDown className="w-3 h-3 flex-shrink-0" />
+              )}
             </button>
           </div>
 
@@ -286,7 +293,9 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
               <History className="w-3 h-3 text-sky-400" />
               Quick Tape (Click to Insert)
             </span>
-            <span className="text-[10px] text-slate-500 font-mono">{recentHistory.length} items</span>
+            <span className="text-[10px] text-slate-500 font-mono">
+              {recentHistory.length} items
+            </span>
           </div>
 
           {recentHistory.length === 0 ? (
@@ -464,12 +473,24 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
           }`}
         >
           <div className="grid grid-cols-2 gap-2 font-mono text-[10px]">
-            <div><kbd className="font-bold text-sky-400">0-9</kbd> : Numbers</div>
-            <div><kbd className="font-bold text-sky-400">+ - * /</kbd> : Operators</div>
-            <div><kbd className="font-bold text-sky-400">Enter / =</kbd> : Solve</div>
-            <div><kbd className="font-bold text-sky-400">Backspace</kbd> : Delete</div>
-            <div><kbd className="font-bold text-sky-400">Esc</kbd> : Clear</div>
-            <div><kbd className="font-bold text-sky-400">%</kbd> : Modulo / Percent</div>
+            <div>
+              <kbd className="font-bold text-sky-400">0-9</kbd> : Numbers
+            </div>
+            <div>
+              <kbd className="font-bold text-sky-400">+ - * /</kbd> : Operators
+            </div>
+            <div>
+              <kbd className="font-bold text-sky-400">Enter / =</kbd> : Solve
+            </div>
+            <div>
+              <kbd className="font-bold text-sky-400">Backspace</kbd> : Delete
+            </div>
+            <div>
+              <kbd className="font-bold text-sky-400">Esc</kbd> : Clear
+            </div>
+            <div>
+              <kbd className="font-bold text-sky-400">%</kbd> : Modulo / Percent
+            </div>
           </div>
         </div>
       )}

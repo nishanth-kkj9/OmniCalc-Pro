@@ -227,11 +227,17 @@ def _worker_eval_task(expr: str, namespace_keys: list[str], angle_mode: str, cus
 class SafeEvaluator:
     """Thread-safe and process-isolated mathematical expression evaluator with complexity limits."""
 
-    def __init__(self, angle_mode: str = "degrees", max_length: int = MAX_EXPR_LENGTH):
+    def __init__(
+        self,
+        angle_mode: str = "degrees",
+        max_length: int = MAX_EXPR_LENGTH,
+        eval_worker_func: Any = None,
+    ):
         self.angle_mode = angle_mode
         self.max_length = max_length
         self.max_time = MAX_EXECUTION_TIME
         self.max_nesting = MAX_NESTING_DEPTH
+        self._eval_worker_func = eval_worker_func or _worker_eval_task
         self._namespace = self._build_namespace()
 
     def _build_namespace(self) -> dict[str, Any]:
@@ -403,9 +409,9 @@ class SafeEvaluator:
 
             # Fast path or timed execution using global _EVAL_POOL for responsive timeout enforcement
             if self.max_time <= 0:
-                return _worker_eval_task(expr, list(self._namespace.keys()), self.angle_mode, self._namespace)
+                return self._eval_worker_func(expr, list(self._namespace.keys()), self.angle_mode, self._namespace)
 
-            future = _EVAL_POOL.submit(_worker_eval_task, expr, list(self._namespace.keys()), self.angle_mode, self._namespace)
+            future = _EVAL_POOL.submit(self._eval_worker_func, expr, list(self._namespace.keys()), self.angle_mode, self._namespace)
             try:
                 return future.result(timeout=self.max_time)
             except FuturesTimeoutError:

@@ -248,6 +248,29 @@ export function loadInitialSettings(storage?: Storage): AppSettings {
 }
 
 /**
+ * Synchronously applies the persisted theme class to the root document element before React mounts.
+ * Reads canonical SETTINGS_KEY ('omnicalc_settings_v2'), migrates legacy if needed, and sanitizes.
+ */
+export function applyThemeBootstrap(storage?: Storage, rootEl?: HTMLElement): AppSettings['theme'] {
+  const settings = loadInitialSettings(storage);
+  const el = rootEl || (typeof document !== 'undefined' ? document.documentElement : undefined);
+  if (el) {
+    el.classList.remove('dark', 'light', 'oled');
+    if (settings.theme === 'light') {
+      el.classList.add('light');
+      el.style.colorScheme = 'light';
+    } else if (settings.theme === 'oled') {
+      el.classList.add('dark', 'oled');
+      el.style.colorScheme = 'dark';
+    } else {
+      el.classList.add('dark');
+      el.style.colorScheme = 'dark';
+    }
+  }
+  return settings.theme;
+}
+
+/**
  * Persists current settings to localStorage with schema version tag.
  */
 export function saveSettings(settings: AppSettings, storage?: Storage): void {

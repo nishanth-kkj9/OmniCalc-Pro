@@ -6,7 +6,7 @@ import { DEFAULT_SETTINGS } from '../utils/settings';
 describe('BasicCalculator Component', () => {
   it('renders correctly with default state', () => {
     render(<BasicCalculator settings={DEFAULT_SETTINGS} />);
-    expect(screen.getByText('C')).toBeDefined();
+    expect(screen.getByText('AC')).toBeDefined();
     expect(screen.getByText('MC')).toBeDefined();
     expect(screen.getByText('MR')).toBeDefined();
   });

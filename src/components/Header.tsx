@@ -28,7 +28,10 @@ interface HeaderProps {
   onUpdateSettings: (newSettings: Partial<AppSettings>) => void;
 }
 
-const MODE_TITLES: Record<CalcMode, { title: string; subtitle: string; category: string; color: string }> = {
+const MODE_TITLES: Record<
+  CalcMode,
+  { title: string; subtitle: string; category: string; color: string }
+> = {
   basic: {
     title: 'Basic Calculator',
     subtitle: 'Standard arithmetic operations & memory functions',
@@ -310,7 +313,11 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           onClick={toggleSound}
           className={`p-2 rounded-xl transition-all hidden sm:flex flex-shrink-0 ${btnIdleClass}`}
-          title={settings.soundEnabled ? 'Audio Feedback Enabled (Click to Mute)' : 'Audio Feedback Muted (Click to Enable)'}
+          title={
+            settings.soundEnabled
+              ? 'Audio Feedback Enabled (Click to Mute)'
+              : 'Audio Feedback Muted (Click to Enable)'
+          }
         >
           {settings.soundEnabled ? (
             <Volume2 className="w-4.5 h-4.5 text-sky-400 flex-shrink-0" />

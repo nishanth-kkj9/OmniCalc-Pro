@@ -284,7 +284,11 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({
             >
               <History className="w-3 h-3 flex-shrink-0" />
               <span className="hidden sm:inline">Tape</span>
-              {showHistoryTape ? <ChevronUp className="w-3 h-3 flex-shrink-0" /> : <ChevronDown className="w-3 h-3 flex-shrink-0" />}
+              {showHistoryTape ? (
+                <ChevronUp className="w-3 h-3 flex-shrink-0" />
+              ) : (
+                <ChevronDown className="w-3 h-3 flex-shrink-0" />
+              )}
             </button>
           </div>
 
@@ -344,7 +348,9 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({
               <History className="w-3 h-3 text-sky-400" />
               Quick Tape (Click to Insert)
             </span>
-            <span className="text-[10px] text-slate-500 font-mono">{recentHistory.length} items</span>
+            <span className="text-[10px] text-slate-500 font-mono">
+              {recentHistory.length} items
+            </span>
           </div>
 
           {recentHistory.length === 0 ? (
@@ -377,7 +383,9 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({
       )}
 
       {/* Control Bar */}
-      <div className={`flex flex-wrap items-center justify-between gap-2 p-2 rounded-2xl border ${controlBarBg}`}>
+      <div
+        className={`flex flex-wrap items-center justify-between gap-2 p-2 rounded-2xl border ${controlBarBg}`}
+      >
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => setIsSecond(!isSecond)}
@@ -612,12 +620,24 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({
           }`}
         >
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 font-mono text-[10px]">
-            <div><kbd className="font-bold text-sky-400">0-9</kbd> : Numbers</div>
-            <div><kbd className="font-bold text-sky-400">+ - * /</kbd> : Operators</div>
-            <div><kbd className="font-bold text-sky-400">^</kbd> : Power / Exponent</div>
-            <div><kbd className="font-bold text-sky-400">( )</kbd> : Parentheses</div>
-            <div><kbd className="font-bold text-sky-400">Enter / =</kbd> : Solve</div>
-            <div><kbd className="font-bold text-sky-400">Backspace</kbd> : Delete</div>
+            <div>
+              <kbd className="font-bold text-sky-400">0-9</kbd> : Numbers
+            </div>
+            <div>
+              <kbd className="font-bold text-sky-400">+ - * /</kbd> : Operators
+            </div>
+            <div>
+              <kbd className="font-bold text-sky-400">^</kbd> : Power / Exponent
+            </div>
+            <div>
+              <kbd className="font-bold text-sky-400">( )</kbd> : Parentheses
+            </div>
+            <div>
+              <kbd className="font-bold text-sky-400">Enter / =</kbd> : Solve
+            </div>
+            <div>
+              <kbd className="font-bold text-sky-400">Backspace</kbd> : Delete
+            </div>
           </div>
         </div>
       )}

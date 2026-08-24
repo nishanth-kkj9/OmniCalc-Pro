@@ -295,7 +295,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
               >
                 OmniCalc Pro
               </h1>
-              <p className="text-[11px] font-medium flex items-center gap-1.5" style={{ color: 'var(--accent)' }}>
+              <p
+                className="text-[11px] font-medium flex items-center gap-1.5"
+                style={{ color: 'var(--accent)' }}
+              >
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 17 Specialized Engines
               </p>
@@ -339,9 +342,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
                   Quick Pinned
                 </span>
-                <span className="text-[9px] font-mono text-slate-500">
-                  {pinnedItems.length}
-                </span>
+                <span className="text-[9px] font-mono text-slate-500">{pinnedItems.length}</span>
               </div>
               <div className="space-y-0.5">
                 {pinnedItems.map((item) => {
@@ -360,9 +361,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       `}
                     >
                       <div className="flex items-center gap-2.5">
-                        <span className={isActive ? 'text-white' : ''}>
-                          {item.icon}
-                        </span>
+                        <span className={isActive ? 'text-white' : ''}>{item.icon}</span>
                         <span className="truncate">{item.label}</span>
                       </div>
                       <div className="flex items-center gap-1">
@@ -434,9 +433,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           `}
                         >
                           <div className="flex items-center gap-2.5">
-                            <span className={isActive ? 'text-white' : ''}>
-                              {item.icon}
-                            </span>
+                            <span className={isActive ? 'text-white' : ''}>{item.icon}</span>
                             <span className="truncate">{item.label}</span>
                           </div>
                           <div className="flex items-center gap-1">
@@ -474,8 +471,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Footer info */}
-        <div className={`p-3 border-t text-[11px] text-center flex items-center justify-between px-4 ${footerColor}`}>
-          <span>{APP_NAME} v{APP_VERSION}</span>
+        <div
+          className={`p-3 border-t text-[11px] text-center flex items-center justify-between px-4 ${footerColor}`}
+        >
+          <span>
+            {APP_NAME} v{APP_VERSION} • Multi-Engine Suite
+          </span>
           <span className="font-mono text-[10px] text-slate-500">⌘K Search</span>
         </div>
       </aside>

@@ -2,25 +2,12 @@
 <html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data:; connect-src 'self';" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data:; connect-src 'self';" />
     <meta name="theme-color" content="#020617" />
     <link rel="icon" type="image/svg+xml" href="/assets/icons/app_icon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>OmniCalc Pro</title>
-    <script>
-      (function() {
-        try {
-          var saved = localStorage.getItem('omnicalc_settings');
-          if (saved) {
-            var parsed = JSON.parse(saved);
-            if (parsed.theme === 'light' || parsed.theme === 'oled') {
-              document.documentElement.classList.remove('dark');
-              document.documentElement.classList.add(parsed.theme);
-            }
-          }
-        } catch (e) {}
-      })();
-    </script>
+    <script type="module" src="/src/bootstrap-theme.ts"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">

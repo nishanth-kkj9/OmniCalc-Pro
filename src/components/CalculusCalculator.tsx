@@ -397,7 +397,11 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
                           <FileText className="w-3.5 h-3.5 text-sky-400" />
                           Step-by-Step Integration Derivation
                         </span>
-                        {showSteps ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                        {showSteps ? (
+                          <ChevronUp className="w-4 h-4" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4" />
+                        )}
                       </button>
 
                       {showSteps && (
@@ -528,7 +532,9 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
 
                     {/* Step-by-Step Breakdown */}
                     <div className="border-t border-slate-800 pt-3 flex flex-col gap-1.5">
-                      <span className="text-xs font-bold text-slate-400">Derivative Derivation Steps:</span>
+                      <span className="text-xs font-bold text-slate-400">
+                        Derivative Derivation Steps:
+                      </span>
                       {diffData.steps?.map((step, idx) => (
                         <div key={idx} className="text-xs font-mono text-slate-300">
                           • {step}

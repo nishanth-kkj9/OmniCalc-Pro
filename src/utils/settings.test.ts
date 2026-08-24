@@ -3,6 +3,7 @@ import {
   loadInitialSettings,
   saveSettings,
   migrateSettings,
+  applyThemeBootstrap,
   DEFAULT_SETTINGS,
   SETTINGS_KEY,
   SETTINGS_VERSION,
@@ -97,5 +98,64 @@ describe('Settings Management and Migration (BUG-02 Regression Tests)', () => {
   it('migrateSettings returns null for unsupported source versions', () => {
     expect(migrateSettings({ theme: 'light' }, 99)).toBeNull();
     expect(migrateSettings(null, 1)).toBeNull();
+  });
+
+  describe('Theme Startup Bootstrap (BUG-01 Regression Tests)', () => {
+    let rootElement: HTMLElement;
+
+    beforeEach(() => {
+      localStorage.clear();
+      rootElement = document.createElement('html');
+      rootElement.className = 'dark';
+    });
+
+    it('v2 dark setting produces dark initial document class', () => {
+      saveSettings({ ...DEFAULT_SETTINGS, theme: 'dark' });
+      const theme = applyThemeBootstrap(localStorage, rootElement);
+      expect(theme).toBe('dark');
+      expect(rootElement.classList.contains('dark')).toBe(true);
+      expect(rootElement.classList.contains('light')).toBe(false);
+      expect(rootElement.classList.contains('oled')).toBe(false);
+    });
+
+    it('v2 light setting produces light initial document class', () => {
+      saveSettings({ ...DEFAULT_SETTINGS, theme: 'light' });
+      const theme = applyThemeBootstrap(localStorage, rootElement);
+      expect(theme).toBe('light');
+      expect(rootElement.classList.contains('light')).toBe(true);
+      expect(rootElement.classList.contains('dark')).toBe(false);
+    });
+
+    it('v2 oled setting produces OLED initial document class', () => {
+      saveSettings({ ...DEFAULT_SETTINGS, theme: 'oled' });
+      const theme = applyThemeBootstrap(localStorage, rootElement);
+      expect(theme).toBe('oled');
+      expect(rootElement.classList.contains('oled')).toBe(true);
+      expect(rootElement.classList.contains('dark')).toBe(true);
+    });
+
+    it('malformed v2 data does not break page startup and falls back to default', () => {
+      localStorage.setItem(SETTINGS_KEY, '{"theme": "invalid-theme-injection", "__v": 2}');
+      const theme = applyThemeBootstrap(localStorage, rootElement);
+      expect(theme).toBe(DEFAULT_SETTINGS.theme);
+      expect(rootElement.classList.contains(DEFAULT_SETTINGS.theme)).toBe(true);
+    });
+
+    it('legacy omnicalc_settings migration remains functional during startup bootstrap', () => {
+      localStorage.setItem(LEGACY_SETTINGS_KEY, JSON.stringify({ theme: 'light' }));
+      const theme = applyThemeBootstrap(localStorage, rootElement);
+      expect(theme).toBe('light');
+      expect(rootElement.classList.contains('light')).toBe(true);
+      expect(localStorage.getItem(LEGACY_SETTINGS_KEY)).toBeNull();
+      expect(localStorage.getItem(SETTINGS_KEY)).not.toBeNull();
+    });
+
+    it('runtime saveSettings() and startup bootstrap agree on the same source of truth', () => {
+      saveSettings({ ...DEFAULT_SETTINGS, theme: 'light' });
+      const bootstrapTheme = applyThemeBootstrap(localStorage, rootElement);
+      const loadedSettings = loadInitialSettings();
+      expect(bootstrapTheme).toBe(loadedSettings.theme);
+      expect(bootstrapTheme).toBe('light');
+    });
   });
 });

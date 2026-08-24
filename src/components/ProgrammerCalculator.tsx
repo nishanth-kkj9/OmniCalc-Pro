@@ -1,16 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { BitWordSize, NumberBase, AppSettings } from '../types';
 import { addHistory } from '../utils/history';
-import {
-  Download,
-  Copy,
-  Check,
-  RotateCcw,
-  RotateCw,
-  Sliders,
-  Cpu,
-  Layers,
-} from 'lucide-react';
+import { Download, Copy, Check, RotateCcw, RotateCw, Sliders, Cpu, Layers } from 'lucide-react';
 import { ExportModal } from './ExportModal';
 import { ExportReportData } from '../utils/exportEngine';
 
@@ -129,7 +120,7 @@ export const ProgrammerCalculator: React.FC<ProgrammerCalculatorProps> = ({ sett
   };
 
   const invertAllBits = () => {
-    const newVal = (~val) & getMask(wordSize);
+    const newVal = ~val & getMask(wordSize);
     setVal(newVal);
     updateBufferFromVal(newVal, activeBase);
   };
@@ -420,8 +411,16 @@ export const ProgrammerCalculator: React.FC<ProgrammerCalculatorProps> = ({ sett
       {/* Inspector Tabs */}
       <div className="flex items-center gap-2">
         {[
-          { id: 'matrix', label: 'Interactive Bit Matrix', icon: <Layers className="w-3.5 h-3.5" /> },
-          { id: 'bitfield', label: 'Byte / Bitfield Packer', icon: <Sliders className="w-3.5 h-3.5" /> },
+          {
+            id: 'matrix',
+            label: 'Interactive Bit Matrix',
+            icon: <Layers className="w-3.5 h-3.5" />,
+          },
+          {
+            id: 'bitfield',
+            label: 'Byte / Bitfield Packer',
+            icon: <Sliders className="w-3.5 h-3.5" />,
+          },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -476,22 +475,30 @@ export const ProgrammerCalculator: React.FC<ProgrammerCalculatorProps> = ({ sett
       {/* Byte & Bitfield Range Packer */}
       {activeTab === 'bitfield' && (
         <div className={`${subCardBg} border rounded-3xl p-5 flex flex-col gap-3 shadow-md`}>
-          <h4 className="text-xs font-bold text-slate-300">Byte Breakdown (RGBA / Network Packets):</h4>
+          <h4 className="text-xs font-bold text-slate-300">
+            Byte Breakdown (RGBA / Network Packets):
+          </h4>
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
             {Array.from({ length: Math.min(4, wordSize / 8) }).map((_, bIdx) => {
               const byteShift = BigInt((Math.min(4, wordSize / 8) - 1 - bIdx) * 8);
               const byteVal = Number((val >> byteShift) & 0xffn);
               return (
-                <div key={bIdx} className="p-3 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col gap-1 font-mono">
+                <div
+                  key={bIdx}
+                  className="p-3 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col gap-1 font-mono"
+                >
                   <span className="text-[10px] font-bold text-slate-400 uppercase">
-                    Byte {Math.min(4, wordSize / 8) - 1 - bIdx} [Bits {Number(byteShift) + 7}:{Number(byteShift)}]
+                    Byte {Math.min(4, wordSize / 8) - 1 - bIdx} [Bits {Number(byteShift) + 7}:
+                    {Number(byteShift)}]
                   </span>
                   <span className="text-lg font-bold text-sky-400">
                     0x{byteVal.toString(16).toUpperCase().padStart(2, '0')}
                   </span>
                   <div className="flex items-center justify-between text-xs text-slate-400">
                     <span>Dec: {byteVal}</span>
-                    <span>Char: '{byteVal >= 32 && byteVal <= 126 ? String.fromCharCode(byteVal) : '·'}'</span>
+                    <span>
+                      Char: '{byteVal >= 32 && byteVal <= 126 ? String.fromCharCode(byteVal) : '·'}'
+                    </span>
                   </div>
                 </div>
               );

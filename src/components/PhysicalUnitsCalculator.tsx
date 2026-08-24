@@ -30,7 +30,9 @@ interface PhysicalUnitsCalculatorProps {
 }
 
 export const PhysicalUnitsCalculator: React.FC<PhysicalUnitsCalculatorProps> = ({ settings }) => {
-  const [activeTab, setActiveTab] = useState<'evaluator' | 'formulas' | 'constants' | 'converter'>('evaluator');
+  const [activeTab, setActiveTab] = useState<'evaluator' | 'formulas' | 'constants' | 'converter'>(
+    'evaluator'
+  );
   const [copied, setCopied] = useState<string | null>(null);
   const [exportData, setExportData] = useState<ExportReportData | null>(null);
 
@@ -146,7 +148,7 @@ export const PhysicalUnitsCalculator: React.FC<PhysicalUnitsCalculatorProps> = (
     let targetConverted = resBaseVal;
     let activeTarget = targetUnit;
     const matchedTargetUnit = UNIT_DICTIONARY[targetUnit];
-    
+
     if (matchedTargetUnit && compatibleUnits.some((u) => u.symbol === targetUnit)) {
       targetConverted = resBaseVal / matchedTargetUnit.scale;
     } else if (compatibleUnits.length > 0) {
@@ -168,7 +170,7 @@ export const PhysicalUnitsCalculator: React.FC<PhysicalUnitsCalculatorProps> = (
         `Dimensional Combination: ${formatDimensionVector(u1.dimensions)} ${op} ${formatDimensionVector(u2.dimensions)} = ${formatDimensionVector(resDims)}`,
         `Classified Quantity: ${dimensionName}`,
         `Calculated SI Magnitude: ${resBaseVal.toPrecision(6)} [SI Base]`,
-        `Target Conversion (${activeTarget}): ${(targetConverted).toPrecision(6)} ${activeTarget}`,
+        `Target Conversion (${activeTarget}): ${targetConverted.toPrecision(6)} ${activeTarget}`,
       ],
     };
   }, [val1, unit1, op, val2, unit2, targetUnit]);
@@ -254,10 +256,26 @@ export const PhysicalUnitsCalculator: React.FC<PhysicalUnitsCalculatorProps> = (
       {/* Engine Tabs */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
         {[
-          { id: 'evaluator', label: 'Unit Arithmetic & Dimensional Check', icon: <Zap className="w-4 h-4 flex-shrink-0" /> },
-          { id: 'formulas', label: 'Physics Formulas & Derivations', icon: <Sparkles className="w-4 h-4 flex-shrink-0" /> },
-          { id: 'converter', label: 'Dimension-Safe Converter', icon: <ArrowLeftRight className="w-4 h-4 flex-shrink-0" /> },
-          { id: 'constants', label: 'Universal Physical Constants', icon: <BookOpen className="w-4 h-4 flex-shrink-0" /> },
+          {
+            id: 'evaluator',
+            label: 'Unit Arithmetic & Dimensional Check',
+            icon: <Zap className="w-4 h-4 flex-shrink-0" />,
+          },
+          {
+            id: 'formulas',
+            label: 'Physics Formulas & Derivations',
+            icon: <Sparkles className="w-4 h-4 flex-shrink-0" />,
+          },
+          {
+            id: 'converter',
+            label: 'Dimension-Safe Converter',
+            icon: <ArrowLeftRight className="w-4 h-4 flex-shrink-0" />,
+          },
+          {
+            id: 'constants',
+            label: 'Universal Physical Constants',
+            icon: <BookOpen className="w-4 h-4 flex-shrink-0" />,
+          },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -282,7 +300,9 @@ export const PhysicalUnitsCalculator: React.FC<PhysicalUnitsCalculatorProps> = (
         <div className="flex flex-col gap-6">
           {/* Presets Bar */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
-            <span className="text-slate-400 font-bold px-1 whitespace-nowrap flex-shrink-0">Presets:</span>
+            <span className="text-slate-400 font-bold px-1 whitespace-nowrap flex-shrink-0">
+              Presets:
+            </span>
             {[
               { id: 'work', label: 'Force × Distance (Work = Joules)' },
               { id: 'force', label: 'Mass × Acceleration (Force = Newtons)' },
@@ -307,9 +327,12 @@ export const PhysicalUnitsCalculator: React.FC<PhysicalUnitsCalculatorProps> = (
           <div className={`${cardBg} border rounded-3xl p-6 flex flex-col gap-6`}>
             <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
               <div>
-                <h3 className="text-base font-bold text-slate-100">Dimensional Consistency & Compound Unit Engine</h3>
+                <h3 className="text-base font-bold text-slate-100">
+                  Dimensional Consistency & Compound Unit Engine
+                </h3>
                 <p className="text-xs text-slate-400">
-                  Calculates unit operations, analyzes SI base dimensions [M, L, T, I, Θ, N, J], and flags dimensional errors
+                  Calculates unit operations, analyzes SI base dimensions [M, L, T, I, Θ, N, J], and
+                  flags dimensional errors
                 </p>
               </div>
               <button
@@ -400,12 +423,18 @@ export const PhysicalUnitsCalculator: React.FC<PhysicalUnitsCalculatorProps> = (
 
             {/* Formatted Equation Display */}
             <div className="p-4 bg-slate-950/90 border border-slate-800 rounded-2xl text-center font-mono text-base font-bold text-sky-400 flex items-center justify-center gap-2">
-              <span>{val1} {unit1}</span>
+              <span>
+                {val1} {unit1}
+              </span>
               <span className="text-white">{op === '*' ? '×' : op === '/' ? '÷' : op}</span>
-              <span>{val2} {unit2}</span>
+              <span>
+                {val2} {unit2}
+              </span>
               <span className="text-white">=</span>
               <span className="text-emerald-400">
-                {evalResult.error ? '—' : `${evalResult.targetValue?.toFixed(4)} ${evalResult.targetSymbol}`}
+                {evalResult.error
+                  ? '—'
+                  : `${evalResult.targetValue?.toFixed(4)} ${evalResult.targetSymbol}`}
               </span>
             </div>
 
@@ -417,14 +446,18 @@ export const PhysicalUnitsCalculator: React.FC<PhysicalUnitsCalculatorProps> = (
                   <h4 className="text-sm font-bold text-rose-400">
                     {evalResult.isDimError ? 'Dimensional Consistency Error' : 'Calculation Error'}
                   </h4>
-                  <p className="text-xs text-rose-300/90 mt-1 leading-relaxed">{evalResult.error}</p>
+                  <p className="text-xs text-rose-300/90 mt-1 leading-relaxed">
+                    {evalResult.error}
+                  </p>
                 </div>
               </div>
             ) : (
               <div className={`${subCardBg} border rounded-2xl p-5 flex flex-col gap-4`}>
                 <div className="flex items-center justify-between">
                   <div>
-                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Identified Dimension</span>
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                      Identified Dimension
+                    </span>
                     <h4 className="text-xl font-bold text-sky-400">{evalResult.dimensionName}</h4>
                     <span className="text-xs font-mono text-slate-400">
                       SI Vector: {formatDimensionVector(evalResult.dimensions!)}
@@ -441,7 +474,11 @@ export const PhysicalUnitsCalculator: React.FC<PhysicalUnitsCalculatorProps> = (
                       }
                       className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl flex items-center gap-1.5 border border-slate-700"
                     >
-                      {copied === 'eval' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                      {copied === 'eval' ? (
+                        <Check className="w-3.5 h-3.5 text-emerald-400" />
+                      ) : (
+                        <Copy className="w-3.5 h-3.5" />
+                      )}
                       {copied === 'eval' ? 'Copied' : 'Copy'}
                     </button>
 
@@ -472,10 +509,12 @@ export const PhysicalUnitsCalculator: React.FC<PhysicalUnitsCalculatorProps> = (
                 {/* Target Unit Convert Pills */}
                 {evalResult.compatibleUnits && evalResult.compatibleUnits.length > 0 && (
                   <div className="flex flex-col gap-2 pt-2 border-t border-slate-800">
-                    <span className="text-xs font-bold text-slate-400">Equivalent Units for this Dimension:</span>
+                    <span className="text-xs font-bold text-slate-400">
+                      Equivalent Units for this Dimension:
+                    </span>
                     <div className="flex flex-wrap gap-2">
                       {evalResult.compatibleUnits.map((u) => {
-                        const valInThisUnit = (evalResult.value! / u.scale);
+                        const valInThisUnit = evalResult.value! / u.scale;
                         return (
                           <button
                             key={u.symbol}
@@ -486,7 +525,11 @@ export const PhysicalUnitsCalculator: React.FC<PhysicalUnitsCalculatorProps> = (
                                 : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
                             }`}
                           >
-                            <span>{valInThisUnit < 0.001 || valInThisUnit > 1e6 ? valInThisUnit.toExponential(4) : valInThisUnit.toFixed(4)}</span>
+                            <span>
+                              {valInThisUnit < 0.001 || valInThisUnit > 1e6
+                                ? valInThisUnit.toExponential(4)
+                                : valInThisUnit.toFixed(4)}
+                            </span>
                             <span className="text-sky-400">{u.symbol}</span>
                           </button>
                         );
@@ -497,7 +540,9 @@ export const PhysicalUnitsCalculator: React.FC<PhysicalUnitsCalculatorProps> = (
 
                 {/* Step by step */}
                 <div className="flex flex-col gap-1.5 border-t border-slate-800 pt-3">
-                  <span className="text-xs font-bold text-slate-400">Dimensional Reduction Steps:</span>
+                  <span className="text-xs font-bold text-slate-400">
+                    Dimensional Reduction Steps:
+                  </span>
                   {evalResult.steps?.map((step, idx) => (
                     <div key={idx} className="text-xs font-mono text-slate-300">
                       • {step}
@@ -515,7 +560,9 @@ export const PhysicalUnitsCalculator: React.FC<PhysicalUnitsCalculatorProps> = (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Formula Selector Sidebar */}
           <div className={`${cardBg} border rounded-3xl p-4 flex flex-col gap-2 md:col-span-1`}>
-            <span className="text-xs font-bold text-slate-400 uppercase px-2 mb-1">Standard Physics Formulas</span>
+            <span className="text-xs font-bold text-slate-400 uppercase px-2 mb-1">
+              Standard Physics Formulas
+            </span>
             {PHYSICS_FORMULAS.map((f) => (
               <button
                 key={f.id}
@@ -535,7 +582,9 @@ export const PhysicalUnitsCalculator: React.FC<PhysicalUnitsCalculatorProps> = (
               >
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold">{f.name}</span>
-                  <span className={`text-[10px] px-1.5 py-0.5 rounded-md ${selectedFormula.id === f.id ? 'bg-sky-700 text-white' : 'bg-slate-700 text-slate-300'}`}>
+                  <span
+                    className={`text-[10px] px-1.5 py-0.5 rounded-md ${selectedFormula.id === f.id ? 'bg-sky-700 text-white' : 'bg-slate-700 text-slate-300'}`}
+                  >
                     {f.category}
                   </span>
                 </div>
@@ -583,7 +632,9 @@ export const PhysicalUnitsCalculator: React.FC<PhysicalUnitsCalculatorProps> = (
               <div className={`${subCardBg} border rounded-2xl p-5 flex flex-col gap-4`}>
                 <div className="flex items-center justify-between">
                   <div>
-                    <span className="text-xs font-bold text-slate-400 uppercase">Calculated Result</span>
+                    <span className="text-xs font-bold text-slate-400 uppercase">
+                      Calculated Result
+                    </span>
                     <div className="text-2xl font-mono font-bold text-emerald-400 mt-1">
                       {formulaResult.value < 0.001 || formulaResult.value > 1e6
                         ? formulaResult.value.toExponential(6)
@@ -634,14 +685,20 @@ export const PhysicalUnitsCalculator: React.FC<PhysicalUnitsCalculatorProps> = (
       {activeTab === 'converter' && (
         <div className={`${cardBg} border rounded-3xl p-6 flex flex-col gap-6`}>
           <div>
-            <h3 className="text-base font-bold text-slate-100">Dimension-Safe Physical Unit Converter</h3>
-            <p className="text-xs text-slate-400">Converts magnitudes across physically compatible dimensions</p>
+            <h3 className="text-base font-bold text-slate-100">
+              Dimension-Safe Physical Unit Converter
+            </h3>
+            <p className="text-xs text-slate-400">
+              Converts magnitudes across physically compatible dimensions
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-5 items-center gap-4">
             {/* From */}
             <div className="md:col-span-2 flex flex-col gap-2">
-              <label className="text-xs font-bold text-slate-400 uppercase">From Value & Unit</label>
+              <label className="text-xs font-bold text-slate-400 uppercase">
+                From Value & Unit
+              </label>
               <input
                 type="number"
                 value={convVal}
@@ -686,7 +743,9 @@ export const PhysicalUnitsCalculator: React.FC<PhysicalUnitsCalculatorProps> = (
 
             {/* To */}
             <div className="md:col-span-2 flex flex-col gap-2">
-              <label className="text-xs font-bold text-slate-400 uppercase">Converted Outcome</label>
+              <label className="text-xs font-bold text-slate-400 uppercase">
+                Converted Outcome
+              </label>
               <div className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 text-2xl font-mono font-bold text-emerald-400 truncate">
                 {convResult.success ? (
                   convResult.result! < 0.0001 || convResult.result! > 1e6 ? (
@@ -731,7 +790,11 @@ export const PhysicalUnitsCalculator: React.FC<PhysicalUnitsCalculatorProps> = (
               }
               className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl flex items-center gap-2 border border-slate-700"
             >
-              {copied === 'conv' ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+              {copied === 'conv' ? (
+                <Check className="w-4 h-4 text-emerald-400" />
+              ) : (
+                <Copy className="w-4 h-4" />
+              )}
               {copied === 'conv' ? 'Copied!' : 'Copy Conversion'}
             </button>
           </div>
@@ -742,7 +805,9 @@ export const PhysicalUnitsCalculator: React.FC<PhysicalUnitsCalculatorProps> = (
       {activeTab === 'constants' && (
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-3">
-            <div className={`flex-1 flex items-center gap-2 px-3.5 py-2 rounded-2xl border text-xs ${inputBg}`}>
+            <div
+              className={`flex-1 flex items-center gap-2 px-3.5 py-2 rounded-2xl border text-xs ${inputBg}`}
+            >
               <Search className="w-4 h-4 text-slate-400" />
               <input
                 type="text"

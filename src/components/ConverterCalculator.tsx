@@ -351,7 +351,11 @@ export const ConverterCalculator: React.FC<ConverterCalculatorProps> = ({ settin
                 onClick={copyResult}
                 className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl flex items-center gap-2 border border-slate-700/80 transition-all"
               >
-                {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                {copied ? (
+                  <Check className="w-4 h-4 text-emerald-400" />
+                ) : (
+                  <Copy className="w-4 h-4" />
+                )}
                 {copied ? 'Copied!' : 'Copy Result'}
               </button>
             </div>

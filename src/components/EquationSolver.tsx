@@ -236,7 +236,9 @@ export const EquationSolver: React.FC<EquationSolverProps> = ({ settings }) => {
         const r1 = 2 * u + shift;
         const r2 = -u + shift;
         roots.push(`x₁ = ${formatNum(r1)}`, `x₂ = x₃ = ${formatNum(r2)} (Double root)`);
-        steps.push(`   Two real roots (one single, one double root): x₁ = ${formatNum(r1)}, x₂,₃ = ${formatNum(r2)}`);
+        steps.push(
+          `   Two real roots (one single, one double root): x₁ = ${formatNum(r1)}, x₂,₃ = ${formatNum(r2)}`
+        );
       }
     } else if (delta > 0) {
       const u = Math.cbrt(-q / 2 + Math.sqrt(delta));
@@ -266,7 +268,7 @@ export const EquationSolver: React.FC<EquationSolverProps> = ({ settings }) => {
       roots.push(`x₁ = ${formatNum(r1)}`, `x₂ = ${formatNum(r2)}`, `x₃ = ${formatNum(r3)}`);
       steps.push(
         `   Since Δ < 0, there are 3 distinct real roots (Casus Irreducibilis resolved via trigonometry).`,
-        `   Angle φ = arccos(-q / (2√(-p³/27))) = ${(phi * 180 / Math.PI).toFixed(2)}°`,
+        `   Angle φ = arccos(-q / (2√(-p³/27))) = ${((phi * 180) / Math.PI).toFixed(2)}°`,
         `   x₁ = 2√(-p/3)·cos(φ/3) + shift = ${formatNum(r1)}`,
         `   x₂ = 2√(-p/3)·cos((φ+2π)/3) + shift = ${formatNum(r2)}`,
         `   x₃ = 2√(-p/3)·cos((φ+4π)/3) + shift = ${formatNum(r3)}`
@@ -299,7 +301,10 @@ export const EquationSolver: React.FC<EquationSolverProps> = ({ settings }) => {
 
     if (Math.abs(D) < 1e-12) {
       if (Math.abs(Dx) < 1e-12 && Math.abs(Dy) < 1e-12) {
-        return { status: 'infinite', msg: 'Infinitely many solutions (dependent/coincident lines).' };
+        return {
+          status: 'infinite',
+          msg: 'Infinitely many solutions (dependent/coincident lines).',
+        };
       }
       return { status: 'none', msg: 'No solution (inconsistent/parallel lines).' };
     }
@@ -444,7 +449,9 @@ export const EquationSolver: React.FC<EquationSolverProps> = ({ settings }) => {
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
               <div>
                 <h3 className="text-base font-bold text-slate-100">Quadratic Equation Solver</h3>
-                <p className="text-xs text-slate-400">Complete algebraic derivation, vertex geometry, and roots</p>
+                <p className="text-xs text-slate-400">
+                  Complete algebraic derivation, vertex geometry, and roots
+                </p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <button
@@ -470,7 +477,8 @@ export const EquationSolver: React.FC<EquationSolverProps> = ({ settings }) => {
                         latex: quadRes.latex,
                         steps: quadRes.steps,
                         metadata: {
-                          'Discriminant Δ': quadRes.discriminant !== undefined ? `${quadRes.discriminant}` : '0',
+                          'Discriminant Δ':
+                            quadRes.discriminant !== undefined ? `${quadRes.discriminant}` : '0',
                           'Vertex (h, k)': quadRes.vertex || '',
                           'Axis of Symmetry': quadRes.axisSymmetry || '',
                         },
@@ -535,7 +543,11 @@ export const EquationSolver: React.FC<EquationSolverProps> = ({ settings }) => {
                         onClick={() => handleCopy('quad', (quadRes.roots || []).join(', '))}
                         className="text-xs text-sky-400 hover:text-sky-300 flex items-center gap-1"
                       >
-                        {copied === 'quad' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                        {copied === 'quad' ? (
+                          <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        ) : (
+                          <Copy className="w-3.5 h-3.5" />
+                        )}
                         {copied === 'quad' ? 'Copied' : 'Copy'}
                       </button>
                     </div>
@@ -555,15 +567,21 @@ export const EquationSolver: React.FC<EquationSolverProps> = ({ settings }) => {
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs border-t border-slate-800 pt-3 text-slate-400">
                         <div>
                           <span>Parabola Vertex (h, k):</span>
-                          <p className="font-mono font-bold text-slate-200 text-sm mt-0.5">{quadRes.vertex}</p>
+                          <p className="font-mono font-bold text-slate-200 text-sm mt-0.5">
+                            {quadRes.vertex}
+                          </p>
                         </div>
                         <div>
                           <span>Axis of Symmetry:</span>
-                          <p className="font-mono font-bold text-slate-200 text-sm mt-0.5">{quadRes.axisSymmetry}</p>
+                          <p className="font-mono font-bold text-slate-200 text-sm mt-0.5">
+                            {quadRes.axisSymmetry}
+                          </p>
                         </div>
                         <div>
                           <span>Opening Orientation:</span>
-                          <p className="font-bold text-sky-400 text-xs mt-0.5">{quadRes.concavity}</p>
+                          <p className="font-bold text-sky-400 text-xs mt-0.5">
+                            {quadRes.concavity}
+                          </p>
                         </div>
                       </div>
                     )}
@@ -578,7 +596,11 @@ export const EquationSolver: React.FC<EquationSolverProps> = ({ settings }) => {
                           <FileText className="w-3.5 h-3.5 text-sky-400" />
                           Step-by-Step Formal Mathematical Derivation
                         </span>
-                        {showDetailedSteps ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                        {showDetailedSteps ? (
+                          <ChevronUp className="w-4 h-4" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4" />
+                        )}
                       </button>
 
                       {showDetailedSteps && (
@@ -603,7 +625,9 @@ export const EquationSolver: React.FC<EquationSolverProps> = ({ settings }) => {
           <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
               <div>
-                <h3 className="text-base font-bold text-slate-100">Cubic Equation Solver (Cardano's Method)</h3>
+                <h3 className="text-base font-bold text-slate-100">
+                  Cubic Equation Solver (Cardano's Method)
+                </h3>
                 <p className="text-xs text-slate-400">Standard form: ax³ + bx² + cx + d = 0</p>
               </div>
               <div className="flex items-center gap-2">
@@ -680,7 +704,11 @@ export const EquationSolver: React.FC<EquationSolverProps> = ({ settings }) => {
                         onClick={() => handleCopy('cub', (cubRes.roots || []).join(', '))}
                         className="text-xs text-sky-400 hover:text-sky-300 flex items-center gap-1"
                       >
-                        {copied === 'cub' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                        {copied === 'cub' ? (
+                          <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        ) : (
+                          <Copy className="w-3.5 h-3.5" />
+                        )}
                         {copied === 'cub' ? 'Copied' : 'Copy'}
                       </button>
                     </div>
@@ -698,7 +726,9 @@ export const EquationSolver: React.FC<EquationSolverProps> = ({ settings }) => {
 
                     {/* Step-by-Step Breakdown */}
                     <div className="border-t border-slate-800 pt-3 flex flex-col gap-1.5">
-                      <span className="text-xs font-bold text-slate-400">Cardano Method Derivation:</span>
+                      <span className="text-xs font-bold text-slate-400">
+                        Cardano Method Derivation:
+                      </span>
                       {cubRes.steps?.map((step, idx) => (
                         <div key={idx} className="text-xs font-mono text-slate-300">
                           {step}
@@ -717,8 +747,12 @@ export const EquationSolver: React.FC<EquationSolverProps> = ({ settings }) => {
           <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
               <div>
-                <h3 className="text-base font-bold text-slate-100">2×2 System of Linear Equations</h3>
-                <p className="text-xs text-slate-400">Solved via Cramer's Rule determinants & Gaussian Elimination</p>
+                <h3 className="text-base font-bold text-slate-100">
+                  2×2 System of Linear Equations
+                </h3>
+                <p className="text-xs text-slate-400">
+                  Solved via Cramer's Rule determinants & Gaussian Elimination
+                </p>
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -832,7 +866,9 @@ export const EquationSolver: React.FC<EquationSolverProps> = ({ settings }) => {
                     </div>
 
                     <div className="border-t border-slate-800 pt-3 flex flex-col gap-1.5">
-                      <span className="text-xs font-bold text-slate-400">Step-by-Step Cramer's Determinants:</span>
+                      <span className="text-xs font-bold text-slate-400">
+                        Step-by-Step Cramer's Determinants:
+                      </span>
                       {l2Res.steps?.map((s, idx) => (
                         <div key={idx} className="text-xs font-mono text-slate-300">
                           {s}
@@ -851,8 +887,12 @@ export const EquationSolver: React.FC<EquationSolverProps> = ({ settings }) => {
           <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
               <div>
-                <h3 className="text-base font-bold text-slate-100">3×3 System of Linear Equations</h3>
-                <p className="text-xs text-slate-400">Enter coefficients for x, y, z and constants</p>
+                <h3 className="text-base font-bold text-slate-100">
+                  3×3 System of Linear Equations
+                </h3>
+                <p className="text-xs text-slate-400">
+                  Enter coefficients for x, y, z and constants
+                </p>
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -906,9 +946,39 @@ export const EquationSolver: React.FC<EquationSolverProps> = ({ settings }) => {
             {/* Rows */}
             <div className="flex flex-col gap-2.5">
               {[
-                { r: '1', a: l3.a1, b: l3.b1, c: l3.c1, d: l3.d1, sa: (v: string) => setL3({ ...l3, a1: v }), sb: (v: string) => setL3({ ...l3, b1: v }), sc: (v: string) => setL3({ ...l3, c1: v }), sd: (v: string) => setL3({ ...l3, d1: v }) },
-                { r: '2', a: l3.a2, b: l3.b2, c: l3.c2, d: l3.d2, sa: (v: string) => setL3({ ...l3, a2: v }), sb: (v: string) => setL3({ ...l3, b2: v }), sc: (v: string) => setL3({ ...l3, c2: v }), sd: (v: string) => setL3({ ...l3, d2: v }) },
-                { r: '3', a: l3.a3, b: l3.b3, c: l3.c3, d: l3.d3, sa: (v: string) => setL3({ ...l3, a3: v }), sb: (v: string) => setL3({ ...l3, b3: v }), sc: (v: string) => setL3({ ...l3, c3: v }), sd: (v: string) => setL3({ ...l3, d3: v }) },
+                {
+                  r: '1',
+                  a: l3.a1,
+                  b: l3.b1,
+                  c: l3.c1,
+                  d: l3.d1,
+                  sa: (v: string) => setL3({ ...l3, a1: v }),
+                  sb: (v: string) => setL3({ ...l3, b1: v }),
+                  sc: (v: string) => setL3({ ...l3, c1: v }),
+                  sd: (v: string) => setL3({ ...l3, d1: v }),
+                },
+                {
+                  r: '2',
+                  a: l3.a2,
+                  b: l3.b2,
+                  c: l3.c2,
+                  d: l3.d2,
+                  sa: (v: string) => setL3({ ...l3, a2: v }),
+                  sb: (v: string) => setL3({ ...l3, b2: v }),
+                  sc: (v: string) => setL3({ ...l3, c2: v }),
+                  sd: (v: string) => setL3({ ...l3, d2: v }),
+                },
+                {
+                  r: '3',
+                  a: l3.a3,
+                  b: l3.b3,
+                  c: l3.c3,
+                  d: l3.d3,
+                  sa: (v: string) => setL3({ ...l3, a3: v }),
+                  sb: (v: string) => setL3({ ...l3, b3: v }),
+                  sc: (v: string) => setL3({ ...l3, c3: v }),
+                  sd: (v: string) => setL3({ ...l3, d3: v }),
+                },
               ].map((row) => (
                 <div key={row.r} className="grid grid-cols-4 gap-2.5 items-center">
                   <input
@@ -972,7 +1042,9 @@ export const EquationSolver: React.FC<EquationSolverProps> = ({ settings }) => {
                     </div>
 
                     <div className="border-t border-slate-800 pt-3 flex flex-col gap-1.5">
-                      <span className="text-xs font-bold text-slate-400">3×3 Cramer Determinant Steps:</span>
+                      <span className="text-xs font-bold text-slate-400">
+                        3×3 Cramer Determinant Steps:
+                      </span>
                       {l3Res.steps?.map((s, idx) => (
                         <div key={idx} className="text-xs font-mono text-slate-300">
                           {s}

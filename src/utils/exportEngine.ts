@@ -1,6 +1,6 @@
 /**
  * OmniCalc Pro - Computation Export & Reporting Engine
- * 
+ *
  * Supports:
  * - Formatted LaTeX equations ready for papers and docs
  * - PDF-ready formatted print calculation sheets
@@ -49,7 +49,7 @@ export function generateMarkdownReport(data: ExportReportData): string {
   md += `**Engine:** ${data.engine}  \n`;
   md += `**Generated:** ${dateStr}  \n\n`;
   md += `---\n\n`;
-  
+
   md += `## 1. Problem Specification\n`;
   md += `- **Input / Configuration:** \`${data.inputDescription}\`\n`;
   md += `- **Computed Result:** **\`${data.resultSummary}\`**\n\n`;
@@ -108,7 +108,11 @@ export function generateCSV(headers: string[], rows: (string | number)[][]): str
 /**
  * Trigger browser file download (Markdown, CSV, LaTeX, JSON)
  */
-export function downloadTextFile(filename: string, content: string, mimeType: string = 'text/plain') {
+export function downloadTextFile(
+  filename: string,
+  content: string,
+  mimeType: string = 'text/plain'
+) {
   const blob = new Blob([content], { type: `${mimeType};charset=utf-8` });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
@@ -128,18 +132,20 @@ export function printCalculationSheet(data: ExportReportData) {
   if (!printWindow) return;
 
   const dateStr = new Date(data.timestamp).toLocaleString();
-  
-  const stepsHtml = data.steps && data.steps.length > 0
-    ? `<div class="section">
+
+  const stepsHtml =
+    data.steps && data.steps.length > 0
+      ? `<div class="section">
         <h3>Step-by-Step Derivation</h3>
         <ol>
           ${data.steps.map((s) => `<li>${s}</li>`).join('')}
         </ol>
       </div>`
-    : '';
+      : '';
 
-  const tableHtml = data.tableHeaders && data.tableRows && data.tableRows.length > 0
-    ? `<div class="section">
+  const tableHtml =
+    data.tableHeaders && data.tableRows && data.tableRows.length > 0
+      ? `<div class="section">
         <h3>Numerical Data Table</h3>
         <table>
           <thead>
@@ -150,16 +156,19 @@ export function printCalculationSheet(data: ExportReportData) {
           </tbody>
         </table>
       </div>`
-    : '';
+      : '';
 
-  const metadataHtml = data.metadata && Object.keys(data.metadata).length > 0
-    ? `<div class="section">
+  const metadataHtml =
+    data.metadata && Object.keys(data.metadata).length > 0
+      ? `<div class="section">
         <h3>Parameters & Constants</h3>
         <ul>
-          ${Object.entries(data.metadata).map(([k, v]) => `<li><strong>${k}:</strong> ${v}</li>`).join('')}
+          ${Object.entries(data.metadata)
+            .map(([k, v]) => `<li><strong>${k}:</strong> ${v}</li>`)
+            .join('')}
         </ul>
       </div>`
-    : '';
+      : '';
 
   const html = `<!DOCTYPE html>
 <html>

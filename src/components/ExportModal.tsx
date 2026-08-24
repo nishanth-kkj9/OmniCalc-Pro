@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
-import { X, Copy, Check, Download, Printer, FileText, Code2, Table as TableIcon } from 'lucide-react';
+import {
+  X,
+  Copy,
+  Check,
+  Download,
+  Printer,
+  FileText,
+  Code2,
+  Table as TableIcon,
+} from 'lucide-react';
 import {
   ExportReportData,
   generateLatexSnippet,
@@ -67,7 +76,9 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, data,
             <h3 className="text-base font-bold flex items-center gap-2">
               <Download className="w-4 h-4 text-sky-400" /> Export Calculation & Report
             </h3>
-            <p className="text-xs text-slate-400">{data.title} • {data.engine}</p>
+            <p className="text-xs text-slate-400">
+              {data.title} • {data.engine}
+            </p>
           </div>
           <button
             onClick={onClose}
@@ -179,7 +190,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, data,
               <div>
                 <h4 className="text-sm font-bold text-slate-200">Formal PDF Calculation Sheet</h4>
                 <p className="text-xs text-slate-400 max-w-sm mt-1">
-                  Generates an executive mathematical summary sheet formatted for printing, saving to PDF, or archiving.
+                  Generates an executive mathematical summary sheet formatted for printing, saving
+                  to PDF, or archiving.
                 </p>
               </div>
               <button
@@ -207,7 +219,11 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, data,
               }}
               className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl flex items-center gap-2 border border-slate-700 transition-all"
             >
-              {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+              {copied ? (
+                <Check className="w-4 h-4 text-emerald-400" />
+              ) : (
+                <Copy className="w-4 h-4" />
+              )}
               {copied ? 'Copied to Clipboard!' : 'Copy to Clipboard'}
             </button>
 

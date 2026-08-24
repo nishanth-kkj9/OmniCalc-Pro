@@ -134,7 +134,9 @@ export const MatrixCalculator: React.FC<MatrixCalculatorProps> = ({ settings }) 
     setErrorMsg(null);
     const res = multiplyMatrices(matA, matB);
     if (!res) {
-      setErrorMsg('Columns of A must equal Rows of B for multiplication (A: r_a × c_a, B: r_b × c_b with c_a = r_b).');
+      setErrorMsg(
+        'Columns of A must equal Rows of B for multiplication (A: r_a × c_a, B: r_b × c_b with c_a = r_b).'
+      );
       return;
     }
     setResultMat(res);
@@ -438,7 +440,8 @@ export const MatrixCalculator: React.FC<MatrixCalculatorProps> = ({ settings }) 
                   engine: 'Matrix Calculator',
                   timestamp: Date.now(),
                   inputDescription: `Matrix A (${rowsA}×${colsA}), Matrix B (${rowsB}×${colsB})`,
-                  resultSummary: typeof resultMat === 'number' ? `${resultMat}` : 'Computed Result Matrix',
+                  resultSummary:
+                    typeof resultMat === 'number' ? `${resultMat}` : 'Computed Result Matrix',
                   latex,
                   steps,
                   tableHeaders,
@@ -464,7 +467,7 @@ export const MatrixCalculator: React.FC<MatrixCalculatorProps> = ({ settings }) 
                 <div
                   className="grid gap-2"
                   style={{
-                    gridTemplateColumns: `repeat(${resultMat[0]?.length || 1}, minmax(0, 1fr))`
+                    gridTemplateColumns: `repeat(${resultMat[0]?.length || 1}, minmax(0, 1fr))`,
                   }}
                 >
                   {resultMat.map((row, r) =>
@@ -493,7 +496,11 @@ export const MatrixCalculator: React.FC<MatrixCalculatorProps> = ({ settings }) 
                   <FileText className="w-3.5 h-3.5 text-sky-400" />
                   Derivation Steps & Method Details
                 </span>
-                {showSteps ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                {showSteps ? (
+                  <ChevronUp className="w-4 h-4" />
+                ) : (
+                  <ChevronDown className="w-4 h-4" />
+                )}
               </button>
 
               {showSteps && (
