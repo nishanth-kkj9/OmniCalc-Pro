@@ -5,14 +5,26 @@ updates:
     directory: '/'
     schedule:
       interval: 'weekly'
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: 'chore(deps)'
+    groups:
+      npm-dependencies:
+        patterns:
+          - '*'
 
   # Maintain dependencies for pip (Python Desktop & Engine)
   - package-ecosystem: 'pip'
     directory: '/'
     schedule:
       interval: 'weekly'
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: 'chore(deps)'
+    groups:
+      python-dependencies:
+        patterns:
+          - '*'
 
   # Maintain GitHub Actions workflows
   - package-ecosystem: 'github-actions'
@@ -20,3 +32,10 @@ updates:
     schedule:
       interval: 'monthly'
     open-pull-requests-limit: 5
+    commit-message:
+      prefix: 'chore(ci)'
+    groups:
+      actions-dependencies:
+        patterns:
+          - '*'
+

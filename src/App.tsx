@@ -1,4 +1,4 @@
-import React, { useState, useEffect, lazy, Suspense, Component, ReactNode, ErrorInfo } from 'react';
+import { useState, useEffect, lazy, Suspense, Component, ReactNode, ErrorInfo } from 'react';
 import { CalcMode, AppSettings } from './types';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';

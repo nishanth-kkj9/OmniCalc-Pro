@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyc
 
 # Virtual environments
 venv/
@@ -14,13 +15,11 @@ dist/
 build/
 *.egg-info/
 
-# IDE
+# IDE & OS
 .vscode/
 .idea/
 *.swp
 *.swo
-
-# OS
 .DS_Store
 Thumbs.db
 
@@ -32,6 +31,7 @@ logs/
 *.db
 *.sqlite
 *.sqlite3
+database/
 
 # Environment / secrets
 .env
@@ -43,27 +43,21 @@ logs/
 *.spec
 *.manifest
 
-# Testing
+# Testing & Coverage
 .coverage
 .pytest_cache/
 htmlcov/
 coverage/
 .vitest/
 
-# Type checking
+# Type checking & Linters
 .mypy_cache/
+.ruff_cache/
 .dmypy.json
 *.tsbuildinfo
 
 # Node / Web
 node_modules/
-dist/
-build/
-
 
 # Jupyter
 .ipynb_checkpoints/
-
-# Project specific
-database/
-*.pyc

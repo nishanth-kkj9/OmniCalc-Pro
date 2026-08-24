@@ -115,6 +115,18 @@ export function prevalidateWebExpression(expr: string): boolean {
   return depth === 0;
 }
 
+interface MathJsAstNode extends MathNode {
+  type: string;
+  name?: string;
+  op?: string;
+  value?: unknown;
+  args?: MathJsAstNode[];
+  isFunctionNode?: boolean;
+  isSymbolNode?: boolean;
+  isConstantNode?: boolean;
+  isOperatorNode?: boolean;
+}
+
 /**
  * Validates parsed MathJS AST against strict allowlists and resource limits.
  * Rejects property access (AccessorNode), object construction (ObjectNode),
@@ -124,18 +136,19 @@ export function prevalidateWebExpression(expr: string): boolean {
 export function validateMathAst(node: MathNode, customScopeKeys: Set<string>): boolean {
   let isValid = true;
 
-  node.traverse((child: any) => {
+  node.traverse((child: MathNode) => {
     if (!isValid) return;
+    const astNode = child as MathJsAstNode;
 
     // Check allowed AST node types
-    if (!ALLOWED_NODE_TYPES.has(child.type)) {
+    if (!ALLOWED_NODE_TYPES.has(astNode.type)) {
       isValid = false;
       return;
     }
 
     // Function node validation
-    if (child.isFunctionNode) {
-      const fnName = child.name?.toLowerCase();
+    if (astNode.isFunctionNode) {
+      const fnName = astNode.name?.toLowerCase();
       if (!fnName || !ALLOWED_FUNCTIONS.has(fnName)) {
         isValid = false;
         return;
@@ -143,8 +156,8 @@ export function validateMathAst(node: MathNode, customScopeKeys: Set<string>): b
 
       // Check expensive factorial argument in AST
       if (fnName === 'factorial' || fnName === 'fact') {
-        if (child.args?.[0]?.isConstantNode) {
-          const val = Number(child.args[0].value);
+        if (astNode.args?.[0]?.isConstantNode) {
+          const val = Number(astNode.args[0].value);
           if (!isNaN(val) && (val > MAX_FACTORIAL_ARGUMENT || val < 0)) {
             isValid = false;
             return;
@@ -154,8 +167,8 @@ export function validateMathAst(node: MathNode, customScopeKeys: Set<string>): b
 
       // Check expensive gamma argument in AST
       if (fnName === 'gamma') {
-        if (child.args?.[0]?.isConstantNode) {
-          const val = Number(child.args[0].value);
+        if (astNode.args?.[0]?.isConstantNode) {
+          const val = Number(astNode.args[0].value);
           if (!isNaN(val) && (val > MAX_GAMMA_ARGUMENT || (val <= 0 && Number.isInteger(val)))) {
             isValid = false;
             return;
@@ -165,8 +178,8 @@ export function validateMathAst(node: MathNode, customScopeKeys: Set<string>): b
     }
 
     // Symbol node validation (constants, customScope keys like 'x', or known math functions)
-    if (child.isSymbolNode) {
-      const symName = child.name;
+    if (astNode.isSymbolNode && astNode.name) {
+      const symName = astNode.name;
       const lower = symName.toLowerCase();
       if (
         !ALLOWED_SYMBOLS.has(symName) &&
@@ -180,10 +193,10 @@ export function validateMathAst(node: MathNode, customScopeKeys: Set<string>): b
     }
 
     // Operator validation
-    if (child.isOperatorNode) {
+    if (astNode.isOperatorNode) {
       // Exponent limit protection in AST
-      if ((child.op === '^' || child.op === '**') && child.args?.[1]?.isConstantNode) {
-        const expVal = Number(child.args[1].value);
+      if ((astNode.op === '^' || astNode.op === '**') && astNode.args?.[1]?.isConstantNode) {
+        const expVal = Number(astNode.args[1].value);
         if (!isNaN(expVal) && Math.abs(expVal) > MAX_EXPONENT) {
           isValid = false;
           return;
