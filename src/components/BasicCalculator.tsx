@@ -43,9 +43,12 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
 
   const handleCopy = () => {
     const valToCopy = displayResult || rawResult || '0';
-    navigator.clipboard.writeText(valToCopy);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
+    navigator.clipboard.writeText(valToCopy).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    }).catch(() => {
+      // Fallback or ignore clipboard error silently
+    });
   };
 
   const handleInput = useCallback(
@@ -92,6 +95,10 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
       setDisplayResult(formatted);
       setIsEvaluated(true);
       refreshHistory();
+    } else {
+      setRawResult('Error');
+      setDisplayResult('Error');
+      setIsEvaluated(true);
     }
   }, [expression, settings, refreshHistory]);
 

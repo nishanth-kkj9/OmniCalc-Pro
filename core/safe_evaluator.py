@@ -45,6 +45,12 @@ def _safe_deg_tan(x: float) -> float:
         return float("nan")
     return math.tan(math.radians(x))
 
+def _safe_grad_tan(x: float) -> float:
+    mod_grad = ((x % 200) + 200) % 200
+    if abs(mod_grad - 100) < 1e-10:
+        return float("nan")
+    return math.tan(x * math.pi / 200)
+
 def _safe_rad_tan(x: float) -> float:
     half_pi = math.pi / 2
     mod_pi = ((x % math.pi) + math.pi) % math.pi
@@ -59,13 +65,14 @@ SAFE_FUNCTIONS = {
     "exp", "expm1", "degrees", "radians",
     "floor", "ceil", "trunc", "round",
     "abs", "factorial", "fact", "gamma", "mod", "sign",
-    "pi", "e", "tau", "inf", "nan",
+    "pi", "e", "tau", "phi", "inf", "nan",
 }
 
 SAFE_CONSTANTS = {
     "pi": math.pi,
     "e": math.e,
     "tau": math.tau,
+    "phi": (1 + math.sqrt(5)) / 2,
     "inf": float("inf"),
     "nan": float("nan"),
 }
@@ -77,6 +84,18 @@ DEGREE_FUNCTIONS = {
     "asin": lambda x: math.degrees(math.asin(x)),
     "acos": lambda x: math.degrees(math.acos(x)),
     "atan": lambda x: math.degrees(math.atan(x)),
+    "mod": lambda a, b: a % b,
+    "sign": lambda x: (1.0 if x > 0 else (-1.0 if x < 0 else 0.0)),
+    "fact": math.factorial,
+}
+
+GRAD_FUNCTIONS = {
+    "sin": lambda x: 0.0 if abs(((x % 400) + 400) % 400 - 200) < 1e-10 or abs(((x % 400) + 400) % 400) < 1e-10 else math.sin(x * math.pi / 200),
+    "cos": lambda x: 0.0 if abs(((x % 400) + 400) % 400 - 100) < 1e-10 or abs(((x % 400) + 400) % 400 - 300) < 1e-10 else math.cos(x * math.pi / 200),
+    "tan": _safe_grad_tan,
+    "asin": lambda x: (math.asin(x) * 200) / math.pi,
+    "acos": lambda x: (math.acos(x) * 200) / math.pi,
+    "atan": lambda x: (math.atan(x) * 200) / math.pi,
     "mod": lambda a, b: a % b,
     "sign": lambda x: (1.0 if x > 0 else (-1.0 if x < 0 else 0.0)),
     "fact": math.factorial,
@@ -167,9 +186,13 @@ def _validate_parsed_sympy_tree(node: Any) -> None:
 def _worker_eval_task(expr: str, namespace_keys: list[str], angle_mode: str, custom_namespace: dict[str, Any] | None = None) -> float:
     """Isolated evaluation task with strict global dictionary restrictions and AST traversal."""
     ns: dict[str, Any] = dict(SAFE_CONSTANTS)
-    if angle_mode == "degrees":
+    mode = (angle_mode or "").lower()
+    if mode in ("degrees", "deg"):
         ns.update(DEGREE_FUNCTIONS)
         ns.update({k: v for k, v in RADIAN_FUNCTIONS.items() if k not in DEGREE_FUNCTIONS})
+    elif mode in ("grad", "grads", "gradian", "gradians"):
+        ns.update(GRAD_FUNCTIONS)
+        ns.update({k: v for k, v in RADIAN_FUNCTIONS.items() if k not in GRAD_FUNCTIONS})
     else:
         ns.update(RADIAN_FUNCTIONS)
 
@@ -213,16 +236,21 @@ class SafeEvaluator:
 
     def _build_namespace(self) -> dict[str, Any]:
         ns: dict[str, Any] = dict(SAFE_CONSTANTS)
-        if self.angle_mode == "degrees":
+        mode = (self.angle_mode or "").lower()
+        if mode in ("degrees", "deg"):
             ns.update(DEGREE_FUNCTIONS)
             ns.update({k: v for k, v in RADIAN_FUNCTIONS.items() if k not in DEGREE_FUNCTIONS})
+        elif mode in ("grad", "grads", "gradian", "gradians"):
+            ns.update(GRAD_FUNCTIONS)
+            ns.update({k: v for k, v in RADIAN_FUNCTIONS.items() if k not in GRAD_FUNCTIONS})
         else:
             ns.update(RADIAN_FUNCTIONS)
         return ns
 
     def set_angle_mode(self, mode: str) -> None:
-        if mode in ("degrees", "radians"):
-            self.angle_mode = mode
+        clean = (mode or "").lower()
+        if clean in ("degrees", "deg", "grad", "grads", "gradian", "gradians", "radians", "rad"):
+            self.angle_mode = clean
             self._namespace = self._build_namespace()
 
     def _check_nesting_depth(self, expr: str) -> None:
