@@ -39,13 +39,26 @@ MAX_OPERATOR_COUNT = 100
 _EVAL_POOL = ThreadPoolExecutor(max_workers=2, thread_name_prefix="eval_worker")
 atexit.register(lambda: _EVAL_POOL.shutdown(wait=False))
 
+def _safe_deg_tan(x: float) -> float:
+    mod_deg = ((x % 180) + 180) % 180
+    if abs(mod_deg - 90) < 1e-10:
+        return float("nan")
+    return math.tan(math.radians(x))
+
+def _safe_rad_tan(x: float) -> float:
+    half_pi = math.pi / 2
+    mod_pi = ((x % math.pi) + math.pi) % math.pi
+    if abs(mod_pi - half_pi) < 1e-10:
+        return float("nan")
+    return math.tan(x)
+
 SAFE_FUNCTIONS = {
     "sin", "cos", "tan", "asin", "acos", "atan",
     "sinh", "cosh", "tanh", "asinh", "acosh", "atanh",
     "log", "ln", "log10", "log2", "sqrt", "cbrt",
     "exp", "expm1", "degrees", "radians",
     "floor", "ceil", "trunc", "round",
-    "abs", "factorial", "gamma",
+    "abs", "factorial", "fact", "gamma", "mod", "sign",
     "pi", "e", "tau", "inf", "nan",
 }
 
@@ -58,18 +71,21 @@ SAFE_CONSTANTS = {
 }
 
 DEGREE_FUNCTIONS = {
-    "sin": lambda x: math.sin(math.radians(x)),
-    "cos": lambda x: math.cos(math.radians(x)),
-    "tan": lambda x: math.tan(math.radians(x)),
+    "sin": lambda x: 0.0 if abs(((x % 360) + 360) % 360 - 180) < 1e-10 or abs(((x % 360) + 360) % 360) < 1e-10 else math.sin(math.radians(x)),
+    "cos": lambda x: 0.0 if abs(((x % 360) + 360) % 360 - 90) < 1e-10 or abs(((x % 360) + 360) % 360 - 270) < 1e-10 else math.cos(math.radians(x)),
+    "tan": _safe_deg_tan,
     "asin": lambda x: math.degrees(math.asin(x)),
     "acos": lambda x: math.degrees(math.acos(x)),
     "atan": lambda x: math.degrees(math.atan(x)),
+    "mod": lambda a, b: a % b,
+    "sign": lambda x: (1.0 if x > 0 else (-1.0 if x < 0 else 0.0)),
+    "fact": math.factorial,
 }
 
 RADIAN_FUNCTIONS = {
     "sin": math.sin,
     "cos": math.cos,
-    "tan": math.tan,
+    "tan": _safe_rad_tan,
     "asin": math.asin,
     "acos": math.acos,
     "atan": math.atan,
@@ -95,7 +111,10 @@ RADIAN_FUNCTIONS = {
     "round": round,
     "abs": abs,
     "factorial": math.factorial,
+    "fact": math.factorial,
     "gamma": math.gamma,
+    "mod": lambda a, b: a % b,
+    "sign": lambda x: (1.0 if x > 0 else (-1.0 if x < 0 else 0.0)),
 }
 
 # Blocked tokens that should never appear in mathematical expressions
@@ -127,8 +146,26 @@ _UNICODE_MAP = {
 _PROTECTED_FUNCTIONS = set(SAFE_FUNCTIONS) | {"factorial"}
 
 
-def _worker_eval_task(expr: str, namespace_keys: list[str], angle_mode: str) -> float:
-    """Isolated evaluation task designed for worker execution."""
+def _validate_parsed_sympy_tree(node: Any) -> None:
+    """Traverses parsed SymPy AST nodes to enforce mathematical limits (exponent, factorial, gamma)."""
+    if isinstance(node, Basic):
+        for subnode in sp.preorder_traversal(node):
+            if subnode.is_Pow:
+                exp = subnode.exp
+                if exp.is_Number and abs(float(exp)) > MAX_EXPONENT_VAL:
+                    raise ValueError(f"Exponent {exp} exceeds safe limit ({MAX_EXPONENT_VAL})")
+            elif getattr(subnode, "func", None) in (sp.factorial, math.factorial):
+                arg = subnode.args[0] if subnode.args else None
+                if arg is not None and arg.is_Number and float(arg) > MAX_FACTORIAL_VAL:
+                    raise ValueError(f"Factorial input {arg} exceeds safe limit ({MAX_FACTORIAL_VAL})")
+            elif getattr(subnode, "func", None) in (sp.gamma, math.gamma):
+                arg = subnode.args[0] if subnode.args else None
+                if arg is not None and arg.is_Number and float(arg) > MAX_GAMMA_VAL:
+                    raise ValueError(f"Gamma input {arg} exceeds safe limit ({MAX_GAMMA_VAL})")
+
+
+def _worker_eval_task(expr: str, namespace_keys: list[str], angle_mode: str, custom_namespace: dict[str, Any] | None = None) -> float:
+    """Isolated evaluation task with strict global dictionary restrictions and AST traversal."""
     ns: dict[str, Any] = dict(SAFE_CONSTANTS)
     if angle_mode == "degrees":
         ns.update(DEGREE_FUNCTIONS)
@@ -136,7 +173,14 @@ def _worker_eval_task(expr: str, namespace_keys: list[str], angle_mode: str) -> 
     else:
         ns.update(RADIAN_FUNCTIONS)
 
-    result = parse_expr(expr, transformations=TRANSFORMATIONS, local_dict=ns, evaluate=True)
+    if custom_namespace:
+        ns.update(custom_namespace)
+
+    # Restrict parse_expr with empty global_dict
+    result = parse_expr(expr, transformations=TRANSFORMATIONS, local_dict=ns, global_dict={}, evaluate=True)
+
+    if isinstance(result, Basic):
+        _validate_parsed_sympy_tree(result)
 
     if isinstance(result, (int, float)):
         val = float(result)
@@ -331,9 +375,9 @@ class SafeEvaluator:
 
             # Fast path or timed execution using global _EVAL_POOL for responsive timeout enforcement
             if self.max_time <= 0:
-                return _worker_eval_task(expr, list(self._namespace.keys()), self.angle_mode)
+                return _worker_eval_task(expr, list(self._namespace.keys()), self.angle_mode, self._namespace)
 
-            future = _EVAL_POOL.submit(_worker_eval_task, expr, list(self._namespace.keys()), self.angle_mode)
+            future = _EVAL_POOL.submit(_worker_eval_task, expr, list(self._namespace.keys()), self.angle_mode, self._namespace)
             try:
                 return future.result(timeout=self.max_time)
             except FuturesTimeoutError:

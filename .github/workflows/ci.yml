@@ -53,6 +53,11 @@ jobs:
             exit 1
           fi
 
+          if ! grep -q "VERSION: str = \"$VERSION_FILE\"" utils/constants.py; then
+            echo "::error::utils/constants.py does not match canonical version $VERSION_FILE"
+            exit 1
+          fi
+
           echo "All version declarations synchronized successfully at v$VERSION_FILE."
 
   web-lint:

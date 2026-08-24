@@ -28,7 +28,7 @@ OmniCalc Pro executes arbitrary mathematical calculations across two platforms:
 - **No `eval()` or `exec()`**: AST-based parsing with SymPy's restricted parser transformations.
 - **Strict Keyword Allowlists**: Only verified mathematical functions and constants are accessible.
 - **Execution Hardening & Timeouts**: Expressions run with worker isolation and hard execution timeouts to prevent denial-of-service.
-- **Complexity Limits**: Maximum input length (500 chars), nesting depth (10 levels), maximum operator limits, exponent size limits (≤ 10,000), and factorial limits (≤ 1,000).
+- **Complexity Limits**: Maximum input length (500 chars), nesting depth (10 levels), maximum operator limits, exponent size limits (≤ 10,000), and factorial limits (≤ 170 float64 representation limit).
 
 ### 2. Web Application (`src/utils/calculator.ts`)
 - **True AST Allowlist Validation (`validateMathAst`)**: Parses expressions into MathJS AST representation, traversing nodes to strictly allow only approved AST types (`OperatorNode`, `ConstantNode`, `SymbolNode`, `FunctionNode`, `ParenthesisNode`, `BlockNode`).
