@@ -11,17 +11,18 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      '@': path.resolve(process.cwd(), './src'),
     },
   },
   build: {
     chunkSizeWarningLimit: 800,
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor_math: ['mathjs'],
-          vendor_charts: ['recharts'],
-          vendor_react: ['react', 'react-dom'],
+        manualChunks(id) {
+          if (id.includes('node_modules/mathjs')) return 'vendor_math';
+          if (id.includes('node_modules/recharts')) return 'vendor_charts';
+          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom'))
+            return 'vendor_react';
         },
       },
     },

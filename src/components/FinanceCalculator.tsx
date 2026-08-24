@@ -204,7 +204,7 @@ export const FinanceCalculator: React.FC<FinanceCalculatorProps> = ({ settings: 
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value: number) => `$${value.toLocaleString()}`} />
+                  <Tooltip formatter={(value: any) => `$${Number(value || 0).toLocaleString()}`} />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
