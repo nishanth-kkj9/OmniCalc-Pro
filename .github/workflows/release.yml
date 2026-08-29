@@ -6,8 +6,8 @@ on:
       - 'v*'
 
 jobs:
-  build-and-release:
-    name: Build & Release
+  web-release:
+    name: Build & Release Web Artifact
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -28,7 +28,7 @@ jobs:
           tar -czvf omnicalc-pro-web.tar.gz dist/
           sha256sum omnicalc-pro-web.tar.gz > SHA256SUMS
 
-      - name: Create GitHub Release
+      - name: Create or Update GitHub Release
         uses: softprops/action-gh-release@c95fe1489396fe8a9ec87b0b01613b49e39ea74c # v2.2.1
         with:
           files: |
@@ -37,3 +37,35 @@ jobs:
           draft: false
           prerelease: false
           generate_release_notes: true
+
+  desktop-release-windows:
+    name: Build & Release Windows Desktop Binary
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install Python Dependencies & PyInstaller
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build Standalone Executable
+        run: |
+          pyinstaller --onefile --windowed --name=OmniCalc-Pro main.py
+
+      - name: Attach Windows Executable to Release
+        uses: softprops/action-gh-release@c95fe1489396fe8a9ec87b0b01613b49e39ea74c # v2.2.1
+        with:
+          files: dist/OmniCalc-Pro.exe
+          draft: false
+          prerelease: false

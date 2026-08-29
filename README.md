@@ -179,7 +179,7 @@ mypy core/ utils/
 #### Standalone PyInstaller Binary
 ```bash
 pip install pyinstaller
-pyinstaller --onefile --windowed --icon=assets/icons/app_icon.svg main.py
+pyinstaller --onefile --windowed --name=OmniCalc-Pro main.py
 ```
 The compiled executable will be written to `dist/`.
 

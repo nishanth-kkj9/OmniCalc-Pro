@@ -193,9 +193,12 @@ class GlobalErrorHandler(QObject):
         import subprocess
         import os
         try:
-            python = sys.executable
-            script = os.path.abspath(sys.argv[0])
-            subprocess.Popen([python, script])
+            if getattr(sys, 'frozen', False):
+                subprocess.Popen([sys.executable])
+            else:
+                python = sys.executable
+                script = os.path.abspath(sys.argv[0])
+                subprocess.Popen([python, script])
         except Exception:
             pass
         finally:

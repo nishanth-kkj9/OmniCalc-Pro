@@ -340,6 +340,34 @@ class TestSafeEvaluatorTimeoutDepth(unittest.TestCase):
         self.assertEqual(normal_ev.evaluate("50 * 2"), 100.0)
         self.assertEqual(normal_ev.evaluate("sqrt(64)"), 8.0)
 
+    def test_timeout_worker_pool_recovery_with_long_sleep(self):
+        """BUG-01: Verify that worker tasks sleeping well past timeout do not starve subsequent evaluations."""
+        import time
+        import concurrent.futures
+
+        def long_sleep_mock(expr, keys, angle_mode, custom_ns=None):
+            time.sleep(2.0)
+            return 42.0
+
+        ev_timeout = SafeEvaluator(eval_worker_func=long_sleep_mock)
+        ev_timeout.max_time = 0.05
+
+        # Submit 2 concurrent long-sleeping tasks to occupy all 2 workers in the pool
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as client_pool:
+            futures = [client_pool.submit(ev_timeout.evaluate, "1+1") for _ in range(2)]
+            for f in futures:
+                with self.assertRaises(ValueError):
+                    f.result(timeout=1.0)
+
+        # Immediately test that a subsequent evaluation succeeds rapidly without waiting 2 seconds
+        start_time = time.time()
+        normal_ev = SafeEvaluator()
+        result = normal_ev.evaluate("10 + 20")
+        elapsed = time.time() - start_time
+
+        self.assertEqual(result, 30.0)
+        self.assertLess(elapsed, 0.8)
+
 
 class TestParserBackwardCompat(unittest.TestCase):
     def test_math_parser_static(self):

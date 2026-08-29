@@ -105,10 +105,25 @@ class TestGlobalErrorHandler(unittest.TestCase):
                 self.assertIn("test msg", content)
                 self.assertIn("test tb", content)
 
-    def test_restart_app(self):
+    @patch("subprocess.Popen")
+    def test_restart_app_unfrozen(self, mock_popen):
         app = MagicMock()
         handler = GlobalErrorHandler(app)
-        handler._restart_app()
+        with patch.object(sys, "frozen", False, create=True):
+            handler._restart_app()
+        mock_popen.assert_called_once()
+        args = mock_popen.call_args[0][0]
+        self.assertEqual(len(args), 2)
+        self.assertEqual(args[0], sys.executable)
+        app.quit.assert_called_once()
+
+    @patch("subprocess.Popen")
+    def test_restart_app_frozen(self, mock_popen):
+        app = MagicMock()
+        handler = GlobalErrorHandler(app)
+        with patch.object(sys, "frozen", True, create=True):
+            handler._restart_app()
+        mock_popen.assert_called_once_with([sys.executable])
         app.quit.assert_called_once()
 
     @patch("core.error_handler.GlobalErrorHandler")

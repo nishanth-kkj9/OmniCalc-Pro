@@ -7,6 +7,7 @@ No code execution possible - only mathematical expressions.
 import atexit
 import math
 import re
+import threading
 from typing import Any
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 
@@ -36,8 +37,39 @@ MAX_EXP_VAL = 709
 MAX_OPERATOR_COUNT = 100
 
 # Global worker thread pool to avoid blocking shutdowns on timeout
-_EVAL_POOL = ThreadPoolExecutor(max_workers=2, thread_name_prefix="eval_worker")
-atexit.register(lambda: _EVAL_POOL.shutdown(wait=False))
+_POOL_LOCK = threading.Lock()
+_EVAL_POOL: ThreadPoolExecutor | None = ThreadPoolExecutor(max_workers=2, thread_name_prefix="eval_worker")
+
+def _get_eval_pool() -> ThreadPoolExecutor:
+    global _EVAL_POOL
+    with _POOL_LOCK:
+        if _EVAL_POOL is None:
+            _EVAL_POOL = ThreadPoolExecutor(max_workers=2, thread_name_prefix="eval_worker")
+        return _EVAL_POOL
+
+def _recycle_eval_pool() -> None:
+    """Replace an occupied or blocked worker pool so subsequent calculations are not starved."""
+    global _EVAL_POOL
+    with _POOL_LOCK:
+        old_pool = _EVAL_POOL
+        _EVAL_POOL = ThreadPoolExecutor(max_workers=2, thread_name_prefix="eval_worker")
+    if old_pool is not None:
+        try:
+            old_pool.shutdown(wait=False, cancel_futures=True)
+        except Exception:
+            pass
+
+def _cleanup_eval_pool() -> None:
+    global _EVAL_POOL
+    with _POOL_LOCK:
+        if _EVAL_POOL is not None:
+            try:
+                _EVAL_POOL.shutdown(wait=False, cancel_futures=True)
+            except Exception:
+                pass
+            _EVAL_POOL = None
+
+atexit.register(_cleanup_eval_pool)
 
 def _safe_deg_tan(x: float) -> float:
     mod_deg = ((x % 180) + 180) % 180
@@ -411,11 +443,13 @@ class SafeEvaluator:
             if self.max_time <= 0:
                 return self._eval_worker_func(expr, list(self._namespace.keys()), self.angle_mode, self._namespace)
 
-            future = _EVAL_POOL.submit(self._eval_worker_func, expr, list(self._namespace.keys()), self.angle_mode, self._namespace)
+            pool = _get_eval_pool()
+            future = pool.submit(self._eval_worker_func, expr, list(self._namespace.keys()), self.angle_mode, self._namespace)
             try:
                 return future.result(timeout=self.max_time)
             except FuturesTimeoutError:
-                future.cancel()
+                if not future.cancel():
+                    _recycle_eval_pool()
                 raise TimeoutError(f"Evaluation exceeded {self.max_time}s limit")
 
         except SympifyError as e:
