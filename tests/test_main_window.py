@@ -6,7 +6,7 @@ class TestMainWindowActions(unittest.TestCase):
     def test_copy_result_none_widget(self):
         with patch.dict("sys.modules", {"PySide6.QtWidgets": MagicMock(), "PySide6.QtCore": MagicMock(), "PySide6.QtGui": MagicMock()}):
             from ui.main_window import MainWindow
-            window = MagicMock(spec=MainWindow)
+            window = MagicMock()
             window.stack = MagicMock()
             window.stack.currentWidget.return_value = None
             MainWindow._copy_result(window)
@@ -15,7 +15,7 @@ class TestMainWindowActions(unittest.TestCase):
     def test_paste_input_none_widget(self):
         with patch.dict("sys.modules", {"PySide6.QtWidgets": MagicMock(), "PySide6.QtCore": MagicMock(), "PySide6.QtGui": MagicMock()}):
             from ui.main_window import MainWindow
-            window = MagicMock(spec=MainWindow)
+            window = MagicMock()
             window.stack = MagicMock()
             window.stack.currentWidget.return_value = None
             MainWindow._paste_input(window)
@@ -24,7 +24,7 @@ class TestMainWindowActions(unittest.TestCase):
     def test_clear_current_page_none_widget(self):
         with patch.dict("sys.modules", {"PySide6.QtWidgets": MagicMock(), "PySide6.QtCore": MagicMock(), "PySide6.QtGui": MagicMock()}):
             from ui.main_window import MainWindow
-            window = MagicMock(spec=MainWindow)
+            window = MagicMock()
             window.stack = MagicMock()
             window.stack.currentWidget.return_value = None
             MainWindow._clear_current_page(window)

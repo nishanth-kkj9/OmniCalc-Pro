@@ -205,18 +205,40 @@ def _validate_parsed_sympy_tree(node: Any) -> None:
                 exp = subnode.exp
                 if exp.is_Number and abs(float(exp)) > MAX_EXPONENT_VAL:
                     raise ValueError(f"Exponent {exp} exceeds safe limit ({MAX_EXPONENT_VAL})")
+                # Cumulative nested exponent checks
+                curr = subnode
+                total_exp = 1.0
+                while curr.is_Pow:
+                    if curr.exp.is_Number:
+                        try:
+                            total_exp *= float(curr.exp)
+                        except (OverflowError, ValueError):
+                            raise ValueError(f"Exponent tower exceeds safe limit ({MAX_EXPONENT_VAL})")
+                        if abs(total_exp) > MAX_EXPONENT_VAL:
+                            raise ValueError(f"Exponent {total_exp} exceeds safe limit ({MAX_EXPONENT_VAL})")
+                    curr = curr.base
             elif getattr(subnode, "func", None) in (sp.factorial, math.factorial):
                 arg = subnode.args[0] if subnode.args else None
-                if arg is not None and arg.is_Number and float(arg) > MAX_FACTORIAL_VAL:
-                    raise ValueError(f"Factorial input {arg} exceeds safe limit ({MAX_FACTORIAL_VAL})")
+                if arg is not None:
+                    if arg.is_Number and float(arg) > MAX_FACTORIAL_VAL:
+                        raise ValueError(f"Factorial input {arg} exceeds safe limit ({MAX_FACTORIAL_VAL})")
+                    if isinstance(arg, Basic) and any(n.is_Pow or getattr(n, "func", None) in (sp.factorial, sp.gamma) for n in sp.preorder_traversal(arg)):
+                        raise ValueError("Nested or exponential factorial arguments are not permitted")
             elif getattr(subnode, "func", None) in (sp.gamma, math.gamma):
                 arg = subnode.args[0] if subnode.args else None
-                if arg is not None and arg.is_Number and float(arg) > MAX_GAMMA_VAL:
-                    raise ValueError(f"Gamma input {arg} exceeds safe limit ({MAX_GAMMA_VAL})")
+                if arg is not None:
+                    if arg.is_Number and float(arg) > MAX_GAMMA_VAL:
+                        raise ValueError(f"Gamma input {arg} exceeds safe limit ({MAX_GAMMA_VAL})")
+                    if isinstance(arg, Basic) and any(n.is_Pow or getattr(n, "func", None) in (sp.factorial, sp.gamma) for n in sp.preorder_traversal(arg)):
+                        raise ValueError("Nested or exponential gamma arguments are not permitted")
+            elif getattr(subnode, "func", None) in (sp.exp, math.exp):
+                arg = subnode.args[0] if subnode.args else None
+                if arg is not None and arg.is_Number and float(arg) > MAX_EXP_VAL:
+                    raise ValueError(f"Exp input {arg} exceeds safe limit ({MAX_EXP_VAL})")
 
 
 def _worker_eval_task(expr: str, namespace_keys: list[str], angle_mode: str, custom_namespace: dict[str, Any] | None = None) -> float:
-    """Isolated evaluation task with strict global dictionary restrictions and AST traversal."""
+    """Isolated evaluation task with strict AST traversal and safe SymPy evaluation."""
     ns: dict[str, Any] = dict(SAFE_CONSTANTS)
     mode = (angle_mode or "").lower()
     if mode in ("degrees", "deg"):
@@ -231,8 +253,13 @@ def _worker_eval_task(expr: str, namespace_keys: list[str], angle_mode: str, cus
     if custom_namespace:
         ns.update(custom_namespace)
 
-    # Restrict parse_expr with empty global_dict
-    result = parse_expr(expr, transformations=TRANSFORMATIONS, local_dict=ns, global_dict={}, evaluate=True)
+    # 1. Parse into unevaluated AST first to validate complexity without executing computation
+    raw_tree = parse_expr(expr, transformations=TRANSFORMATIONS, local_dict=ns, evaluate=False)
+    if isinstance(raw_tree, Basic):
+        _validate_parsed_sympy_tree(raw_tree)
+
+    # 2. Evaluate expression safely
+    result = parse_expr(expr, transformations=TRANSFORMATIONS, local_dict=ns, evaluate=True)
 
     if isinstance(result, Basic):
         _validate_parsed_sympy_tree(result)
@@ -446,7 +473,7 @@ class SafeEvaluator:
             pool = _get_eval_pool()
             future = pool.submit(self._eval_worker_func, expr, list(self._namespace.keys()), self.angle_mode, self._namespace)
             try:
-                return future.result(timeout=self.max_time)
+                return float(future.result(timeout=self.max_time))
             except FuturesTimeoutError:
                 if not future.cancel():
                     _recycle_eval_pool()
@@ -503,7 +530,7 @@ class SafeEvaluator:
             raise ValueError(f"Error parsing expression: {e}") from e
 
     def to_latex(self, expr) -> str:
-        return sp.latex(expr)
+        return str(sp.latex(expr))
 
     def solve(self, expr, variable: str = 'x'):
         try:

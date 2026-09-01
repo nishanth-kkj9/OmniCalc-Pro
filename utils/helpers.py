@@ -23,9 +23,10 @@ def ensure_dirs() -> None:
 
 def load_config() -> Dict[str, Any]:
     default_config: Dict[str, Any] = {"theme": "dark", "font_size": 14, "angle_mode": "degrees"}
-    if os.path.exists(CONFIG_PATH):
+    target_path = CONFIG_PATH if os.path.exists(CONFIG_PATH) else os.path.join(BASE_DIR, 'config.json')
+    if os.path.exists(target_path):
         try:
-            with open(CONFIG_PATH, 'r', encoding='utf-8') as f:
+            with open(target_path, 'r', encoding='utf-8') as f:
                 cfg = json.load(f)
                 if isinstance(cfg, dict):
                     logger.debug("Config file loaded.")
@@ -41,6 +42,9 @@ def load_config() -> Dict[str, Any]:
 
 def save_config(cfg: Dict[str, Any]) -> None:
     try:
+        config_dir = os.path.dirname(CONFIG_PATH)
+        if config_dir:
+            os.makedirs(config_dir, exist_ok=True)
         with open(CONFIG_PATH, 'w', encoding='utf-8') as f:
             json.dump(cfg, f, indent=2)
         logger.debug("Configuration saved.")
@@ -62,6 +66,6 @@ def copy_to_clipboard(text: str) -> None:
 
 def paste_from_clipboard() -> str:
     try:
-        return pyperclip.paste()
+        return str(pyperclip.paste())
     except Exception:
         return ""

@@ -61,7 +61,7 @@ jobs:
 
       - name: Build Standalone Executable
         run: |
-          pyinstaller --onefile --windowed --name=OmniCalc-Pro main.py
+          pyinstaller --onefile --windowed --name=OmniCalc-Pro --add-data "assets;assets" main.py
 
       - name: Attach Windows Executable to Release
         uses: softprops/action-gh-release@c95fe1489396fe8a9ec87b0b01613b49e39ea74c # v2.2.1

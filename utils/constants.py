@@ -3,15 +3,20 @@ import sys
 
 if getattr(sys, 'frozen', False):
     BASE_DIR = os.path.dirname(sys.executable)
+    ASSETS_BASE = getattr(sys, '_MEIPASS', BASE_DIR)
+    CONFIG_DIR = BASE_DIR
+    CONFIG_PATH: str = os.path.join(CONFIG_DIR, 'config.json')
 else:
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    ASSETS_BASE = BASE_DIR
+    CONFIG_DIR = os.path.join(BASE_DIR, '.local')
+    CONFIG_PATH: str = os.path.join(CONFIG_DIR, 'config.json')
 
-ASSETS_DIR: str = os.path.join(BASE_DIR, 'assets')
+ASSETS_DIR: str = os.path.join(ASSETS_BASE, 'assets')
 THEMES_DIR: str = os.path.join(ASSETS_DIR, 'themes')
 ICONS_DIR: str = os.path.join(ASSETS_DIR, 'icons')
 DB_DIR: str = os.path.join(BASE_DIR, 'database')
 DB_PATH: str = os.path.join(DB_DIR, 'history.db')
-CONFIG_PATH: str = os.path.join(BASE_DIR, 'config.json')
 
 APP_NAME: str = "OmniCalc Pro"
 VERSION: str = "2.1.0"

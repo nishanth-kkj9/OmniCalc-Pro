@@ -45,6 +45,7 @@ class TestServiceLocator(unittest.TestCase):
     def test_register_overwrites_factory(self):
         self.locator.register("svc", lambda: 1)
         v1 = self.locator.get("svc")
+        self.assertEqual(v1, 1)
         self.locator.register("svc", lambda: 2)
         v2 = self.locator.get("svc")
         self.assertEqual(v2, 2)

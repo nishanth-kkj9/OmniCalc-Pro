@@ -3,7 +3,7 @@ Toast notification system for OmniCalc Pro.
 Provides non-intrusive, animated notifications with multiple types.
 """
 from enum import Enum
-from typing import Optional
+from typing import Optional, cast
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QHBoxLayout, QPushButton
 from PySide6.QtWidgets import QGraphicsOpacityEffect
 from PySide6.QtCore import Qt, QTimer, QPropertyAnimation, QEasingCurve, QRect, QPoint, Signal
@@ -227,7 +227,7 @@ def get_toast_manager(parent=None) -> ToastManager:
     """Get or create a toast manager for the parent widget."""
     if not hasattr(parent, '_toast_manager'):
         parent._toast_manager = ToastManager(parent)
-    return parent._toast_manager
+    return cast(ToastManager, parent._toast_manager)
 
 
 def show_toast(parent, message: str, toast_type: ToastType = ToastType.INFO, duration: int = TOAST_DEFAULT_DURATION):

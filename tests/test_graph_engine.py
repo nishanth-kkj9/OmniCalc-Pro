@@ -36,7 +36,7 @@ class TestGraphEngine(unittest.TestCase):
 
     def test_initialization(self, mock_np, MockFigure, mock_mpl_use):
         from core.graph_engine import GraphEngine
-        engine = GraphEngine()
+        GraphEngine()
         MockFigure.assert_called_once_with(figsize=(10, 6), dpi=100)
 
     def test_plot_single_equation(self, mock_np, MockFigure, mock_mpl_use):

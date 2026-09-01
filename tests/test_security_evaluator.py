@@ -48,6 +48,31 @@ class TestSecurityEvaluator(unittest.TestCase):
         res = safe_eval(huge_exp2)
         self.assertTrue(str(res).startswith("Error:") and "exponent" in str(res).lower())
 
+    def test_parenthesized_exponent_towers_rejected_quickly(self):
+        """SEC-01: Ensure nested/parenthesized exponent towers are rejected fast (<1s) before evaluation."""
+        import time
+        tower_payloads = [
+            "((2**9999)**9999)**9999",
+            "(2**500)**500",
+            "(2^100)^100",
+            "((3**200)**200)",
+        ]
+        for payload in tower_payloads:
+            with self.subTest(payload=payload):
+                t0 = time.time()
+                with self.assertRaises(ValueError) as ctx:
+                    self.evaluator.evaluate(payload)
+                elapsed = time.time() - t0
+                self.assertLess(elapsed, 1.0, f"Rejection took too long: {elapsed}s")
+                self.assertIn("exponent", str(ctx.exception).lower())
+
+    def test_valid_parenthesized_powers_remain_functional(self):
+        """Ensure legitimate nested parentheses with moderate exponents evaluate properly."""
+        self.assertEqual(self.evaluator.evaluate("(2 + 3)**2"), 25.0)
+        self.assertEqual(self.evaluator.evaluate("(2**3)**2"), 64.0)
+        self.assertEqual(self.evaluator.evaluate("sqrt((2**10))"), 32.0)
+        self.assertEqual(self.evaluator.evaluate("((2**2)**2)**2"), 256.0)
+
     def test_oversized_factorial_blocked(self):
         """Ensure giant factorial values that trigger memory/CPU denial-of-service are rejected."""
         huge_fact = "factorial(100000)"
