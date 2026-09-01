@@ -13,10 +13,10 @@ jobs:
       contents: write
     steps:
       - name: Checkout Code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: Set up Node.js 20.x
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
         with:
           node-version: 20
           cache: 'npm'
@@ -29,7 +29,7 @@ jobs:
           sha256sum omnicalc-pro-web.tar.gz > SHA256SUMS
 
       - name: Create or Update GitHub Release
-        uses: softprops/action-gh-release@c95fe1489396fe8a9ec87b0b01613b49e39ea74c # v2.2.1
+        uses: softprops/action-gh-release@d99959b9fda58353af1b915bde11b78ac553d1b4 # v2.0.7
         with:
           files: |
             omnicalc-pro-web.tar.gz
@@ -45,10 +45,10 @@ jobs:
       contents: write
     steps:
       - name: Checkout Code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: Set up Python 3.12
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        uses: actions/setup-python@0b93645e9e0d20f1dafcf9bc8b08cad3170cc3fc # v5.1.1
         with:
           python-version: '3.12'
           cache: 'pip'
@@ -64,7 +64,7 @@ jobs:
           pyinstaller --onefile --windowed --name=OmniCalc-Pro --add-data "assets;assets" main.py
 
       - name: Attach Windows Executable to Release
-        uses: softprops/action-gh-release@c95fe1489396fe8a9ec87b0b01613b49e39ea74c # v2.2.1
+        uses: softprops/action-gh-release@d99959b9fda58353af1b915bde11b78ac553d1b4 # v2.0.7
         with:
           files: dist/OmniCalc-Pro.exe
           draft: false
