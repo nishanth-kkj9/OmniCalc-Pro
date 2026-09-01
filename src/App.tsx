@@ -4,6 +4,7 @@ import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { SettingsModal } from './components/SettingsModal';
 import { CommandPalette } from './components/CommandPalette';
+import { WindowViewportController } from './components/WindowViewportController';
 import { playClickSound, prewarmAudio } from './utils/sound';
 import { ACCENT_COLOR_MAP } from './utils/formatting';
 import { loadInitialSettings, saveSettings } from './utils/settings';
@@ -135,6 +136,7 @@ export function App() {
   const [settings, setSettings] = useState<AppSettings>(() => loadInitialSettings());
   const [currentMode, setCurrentMode] = useState<CalcMode>(() => settings.defaultMode || 'basic');
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
+  const [isRailCollapsed, setIsRailCollapsed] = useState<boolean>(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState<boolean>(false);
 
   // Listen for custom open event
@@ -253,6 +255,8 @@ export function App() {
         isOpen={sidebarOpen}
         onCloseMobile={() => setSidebarOpen(false)}
         settings={settings}
+        isRailCollapsed={isRailCollapsed}
+        onToggleRailCollapse={() => setIsRailCollapsed((prev) => !prev)}
       />
 
       {/* Main Workspace Area */}
@@ -266,44 +270,49 @@ export function App() {
           onUpdateSettings={updateSettings}
         />
 
-        <main className="flex-1 p-4 sm:p-6 overflow-y-auto">
-          <EngineErrorBoundary key={currentMode}>
-            <Suspense fallback={<EngineLoadingFallback theme={settings.theme} />}>
-              {currentMode === 'basic' && <BasicCalculator settings={settings} />}
-              {currentMode === 'scientific' && (
-                <ScientificCalculator settings={settings} onUpdateSettings={updateSettings} />
-              )}
-              {currentMode === 'fractions' && <FractionsCalculator settings={settings} />}
-              {currentMode === 'geometry' && <GeometryCalculator settings={settings} />}
-              {currentMode === 'equation' && <EquationSolver settings={settings} />}
-              {currentMode === 'calculus' && <CalculusCalculator settings={settings} />}
-              {currentMode === 'graphing' && <GraphingCalculator settings={settings} />}
-              {currentMode === 'programmer' && <ProgrammerCalculator settings={settings} />}
-              {currentMode === 'converter' && <ConverterCalculator settings={settings} />}
-              {currentMode === 'finance' && <FinanceCalculator settings={settings} />}
-              {currentMode === 'datetime' && <DateTimeCalculator settings={settings} />}
-              {currentMode === 'health' && <HealthCalculator settings={settings} />}
-              {currentMode === 'matrix' && <MatrixCalculator settings={settings} />}
-              {currentMode === 'statistics' && <StatisticsCalculator settings={settings} />}
-              {currentMode === 'formulas' && (
-                <FormulasPanel
-                  settings={settings}
-                  onNavigateMode={(mode) => setCurrentMode(mode)}
-                />
-              )}
-              {currentMode === 'history' && (
-                <HistoryPanel
-                  settings={settings}
-                  onSelectCalculation={() => {
-                    setCurrentMode('basic');
-                  }}
-                />
-              )}
-              {currentMode === 'settings' && (
-                <SettingsModal settings={settings} onUpdateSettings={updateSettings} />
-              )}
-            </Suspense>
-          </EngineErrorBoundary>
+        <main className="flex-1 p-2 sm:p-4 md:p-6 overflow-y-auto">
+          <WindowViewportController
+            settings={settings}
+            activeModeName={currentMode.charAt(0).toUpperCase() + currentMode.slice(1)}
+          >
+            <EngineErrorBoundary key={currentMode}>
+              <Suspense fallback={<EngineLoadingFallback theme={settings.theme} />}>
+                {currentMode === 'basic' && <BasicCalculator settings={settings} />}
+                {currentMode === 'scientific' && (
+                  <ScientificCalculator settings={settings} onUpdateSettings={updateSettings} />
+                )}
+                {currentMode === 'fractions' && <FractionsCalculator settings={settings} />}
+                {currentMode === 'geometry' && <GeometryCalculator settings={settings} />}
+                {currentMode === 'equation' && <EquationSolver settings={settings} />}
+                {currentMode === 'calculus' && <CalculusCalculator settings={settings} />}
+                {currentMode === 'graphing' && <GraphingCalculator settings={settings} />}
+                {currentMode === 'programmer' && <ProgrammerCalculator settings={settings} />}
+                {currentMode === 'converter' && <ConverterCalculator settings={settings} />}
+                {currentMode === 'finance' && <FinanceCalculator settings={settings} />}
+                {currentMode === 'datetime' && <DateTimeCalculator settings={settings} />}
+                {currentMode === 'health' && <HealthCalculator settings={settings} />}
+                {currentMode === 'matrix' && <MatrixCalculator settings={settings} />}
+                {currentMode === 'statistics' && <StatisticsCalculator settings={settings} />}
+                {currentMode === 'formulas' && (
+                  <FormulasPanel
+                    settings={settings}
+                    onNavigateMode={(mode) => setCurrentMode(mode)}
+                  />
+                )}
+                {currentMode === 'history' && (
+                  <HistoryPanel
+                    settings={settings}
+                    onSelectCalculation={() => {
+                      setCurrentMode('basic');
+                    }}
+                  />
+                )}
+                {currentMode === 'settings' && (
+                  <SettingsModal settings={settings} onUpdateSettings={updateSettings} />
+                )}
+              </Suspense>
+            </EngineErrorBoundary>
+          </WindowViewportController>
         </main>
       </div>
 

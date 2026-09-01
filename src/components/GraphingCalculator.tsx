@@ -21,6 +21,9 @@ import {
   Eye,
   EyeOff,
   Crosshair,
+  MapPin,
+  Flame,
+  Palette,
 } from 'lucide-react';
 import { MAX_GRAPH_SAMPLES } from '../constants/limits';
 import { ExportModal } from './ExportModal';
@@ -38,6 +41,15 @@ export interface FunctionItem {
   showDerivative?: boolean;
 }
 
+export interface PinnedPoint {
+  id: string;
+  x: number;
+  y: number;
+  fnId: string;
+  slope: number;
+  color: string;
+}
+
 const COLORS = [
   '#38bdf8', // Sky Blue
   '#f43f5e', // Rose
@@ -47,6 +59,52 @@ const COLORS = [
   '#06b6d4', // Cyan
   '#ec4899', // Pink
 ];
+
+// Helper to compute 3D surface quad colors based on colormap
+function get3DSurfaceColor(
+  z: number,
+  colormap: 'cyberpunk' | 'viridis' | 'sunset' | 'ocean' | 'aurora',
+  isLightMode: boolean
+) {
+  // Normalize z approx within [-3, 3] range
+  const norm = Math.max(0, Math.min(1, (z + 2.5) / 5));
+  if (colormap === 'cyberpunk') {
+    // 290 (electric purple) to 185 (neon cyan)
+    const hue = 290 - norm * 105;
+    return {
+      fill: `hsla(${hue}, 95%, ${isLightMode ? '55%' : '46%'}, 0.65)`,
+      stroke: `hsla(${hue}, 100%, ${isLightMode ? '40%' : '78%'}, 0.90)`,
+    };
+  } else if (colormap === 'viridis') {
+    // 270 (purple) -> 160 (emerald) -> 55 (yellow)
+    const hue = 270 - norm * 215;
+    return {
+      fill: `hsla(${hue}, 88%, ${isLightMode ? '52%' : '44%'}, 0.65)`,
+      stroke: `hsla(${hue}, 95%, ${isLightMode ? '38%' : '75%'}, 0.90)`,
+    };
+  } else if (colormap === 'sunset') {
+    // 340 (crimson) -> 35 (orange) -> 50 (gold)
+    const hue = norm < 0.5 ? 340 + norm * 80 : (norm - 0.5) * 80;
+    return {
+      fill: `hsla(${hue}, 92%, ${isLightMode ? '55%' : '48%'}, 0.65)`,
+      stroke: `hsla(${hue}, 100%, ${isLightMode ? '42%' : '78%'}, 0.90)`,
+    };
+  } else if (colormap === 'ocean') {
+    // 230 (deep navy) -> 175 (turquoise)
+    const hue = 230 - norm * 65;
+    return {
+      fill: `hsla(${hue}, 90%, ${isLightMode ? '50%' : '42%'}, 0.65)`,
+      stroke: `hsla(${hue}, 95%, ${isLightMode ? '36%' : '72%'}, 0.90)`,
+    };
+  } else {
+    // aurora: 140 (emerald green) -> 190 (cyan) -> 280 (violet)
+    const hue = 140 + norm * 140;
+    return {
+      fill: `hsla(${hue}, 90%, ${isLightMode ? '52%' : '45%'}, 0.65)`,
+      stroke: `hsla(${hue}, 98%, ${isLightMode ? '38%' : '76%'}, 0.90)`,
+    };
+  }
+}
 
 // Preset definitions for all modes
 const CARTESIAN_PRESETS = [
@@ -151,6 +209,14 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
   const [showExtremaRoots, setShowExtremaRoots] = useState<boolean>(true);
   const [showIntersections, setShowIntersections] = useState<boolean>(true);
   const [showTangentAtCursor, setShowTangentAtCursor] = useState<boolean>(true);
+  const [glowMode, setGlowMode] = useState<boolean>(true);
+  const [gradientFill, setGradientFill] = useState<boolean>(true);
+  const [showRiemannSums, setShowRiemannSums] = useState<boolean>(false);
+  const [riemannRule, setRiemannRule] = useState<'left' | 'right' | 'midpoint' | 'trapezoid'>(
+    'midpoint'
+  );
+  const [riemannN, setRiemannN] = useState<number>(10);
+  const [pinnedPoints, setPinnedPoints] = useState<PinnedPoint[]>([]);
   const [shadeArea, setShadeArea] = useState<boolean>(false);
   const [shadeBetweenCurves, setShadeBetweenCurves] = useState<boolean>(false);
   const [shadeA, setShadeA] = useState<number>(-2);
@@ -200,6 +266,9 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
   const [surfaceGridDensity, setSurfaceGridDensity] = useState<'coarse' | 'medium' | 'fine'>(
     'medium'
   );
+  const [surfaceColormap, setSurfaceColormap] = useState<
+    'cyberpunk' | 'viridis' | 'sunset' | 'ocean' | 'aurora'
+  >('cyberpunk');
 
   // Data Regression State
   const [regressionModelType, setRegressionModelType] = useState<
@@ -686,6 +755,81 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
     evalCompiled,
   ]);
 
+  // Riemann Sum Computation for active function
+  const computedRiemannData = useMemo(() => {
+    if (!showRiemannSums || graphMode !== 'cartesian') return null;
+    const startX = Math.min(shadeA, shadeB);
+    const endX = Math.max(shadeA, shadeB);
+    if (Math.abs(endX - startX) < 1e-6) return null;
+
+    const activeFns = functions
+      .map((f, idx) => ({ fn: f, compiled: compiledCartesianFns[idx] }))
+      .filter((item) => item.fn.enabled && item.compiled !== null);
+
+    if (activeFns.length === 0) return null;
+
+    const primary = activeFns[0];
+    const n = Math.max(2, Math.min(60, riemannN));
+    const deltaX = (endX - startX) / n;
+    let sum = 0;
+    const rects: Array<{
+      x0: number;
+      x1: number;
+      y: number;
+      sampleX: number;
+      yLeft?: number;
+      yRight?: number;
+    }> = [];
+
+    for (let i = 0; i < n; i++) {
+      const x0 = startX + i * deltaX;
+      const x1 = x0 + deltaX;
+      let sampleX = x0;
+      if (riemannRule === 'left') sampleX = x0;
+      else if (riemannRule === 'right') sampleX = x1;
+      else if (riemannRule === 'midpoint') sampleX = (x0 + x1) / 2;
+
+      if (riemannRule === 'trapezoid') {
+        const yLeft = evalCompiled(primary.compiled, { x: x0 }) ?? 0;
+        const yRight = evalCompiled(primary.compiled, { x: x1 }) ?? 0;
+        const areaTrap = 0.5 * (yLeft + yRight) * deltaX;
+        sum += areaTrap;
+        rects.push({
+          x0,
+          x1,
+          y: 0.5 * (yLeft + yRight),
+          sampleX: (x0 + x1) / 2,
+          yLeft,
+          yRight,
+        });
+      } else {
+        const yVal = evalCompiled(primary.compiled, { x: sampleX }) ?? 0;
+        sum += yVal * deltaX;
+        rects.push({ x0, x1, y: yVal, sampleX });
+      }
+    }
+
+    return {
+      n,
+      rule: riemannRule,
+      deltaX,
+      sum,
+      rects,
+      fnExpression: primary.fn.expression || primary.fn.id,
+      fnColor: primary.fn.color,
+    };
+  }, [
+    showRiemannSums,
+    graphMode,
+    shadeA,
+    shadeB,
+    functions,
+    compiledCartesianFns,
+    riemannN,
+    riemannRule,
+    evalCompiled,
+  ]);
+
   // Master Render Canvas Loop with High-DPI Support
   const drawGraph = useCallback(() => {
     const canvas = canvasRef.current;
@@ -795,9 +939,9 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
       quads.sort((a, b) => a.avgDepth - b.avgDepth);
 
       quads.forEach((q) => {
-        const hue = Math.max(170, Math.min(340, 240 + q.avgZ * 50));
-        ctx.fillStyle = `hsla(${hue}, 85%, ${isLight ? '55%' : '42%'}, 0.55)`;
-        ctx.strokeStyle = `hsla(${hue}, 95%, ${isLight ? '40%' : '70%'}, 0.85)`;
+        const { fill, stroke } = get3DSurfaceColor(q.avgZ, surfaceColormap, isLight);
+        ctx.fillStyle = fill;
+        ctx.strokeStyle = stroke;
         ctx.lineWidth = 1;
 
         ctx.beginPath();
@@ -813,7 +957,11 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
       // 3D Axis Legend
       ctx.font = '11px monospace';
       ctx.fillStyle = '#38bdf8';
-      ctx.fillText('3D Multivariable Surface: Drag anywhere on canvas to Orbit', 16, 24);
+      ctx.fillText(
+        `3D Surface [Palette: ${surfaceColormap.toUpperCase()}]: Drag on canvas to Orbit`,
+        16,
+        24
+      );
       ctx.restore();
       return;
     }
@@ -1129,13 +1277,105 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
         }
       }
 
-      // Plot All Active Cartesian Curves
+      // Riemann Sums Visualization
+      if (showRiemannSums && computedRiemannData) {
+        const { rects, rule } = computedRiemannData;
+        const cy0 = toCanvasY(0);
+
+        rects.forEach((rect) => {
+          const cx0 = toCanvasX(rect.x0);
+          const cx1 = toCanvasX(rect.x1);
+          const w = cx1 - cx0;
+
+          if (rule === 'trapezoid' && rect.yLeft !== undefined && rect.yRight !== undefined) {
+            const cyL = toCanvasY(rect.yLeft);
+            const cyR = toCanvasY(rect.yRight);
+
+            ctx.fillStyle = isLight ? 'rgba(16, 185, 129, 0.22)' : 'rgba(16, 185, 129, 0.28)';
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 1.2;
+
+            ctx.beginPath();
+            ctx.moveTo(cx0, cy0);
+            ctx.lineTo(cx0, cyL);
+            ctx.lineTo(cx1, cyR);
+            ctx.lineTo(cx1, cy0);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+          } else {
+            const cy = toCanvasY(rect.y);
+            const rectH = cy0 - cy;
+
+            ctx.fillStyle = isLight ? 'rgba(16, 185, 129, 0.22)' : 'rgba(16, 185, 129, 0.28)';
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 1.2;
+
+            ctx.beginPath();
+            ctx.rect(cx0, cy, w, rectH);
+            ctx.fill();
+            ctx.stroke();
+
+            // Sample point marker on top edge of rectangle
+            const sX = toCanvasX(rect.sampleX);
+            ctx.fillStyle = '#10b981';
+            ctx.beginPath();
+            ctx.arc(sX, cy, 3, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        });
+      }
+
+      // Under-Curve Ambient Gradient Fill (High-Fidelity Visual Mode)
+      if (gradientFill) {
+        functions.forEach((fn, idx) => {
+          if (!fn.enabled || !fn.expression.trim()) return;
+          const compiled = compiledCartesianFns[idx];
+
+          const grad = ctx.createLinearGradient(0, toCanvasY(yMax), 0, toCanvasY(yMin));
+          grad.addColorStop(0, fn.color + (isLight ? '30' : '22'));
+          grad.addColorStop(0.6, fn.color + (isLight ? '15' : '10'));
+          grad.addColorStop(1, fn.color + '00');
+
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.moveTo(toCanvasX(xMin), toCanvasY(0));
+
+          let hadValid = false;
+          for (let i = 0; i <= samples; i++) {
+            const xVal = xMin + i * step;
+            const yVal = compiled
+              ? evalCompiled(compiled, { x: xVal })
+              : evalExprFallback(fn.expression, { x: xVal });
+            if (yVal !== null && isFinite(yVal) && yVal >= yMin - 50 && yVal <= yMax + 50) {
+              ctx.lineTo(toCanvasX(xVal), toCanvasY(yVal));
+              hadValid = true;
+            }
+          }
+          ctx.lineTo(toCanvasX(xMax), toCanvasY(0));
+          ctx.closePath();
+          if (hadValid) {
+            ctx.fill();
+          }
+        });
+      }
+
+      // Plot All Active Cartesian Curves with Neon Aura Glow
       functions.forEach((fn, idx) => {
         if (!fn.enabled || !fn.expression.trim()) return;
         const compiled = compiledCartesianFns[idx];
 
         ctx.strokeStyle = fn.color;
         ctx.lineWidth = 2.8;
+
+        if (glowMode) {
+          ctx.shadowColor = fn.color;
+          ctx.shadowBlur = 10;
+        } else {
+          ctx.shadowColor = 'transparent';
+          ctx.shadowBlur = 0;
+        }
+
         ctx.beginPath();
 
         let isDrawing = false;
@@ -1173,6 +1413,10 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
         }
         ctx.stroke();
 
+        // Reset glow shadow before secondary passes
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+
         // Optional Numerical Derivative Curve Overlay y' = d/dx f(x)
         if (fn.showDerivative && compiled) {
           ctx.strokeStyle = fn.color;
@@ -1209,6 +1453,49 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
           ctx.stroke();
           ctx.setLineDash([]);
         }
+      });
+
+      // Render Pinned Inspection Points & Normal/Tangent Lines
+      pinnedPoints.forEach((pin) => {
+        const px = toCanvasX(pin.x);
+        const py = toCanvasY(pin.y);
+
+        // Halo circle
+        ctx.fillStyle = pin.color;
+        ctx.beginPath();
+        ctx.arc(px, py, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Tangent dashed line
+        const tSpan = (xMax - xMin) * 0.15;
+        const tx1 = pin.x - tSpan;
+        const ty1 = pin.y - pin.slope * tSpan;
+        const tx2 = pin.x + tSpan;
+        const ty2 = pin.y + pin.slope * tSpan;
+
+        ctx.strokeStyle = pin.color;
+        ctx.setLineDash([3, 3]);
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(toCanvasX(tx1), toCanvasY(ty1));
+        ctx.lineTo(toCanvasX(tx2), toCanvasY(ty2));
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Label pill
+        const labelText = `(${pin.x.toFixed(2)}, ${pin.y.toFixed(2)}) m=${pin.slope.toFixed(2)}`;
+        ctx.font = 'bold 10px monospace';
+        const txtWidth = ctx.measureText(labelText).width;
+        ctx.fillStyle = isLight ? 'rgba(255,255,255,0.92)' : 'rgba(15,23,42,0.92)';
+        ctx.fillRect(px - txtWidth / 2 - 4, py - 24, txtWidth + 8, 16);
+        ctx.strokeStyle = pin.color;
+        ctx.lineWidth = 1;
+        ctx.strokeRect(px - txtWidth / 2 - 4, py - 24, txtWidth + 8, 16);
+        ctx.fillStyle = isLight ? '#0f172a' : '#f8fafc';
+        ctx.fillText(labelText, px - txtWidth / 2, py - 12);
       });
 
       // Render Detected Critical Points (Roots & Extrema)
@@ -1315,6 +1602,12 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
     shadeBetweenCurves,
     shadeA,
     shadeB,
+    showRiemannSums,
+    computedRiemannData,
+    gradientFill,
+    glowMode,
+    pinnedPoints,
+    surfaceColormap,
     showExtremaRoots,
     showIntersections,
     showTangentAtCursor,
@@ -1537,6 +1830,96 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
     link.click();
   };
 
+  const copyGraphImageToClipboard = async () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    try {
+      canvas.toBlob(async (blob) => {
+        if (blob && navigator.clipboard && window.ClipboardItem) {
+          await navigator.clipboard.write([
+            new ClipboardItem({
+              'image/png': blob,
+            }),
+          ]);
+          setCopiedToast('Graph Image Copied to Clipboard!');
+          setTimeout(() => setCopiedToast(null), 2500);
+        } else {
+          // Fallback to data URL
+          const dataUrl = canvas.toDataURL('image/png');
+          await navigator.clipboard.writeText(dataUrl);
+          setCopiedToast('Image Data URI Copied!');
+          setTimeout(() => setCopiedToast(null), 2500);
+        }
+      });
+    } catch {
+      setCopiedToast('Could not copy image directly');
+      setTimeout(() => setCopiedToast(null), 2500);
+    }
+  };
+
+  // Canvas Click to Pin/Unpin Inspection Point
+  const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (graphMode !== 'cartesian' || functions.length === 0) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const cx = e.clientX - rect.left;
+    const cy = e.clientY - rect.top;
+
+    const xVal = xMin + (cx / rect.width) * (xMax - xMin);
+    const yVal = yMax - (cy / rect.height) * (yMax - yMin);
+
+    // Find closest active function
+    let bestFn: (typeof functions)[0] | null = null;
+    let bestY: number | null = null;
+    let bestDist = Infinity;
+
+    functions.forEach((fn, idx) => {
+      if (!fn.enabled) return;
+      const compiled = compiledCartesianFns[idx];
+      const fy = compiled
+        ? evalCompiled(compiled, { x: xVal })
+        : evalExprFallback(fn.expression, { x: xVal });
+      if (fy !== null && isFinite(fy)) {
+        const dist = Math.abs(fy - yVal);
+        if (dist < bestDist) {
+          bestDist = dist;
+          bestFn = fn;
+          bestY = fy;
+        }
+      }
+    });
+
+    if (bestFn && bestY !== null && bestDist < (yMax - yMin) * 0.2) {
+      const targetFn: FunctionItem = bestFn;
+      const compiled = compiledCartesianFns[functions.findIndex((f) => f.id === targetFn.id)];
+      const h = 1e-4;
+      const yp = compiled
+        ? evalCompiled(compiled, { x: xVal + h }) ?? 0
+        : evalExprFallback(targetFn.expression, { x: xVal + h }) ?? 0;
+      const ym = compiled
+        ? evalCompiled(compiled, { x: xVal - h }) ?? 0
+        : evalExprFallback(targetFn.expression, { x: xVal - h }) ?? 0;
+      const slope = (yp - ym) / (2 * h);
+
+      // Check if near existing pin to remove it
+      const existingIdx = pinnedPoints.findIndex((p) => Math.abs(p.x - xVal) < (xMax - xMin) * 0.03);
+      if (existingIdx >= 0) {
+        setPinnedPoints((prev) => prev.filter((_, i) => i !== existingIdx));
+      } else {
+        const newPin: PinnedPoint = {
+          id: 'pin_' + Date.now(),
+          x: Math.round(xVal * 100) / 100,
+          y: Math.round(bestY * 100) / 100,
+          fnId: targetFn.expression || targetFn.id,
+          slope: Math.round(slope * 1000) / 1000,
+          color: targetFn.color,
+        };
+        setPinnedPoints((prev) => [...prev.slice(-5), newPin]);
+      }
+    }
+  };
+
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
     setCopiedToast(label);
@@ -1718,7 +2101,7 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
             </div>
 
             {/* Analysis Toggles & Area Settings */}
-            <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-slate-300 pt-2 border-t border-slate-800">
+            <div className="flex flex-wrap items-center gap-3 text-xs font-semibold text-slate-300 pt-2 border-t border-slate-800">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
@@ -1751,21 +2134,63 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
                   className="accent-rose-500 rounded"
                 />
                 <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-rose-500" /> Live Cursor Tangent
+                  <span className="w-2 h-2 rounded-full bg-rose-500" /> Cursor Tangent
                 </span>
               </label>
 
-              <label className="flex items-center gap-2 cursor-pointer">
+              {/* Graphic FX Toggles */}
+              <div className="flex items-center gap-1.5 border-l border-slate-800 pl-3">
+                <button
+                  onClick={() => setGlowMode(!glowMode)}
+                  className={`px-2 py-1 rounded-lg flex items-center gap-1 transition-all text-xs font-bold border ${
+                    glowMode
+                      ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 shadow-sm'
+                      : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'
+                  }`}
+                  title="Toggle Neon Curve Glow"
+                >
+                  <Flame className="w-3.5 h-3.5" />
+                  Glow FX
+                </button>
+
+                <button
+                  onClick={() => setGradientFill(!gradientFill)}
+                  className={`px-2 py-1 rounded-lg flex items-center gap-1 transition-all text-xs font-bold border ${
+                    gradientFill
+                      ? 'bg-sky-500/20 text-sky-300 border-sky-500/50 shadow-sm'
+                      : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'
+                  }`}
+                  title="Toggle Under-curve Ambient Gradient Fill"
+                >
+                  <Palette className="w-3.5 h-3.5" />
+                  Gradient Fill
+                </button>
+              </div>
+
+              {/* Riemann Sums Toggle */}
+              <div className="flex items-center gap-1.5 border-l border-slate-800 pl-3">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={showRiemannSums}
+                    onChange={(e) => setShowRiemannSums(e.target.checked)}
+                    className="accent-emerald-500 rounded"
+                  />
+                  <span className="text-emerald-400 font-bold">Riemann Sums</span>
+                </label>
+              </div>
+
+              <label className="flex items-center gap-2 cursor-pointer border-l border-slate-800 pl-3">
                 <input
                   type="checkbox"
                   checked={shadeArea}
                   onChange={(e) => setShadeArea(e.target.checked)}
                   className="accent-sky-500 rounded"
                 />
-                <span>Shade Definite Integral:</span>
+                <span>Definite Integral [a, b]:</span>
               </label>
 
-              {shadeArea && (
+              {(shadeArea || showRiemannSums) && (
                 <div className="flex flex-wrap items-center gap-2 font-mono text-xs">
                   <span>[</span>
                   <input
@@ -1783,7 +2208,7 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
                   />
                   <span>]</span>
 
-                  {functions.length >= 2 && (
+                  {shadeArea && functions.length >= 2 && (
                     <label className="flex items-center gap-1.5 ml-2 cursor-pointer">
                       <input
                         type="checkbox"
@@ -1797,6 +2222,43 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
                 </div>
               )}
             </div>
+
+            {/* Riemann Sum Settings Bar */}
+            {showRiemannSums && (
+              <div className="flex flex-wrap items-center justify-between gap-3 bg-emerald-950/30 border border-emerald-800/60 p-3 rounded-2xl text-xs text-emerald-200">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-bold text-emerald-400">Approximation Rule:</span>
+                  {(['left', 'right', 'midpoint', 'trapezoid'] as const).map((rule) => (
+                    <button
+                      key={rule}
+                      onClick={() => setRiemannRule(rule)}
+                      className={`px-2.5 py-1 rounded-xl capitalize font-bold transition-all border ${
+                        riemannRule === rule
+                          ? 'bg-emerald-600 text-white border-emerald-400 shadow-sm'
+                          : 'bg-slate-900/80 text-emerald-400/80 border-emerald-900/60 hover:text-white'
+                      }`}
+                    >
+                      {rule}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-emerald-400">Subdivisions N:</span>
+                  <input
+                    type="range"
+                    min={2}
+                    max={60}
+                    value={riemannN}
+                    onChange={(e) => setRiemannN(parseInt(e.target.value) || 10)}
+                    className="w-24 accent-emerald-500 cursor-pointer"
+                  />
+                  <span className="font-mono font-bold bg-slate-900 px-2 py-0.5 rounded-lg border border-emerald-800 text-emerald-300">
+                    {riemannN}
+                  </span>
+                </div>
+              </div>
+            )}
 
             {/* Computed Integral Value Badge */}
             {computedAreaResult && (
@@ -1821,7 +2283,7 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
                   3D Multivariable Surface Plotter
                 </h3>
                 <p className="text-xs text-slate-400">
-                  Plot z = f(x, y) with depth-sorted shading & 360° interactive orbit
+                  Plot z = f(x, y) with depth-sorted shading, colormaps & 360° orbit
                 </p>
               </div>
 
@@ -1860,6 +2322,7 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
               ))}
             </div>
 
+            {/* 3D Expression and Mesh / Colormap options */}
             <div className="flex flex-wrap gap-2 items-center">
               <span className="text-xs font-mono font-bold text-sky-400">z = f(x, y) =</span>
               <input
@@ -1885,6 +2348,27 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
                   </button>
                 ))}
               </div>
+            </div>
+
+            {/* 3D Colormap Selector */}
+            <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-800/60 text-xs">
+              <span className="font-bold text-slate-400 flex items-center gap-1.5">
+                <Palette className="w-3.5 h-3.5 text-sky-400" />
+                Colormap Palette:
+              </span>
+              {(['cyberpunk', 'viridis', 'sunset', 'ocean', 'aurora'] as const).map((cmap) => (
+                <button
+                  key={cmap}
+                  onClick={() => setSurfaceColormap(cmap)}
+                  className={`px-2.5 py-1 rounded-xl capitalize font-bold transition-all border ${
+                    surfaceColormap === cmap
+                      ? 'bg-sky-600 text-white border-sky-400 shadow-sm'
+                      : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'
+                  }`}
+                >
+                  {cmap}
+                </button>
+              ))}
             </div>
           </div>
         )}
@@ -2231,6 +2715,13 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
               <Download className="w-4 h-4" />
             </button>
             <button
+              onClick={copyGraphImageToClipboard}
+              className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl border border-slate-700 shadow-sm flex-shrink-0"
+              title="Copy Graph Image to Clipboard"
+            >
+              <Copy className="w-4 h-4" />
+            </button>
+            <button
               onClick={() => {
                 const tableHeaders = [
                   'x',
@@ -2273,6 +2764,9 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
                     'Y-Range': `[${yMin.toFixed(2)}, ${yMax.toFixed(2)}]`,
                     ...(computedAreaResult
                       ? { 'Integral Area': computedAreaResult.area.toFixed(5) }
+                      : {}),
+                    ...(computedRiemannData
+                      ? { 'Riemann Sum Approx': computedRiemannData.sum.toFixed(5) }
                       : {}),
                   },
                 });
@@ -2324,7 +2818,7 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
           )}
         </div>
 
-        {/* Canvas Element with Pan & Zoom Gestures */}
+        {/* Canvas Element with Pan, Zoom, and Click-to-Pin Gestures */}
         <div className="relative w-full aspect-[16/9] max-h-[480px] rounded-2xl overflow-hidden border border-slate-800 bg-slate-950">
           <canvas
             ref={canvasRef}
@@ -2333,6 +2827,7 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
             onMouseMove={handleMouseMove}
             onMouseDown={handleMouseDown}
             onMouseUp={handleMouseUp}
+            onClick={handleCanvasClick}
             onMouseLeave={() => {
               setHoverCoords(null);
               setSnappedPoint(null);
@@ -2345,10 +2840,106 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
 
           {/* Canvas Interactive Overlay Prompt */}
           <div className="absolute bottom-3 left-3 pointer-events-none bg-slate-900/80 backdrop-blur-md px-2.5 py-1 rounded-xl border border-slate-800 text-[11px] text-slate-400 font-mono flex items-center gap-2">
-            <span>🖱️ Drag to Pan · Scroll to Zoom</span>
+            <span>🖱️ Drag to Pan · Scroll to Zoom · Click curve to Pin Tangent Point</span>
           </div>
         </div>
       </div>
+
+      {/* Pinned Inspection Points List (Cartesian) */}
+      {graphMode === 'cartesian' && pinnedPoints.length > 0 && (
+        <div className={`${cardBg} border rounded-3xl p-5 flex flex-col gap-3`}>
+          <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
+            <h4 className="text-sm font-bold text-slate-100 flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-emerald-400" />
+              Pinned Inspection Points & Local Tangents ({pinnedPoints.length})
+            </h4>
+            <button
+              onClick={() => setPinnedPoints([])}
+              className="text-xs text-rose-400 hover:text-rose-300 transition-colors font-semibold"
+            >
+              Clear All Pins
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+            {pinnedPoints.map((pin) => (
+              <div
+                key={pin.id}
+                className="bg-slate-950/60 border border-slate-800/80 p-3 rounded-2xl flex items-center justify-between gap-2 text-xs font-mono"
+              >
+                <div className="flex items-center gap-2">
+                  <span
+                    className="w-3 h-3 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: pin.color }}
+                  />
+                  <div>
+                    <div className="font-bold text-slate-100">
+                      ({pin.x}, {pin.y})
+                    </div>
+                    <div className="text-[11px] text-slate-400">
+                      Slope m = <strong className="text-sky-400">{pin.slope}</strong>
+                    </div>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setPinnedPoints((prev) => prev.filter((p) => p.id !== pin.id))}
+                  className="text-slate-500 hover:text-rose-400 p-1"
+                  title="Remove Pin"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Riemann Sums Approximation & Error Breakdown Card */}
+      {graphMode === 'cartesian' && showRiemannSums && computedRiemannData && (
+        <div className={`${cardBg} border border-emerald-900/40 rounded-3xl p-5 flex flex-col gap-3 bg-emerald-950/10`}>
+          <div className="flex items-center justify-between border-b border-emerald-900/60 pb-2">
+            <h4 className="text-sm font-bold text-emerald-300 flex items-center gap-2">
+              <Layers className="w-4 h-4 text-emerald-400" />
+              Riemann Sum Numerical Integration Analysis
+            </h4>
+            <span className="text-xs font-mono font-bold text-emerald-400 bg-emerald-950/80 border border-emerald-800 px-2.5 py-1 rounded-xl">
+              Rule: {computedRiemannData.rule.toUpperCase()} (N = {computedRiemannData.n})
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs font-mono">
+            <div className="bg-slate-950/60 border border-slate-800 p-3 rounded-2xl flex flex-col gap-1">
+              <span className="text-slate-500 text-[11px]">Riemann Sum S_N:</span>
+              <strong className="text-emerald-300 text-sm font-bold">
+                {computedRiemannData.sum.toFixed(5)}
+              </strong>
+            </div>
+
+            <div className="bg-slate-950/60 border border-slate-800 p-3 rounded-2xl flex flex-col gap-1">
+              <span className="text-slate-500 text-[11px]">Partition Width Δx:</span>
+              <strong className="text-sky-300 text-sm font-bold">
+                {computedRiemannData.deltaX.toFixed(4)}
+              </strong>
+            </div>
+
+            <div className="bg-slate-950/60 border border-slate-800 p-3 rounded-2xl flex flex-col gap-1">
+              <span className="text-slate-500 text-[11px]">Exact Integral (Simpson):</span>
+              <strong className="text-indigo-300 text-sm font-bold">
+                {computedAreaResult ? computedAreaResult.area.toFixed(5) : '—'}
+              </strong>
+            </div>
+
+            <div className="bg-slate-950/60 border border-slate-800 p-3 rounded-2xl flex flex-col gap-1">
+              <span className="text-slate-500 text-[11px]">Approximation Error |Δ|:</span>
+              <strong className="text-amber-300 text-sm font-bold">
+                {computedAreaResult
+                  ? Math.abs(computedRiemannData.sum - computedAreaResult.area).toFixed(5)
+                  : '—'}
+              </strong>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Critical Points & Roots Analysis Card (Cartesian) */}
       {graphMode === 'cartesian' && criticalAnalysis && (
