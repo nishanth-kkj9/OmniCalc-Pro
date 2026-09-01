@@ -186,10 +186,10 @@ jobs:
           pip install -e . --no-deps
 
       - name: Lint with Ruff
-        run: ruff check core utils ui tests || true
+        run: ruff check core utils ui tests
 
       - name: Static Type Check with MyPy
-        run: mypy --config-file pyproject.toml core utils ui || true
+        run: mypy --config-file pyproject.toml core utils ui
 
   python-test:
     name: Python Engine Tests (${{ matrix.os }}, Python ${{ matrix.python-version }})

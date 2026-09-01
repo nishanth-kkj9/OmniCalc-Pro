@@ -561,9 +561,22 @@ class SafeEvaluator:
             sym_ns = self._build_symbolic_namespace()
             sym_ns[variable] = x
             eq = parse_expr(expr, transformations=TRANSFORMATIONS, local_dict=sym_ns, evaluate=False)
-            return sp.solve(eq, x)
+
+            if self.max_time <= 0:
+                return sp.solve(eq, x)
+
+            pool = _get_eval_pool()
+            future = pool.submit(sp.solve, eq, x)
+            try:
+                return future.result(timeout=self.max_time)
+            except FuturesTimeoutError:
+                if not future.cancel():
+                    _recycle_eval_pool()
+                raise TimeoutError(f"Solving exceeded {self.max_time}s limit")
         except SympifyError as e:
             raise ValueError(f"Error solving expression: {e}") from e
+        except TimeoutError as e:
+            raise ValueError(str(e)) from e
         except ValueError:
             raise
         except Exception as e:

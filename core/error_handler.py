@@ -26,10 +26,17 @@ from PySide6.QtCore import Qt, QObject, QEvent
 from utils.logger import get_logger
 from utils.constants import BASE_DIR
 
+import tempfile
+
 logger = get_logger()
 
 LOG_DIR = Path(BASE_DIR) / "logs"
-LOG_DIR.mkdir(exist_ok=True)
+try:
+    LOG_DIR.mkdir(exist_ok=True)
+except OSError:
+    LOG_DIR = Path(tempfile.gettempdir()) / "OmniCalcPro" / "logs"
+    LOG_DIR.mkdir(parents=True, exist_ok=True)
+
 CRASH_LOG = LOG_DIR / "crash.log"
 ERROR_LOG = LOG_DIR / "error.log"
 

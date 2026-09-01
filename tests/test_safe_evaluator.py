@@ -388,6 +388,22 @@ class TestParserBackwardCompat(unittest.TestCase):
         self.assertIn(2, solutions)
         self.assertIn(-2, solutions)
 
+    def test_solve_timeout_enforced(self):
+        from core.safe_evaluator import SafeEvaluator
+        import sympy as sp
+        import time
+
+        def slow_solve(eq, x):
+            time.sleep(0.5)
+            return [2]
+
+        ev = SafeEvaluator()
+        ev.max_time = 0.05
+        with patch.object(sp, "solve", side_effect=slow_solve):
+            with self.assertRaises(ValueError) as ctx:
+                ev.solve("x - 2", "x")
+            self.assertIn("limit", str(ctx.exception).lower())
+
 
 if __name__ == '__main__':
     unittest.main()

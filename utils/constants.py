@@ -10,7 +10,7 @@ else:
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     ASSETS_BASE = BASE_DIR
     CONFIG_DIR = os.path.join(BASE_DIR, '.local')
-    CONFIG_PATH: str = os.path.join(CONFIG_DIR, 'config.json')
+    CONFIG_PATH = os.path.join(CONFIG_DIR, 'config.json')
 
 ASSETS_DIR: str = os.path.join(ASSETS_BASE, 'assets')
 THEMES_DIR: str = os.path.join(ASSETS_DIR, 'themes')

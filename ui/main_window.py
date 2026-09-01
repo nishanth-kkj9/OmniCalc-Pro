@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QStackedWidget, QLabel, QPushButton, QHBoxLayout, QApplication, QSystemTrayIcon, QMenu
-from PySide6.QtCore import Qt, QPoint, QTimer, QPropertyAnimation, QEasingCurve, QParallelAnimationGroup, QRect
+from PySide6.QtCore import Qt, QPoint, QTimer, QPropertyAnimation, QEasingCurve, QParallelAnimationGroup, QRect, QSettings
 from PySide6.QtGui import QFont, QIcon, QPixmap, QPainter, QColor, QAction, QKeySequence, QShortcut
 from ui.sidebar import Sidebar
 from ui.widgets import CalcButton, DisplayPanel
@@ -148,6 +148,12 @@ class MainWindow(QMainWindow):
         self.resize(1150, 800)
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+
+        # Restore window geometry if available
+        settings = QSettings("OmniCalc", "OmniCalc Pro")
+        geom = settings.value("geometry")
+        if geom:
+            self.restoreGeometry(geom)
 
         self._win11_effects = apply_windows11_effects(self, backdrop="mica", dark_mode=True, rounded_corners=True)
 
@@ -369,3 +375,8 @@ class MainWindow(QMainWindow):
             theme.apply(cfg.get("theme", "dark"))
             app.setFont(QFont("Segoe UI", cfg.get("font_size", 14)))
             self.title_bar.status_lbl.setText("  OmniCalc Pro | Theme Updated")
+
+    def closeEvent(self, event):
+        settings = QSettings("OmniCalc", "OmniCalc Pro")
+        settings.setValue("geometry", self.saveGeometry())
+        super().closeEvent(event)

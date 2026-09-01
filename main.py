@@ -7,9 +7,10 @@ from PySide6.QtGui import QFont
 from ui.main_window import MainWindow
 from ui.fluent_theme import get_theme
 from utils.helpers import load_config
-from utils.logger import get_logger
+from utils.logger import setup_logger, get_logger
 
 def main():
+    setup_logger()
     logger = get_logger()
     logger.info("Starting OmniCalc Pro Desktop Application...")
     

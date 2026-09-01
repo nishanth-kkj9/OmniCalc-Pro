@@ -132,3 +132,11 @@ class TestGlobalErrorHandler(unittest.TestCase):
         app = MagicMock()
         install_global_handler(app)
         MockHandler.return_value.install.assert_called_once()
+
+    def test_log_dir_permission_error_fallback(self):
+        # Verify that if primary Path.mkdir fails with OSError, it falls back to tempdir safely
+        with patch.object(Path, "mkdir", side_effect=[OSError("Permission denied"), None]):
+            import importlib
+            import core.error_handler
+            importlib.reload(core.error_handler)
+            self.assertIn("OmniCalcPro", str(core.error_handler.LOG_DIR))

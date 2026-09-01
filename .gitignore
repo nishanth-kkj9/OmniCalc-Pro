@@ -33,6 +33,9 @@ logs/
 *.sqlite3
 database/
 
+# Local configuration
+.local/
+
 # Environment / secrets
 .env
 .env.local
