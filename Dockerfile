@@ -1,6 +1,6 @@
 # Multi-stage Dockerfile for OmniCalc Pro Web Application
 # Stage 1: Build
-FROM node:20-alpine AS builder
+FROM node:20-bookworm-slim AS builder
 WORKDIR /app
 
 COPY package*.json ./

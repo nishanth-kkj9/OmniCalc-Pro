@@ -203,7 +203,7 @@ def _validate_parsed_sympy_tree(node: Any) -> None:
         for subnode in sp.preorder_traversal(node):
             if subnode.is_Pow:
                 exp = subnode.exp
-                if exp.is_Number and abs(float(exp)) > MAX_EXPONENT_VAL:
+                if exp.is_Number and abs(float(exp)) >= MAX_EXPONENT_VAL:
                     raise ValueError(f"Exponent {exp} exceeds safe limit ({MAX_EXPONENT_VAL})")
                 # Cumulative nested exponent checks
                 curr = subnode
@@ -214,7 +214,7 @@ def _validate_parsed_sympy_tree(node: Any) -> None:
                             total_exp *= float(curr.exp)
                         except (OverflowError, ValueError):
                             raise ValueError(f"Exponent tower exceeds safe limit ({MAX_EXPONENT_VAL})")
-                        if abs(total_exp) > MAX_EXPONENT_VAL:
+                        if abs(total_exp) >= MAX_EXPONENT_VAL:
                             raise ValueError(f"Exponent {total_exp} exceeds safe limit ({MAX_EXPONENT_VAL})")
                     curr = curr.base
             elif getattr(subnode, "func", None) in (sp.factorial, math.factorial):
@@ -237,6 +237,23 @@ def _validate_parsed_sympy_tree(node: Any) -> None:
                     raise ValueError(f"Exp input {arg} exceeds safe limit ({MAX_EXP_VAL})")
 
 
+_SYMBOLIC_STRUCTURE_NS: dict[str, Any] = {
+    "sin": sp.sin, "cos": sp.cos, "tan": sp.tan,
+    "asin": sp.asin, "acos": sp.acos, "atan": sp.atan,
+    "sinh": sp.sinh, "cosh": sp.cosh, "tanh": sp.tanh,
+    "asinh": sp.asinh, "acosh": sp.acosh, "atanh": sp.atanh,
+    "log": sp.log, "ln": sp.log,
+    "log10": lambda arg: sp.log(arg, 10), "log2": lambda arg: sp.log(arg, 2),
+    "sqrt": sp.sqrt, "cbrt": sp.cbrt,
+    "exp": sp.exp, "expm1": lambda arg: sp.exp(arg) - 1,
+    "degrees": lambda arg: arg * 180 / sp.pi, "radians": lambda arg: arg * sp.pi / 180,
+    "floor": sp.floor, "ceil": sp.ceiling, "trunc": lambda arg: sp.sign(arg) * sp.floor(sp.Abs(arg)),
+    "round": lambda arg: sp.floor(arg + sp.Rational(1, 2)),
+    "abs": sp.Abs, "factorial": sp.factorial, "fact": sp.factorial, "gamma": sp.gamma,
+    "mod": lambda a, b: a % b, "sign": sp.sign,
+}
+
+
 def _worker_eval_task(expr: str, namespace_keys: list[str], angle_mode: str, custom_namespace: dict[str, Any] | None = None) -> float:
     """Isolated evaluation task with strict AST traversal and safe SymPy evaluation."""
     ns: dict[str, Any] = dict(SAFE_CONSTANTS)
@@ -253,8 +270,13 @@ def _worker_eval_task(expr: str, namespace_keys: list[str], angle_mode: str, cus
     if custom_namespace:
         ns.update(custom_namespace)
 
-    # 1. Parse into unevaluated AST first to validate complexity without executing computation
-    raw_tree = parse_expr(expr, transformations=TRANSFORMATIONS, local_dict=ns, evaluate=False)
+    # 1. Parse into unevaluated AST first to validate complexity without executing computation.
+    # NOTE: sympy's evaluate=False transform appends an `evaluate=False` kwarg to every
+    # resolved function call, so local_dict must map to real sympy Functions here (not the
+    # plain math/lambda callables used for the actual numeric evaluation below).
+    structure_ns: dict[str, Any] = dict(SAFE_CONSTANTS)
+    structure_ns.update(_SYMBOLIC_STRUCTURE_NS)
+    raw_tree = parse_expr(expr, transformations=TRANSFORMATIONS, local_dict=structure_ns, evaluate=False)
     if isinstance(raw_tree, Basic):
         _validate_parsed_sympy_tree(raw_tree)
 

@@ -156,6 +156,13 @@ jobs:
           load: true
           tags: omnicalc-pro:test
 
+      - name: Run Container Smoke Test
+        run: |
+          docker run -d --name omnicalc-smoke -p 3000:3000 omnicalc-pro:test
+          sleep 3
+          curl -f http://localhost:3000/ || (docker logs omnicalc-smoke && exit 1)
+          docker stop omnicalc-smoke
+
   python-lint:
     name: Python Linting & Type Analysis
     runs-on: ubuntu-latest
