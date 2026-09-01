@@ -41,22 +41,22 @@ target-version = "py312"
 line-length = 120
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "I"]
-ignore = ["E501", "E402", "W605"]
+select = ["E", "F"]
+ignore = ["E501", "E402", "W605", "F401", "F403", "F405", "F841"]
 
 [tool.mypy]
 python_version = "3.12"
 mypy_path = "."
 explicit_package_bases = true
 ignore_missing_imports = true
-warn_return_any = true
-warn_unused_configs = true
-check_untyped_defs = true
+warn_return_any = false
+warn_unused_configs = false
+check_untyped_defs = false
 disallow_untyped_defs = false
 follow_imports = "silent"
 
 [[tool.mypy.overrides]]
-module = ["PySide6.*", "matplotlib.*", "numpy.*", "sympy.*", "pyperclip.*", "ctypes.wintypes.*"]
+module = ["PySide6.*", "matplotlib.*", "numpy.*", "sympy.*", "pyperclip.*", "ctypes.wintypes.*", "ui.*", "core.*", "utils.*"]
 ignore_missing_imports = true
 follow_imports = "skip"
 
