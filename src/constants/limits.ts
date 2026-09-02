@@ -20,7 +20,7 @@ export const MAX_FACTORIAL_ARGUMENT = 170;
 export const MAX_GAMMA_ARGUMENT = 171;
 
 /** Maximum square matrix dimension (NxN) supported for linear algebra operations. */
-export const MAX_MATRIX_DIMENSION = 5;
+export const MAX_MATRIX_DIMENSION = 10;
 
 /** Maximum iterations for numerical root-finding algorithms (e.g. Newton-Raphson). */
 export const MAX_ITERATIONS = 100;

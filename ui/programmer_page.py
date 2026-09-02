@@ -32,13 +32,20 @@ class ProgrammerPage(QWidget):
         self.dec_in.returnPressed.connect(self.convert_all)
 
     def convert_all(self):
+        val = self.dec_in.text().strip()
+        if not val:
+            self.res_label.setText("Binary: -")
+            self.res_label2.setText("Octal: -")
+            self.res_label3.setText("Hexadecimal: -")
+            return
         try:
-            val = self.dec_in.text()
             self.res_label.setText(f"Binary: {self.engine.to_base(val, 'BIN')}")
             self.res_label2.setText(f"Octal: {self.engine.to_base(val, 'OCT')}")
             self.res_label3.setText(f"Hexadecimal: {self.engine.to_base(val, 'HEX')}")
         except Exception:
-            pass
+            self.res_label.setText("Binary: Invalid Input")
+            self.res_label2.setText("Octal: Invalid Input")
+            self.res_label3.setText("Hexadecimal: Invalid Input")
 
     def bitwise_layout(self, layout):
         layout.addWidget(QLabel("Bitwise Op:"), 6, 0)
@@ -49,10 +56,20 @@ class ProgrammerPage(QWidget):
         layout.addWidget(self.a_in, 6, 1)
         layout.addWidget(self.op_in, 7, 0)
         layout.addWidget(self.b_in, 7, 1)
-        self.bit_res = QPushButton("Result: -")
-        self.bit_res.clicked.connect(self.do_bitwise)
-        layout.addWidget(self.bit_res, 8, 0, 1, 2)
+        self.bit_calc_btn = QPushButton("Calculate Bitwise")
+        self.bit_calc_btn.clicked.connect(self.do_bitwise)
+        layout.addWidget(self.bit_calc_btn, 8, 1)
+        self.bit_res = QLabel("Result: -")
+        layout.addWidget(self.bit_res, 9, 0, 1, 2)
 
     def do_bitwise(self):
-        res = self.engine.bitwise(self.a_in.text(), self.b_in.text(), self.op_in.currentText())
-        self.bit_res.setText(f"Result: {res}")
+        a_txt = self.a_in.text().strip()
+        b_txt = self.b_in.text().strip()
+        if not a_txt or not b_txt:
+            self.bit_res.setText("Result: Please enter both operands")
+            return
+        try:
+            res = self.engine.bitwise(a_txt, b_txt, self.op_in.currentText())
+            self.bit_res.setText(f"Result: {res}")
+        except Exception as e:
+            self.bit_res.setText(f"Result: Error ({e})")

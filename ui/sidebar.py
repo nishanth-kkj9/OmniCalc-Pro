@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QToolButton, QLabel, QPushButton, QFrame
-from PySide6.QtCore import Qt, Signal, QPropertyAnimation, QEasingCurve, QParallelAnimationGroup, QRect
+from PySide6.QtCore import Qt, Signal, Property, QPropertyAnimation, QEasingCurve, QParallelAnimationGroup, QRect
 from PySide6.QtGui import QFont
 from utils.constants import (
     COLLAPSED_WIDTH, EXPANDED_WIDTH, SIDEBAR_ANIM_DURATION,
@@ -94,6 +94,14 @@ class Sidebar(QWidget):
 
         self.animation_group = QParallelAnimationGroup()
 
+    def _get_sidebar_width(self) -> int:
+        return self.width()
+
+    def _set_sidebar_width(self, w: int) -> None:
+        self.setFixedWidth(w)
+
+    sidebar_width = Property(int, _get_sidebar_width, _set_sidebar_width)
+
     def toggle_expand(self):
         self._expanded = not self._expanded
         target_width = EXPANDED_WIDTH if self._expanded else COLLAPSED_WIDTH
@@ -101,7 +109,7 @@ class Sidebar(QWidget):
         self.animation_group.stop()
         self.animation_group.clear()
 
-        anim = QPropertyAnimation(self, b"fixedWidth", self)
+        anim = QPropertyAnimation(self, b"sidebar_width", self)
         anim.setDuration(SIDEBAR_ANIM_DURATION)
         anim.setStartValue(self.width())
         anim.setEndValue(target_width)

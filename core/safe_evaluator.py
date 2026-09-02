@@ -90,6 +90,11 @@ def _safe_rad_tan(x: float) -> float:
         return float("nan")
     return math.tan(x)
 
+def _safe_cbrt(x: float) -> float:
+    if hasattr(math, 'cbrt'):
+        return math.cbrt(x)
+    return math.copysign(abs(x) ** (1 / 3), x)
+
 SAFE_FUNCTIONS = {
     "sin", "cos", "tan", "asin", "acos", "atan",
     "sinh", "cosh", "tanh", "asinh", "acosh", "atanh",
@@ -151,7 +156,7 @@ RADIAN_FUNCTIONS = {
     "log10": math.log10,
     "log2": math.log2,
     "sqrt": math.sqrt,
-    "cbrt": lambda x: x ** (1/3),
+    "cbrt": _safe_cbrt,
     "exp": math.exp,
     "expm1": math.expm1,
     "degrees": math.degrees,
@@ -584,6 +589,12 @@ class SafeEvaluator:
 
 
 _default_evaluator = SafeEvaluator()
+_EVALUATOR_CACHE: dict[str, SafeEvaluator] = {
+    "degrees": _default_evaluator,
+    "radians": SafeEvaluator(angle_mode="radians"),
+    "gradients": SafeEvaluator(angle_mode="gradients"),
+}
+_CACHE_LOCK = threading.Lock()
 
 
 def validate_expression(expr: str, allow_vars: bool = False) -> str:
@@ -592,8 +603,11 @@ def validate_expression(expr: str, allow_vars: bool = False) -> str:
 
 
 def safe_eval(expression: str, angle_mode: str = "degrees") -> float | str:
-    """Convenience function for backward compatibility."""
-    global _default_evaluator
-    if _default_evaluator.angle_mode != angle_mode:
-        _default_evaluator.set_angle_mode(angle_mode)
-    return _default_evaluator.evaluate_safe(expression)
+    """Thread-safe convenience function for expression evaluation."""
+    norm_mode = str(angle_mode).lower().strip()
+    with _CACHE_LOCK:
+        evaluator = _EVALUATOR_CACHE.get(norm_mode)
+        if evaluator is None:
+            evaluator = SafeEvaluator(angle_mode=norm_mode)
+            _EVALUATOR_CACHE[norm_mode] = evaluator
+    return evaluator.evaluate_safe(expression)

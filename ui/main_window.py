@@ -246,6 +246,13 @@ class MainWindow(QMainWindow):
             show_toast(self, f"Theme switched to {new_theme}", ToastType.INFO, 2000)
 
     def _copy_result(self):
+        focused = QApplication.focusWidget()
+        if focused and hasattr(focused, 'selectedText') and focused.selectedText():
+            focused.copy()
+            return
+        if focused and hasattr(focused, 'textCursor') and focused.textCursor().hasSelection():
+            focused.copy()
+            return
         current_page = self.stack.currentWidget()
         if current_page is None:
             return
@@ -261,6 +268,10 @@ class MainWindow(QMainWindow):
                 show_toast(self, "Copied to clipboard", ToastType.SUCCESS, 1500)
 
     def _paste_input(self):
+        focused = QApplication.focusWidget()
+        if focused and hasattr(focused, 'paste'):
+            focused.paste()
+            return
         current_page = self.stack.currentWidget()
         if current_page is None:
             return
@@ -337,7 +348,10 @@ class MainWindow(QMainWindow):
         sys.exit(0)
 
     def closeEvent(self, event):
-        self.tray.hide()
+        settings = QSettings("OmniCalc", "OmniCalc Pro")
+        settings.setValue("geometry", self.saveGeometry())
+        if hasattr(self, 'tray') and self.tray is not None:
+            self.tray.hide()
         event.accept()
         QApplication.quit()
 
@@ -375,8 +389,3 @@ class MainWindow(QMainWindow):
             theme.apply(cfg.get("theme", "dark"))
             app.setFont(QFont("Segoe UI", cfg.get("font_size", 14)))
             self.title_bar.status_lbl.setText("  OmniCalc Pro | Theme Updated")
-
-    def closeEvent(self, event):
-        settings = QSettings("OmniCalc", "OmniCalc Pro")
-        settings.setValue("geometry", self.saveGeometry())
-        super().closeEvent(event)

@@ -62,13 +62,19 @@ class FinancePage(QWidget):
         self.grid_layout.addWidget(self.res, start_row + len(fields[idx])*2 + 1, 0, 1, 2)
 
     def calculate(self) -> None:
-        vals = [i.text() for i in self.inputs]
+        vals = [i.text().strip() for i in self.inputs]
+        if any(not v for v in vals):
+            if self.res is not None:
+                self.res.setText("Please fill all fields.")
+            return
         idx = self.calc_type.currentIndex()
         try:
             if idx == 0:
                 p = float(vals[0])
                 r = float(vals[1])
                 m = int(float(vals[2]))
+                if m <= 0 or p < 0 or r < 0:
+                    raise ValueError("Values must be positive and months > 0")
                 emi, total, interest = self.engine.emi(p, r, m)
                 res_text = f"EMI: {emi}\nTotal Payment: {total}\nTotal Interest: {interest}"
             elif idx == 1:
@@ -76,20 +82,29 @@ class FinancePage(QWidget):
                 r = float(vals[1])
                 y = int(float(vals[2]))
                 c = int(float(vals[3]))
+                if p < 0 or r < 0 or y < 0 or c <= 0:
+                    raise ValueError("Invalid parameters (compounds/yr must be > 0)")
                 amt, interest = self.engine.compound_interest(p, r, c, y)
                 res_text = f"Amount: {amt}\nInterest: {interest}"
             elif idx == 2:
                 amt_val = float(vals[0])
                 rate_val = float(vals[1])
+                if amt_val < 0 or rate_val < 0:
+                    raise ValueError("Amount and rate must be positive")
                 gst_res = self.engine.gst(amt_val, rate_val)
                 res_text = f"Base: {gst_res[0]}\nTax: {gst_res[1]}\nTotal: {gst_res[2]}"
             else:
                 price = float(vals[0])
                 disc = float(vals[1])
+                if price < 0 or disc < 0:
+                    raise ValueError("Price and discount must be positive")
                 saved, final = self.engine.discount(price, disc)
                 res_text = f"You Save: {saved}\nFinal Price: {final}"
             if self.res is not None:
                 self.res.setText(res_text)
+        except ValueError as ve:
+            if self.res is not None:
+                self.res.setText(f"Invalid Input: {ve}")
         except Exception:
             if self.res is not None:
                 self.res.setText("Invalid Input")

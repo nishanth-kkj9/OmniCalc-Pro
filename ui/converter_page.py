@@ -48,9 +48,19 @@ class ConverterPage(QWidget):
         self.calculate()
 
     def calculate(self):
+        text = self.val_input.text().strip()
+        if not text:
+            self.result_label.setText("Result: -")
+            return
+        from_u = self.from_unit.currentText()
+        to_u = self.to_unit.currentText()
+        cat = self.cat_combo.currentText()
+        if not from_u or not to_u or not cat:
+            self.result_label.setText("Result: -")
+            return
         try:
-            val = float(self.val_input.text())
-            res = self.engine.convert(val, self.from_unit.currentText(), self.to_unit.currentText(), self.cat_combo.currentText())
+            val = float(text)
+            res = self.engine.convert(val, from_u, to_u, cat)
             self.result_label.setText(f"Result: {round(res, 6)}")
         except Exception:
             self.result_label.setText("Result: Invalid Input")

@@ -29,16 +29,20 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
     refreshHistory();
   }, [refreshHistory]);
 
-  // Live preview evaluation
+  // Live preview evaluation (debounced to keep keystrokes fluid)
   useEffect(() => {
     if (!expression.trim()) {
       setRawResult('0');
       setDisplayResult('0');
       return;
     }
-    const evaluated = evaluateExpression(expression, settings.angleMode, settings.precision);
-    setRawResult(evaluated);
-    setDisplayResult(formatNumberWithSettings(evaluated, settings));
+    const timer = setTimeout(() => {
+      const evaluated = evaluateExpression(expression, settings.angleMode, settings.precision);
+      setRawResult(evaluated);
+      setDisplayResult(formatNumberWithSettings(evaluated, settings));
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, [expression, settings]);
 
   const handleCopy = () => {
