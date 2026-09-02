@@ -412,35 +412,40 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   {pinnedItems.map((item) => {
                     const isActive = currentMode === item.mode;
                     return (
-                      <button
+                      <div
                         key={`pinned-${item.mode}`}
-                        onClick={() => {
-                          onSelectMode(item.mode);
-                          if (onCloseMobile) onCloseMobile();
-                        }}
                         style={isActive ? { backgroundColor: 'var(--accent)' } : undefined}
                         className={`
-                          w-full flex items-center justify-between px-3 py-1.5 rounded-xl font-medium text-xs transition-all duration-150 active:scale-[0.98] group
+                          w-full flex items-center justify-between px-3 py-1.5 rounded-xl font-medium text-xs transition-all duration-150 group
                           ${isActive ? 'text-white shadow-md font-semibold' : idleBtnClass}
                         `}
                       >
-                        <div className="flex items-center gap-2.5">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            onSelectMode(item.mode);
+                            if (onCloseMobile) onCloseMobile();
+                          }}
+                          className="flex-1 flex items-center gap-2.5 text-left min-w-0 focus:outline-none focus:underline"
+                        >
                           <span className={isActive ? 'text-white' : ''}>{item.icon}</span>
                           <span className="truncate">{item.label}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <span
+                        </button>
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <button
+                            type="button"
                             onClick={(e) => togglePin(e, item.mode)}
-                            className="opacity-0 group-hover:opacity-100 p-0.5 hover:text-amber-400 transition-opacity"
+                            className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 p-1 hover:text-amber-400 focus:text-amber-400 focus:opacity-100 transition-opacity rounded focus:outline-none focus:ring-1 focus:ring-amber-400/50"
+                            aria-label={`Unpin ${item.label} from top`}
                             title="Unpin from top"
                           >
                             <Pin className="w-3 h-3 rotate-45 text-amber-400 fill-amber-400" />
-                          </span>
+                          </button>
                           {isActive && (
                             <ChevronRight className="w-3.5 h-3.5 opacity-75 flex-shrink-0" />
                           )}
                         </div>
-                      </button>
+                      </div>
                     );
                   })}
                 </div>
@@ -484,41 +489,46 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         const isActive = currentMode === item.mode;
                         const isPinned = pinnedModes.includes(item.mode);
                         return (
-                          <button
+                          <div
                             key={item.mode}
-                            onClick={() => {
-                              onSelectMode(item.mode);
-                              if (onCloseMobile) onCloseMobile();
-                            }}
                             style={isActive ? { backgroundColor: 'var(--accent)' } : undefined}
                             className={`
-                              w-full flex items-center justify-between px-3 py-2 rounded-xl font-medium text-xs transition-all duration-150 active:scale-[0.98] group
+                              w-full flex items-center justify-between px-3 py-2 rounded-xl font-medium text-xs transition-all duration-150 group
                               ${isActive ? 'text-white shadow-md font-semibold' : idleBtnClass}
                             `}
                           >
-                            <div className="flex items-center gap-2.5">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                onSelectMode(item.mode);
+                                if (onCloseMobile) onCloseMobile();
+                              }}
+                              className="flex-1 flex items-center gap-2.5 text-left min-w-0 focus:outline-none focus:underline"
+                            >
                               <span className={isActive ? 'text-white' : ''}>{item.icon}</span>
                               <span className="truncate">{item.label}</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <span
+                            </button>
+                            <div className="flex items-center gap-1 flex-shrink-0">
+                              <button
+                                type="button"
                                 onClick={(e) => togglePin(e, item.mode)}
-                                className={`p-0.5 rounded transition-opacity ${
+                                className={`p-1 rounded transition-opacity focus:outline-none focus:ring-1 focus:ring-amber-400/50 ${
                                   isPinned
-                                    ? 'text-amber-400 opacity-80 hover:opacity-100'
-                                    : 'opacity-0 group-hover:opacity-60 hover:opacity-100 text-slate-400 hover:text-amber-400'
+                                    ? 'text-amber-400 opacity-80 hover:opacity-100 focus:opacity-100'
+                                    : 'opacity-0 group-hover:opacity-80 group-focus-within:opacity-100 hover:opacity-100 focus:opacity-100 text-slate-400 hover:text-amber-400'
                                 }`}
+                                aria-label={isPinned ? `Unpin ${item.label}` : `Pin ${item.label} to quick favorites`}
                                 title={isPinned ? 'Unpin' : 'Pin to quick favorites'}
                               >
                                 <Pin
                                   className={`w-3 h-3 ${isPinned ? 'fill-amber-400 rotate-45' : ''}`}
                                 />
-                              </span>
+                              </button>
                               {isActive && (
                                 <ChevronRight className="w-3.5 h-3.5 opacity-75 flex-shrink-0" />
                               )}
                             </div>
-                          </button>
+                          </div>
                         );
                       })}
                     </div>

@@ -229,6 +229,7 @@ export const Header: React.FC<HeaderProps> = ({
           onClick={onToggleSidebar}
           className={`p-2 rounded-xl transition-colors lg:hidden ${btnIdleClass}`}
           title="Toggle Navigation Menu"
+          aria-label="Toggle navigation menu"
         >
           <Menu className="w-5 h-5" />
         </button>
@@ -288,6 +289,7 @@ export const Header: React.FC<HeaderProps> = ({
           onClick={onOpenCommandPalette}
           className={`px-2 sm:px-2.5 py-1.5 rounded-xl border text-xs font-medium flex items-center gap-1.5 sm:gap-2 transition-all shadow-xs active:scale-95 flex-shrink-0 ${searchBtnBg}`}
           title="Search engines & tools (Ctrl + K or ⌘K)"
+          aria-label="Search engines and tools"
         >
           <Search className="w-4 h-4 text-sky-500 flex-shrink-0" />
           <span className="hidden md:inline">Search</span>
@@ -304,6 +306,7 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={toggleAngleMode}
             className={`px-2 sm:px-2.5 py-1 text-xs font-semibold rounded-lg border transition-colors shadow-xs flex-shrink-0 ${badgeClass}`}
             title="Click to toggle Angle Unit (DEG / RAD / GRAD)"
+            aria-label={`Angle unit: ${settings.angleMode}. Click to toggle.`}
           >
             {settings.angleMode}
           </button>
@@ -318,6 +321,7 @@ export const Header: React.FC<HeaderProps> = ({
               ? 'Audio Feedback Enabled (Click to Mute)'
               : 'Audio Feedback Muted (Click to Enable)'
           }
+          aria-label={settings.soundEnabled ? 'Mute audio feedback' : 'Enable audio feedback'}
         >
           {settings.soundEnabled ? (
             <Volume2 className="w-4.5 h-4.5 text-sky-400 flex-shrink-0" />
@@ -334,6 +338,7 @@ export const Header: React.FC<HeaderProps> = ({
             currentMode === 'history' ? 'text-white shadow-sm' : btnIdleClass
           }`}
           title="View Calculation History"
+          aria-label="View calculation history"
         >
           <HistoryIcon className="w-4.5 h-4.5 flex-shrink-0" />
         </button>
@@ -343,6 +348,7 @@ export const Header: React.FC<HeaderProps> = ({
           onClick={toggleFullscreen}
           className={`p-2 rounded-xl transition-all hidden md:flex flex-shrink-0 ${btnIdleClass}`}
           title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen (Deep Focus)'}
+          aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
         >
           {isFullscreen ? (
             <Minimize2 className="w-4.5 h-4.5 flex-shrink-0" />
@@ -359,6 +365,7 @@ export const Header: React.FC<HeaderProps> = ({
             currentMode === 'settings' ? 'text-white shadow-sm' : btnIdleClass
           }`}
           title="Preferences & Settings"
+          aria-label="Preferences and settings"
         >
           <SettingsIcon className="w-4.5 h-4.5 flex-shrink-0" />
         </button>
@@ -368,6 +375,7 @@ export const Header: React.FC<HeaderProps> = ({
           onClick={toggleTheme}
           className={`p-2 rounded-xl transition-colors flex-shrink-0 ${btnIdleClass}`}
           title={`Current: ${settings.theme === 'light' ? 'Light' : settings.theme === 'oled' ? 'OLED Black' : 'Dark Slate'} (Click to cycle themes)`}
+          aria-label={`Current theme: ${settings.theme}. Click to cycle themes`}
         >
           {settings.theme === 'light' ? (
             <Sun className="w-4.5 h-4.5 text-amber-500 flex-shrink-0" />
