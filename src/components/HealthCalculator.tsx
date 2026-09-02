@@ -29,6 +29,12 @@ export const HealthCalculator: React.FC<HealthCalculatorProps> = ({ settings: _s
 
   // BMI Calculation
   const calculateBmi = () => {
+    const currentWeight = bmiUnit === 'metric' ? weightKg : weightLbs;
+    const currentHeight = bmiUnit === 'metric' ? heightCm : heightIn;
+    if (currentWeight <= 0 || currentHeight <= 0 || isNaN(currentWeight) || isNaN(currentHeight)) {
+      return { bmi: 0, category: 'Please enter positive values', colorClass: 'text-slate-400' };
+    }
+
     let bmi = 0;
     if (bmiUnit === 'metric') {
       const hM = heightCm / 100;

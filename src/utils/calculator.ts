@@ -530,3 +530,4 @@ export function formatNumber(
   if (!isFinite(num)) return num > 0 ? 'Infinity' : '-Infinity';
   return num.toLocaleString('en-US', { maximumFractionDigits: precision });
 }
+

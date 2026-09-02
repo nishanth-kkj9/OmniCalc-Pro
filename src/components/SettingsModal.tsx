@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { AppSettings, AngleMode, CalcMode } from '../types';
+import React, { useState, useRef, useMemo } from 'react';
+import { AppSettings, AngleMode, CalcMode, HistoryItem } from '../types';
 import { APP_NAME, APP_VERSION } from '../constants/version';
 import {
   Moon,
@@ -22,7 +22,8 @@ import {
   Info,
 } from 'lucide-react';
 import { playClickSound } from '../utils/sound';
-import { getHistory, clearHistory } from '../utils/history';
+import { getHistory, clearHistory, sanitizeHistoryItem } from '../utils/history';
+import { sanitizeSettings } from '../utils/settings';
 
 interface SettingsModalProps {
   settings: AppSettings;
@@ -153,11 +154,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ settings, onUpdate
     reader.onload = (event) => {
       try {
         const parsed = JSON.parse(event.target?.result as string);
-        if (parsed.settings) {
-          onUpdateSettings(parsed.settings);
+        if (parsed.settings && typeof parsed.settings === 'object') {
+          const safe = sanitizeSettings(parsed.settings);
+          onUpdateSettings(safe);
         }
         if (Array.isArray(parsed.history)) {
-          localStorage.setItem('omnicalc_history_v1', JSON.stringify(parsed.history));
+          const safeHistory: HistoryItem[] = parsed.history
+            .map((item: unknown) => sanitizeHistoryItem(item))
+            .filter((item: HistoryItem | null): item is HistoryItem => item !== null);
+          localStorage.setItem('omnicalc_history_v1', JSON.stringify(safeHistory));
         }
         showNotification('Backup successfully imported and restored!');
       } catch {
@@ -187,8 +192,20 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ settings, onUpdate
     }
   };
 
-  const historyCount = getHistory().length;
-  const storageEstimatedKb = Math.round((JSON.stringify(localStorage).length * 2) / 1024);
+  const { historyCount, storageEstimatedKb } = useMemo(() => {
+    if (activeTab !== 'storage') return { historyCount: 0, storageEstimatedKb: 0 };
+    const hCount = getHistory().length;
+    let bytes = 0;
+    try {
+      bytes = JSON.stringify(localStorage).length * 2;
+    } catch {
+      bytes = 0;
+    }
+    return {
+      historyCount: hCount,
+      storageEstimatedKb: Math.round(bytes / 1024),
+    };
+  }, [activeTab]);
 
   const isLight = settings.theme === 'light';
   const isOled = settings.theme === 'oled';
@@ -410,6 +427,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ settings, onUpdate
                 </div>
               </div>
               <button
+                role="switch"
+                aria-checked={settings.autoSaveHistory}
+                aria-label="Toggle auto-record calculation history"
                 onClick={() => onUpdateSettings({ autoSaveHistory: !settings.autoSaveHistory })}
                 style={settings.autoSaveHistory ? { backgroundColor: 'var(--accent)' } : undefined}
                 className={`w-12 h-6 flex items-center rounded-full p-1 transition-all ${
@@ -761,6 +781,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ settings, onUpdate
                 </div>
               </div>
               <button
+                role="switch"
+                aria-checked={settings.soundEnabled}
+                aria-label="Toggle button click sound effects"
                 onClick={() => onUpdateSettings({ soundEnabled: !settings.soundEnabled })}
                 style={settings.soundEnabled ? { backgroundColor: 'var(--accent)' } : undefined}
                 className={`p-2.5 rounded-2xl border transition-all ${
@@ -863,6 +886,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ settings, onUpdate
                 </div>
               </div>
               <button
+                role="switch"
+                aria-checked={settings.hapticFeedback}
+                aria-label="Toggle haptic vibration feedback"
                 onClick={() => onUpdateSettings({ hapticFeedback: !settings.hapticFeedback })}
                 style={settings.hapticFeedback ? { backgroundColor: 'var(--accent)' } : undefined}
                 className={`p-2.5 rounded-2xl border transition-all ${

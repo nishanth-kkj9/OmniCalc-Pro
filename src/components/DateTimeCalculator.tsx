@@ -8,17 +8,35 @@ interface DateTimeCalculatorProps {
 
 const DATETIME_TABS = ['diff', 'addsub', 'age', 'worktime'] as const;
 
+function parseLocalDate(str: string): Date | null {
+  if (!str) return null;
+  const parts = str.split('-').map(Number);
+  if (parts.length !== 3 || parts.some(isNaN)) return null;
+  const [y, m, d] = parts;
+  const date = new Date(y, m - 1, d);
+  return isNaN(date.getTime()) ? null : date;
+}
+
+function formatLocalDate(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 export const DateTimeCalculator: React.FC<DateTimeCalculatorProps> = ({ settings: _settings }) => {
   const [tab, setTab] = useState<'diff' | 'addsub' | 'age' | 'worktime'>('diff');
 
-  // Today ISO
-  const todayStr = new Date().toISOString().split('T')[0];
+  // Today ISO in local timezone
+  const todayStr = formatLocalDate(new Date());
 
   // Date Diff State
   const [startDate, setStartDate] = useState<string>(todayStr);
-  const [endDate, setEndDate] = useState<string>(
-    new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-  );
+  const [endDate, setEndDate] = useState<string>(() => {
+    const future = new Date();
+    future.setDate(future.getDate() + 30);
+    return formatLocalDate(future);
+  });
 
   // Add / Sub State
   const [baseDate, setBaseDate] = useState<string>(todayStr);
@@ -39,9 +57,9 @@ export const DateTimeCalculator: React.FC<DateTimeCalculatorProps> = ({ settings
 
   // Compute Date Difference
   const computeDateDiff = () => {
-    const d1 = new Date(startDate);
-    const d2 = new Date(endDate);
-    if (isNaN(d1.getTime()) || isNaN(d2.getTime())) return null;
+    const d1 = parseLocalDate(startDate);
+    const d2 = parseLocalDate(endDate);
+    if (!d1 || !d2) return null;
 
     const diffTime = Math.abs(d2.getTime() - d1.getTime());
     const totalDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
@@ -92,8 +110,8 @@ export const DateTimeCalculator: React.FC<DateTimeCalculatorProps> = ({ settings
 
   // Add / Subtract Calculation
   const computeAddSub = () => {
-    const d = new Date(baseDate);
-    if (isNaN(d.getTime())) return null;
+    const d = parseLocalDate(baseDate);
+    if (!d) return null;
 
     const mult = opType === 'add' ? 1 : -1;
     const res = new Date(d);
@@ -110,16 +128,16 @@ export const DateTimeCalculator: React.FC<DateTimeCalculatorProps> = ({ settings
     };
 
     return {
-      iso: res.toISOString().split('T')[0],
+      iso: formatLocalDate(res),
       formatted: res.toLocaleDateString(undefined, options),
     };
   };
 
   // Age Calculator
   const computeAge = () => {
-    const dob = new Date(birthDate);
+    const dob = parseLocalDate(birthDate);
     const now = new Date();
-    if (isNaN(dob.getTime())) return null;
+    if (!dob) return null;
 
     let y = now.getFullYear() - dob.getFullYear();
     let m = now.getMonth() - dob.getMonth();

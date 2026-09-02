@@ -549,7 +549,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             className={`p-3 border-t text-[11px] text-center flex items-center justify-between px-4 ${footerColor}`}
           >
             <span>
-              {APP_NAME} v{APP_VERSION} • Multi-Engine
+              {APP_NAME} v{APP_VERSION} • Multi-Engine Suite
             </span>
             <span className="font-mono text-[10px] text-slate-500">⌘K</span>
           </div>

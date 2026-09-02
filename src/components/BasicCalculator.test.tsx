@@ -14,9 +14,9 @@ describe('BasicCalculator Component', () => {
   it('enters digits and calculates basic addition', () => {
     render(<BasicCalculator settings={DEFAULT_SETTINGS} />);
     const sevenBtn = screen.getByRole('button', { name: '7' });
-    const addBtn = screen.getByRole('button', { name: '+' });
+    const addBtn = screen.getByRole('button', { name: /^add$/i });
     const fiveBtn = screen.getByRole('button', { name: '5' });
-    const eqBtn = screen.getByRole('button', { name: '=' });
+    const eqBtn = screen.getByRole('button', { name: /equals/i });
 
     fireEvent.click(sevenBtn);
     fireEvent.click(addBtn);

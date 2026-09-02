@@ -89,12 +89,29 @@ export function generateMarkdownReport(data: ExportReportData): string {
 }
 
 /**
- * Generate Standard CSV formatted text
+ * Sanitizes strings for safe HTML interpolation, preventing DOM-XSS.
+ */
+export function escapeHtml(val: unknown): string {
+  if (val === null || val === undefined) return '';
+  return String(val)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/**
+ * Generate Standard CSV formatted text with CSV injection protection
  */
 export function generateCSV(headers: string[], rows: (string | number)[][]): string {
   const escapeCell = (val: string | number) => {
-    const s = String(val);
-    if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+    let s = String(val ?? '');
+    // Neutralize formula injection in spreadsheet applications (=, +, -, @, \t, \r)
+    if (/^[=+\-@\t\r]/.test(s)) {
+      s = `'${s}`;
+    }
+    if (s.includes(',') || s.includes('"') || s.includes('\n') || s.includes('\r')) {
       return `"${s.replace(/"/g, '""')}"`;
     }
     return s;
@@ -131,14 +148,18 @@ export function printCalculationSheet(data: ExportReportData) {
   const printWindow = window.open('', '_blank');
   if (!printWindow) return;
 
-  const dateStr = new Date(data.timestamp).toLocaleString();
+  const titleSafe = escapeHtml(data.title);
+  const engineSafe = escapeHtml(data.engine);
+  const dateStrSafe = escapeHtml(new Date(data.timestamp).toLocaleString());
+  const inputSafe = escapeHtml(data.inputDescription);
+  const resultSafe = escapeHtml(data.resultSummary);
 
   const stepsHtml =
     data.steps && data.steps.length > 0
       ? `<div class="section">
         <h3>Step-by-Step Derivation</h3>
         <ol>
-          ${data.steps.map((s) => `<li>${s}</li>`).join('')}
+          ${data.steps.map((s) => `<li>${escapeHtml(s)}</li>`).join('')}
         </ol>
       </div>`
       : '';
@@ -149,10 +170,15 @@ export function printCalculationSheet(data: ExportReportData) {
         <h3>Numerical Data Table</h3>
         <table>
           <thead>
-            <tr>${data.tableHeaders.map((h) => `<th>${h}</th>`).join('')}</tr>
+            <tr>${data.tableHeaders.map((h) => `<th>${escapeHtml(h)}</th>`).join('')}</tr>
           </thead>
           <tbody>
-            ${data.tableRows.map((r) => `<tr>${r.map((c) => `<td>${c}</td>`).join('')}</tr>`).join('')}
+            ${data.tableRows
+              .map(
+                (r) =>
+                  `<tr>${r.map((c) => `<td>${escapeHtml(c)}</td>`).join('')}</tr>`
+              )
+              .join('')}
           </tbody>
         </table>
       </div>`
@@ -164,7 +190,7 @@ export function printCalculationSheet(data: ExportReportData) {
         <h3>Parameters & Constants</h3>
         <ul>
           ${Object.entries(data.metadata)
-            .map(([k, v]) => `<li><strong>${k}:</strong> ${v}</li>`)
+            .map(([k, v]) => `<li><strong>${escapeHtml(k)}:</strong> ${escapeHtml(v)}</li>`)
             .join('')}
         </ul>
       </div>`
@@ -173,7 +199,9 @@ export function printCalculationSheet(data: ExportReportData) {
   const html = `<!DOCTYPE html>
 <html>
 <head>
-  <title>${data.title} - OmniCalc Pro Report</title>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline';">
+  <title>${titleSafe} - OmniCalc Pro Report</title>
   <style>
     @media print {
       body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -268,17 +296,17 @@ export function printCalculationSheet(data: ExportReportData) {
 <body>
   <div class="header">
     <div>
-      <h1>${data.title}</h1>
-      <div class="meta">Engine: <strong>${data.engine}</strong> • Generated: ${dateStr}</div>
+      <h1>${titleSafe}</h1>
+      <div class="meta">Engine: <strong>${engineSafe}</strong> • Generated: ${dateStrSafe}</div>
     </div>
     <div style="font-weight: bold; color: #0284c7; font-size: 14px;">OmniCalc Pro</div>
   </div>
 
   <div class="result-box">
     <div class="label">Input Specification</div>
-    <div style="font-family: monospace; font-size: 14px; margin-bottom: 8px;">${data.inputDescription}</div>
+    <div style="font-family: monospace; font-size: 14px; margin-bottom: 8px;">${inputSafe}</div>
     <div class="label">Computed Outcome</div>
-    <div class="value">${data.resultSummary}</div>
+    <div class="value">${resultSafe}</div>
   </div>
 
   ${metadataHtml}

@@ -70,12 +70,16 @@ export const FractionsCalculator: React.FC<FractionsCalculatorProps> = ({
 
   // Compute Fractions
   const computeFractions = () => {
-    const n1 = parseInt(f1Num) || 0;
-    const d1 = parseInt(f1Den) || 1;
-    const n2 = parseInt(f2Num) || 0;
-    const d2 = parseInt(f2Den) || 1;
+    const n1 = parseInt(f1Num.trim(), 10);
+    const d1 = parseInt(f1Den.trim(), 10);
+    const n2 = parseInt(f2Num.trim(), 10);
+    const d2 = parseInt(f2Den.trim(), 10);
 
-    if (d1 === 0 || d2 === 0) {
+    if (isNaN(n1) || isNaN(n2)) {
+      return { error: 'Please enter valid numerator integers.' };
+    }
+
+    if (isNaN(d1) || isNaN(d2) || d1 === 0 || d2 === 0) {
       return { error: 'Denominator cannot be zero.' };
     }
 
