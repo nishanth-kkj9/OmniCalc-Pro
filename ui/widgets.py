@@ -143,6 +143,20 @@ class DisplayPanel(QLineEdit):
         self._flash_animation = None
         self._original_style = self.styleSheet()
 
+        self._color_effect = QGraphicsOpacityEffect(self)
+        self.setGraphicsEffect(self._color_effect)
+        self._color_anim = QPropertyAnimation(self._color_effect, b"opacity")
+        self._color_anim.setDuration(100)
+        self._color_anim.setStartValue(1.0)
+        self._color_anim.setEndValue(0.5)
+        self._color_anim.setEasingCurve(QEasingCurve.Type.OutQuad)
+        self._color_anim.finished.connect(self._on_color_anim_finished)
+
+    def _on_color_anim_finished(self):
+        if self._color_anim.direction() == QPropertyAnimation.Direction.Forward:
+            self._color_anim.setDirection(QPropertyAnimation.Direction.Backward)
+            self._color_anim.start()
+
     def flash_result(self, success=True):
         """Flash the display with success/error color."""
         if self._flash_animation:
@@ -159,15 +173,10 @@ class DisplayPanel(QLineEdit):
         self._flash_animation.setEasingCurve(QEasingCurve.Type.OutQuad)
         self._flash_animation.start()
 
-        # Also animate text color
-        self._color_effect = QGraphicsOpacityEffect(self)
-        self.setGraphicsEffect(self._color_effect)
-        self._color_anim = QPropertyAnimation(self._color_effect, b"opacity")
-        self._color_anim.setDuration(100)
-        self._color_anim.setStartValue(1.0)
-        self._color_anim.setEndValue(0.5)
-        self._color_anim.setEasingCurve(QEasingCurve.Type.OutQuad)
-        self._color_anim.finished.connect(lambda: self._color_anim.setDirection(QPropertyAnimation.Direction.Backward) or self._color_anim.start())
+        # Also animate text color using the reusable opacity animation
+        if self._color_anim.state() == QPropertyAnimation.State.Running:
+            self._color_anim.stop()
+        self._color_anim.setDirection(QPropertyAnimation.Direction.Forward)
         self._color_anim.start()
 
 

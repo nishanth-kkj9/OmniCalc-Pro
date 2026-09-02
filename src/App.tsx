@@ -145,9 +145,22 @@ export function App() {
     return () => window.removeEventListener('open-command-palette', handleOpen);
   }, []);
 
-  // Save settings when modified
+  // Save settings when modified (debounced to avoid localStorage thrashing on rapid changes like slider dragging)
   useEffect(() => {
-    saveSettings(settings);
+    const timer = setTimeout(() => {
+      saveSettings(settings);
+    }, 250);
+
+    return () => clearTimeout(timer);
+  }, [settings]);
+
+  // Ensure latest settings are flushed on window close
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      saveSettings(settings);
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [settings]);
 
   // Apply Theme to document HTML element

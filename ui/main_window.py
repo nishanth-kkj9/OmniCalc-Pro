@@ -368,8 +368,22 @@ class MainWindow(QMainWindow):
         self.title_bar.status_lbl.setText("  OmniCalc Pro | Ready")
 
     def _update_sidebar_active(self, idx):
+        self.current_idx = idx
+        theme = get_theme()
+        active_bg = theme.get("sidebar_active", "#2a2a35")
+        active_color = theme.get("text_accent", "#00ffaa")
+        inactive_color = theme.get("text_secondary", "#8892a0")
+        hover_bg = theme.get("sidebar_hover", "#1e1e2e")
         for i, btn in enumerate(self.sidebar.btn_list):
-            btn.setStyleSheet("QToolButton { background: transparent; color: #aaa; }" if i != idx else "QToolButton { background: #2a2a35; color: #00ffaa; }")
+            if i != idx:
+                btn.setStyleSheet(
+                    f"QToolButton {{ background: transparent; color: {inactive_color}; border: none; border-radius: 8px; }} "
+                    f"QToolButton:hover {{ background: {hover_bg}; }}"
+                )
+            else:
+                btn.setStyleSheet(
+                    f"QToolButton {{ background: {active_bg}; color: {active_color}; border: none; border-radius: 8px; font-weight: bold; }}"
+                )
 
     def _create_page(self, idx):
         page = self.page_factories[idx][1]()
@@ -389,3 +403,5 @@ class MainWindow(QMainWindow):
             theme.apply(cfg.get("theme", "dark"))
             app.setFont(QFont("Segoe UI", cfg.get("font_size", 14)))
             self.title_bar.status_lbl.setText("  OmniCalc Pro | Theme Updated")
+            if hasattr(self, 'current_idx'):
+                self._update_sidebar_active(self.current_idx)

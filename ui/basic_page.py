@@ -15,6 +15,8 @@ class BasicPage(QWidget):
         self.history_db = get_history_manager()
         self.expression = ""
         self.memory = 0.0
+        self._undo_stack = []
+        self._history_cursor = -1
         self.setup_ui()
 
     def setup_ui(self):
@@ -69,8 +71,15 @@ class BasicPage(QWidget):
         layout.addLayout(grid)
 
     def _input(self, t):
+        if t not in ("MC", "MR", "M+", "M-"):
+            if not self._undo_stack or self._undo_stack[-1] != self.expression:
+                self._undo_stack.append(self.expression)
+                if len(self._undo_stack) > 50:
+                    self._undo_stack.pop(0)
+
         if t == "C":
             self.expression = ""
+            self._history_cursor = -1
             logger.debug("Cleared calculator")
         elif t == "\u232b":
             self.expression = self.expression[:-1]
@@ -89,6 +98,7 @@ class BasicPage(QWidget):
                 logger.info(f"Result: {res}")
                 self.expression = str(res)
                 self.display.flash_result(success=True)
+                self._history_cursor = -1
             except Exception as e:
                 logger.warning(f"Calc failed: {e}")
                 self.expression = "Error"
@@ -133,13 +143,47 @@ class BasicPage(QWidget):
         key = event.key()
         text = event.text()
 
+        # Ctrl+Z Undo
+        if (event.modifiers() & Qt.KeyboardModifier.ControlModifier) and key == Qt.Key.Key_Z:
+            if self._undo_stack:
+                self.expression = self._undo_stack.pop()
+                self.display.setText(self.expression)
+            return
+
+        # Up/Down history navigation
+        if key == Qt.Key.Key_Up:
+            try:
+                entries = self.history_db.get_all(limit=25)
+                if entries:
+                    self._history_cursor = min(self._history_cursor + 1, len(entries) - 1)
+                    row = entries[self._history_cursor]
+                    self.expression = row["expression"]
+                    self.display.setText(self.expression)
+            except Exception as e:
+                logger.debug(f"History Up navigation failed: {e}")
+            return
+        elif key == Qt.Key.Key_Down:
+            try:
+                if self._history_cursor > 0:
+                    self._history_cursor -= 1
+                    entries = self.history_db.get_all(limit=25)
+                    if entries:
+                        row = entries[self._history_cursor]
+                        self.expression = row["expression"]
+                        self.display.setText(self.expression)
+                elif self._history_cursor == 0:
+                    self._history_cursor = -1
+                    self.expression = ""
+                    self.display.setText("")
+            except Exception as e:
+                logger.debug(f"History Down navigation failed: {e}")
+            return
+
         if key == Qt.Key.Key_Return or key == Qt.Key.Key_Equal:
             self._input("=")
-        elif key == Qt.Key.Key_Escape or key == Qt.Key.Key_C:
+        elif key == Qt.Key.Key_Escape:
             self._input("C")
-        elif key == Qt.Key.Key_Backspace:
-            self._input("\u232b")
-        elif key == Qt.Key.Key_Delete:
+        elif key == Qt.Key.Key_Backspace or key == Qt.Key.Key_Delete:
             self._input("\u232b")
         elif text in "0123456789":
             self._input(text)

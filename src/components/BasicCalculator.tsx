@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Delete, Copy, Check, History, ChevronUp, ChevronDown, Keyboard } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Delete, Copy, Check, History, ChevronUp, ChevronDown, Keyboard, Undo2 } from 'lucide-react';
 import { evaluateExpression } from '../utils/calculator';
 import { addHistory, getHistory } from '../utils/history';
 import { formatNumberWithSettings } from '../utils/formatting';
@@ -19,6 +19,29 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
   const [showHistoryTape, setShowHistoryTape] = useState<boolean>(false);
   const [recentHistory, setRecentHistory] = useState<HistoryItem[]>([]);
   const [showKeyboardHints, setShowKeyboardHints] = useState<boolean>(false);
+
+  const undoStackRef = useRef<string[]>([]);
+  const [canUndo, setCanUndo] = useState<boolean>(false);
+  const [historyCursor, setHistoryCursor] = useState<number>(-1);
+
+  const pushUndo = useCallback((prevExpr: string) => {
+    if (undoStackRef.current.length === 0 || undoStackRef.current[undoStackRef.current.length - 1] !== prevExpr) {
+      undoStackRef.current.push(prevExpr);
+      if (undoStackRef.current.length > 50) {
+        undoStackRef.current.shift();
+      }
+      setCanUndo(true);
+    }
+  }, []);
+
+  const handleUndo = useCallback(() => {
+    if (undoStackRef.current.length > 0) {
+      const prev = undoStackRef.current.pop() ?? '';
+      setExpression(prev);
+      setIsEvaluated(false);
+      setCanUndo(undoStackRef.current.length > 0);
+    }
+  }, []);
 
   const refreshHistory = useCallback(() => {
     const list = getHistory().filter((h) => h.mode === 'basic' || h.mode === 'scientific');
@@ -60,6 +83,7 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
 
   const handleInput = useCallback(
     (val: string) => {
+      pushUndo(expression);
       if (isEvaluated) {
         if (['+', '−', '×', '÷', '%', '^'].includes(val)) {
           setExpression(rawResult + val);
@@ -71,17 +95,20 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
         setExpression((prev) => prev + val);
       }
     },
-    [isEvaluated, rawResult]
+    [expression, isEvaluated, pushUndo, rawResult]
   );
 
-  const handleClear = () => {
+  const handleClear = useCallback(() => {
+    pushUndo(expression);
     setExpression('');
     setRawResult('0');
     setDisplayResult('0');
     setIsEvaluated(false);
-  };
+    setHistoryCursor(-1);
+  }, [expression, pushUndo]);
 
   const handleBackspace = useCallback(() => {
+    pushUndo(expression);
     if (isEvaluated) {
       setExpression('');
       setRawResult('0');
@@ -90,10 +117,11 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
     } else {
       setExpression((prev) => prev.slice(0, -1));
     }
-  }, [isEvaluated]);
+  }, [expression, isEvaluated, pushUndo]);
 
   const handleEquals = useCallback(() => {
     if (!expression.trim()) return;
+    pushUndo(expression);
     const finalVal = evaluateExpression(expression, settings.angleMode, settings.precision);
     if (finalVal !== 'Error') {
       const formatted = formatNumberWithSettings(finalVal, settings);
@@ -101,16 +129,18 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
       setRawResult(finalVal);
       setDisplayResult(formatted);
       setIsEvaluated(true);
+      setHistoryCursor(-1);
       refreshHistory();
     } else {
       setRawResult('Error');
       setDisplayResult('Error');
       setIsEvaluated(true);
     }
-  }, [expression, settings, refreshHistory]);
+  }, [expression, settings, pushUndo, refreshHistory]);
 
   const handlePlusMinus = () => {
     if (!expression) return;
+    pushUndo(expression);
     if (expression.startsWith('-')) {
       setExpression(expression.substring(1));
     } else {
@@ -128,6 +158,7 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
   };
 
   const handleRecallHistory = (item: HistoryItem) => {
+    pushUndo(expression);
     setExpression(item.expression);
     setRawResult(item.result);
     setDisplayResult(item.result);
@@ -138,6 +169,44 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        handleUndo();
+        return;
+      }
+
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (recentHistory.length > 0) {
+          const nextCursor = Math.min(historyCursor + 1, recentHistory.length - 1);
+          setHistoryCursor(nextCursor);
+          setExpression(recentHistory[nextCursor].expression);
+          setRawResult(recentHistory[nextCursor].result);
+          setDisplayResult(recentHistory[nextCursor].result);
+          setIsEvaluated(true);
+        }
+        return;
+      }
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (historyCursor > 0) {
+          const nextCursor = historyCursor - 1;
+          setHistoryCursor(nextCursor);
+          setExpression(recentHistory[nextCursor].expression);
+          setRawResult(recentHistory[nextCursor].result);
+          setDisplayResult(recentHistory[nextCursor].result);
+          setIsEvaluated(true);
+        } else if (historyCursor === 0) {
+          setHistoryCursor(-1);
+          setExpression('');
+          setRawResult('0');
+          setDisplayResult('0');
+          setIsEvaluated(false);
+        }
+        return;
+      }
 
       if (e.key >= '0' && e.key <= '9') handleInput(e.key);
       else if (e.key === '.') handleInput('.');
@@ -154,7 +223,7 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleInput, handleEquals, handleBackspace]);
+  }, [handleInput, handleEquals, handleBackspace, handleClear, handleUndo, recentHistory, historyCursor]);
 
   const isLight = settings.theme === 'light';
   const isOled = settings.theme === 'oled';
@@ -243,6 +312,22 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
           </div>
 
           <div className="flex items-center gap-1.5 flex-shrink-0">
+            <button
+              onClick={handleUndo}
+              disabled={!canUndo}
+              className={`p-1.5 px-2 rounded-xl border text-xs font-medium flex items-center gap-1.5 transition-all ${
+                !canUndo
+                  ? 'opacity-40 cursor-not-allowed border-transparent'
+                  : isLight
+                    ? 'bg-slate-100 hover:bg-slate-200 text-slate-600 border-slate-200'
+                    : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700/80'
+              }`}
+              title="Undo last change (Ctrl+Z / Cmd+Z)"
+              aria-label="Undo"
+            >
+              <Undo2 className="w-3.5 h-3.5 flex-shrink-0" aria-hidden="true" />
+              <span className="text-[11px] hidden sm:inline">Undo</span>
+            </button>
             <button
               onClick={handleCopy}
               className={`p-1.5 px-2 rounded-xl border text-xs font-medium flex items-center gap-1.5 transition-all opacity-85 group-hover:opacity-100 ${
@@ -505,6 +590,12 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
             </div>
             <div>
               <kbd className="font-bold text-sky-400">%</kbd> : Modulo / Percent
+            </div>
+            <div>
+              <kbd className="font-bold text-sky-400">Ctrl+Z</kbd> : Undo
+            </div>
+            <div>
+              <kbd className="font-bold text-sky-400">↑ / ↓</kbd> : History Recall
             </div>
           </div>
         </div>

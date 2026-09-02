@@ -37,7 +37,7 @@ describe('Matrix Engine — Numerical Linear Algebra & Verification', () => {
     });
 
     it('rejects oversized matrices exceeding limit', () => {
-      const huge = Array.from({ length: 6 }, () => Array(6).fill(1));
+      const huge = Array.from({ length: 11 }, () => Array(11).fill(1));
       expect(validateMatrix(huge).valid).toBe(false);
     });
   });

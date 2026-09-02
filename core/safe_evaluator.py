@@ -266,7 +266,7 @@ def _worker_eval_task(expr: str, namespace_keys: list[str], angle_mode: str, cus
     if mode in ("degrees", "deg"):
         ns.update(DEGREE_FUNCTIONS)
         ns.update({k: v for k, v in RADIAN_FUNCTIONS.items() if k not in DEGREE_FUNCTIONS})
-    elif mode in ("grad", "grads", "gradian", "gradians"):
+    elif mode in ("grad", "grads", "gradian", "gradians", "gradient", "gradients"):
         ns.update(GRAD_FUNCTIONS)
         ns.update({k: v for k, v in RADIAN_FUNCTIONS.items() if k not in GRAD_FUNCTIONS})
     else:
@@ -332,7 +332,7 @@ class SafeEvaluator:
         if mode in ("degrees", "deg"):
             ns.update(DEGREE_FUNCTIONS)
             ns.update({k: v for k, v in RADIAN_FUNCTIONS.items() if k not in DEGREE_FUNCTIONS})
-        elif mode in ("grad", "grads", "gradian", "gradians"):
+        elif mode in ("grad", "grads", "gradian", "gradians", "gradient", "gradients"):
             ns.update(GRAD_FUNCTIONS)
             ns.update({k: v for k, v in RADIAN_FUNCTIONS.items() if k not in GRAD_FUNCTIONS})
         else:
@@ -341,7 +341,7 @@ class SafeEvaluator:
 
     def set_angle_mode(self, mode: str) -> None:
         clean = (mode or "").lower()
-        if clean in ("degrees", "deg", "grad", "grads", "gradian", "gradians", "radians", "rad"):
+        if clean in ("degrees", "deg", "grad", "grads", "gradian", "gradians", "gradient", "gradients", "radians", "rad"):
             self.angle_mode = clean
             self._namespace = self._build_namespace()
 
@@ -588,11 +588,30 @@ class SafeEvaluator:
             raise ValueError(f"Error solving expression: {e}") from e
 
 
-_default_evaluator = SafeEvaluator()
+def _normalize_angle_mode(mode: str) -> str:
+    clean = str(mode or "").lower().strip()
+    if clean in ("degrees", "deg", "degree"):
+        return "degrees"
+    if clean in ("grad", "grads", "gradian", "gradians", "gradient", "gradients"):
+        return "grad"
+    return "radians"
+
+
+_default_evaluator = SafeEvaluator(angle_mode="degrees")
+_radians_evaluator = SafeEvaluator(angle_mode="radians")
+_grad_evaluator = SafeEvaluator(angle_mode="grad")
+
 _EVALUATOR_CACHE: dict[str, SafeEvaluator] = {
     "degrees": _default_evaluator,
-    "radians": SafeEvaluator(angle_mode="radians"),
-    "gradients": SafeEvaluator(angle_mode="gradients"),
+    "deg": _default_evaluator,
+    "radians": _radians_evaluator,
+    "rad": _radians_evaluator,
+    "grad": _grad_evaluator,
+    "grads": _grad_evaluator,
+    "gradian": _grad_evaluator,
+    "gradians": _grad_evaluator,
+    "gradient": _grad_evaluator,
+    "gradients": _grad_evaluator,
 }
 _CACHE_LOCK = threading.Lock()
 
@@ -604,7 +623,7 @@ def validate_expression(expr: str, allow_vars: bool = False) -> str:
 
 def safe_eval(expression: str, angle_mode: str = "degrees") -> float | str:
     """Thread-safe convenience function for expression evaluation."""
-    norm_mode = str(angle_mode).lower().strip()
+    norm_mode = _normalize_angle_mode(angle_mode)
     with _CACHE_LOCK:
         evaluator = _EVALUATOR_CACHE.get(norm_mode)
         if evaluator is None:
