@@ -173,7 +173,7 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({
   const isOled = settings.theme === 'oled';
 
   const btnClass =
-    'h-11 sm:h-12 font-semibold text-sm sm:text-base rounded-xl transition-all duration-150 active:scale-95 active:translate-y-0.5 flex items-center justify-center shadow-xs select-none';
+    'h-10 sm:h-11 md:h-12 font-semibold text-xs sm:text-sm md:text-base rounded-lg sm:rounded-xl transition-all duration-150 active:scale-95 active:translate-y-0.5 flex items-center justify-center shadow-xs select-none touch-manipulation';
 
   const numBtnClass = isLight
     ? `${btnClass} bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-900 border border-slate-200 shadow-xs hover:border-slate-300`

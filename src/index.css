@@ -92,9 +92,20 @@ body {
   color: var(--text-primary);
   overflow-x: hidden;
   user-select: none;
+  -webkit-tap-highlight-color: transparent;
   transition:
     background-color 0.15s ease,
     color 0.15s ease;
+}
+
+/* Touch-friendly interactive components for all mobile/tablet devices */
+button,
+[role='button'],
+input[type='button'],
+input[type='submit'],
+a {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Theme Adaptive Helper Classes */

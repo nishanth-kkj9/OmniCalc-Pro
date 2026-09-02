@@ -4,7 +4,6 @@ import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { SettingsModal } from './components/SettingsModal';
 import { CommandPalette } from './components/CommandPalette';
-import { WindowViewportController } from './components/WindowViewportController';
 import { playClickSound, prewarmAudio } from './utils/sound';
 import { ACCENT_COLOR_MAP } from './utils/formatting';
 import { loadInitialSettings, saveSettings } from './utils/settings';
@@ -243,7 +242,7 @@ export function App() {
 
   return (
     <div
-      className={`min-h-screen ${bgClass} flex flex-col lg:flex-row font-sans antialiased transition-colors duration-150`}
+      className={`h-screen w-full overflow-hidden ${bgClass} flex flex-col lg:flex-row font-sans antialiased transition-colors duration-150`}
     >
       {/* Sidebar Navigation */}
       <Sidebar
@@ -260,7 +259,7 @@ export function App() {
       />
 
       {/* Main Workspace Area */}
-      <div className="flex-1 flex flex-col min-w-0 min-h-screen">
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         <Header
           currentMode={currentMode}
           onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
@@ -270,11 +269,8 @@ export function App() {
           onUpdateSettings={updateSettings}
         />
 
-        <main className="flex-1 p-2 sm:p-4 md:p-6 overflow-y-auto">
-          <WindowViewportController
-            settings={settings}
-            activeModeName={currentMode.charAt(0).toUpperCase() + currentMode.slice(1)}
-          >
+        <main className="flex-1 w-full p-2.5 sm:p-4 md:p-6 overflow-y-auto overscroll-contain">
+          <div className="w-full max-w-7xl mx-auto flex flex-col items-center justify-start">
             <EngineErrorBoundary key={currentMode}>
               <Suspense fallback={<EngineLoadingFallback theme={settings.theme} />}>
                 {currentMode === 'basic' && <BasicCalculator settings={settings} />}
@@ -312,7 +308,7 @@ export function App() {
                 )}
               </Suspense>
             </EngineErrorBoundary>
-          </WindowViewportController>
+          </div>
         </main>
       </div>
 

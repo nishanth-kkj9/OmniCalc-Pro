@@ -156,7 +156,7 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
   const isOled = settings.theme === 'oled';
 
   const btnClass =
-    'h-13 sm:h-14 font-semibold text-lg rounded-2xl transition-all duration-150 active:scale-95 active:translate-y-0.5 flex items-center justify-center select-none shadow-xs';
+    'h-11 sm:h-13 md:h-14 font-semibold text-base sm:text-lg md:text-xl rounded-xl sm:rounded-2xl transition-all duration-150 active:scale-95 active:translate-y-0.5 flex items-center justify-center select-none shadow-xs touch-manipulation';
 
   const numBtnClass = isLight
     ? `${btnClass} bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-900 border border-slate-200 shadow-xs hover:border-slate-300`

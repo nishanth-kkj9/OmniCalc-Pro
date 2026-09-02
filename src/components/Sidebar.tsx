@@ -283,7 +283,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Sidebar Container */}
       <aside
         className={`
-        fixed top-0 bottom-0 left-0 z-50 border-r
+        fixed top-0 bottom-0 left-0 z-50 border-r h-full max-h-screen overflow-hidden flex-shrink-0
         flex flex-col transition-all duration-300 ease-in-out lg:translate-x-0 lg:static lg:z-auto
         ${sidebarBg}
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
@@ -328,11 +328,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
               )}
             </button>
           )}
+
+          {/* Mobile Close Button */}
+          {onCloseMobile && (
+            <button
+              onClick={onCloseMobile}
+              className={`flex lg:hidden p-1.5 rounded-xl transition-colors ${idleBtnClass}`}
+              title="Close navigation menu"
+            >
+              <X className="w-5 h-5 text-slate-400 hover:text-slate-100" />
+            </button>
+          )}
         </div>
 
         {/* Mini Icon Rail Mode (PC / Laptop) */}
         {isRailCollapsed ? (
-          <div className="hidden lg:flex flex-1 flex-col items-center py-3 overflow-y-auto space-y-2 scrollbar-none">
+          <div className="hidden lg:flex flex-1 flex-col items-center py-3 overflow-y-auto overscroll-contain space-y-2 scrollbar-none">
             {MENU_ITEMS.map((item) => {
               const isActive = currentMode === item.mode;
               return (
@@ -384,7 +395,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
 
           {/* Navigation items grouped */}
-          <div className="flex-1 overflow-y-auto py-2 px-2 space-y-3.5">
+          <div className="flex-1 overflow-y-auto overscroll-contain py-2 px-2 space-y-3.5">
             {/* Pinned / Quick Access Bar (if not filtering) */}
             {!filterText.trim() && pinnedItems.length > 0 && (
               <div className="space-y-1">
