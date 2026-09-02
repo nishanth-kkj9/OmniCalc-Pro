@@ -1,215 +1,228 @@
 import React, { useState, useEffect } from 'react';
-import { HistoryItem, AppSettings } from '../types';
+import {
+  History,
+  Trash2,
+  Copy,
+  Check,
+  Search,
+  Download,
+  Filter,
+  FileSpreadsheet,
+} from 'lucide-react';
 import { getHistory, clearHistory, deleteHistoryItem } from '../utils/history';
-import { Search, Trash2, Copy, Download, Check, ArrowRight } from 'lucide-react';
+import { HistoryItem, AppSettings } from '../types';
+import { downloadTextFile, generateCSV } from '../utils/exportEngine';
 
 interface HistoryPanelProps {
-  onSelectCalculation?: (expr: string) => void;
+  onSelectExpr?: (expr: string) => void;
+  onSelectCalculation?: () => void;
   settings?: AppSettings;
 }
 
-export const HistoryPanel: React.FC<HistoryPanelProps> = ({ onSelectCalculation, settings }) => {
-  const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
+export const HistoryPanel: React.FC<HistoryPanelProps> = ({ onSelectExpr, settings }) => {
+  const [items, setItems] = useState<HistoryItem[]>([]);
+  const [filterMode, setFilterMode] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [modeFilter, setModeFilter] = useState<string>('all');
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const loadItems = () => {
+    setItems(getHistory());
+  };
+
+  useEffect(() => {
+    loadItems();
+  }, []);
+
+  const handleClear = () => {
+    if (window.confirm('Are you sure you want to clear all calculation history?')) {
+      clearHistory();
+      loadItems();
+    }
+  };
+
+  const handleDeleteItem = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    deleteHistoryItem(id);
+    loadItems();
+  };
+
+  const handleCopy = (text: string, id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 1500);
+  };
+
+  const filteredItems = items.filter((item) => {
+    const matchesMode = filterMode === 'all' || item.mode === filterMode;
+    const matchesSearch =
+      !searchQuery.trim() ||
+      item.expression.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.result.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesMode && matchesSearch;
+  });
 
   const isLight = settings?.theme === 'light';
   const isOled = settings?.theme === 'oled';
 
-  useEffect(() => {
-    setHistoryItems(getHistory());
-  }, []);
-
-  const handleClearAll = () => {
-    clearHistory();
-    setHistoryItems([]);
-  };
-
-  const handleDelete = (id: string) => {
-    const updated = deleteHistoryItem(id);
-    setHistoryItems(updated);
-  };
-
-  const copyItem = (item: HistoryItem) => {
-    navigator.clipboard.writeText(`${item.expression} = ${item.result}`);
-    setCopiedId(item.id);
-    setTimeout(() => setCopiedId(null), 2000);
-  };
-
-  const exportJSON = () => {
-    const dataStr =
-      'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(historyItems, null, 2));
-    const dlAnchorElem = document.createElement('a');
-    dlAnchorElem.setAttribute('href', dataStr);
-    dlAnchorElem.setAttribute('download', `omnicalc-history-${Date.now()}.json`);
-    dlAnchorElem.click();
-  };
-
-  const filteredItems = historyItems.filter((item) => {
-    const matchesSearch =
-      item.expression.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.result.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesMode = modeFilter === 'all' || item.mode === modeFilter;
-    return matchesSearch && matchesMode;
-  });
-
-  const cardBg = isLight
-    ? 'bg-white border-slate-200 text-slate-900 shadow-sm'
+  const panelBg = isLight
+    ? 'bg-white border-slate-200 text-slate-900'
     : isOled
       ? 'bg-zinc-950 border-zinc-800 text-white'
-      : 'bg-slate-900 border-slate-800 text-slate-100 shadow-xl';
+      : 'bg-slate-900 border-slate-800 text-slate-100';
 
-  const inputBg = isLight
-    ? 'bg-slate-50 border-slate-200 text-slate-900'
+  const cardBg = isLight
+    ? 'bg-slate-50 border-slate-200 hover:border-slate-300'
     : isOled
-      ? 'bg-zinc-900 border-zinc-800 text-white'
-      : 'bg-slate-800/80 border-slate-700/80 text-slate-100';
+      ? 'bg-zinc-900 border-zinc-800 hover:border-zinc-700'
+      : 'bg-slate-950/80 border-slate-800/80 hover:border-slate-700';
 
-  const rowBg = isLight
-    ? 'bg-white border-slate-200 hover:border-slate-300 text-slate-900'
-    : isOled
-      ? 'bg-zinc-950 border-zinc-800/80 hover:border-zinc-700 text-white'
-      : 'bg-slate-900 border-slate-800/80 hover:border-slate-700 text-slate-100';
+  const handleExportCSV = () => {
+    const headers = ['ID', 'Timestamp', 'Engine Mode', 'Expression', 'Result'];
+    const rows = filteredItems.map((item) => [
+      item.id,
+      new Date(item.timestamp).toLocaleString(),
+      item.mode,
+      item.expression,
+      item.result,
+    ]);
+    const csvContent = generateCSV(headers, rows);
+    downloadTextFile('omnicalc_history_export.csv', csvContent, 'text/csv');
+  };
 
-  const btnSecondary = isLight
-    ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-300'
-    : isOled
-      ? 'bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border-zinc-800'
-      : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700/80';
+  const handleExportJSON = () => {
+    const jsonStr = JSON.stringify(filteredItems, null, 2);
+    downloadTextFile('omnicalc_history_export.json', jsonStr, 'application/json');
+  };
 
   return (
-    <div className="max-w-4xl mx-auto w-full p-4 flex flex-col gap-5">
-      {/* Search & Filter Header */}
-      <div
-        className={`${cardBg} border rounded-3xl p-4 flex flex-wrap items-center justify-between gap-3`}
-      >
-        <div
-          className={`flex items-center gap-2 flex-1 min-w-[200px] border px-3 py-2 rounded-2xl ${inputBg}`}
-        >
-          <Search className={`w-4 h-4 ${isLight ? 'text-slate-400' : 'text-slate-400'}`} />
+    <div className={`max-w-4xl mx-auto w-full p-4 sm:p-6 rounded-3xl border shadow-xl ${panelBg} flex flex-col gap-6`}>
+      {/* Header Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 bg-sky-600/10 border border-sky-500/20 rounded-2xl text-sky-400">
+            <History className="w-5 h-5" />
+          </div>
+          <div>
+            <h2 className="text-base sm:text-lg font-bold">Calculation Log & Audit</h2>
+            <p className="text-xs text-slate-400">
+              {items.length} total entries recorded across engines
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={handleExportCSV}
+            disabled={filteredItems.length === 0}
+            className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-slate-200 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-slate-700 transition-all"
+          >
+            <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" /> Export CSV
+          </button>
+
+          <button
+            onClick={handleExportJSON}
+            disabled={filteredItems.length === 0}
+            className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-slate-200 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-slate-700 transition-all"
+          >
+            <Download className="w-3.5 h-3.5 text-sky-400" /> JSON
+          </button>
+
+          {items.length > 0 && (
+            <button
+              onClick={handleClear}
+              className="px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-rose-500/30 transition-all"
+            >
+              <Trash2 className="w-3.5 h-3.5" /> Clear All
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Filter and Search controls */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="relative">
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search calculations..."
-            className="bg-transparent border-none text-sm focus:outline-none w-full"
+            placeholder="Search expressions or results..."
+            className="w-full bg-slate-800/60 border border-slate-700/80 focus:border-sky-500 rounded-2xl pl-10 pr-4 py-2 text-xs font-mono text-slate-100 placeholder-slate-400 focus:outline-none"
           />
         </div>
 
-        <select
-          value={modeFilter}
-          onChange={(e) => setModeFilter(e.target.value)}
-          className={`border text-xs font-semibold rounded-2xl px-3 py-2 focus:outline-none cursor-pointer ${btnSecondary}`}
-        >
-          <option value="all">All Modes</option>
-          <option value="basic">Basic</option>
-          <option value="scientific">Scientific</option>
-          <option value="programmer">Programmer</option>
-          <option value="matrix">Matrix</option>
-        </select>
-
         <div className="flex items-center gap-2">
-          <button
-            onClick={exportJSON}
-            disabled={historyItems.length === 0}
-            className={`px-3 py-2 text-xs font-bold rounded-2xl border flex items-center gap-1.5 transition-all disabled:opacity-40 ${btnSecondary}`}
+          <Filter className="w-4 h-4 text-slate-400 flex-shrink-0" />
+          <select
+            value={filterMode}
+            onChange={(e) => setFilterMode(e.target.value)}
+            className="w-full bg-slate-800/60 border border-slate-700/80 focus:border-sky-500 rounded-2xl px-3 py-2 text-xs font-bold text-slate-200 focus:outline-none"
           >
-            <Download className="w-3.5 h-3.5" /> Export
-          </button>
-          <button
-            onClick={handleClearAll}
-            disabled={historyItems.length === 0}
-            className="px-3 py-2 bg-rose-500/15 hover:bg-rose-500/25 text-rose-500 text-xs font-bold rounded-2xl border border-rose-500/30 flex items-center gap-1.5 transition-all disabled:opacity-40"
-          >
-            <Trash2 className="w-3.5 h-3.5" /> Clear All
-          </button>
+            <option value="all">All Calculator Engines</option>
+            <option value="basic">Basic & Standard</option>
+            <option value="scientific">Scientific</option>
+            <option value="programmer">Programmer</option>
+            <option value="matrix">Matrix</option>
+            <option value="calculus">Calculus</option>
+            <option value="equation">Equation Solver</option>
+          </select>
         </div>
       </div>
 
       {/* History Items List */}
-      <div className="flex flex-col gap-3">
+      <div className="space-y-2.5 max-h-[500px] overflow-y-auto pr-1">
         {filteredItems.length === 0 ? (
-          <div className={`${cardBg} border rounded-3xl p-12 text-center text-slate-400 text-sm`}>
-            No calculation entries found in history.
+          <div className="text-center py-12 text-slate-400 text-xs flex flex-col items-center gap-2">
+            <History className="w-8 h-8 text-slate-600" />
+            <span>No calculation logs match your query or filter.</span>
           </div>
         ) : (
           filteredItems.map((item) => (
             <div
               key={item.id}
-              className={`${rowBg} border rounded-3xl p-4 shadow-xs flex items-center justify-between gap-4 transition-all group`}
+              onClick={() => onSelectExpr?.(item.expression)}
+              className={`p-3.5 rounded-2xl border transition-all cursor-pointer group flex items-center justify-between gap-4 ${cardBg}`}
             >
-              <div className="flex flex-col gap-1 overflow-hidden">
-                <div className="flex items-center gap-2">
-                  <span
-                    className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border"
-                    style={{
-                      backgroundColor: isLight
-                        ? 'rgba(2, 132, 199, 0.1)'
-                        : 'rgba(2, 132, 199, 0.2)',
-                      color: 'var(--accent)',
-                      borderColor: 'var(--accent)',
-                    }}
-                  >
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-sky-500/10 text-sky-400 border border-sky-500/20">
                     {item.mode}
                   </span>
-                  <span
-                    className={`text-[10px] font-mono ${isLight ? 'text-slate-400' : 'text-slate-500'}`}
-                  >
+                  <span className="text-[10px] font-mono text-slate-500">
                     {new Date(item.timestamp).toLocaleTimeString([], {
                       hour: '2-digit',
                       minute: '2-digit',
                     })}
                   </span>
                 </div>
-                <div
-                  className={`text-sm font-mono truncate ${isLight ? 'text-slate-600' : 'text-slate-400'}`}
-                >
-                  {item.expression}
+
+                <div className="font-mono text-xs text-slate-400 truncate mb-0.5">
+                  {item.expression} =
                 </div>
-                <div className="text-lg font-mono font-bold flex items-center gap-2">
-                  <span>=</span>
-                  <span style={{ color: 'var(--accent)' }}>{item.result}</span>
+                <div className="font-mono text-base font-bold text-slate-100 truncate">
+                  {item.result}
                 </div>
               </div>
 
-              <div className="flex items-center gap-1.5">
-                {onSelectCalculation && (
-                  <button
-                    onClick={() => onSelectCalculation(item.expression)}
-                    className={`p-2 rounded-xl transition-colors ${
-                      isLight
-                        ? 'text-slate-500 hover:text-sky-600 hover:bg-slate-100'
-                        : 'text-slate-400 hover:text-sky-400 hover:bg-slate-800'
-                    }`}
-                    title="Open in Calculator"
-                  >
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-                )}
+              <div className="flex items-center gap-1 opacity-80 group-hover:opacity-100 flex-shrink-0">
                 <button
-                  onClick={() => copyItem(item)}
-                  className={`p-2 rounded-xl transition-colors ${
-                    isLight
-                      ? 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-800'
-                  }`}
-                  title="Copy Entry"
+                  onClick={(e) => handleCopy(item.result, item.id, e)}
+                  className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-colors"
+                  title="Copy Result"
+                  aria-label="Copy result"
                 >
                   {copiedId === item.id ? (
-                    <Check className="w-4 h-4 text-emerald-500" />
+                    <Check className="w-4 h-4 text-emerald-400" />
                   ) : (
                     <Copy className="w-4 h-4" />
                   )}
                 </button>
                 <button
-                  onClick={() => handleDelete(item.id)}
-                  className={`p-2 rounded-xl transition-colors ${
-                    isLight
-                      ? 'text-slate-400 hover:text-rose-500 hover:bg-slate-100'
-                      : 'text-slate-500 hover:text-rose-400 hover:bg-slate-800'
-                  }`}
-                  title="Delete Entry"
+                  onClick={(e) => handleDeleteItem(item.id, e)}
+                  className="p-2 bg-slate-800 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 rounded-xl transition-colors"
+                  title="Delete Item"
+                  aria-label="Delete history item"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>

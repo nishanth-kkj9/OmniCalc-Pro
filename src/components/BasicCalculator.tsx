@@ -156,7 +156,7 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
   const isOled = settings.theme === 'oled';
 
   const btnClass =
-    'h-11 sm:h-13 md:h-14 font-semibold text-base sm:text-lg md:text-xl rounded-xl sm:rounded-2xl transition-all duration-150 active:scale-95 active:translate-y-0.5 flex items-center justify-center select-none shadow-xs touch-manipulation';
+    'h-11 sm:h-13 md:h-14 font-semibold text-base sm:text-lg md:text-xl rounded-xl sm:rounded-2xl transition-all duration-150 active:scale-95 active:translate-y-0.5 flex items-center justify-center select-none shadow-xs touch-manipulation focus-visible:ring-2 focus-visible:ring-sky-400/60 focus-visible:ring-offset-1 focus-visible:outline-none';
 
   const numBtnClass = isLight
     ? `${btnClass} bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-900 border border-slate-200 shadow-xs hover:border-slate-300`
@@ -177,10 +177,10 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
       : `${btnClass} bg-slate-800/80 hover:bg-slate-700 active:bg-slate-700 text-slate-200 border border-slate-700/60`;
 
   const memBtnClass = isLight
-    ? 'h-9 bg-white hover:bg-slate-100 active:bg-slate-200 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-bold transition-all border border-slate-200 shadow-xs active:scale-95'
+    ? 'h-9 bg-white hover:bg-slate-100 active:bg-slate-200 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-bold transition-all border border-slate-200 shadow-xs active:scale-95 focus-visible:ring-2 focus-visible:ring-sky-400/60 focus-visible:ring-offset-1 focus-visible:outline-none'
     : isOled
-      ? 'h-9 bg-zinc-900 hover:bg-zinc-800 active:bg-zinc-700 text-zinc-300 hover:text-white rounded-xl text-xs font-bold transition-all border border-zinc-800 active:scale-95'
-      : 'h-9 bg-slate-800/80 hover:bg-slate-700 active:bg-slate-600 text-slate-300 hover:text-white rounded-xl text-xs font-bold transition-all border border-slate-700/60 active:scale-95';
+      ? 'h-9 bg-zinc-900 hover:bg-zinc-800 active:bg-zinc-700 text-zinc-300 hover:text-white rounded-xl text-xs font-bold transition-all border border-zinc-800 active:scale-95 focus-visible:ring-2 focus-visible:ring-sky-400/60 focus-visible:ring-offset-1 focus-visible:outline-none'
+      : 'h-9 bg-slate-800/80 hover:bg-slate-700 active:bg-slate-600 text-slate-300 hover:text-white rounded-xl text-xs font-bold transition-all border border-slate-700/60 active:scale-95 focus-visible:ring-2 focus-visible:ring-sky-400/60 focus-visible:ring-offset-1 focus-visible:outline-none';
 
   const screenBg = isLight
     ? 'bg-white border-slate-200 text-slate-900 shadow-sm'
@@ -206,7 +206,7 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
           <div className="flex flex-wrap items-center gap-1.5">
             {memory !== 0 && (
               <span
-                className="text-[10px] font-bold px-2 py-0.5 rounded-full border shadow-xs"
+                className="text-[11px] font-bold px-2 py-0.5 rounded-full border shadow-xs"
                 style={{
                   backgroundColor: isLight ? 'rgba(2, 132, 199, 0.1)' : 'rgba(2, 132, 199, 0.25)',
                   color: 'var(--accent)',
@@ -226,13 +226,14 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
                     : 'bg-slate-800 text-slate-400 hover:bg-slate-700 border-slate-700/80'
               }`}
               title="Toggle Quick History Tape"
+              aria-pressed={showHistoryTape}
             >
-              <History className="w-3 h-3 flex-shrink-0" />
+              <History className="w-3 h-3 flex-shrink-0" aria-hidden="true" />
               <span className="hidden sm:inline">Tape</span>
               {showHistoryTape ? (
-                <ChevronUp className="w-3 h-3 flex-shrink-0" />
+                <ChevronUp className="w-3 h-3 flex-shrink-0" aria-hidden="true" />
               ) : (
-                <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                <ChevronDown className="w-3 h-3 flex-shrink-0" aria-hidden="true" />
               )}
             </button>
           </div>
@@ -249,12 +250,12 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
             >
               {copied ? (
                 <>
-                  <Check className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
+                  <Check className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" aria-hidden="true" />
                   <span className="text-[11px] text-emerald-500 font-bold">Copied</span>
                 </>
               ) : (
                 <>
-                  <Copy className="w-3.5 h-3.5 flex-shrink-0" />
+                  <Copy className="w-3.5 h-3.5 flex-shrink-0" aria-hidden="true" />
                   <span className="text-[11px] hidden sm:inline">Copy</span>
                 </>
               )}
@@ -270,11 +271,12 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
         </div>
 
         {/* Main Display Output */}
-        <div
-          className={`${fontSizeClass} font-bold font-mono tracking-tight overflow-x-auto whitespace-nowrap scrollbar-none py-0.5 tabular-nums ${isLight ? 'text-slate-900' : 'text-slate-100'}`}
+        <output
+          aria-live="polite"
+          className={`${fontSizeClass} font-bold font-mono tracking-tight overflow-x-auto whitespace-nowrap scrollbar-none py-0.5 tabular-nums ${rawResult === 'Error' ? 'text-rose-400' : isLight ? 'text-slate-900' : 'text-slate-100'}`}
         >
           {displayResult || '0'}
-        </div>
+        </output>
       </div>
 
       {/* Quick History Tape Drawer */}
@@ -290,10 +292,10 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
         >
           <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-              <History className="w-3 h-3 text-sky-400" />
+              <History className="w-3 h-3 text-sky-400" aria-hidden="true" />
               Quick Tape (Click to Insert)
             </span>
-            <span className="text-[10px] text-slate-500 font-mono">
+            <span className="text-[11px] text-slate-500 font-mono">
               {recentHistory.length} items
             </span>
           </div>
@@ -330,7 +332,7 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
       {/* Memory Bar */}
       <div className="grid grid-cols-4 gap-2">
         {['MC', 'MR', 'M+', 'M-'].map((m) => (
-          <button key={m} onClick={() => handleMemory(m as any)} className={memBtnClass}>
+          <button key={m} onClick={() => handleMemory(m as any)} className={memBtnClass} aria-label={`Memory ${m === "MC" ? "Clear" : m === "MR" ? "Recall" : m === "M+" ? "Add" : "Subtract"}`}>
             {m}
           </button>
         ))}
@@ -340,22 +342,24 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
       <div className="grid grid-cols-4 gap-2.5">
         <button
           onClick={handleClear}
+          aria-label={expression ? 'Clear current input' : 'Clear all'}
           className={`${btnClass} bg-rose-500/15 hover:bg-rose-500/25 active:bg-rose-500/35 text-rose-500 border border-rose-500/30`}
         >
           {expression ? 'C' : 'AC'}
         </button>
-        <button onClick={() => handleInput('(')} className={fnBtnClass}>
+        <button onClick={() => handleInput('(')} aria-label="Open parenthesis" className={fnBtnClass}>
           (
         </button>
-        <button onClick={() => handleInput(')')} className={fnBtnClass}>
+        <button onClick={() => handleInput(')')} aria-label="Close parenthesis" className={fnBtnClass}>
           )
         </button>
-        <button onClick={handleBackspace} className={fnBtnClass}>
-          <Delete className="w-5 h-5" />
+        <button onClick={handleBackspace} aria-label="Backspace" className={fnBtnClass}>
+          <Delete className="w-5 h-5" aria-hidden="true" />
         </button>
 
         <button
           onClick={() => handleInput('√(')}
+          aria-label="Square root"
           className={fnBtnClass}
           style={{ color: 'var(--accent)' }}
         >
@@ -363,6 +367,7 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
         </button>
         <button
           onClick={() => handleInput('%')}
+          aria-label="Percentage"
           className={fnBtnClass}
           style={{ color: 'var(--accent)' }}
         >
@@ -370,6 +375,7 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
         </button>
         <button
           onClick={() => handleInput('^')}
+          aria-label="Exponent"
           className={fnBtnClass}
           style={{ color: 'var(--accent)' }}
         >
@@ -377,74 +383,79 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
         </button>
         <button
           onClick={() => handleInput('÷')}
+          aria-label="Divide"
           className={opBtnClass}
           style={!isLight ? { color: 'var(--accent)' } : undefined}
         >
           ÷
         </button>
 
-        <button onClick={() => handleInput('7')} className={numBtnClass}>
+        <button onClick={() => handleInput('7')} aria-label="7" className={numBtnClass}>
           7
         </button>
-        <button onClick={() => handleInput('8')} className={numBtnClass}>
+        <button onClick={() => handleInput('8')} aria-label="8" className={numBtnClass}>
           8
         </button>
-        <button onClick={() => handleInput('9')} className={numBtnClass}>
+        <button onClick={() => handleInput('9')} aria-label="9" className={numBtnClass}>
           9
         </button>
         <button
           onClick={() => handleInput('×')}
+          aria-label="Multiply"
           className={opBtnClass}
           style={!isLight ? { color: 'var(--accent)' } : undefined}
         >
           ×
         </button>
 
-        <button onClick={() => handleInput('4')} className={numBtnClass}>
+        <button onClick={() => handleInput('4')} aria-label="4" className={numBtnClass}>
           4
         </button>
-        <button onClick={() => handleInput('5')} className={numBtnClass}>
+        <button onClick={() => handleInput('5')} aria-label="5" className={numBtnClass}>
           5
         </button>
-        <button onClick={() => handleInput('6')} className={numBtnClass}>
+        <button onClick={() => handleInput('6')} aria-label="6" className={numBtnClass}>
           6
         </button>
         <button
           onClick={() => handleInput('−')}
+          aria-label="Subtract"
           className={opBtnClass}
           style={!isLight ? { color: 'var(--accent)' } : undefined}
         >
           −
         </button>
 
-        <button onClick={() => handleInput('1')} className={numBtnClass}>
+        <button onClick={() => handleInput('1')} aria-label="1" className={numBtnClass}>
           1
         </button>
-        <button onClick={() => handleInput('2')} className={numBtnClass}>
+        <button onClick={() => handleInput('2')} aria-label="2" className={numBtnClass}>
           2
         </button>
-        <button onClick={() => handleInput('3')} className={numBtnClass}>
+        <button onClick={() => handleInput('3')} aria-label="3" className={numBtnClass}>
           3
         </button>
         <button
           onClick={() => handleInput('+')}
+          aria-label="Add"
           className={opBtnClass}
           style={!isLight ? { color: 'var(--accent)' } : undefined}
         >
           +
         </button>
 
-        <button onClick={handlePlusMinus} className={numBtnClass}>
+        <button onClick={handlePlusMinus} aria-label="Plus or minus" className={numBtnClass}>
           ±
         </button>
-        <button onClick={() => handleInput('0')} className={numBtnClass}>
+        <button onClick={() => handleInput('0')} aria-label="0" className={numBtnClass}>
           0
         </button>
-        <button onClick={() => handleInput('.')} className={numBtnClass}>
+        <button onClick={() => handleInput('.')} aria-label="Decimal point" className={numBtnClass}>
           .
         </button>
         <button
           onClick={handleEquals}
+          aria-label="Calculate equals"
           style={{ backgroundColor: 'var(--accent)' }}
           className={`${btnClass} text-white font-bold text-2xl shadow-md hover:brightness-110 active:brightness-95`}
         >
@@ -458,10 +469,10 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
           onClick={() => setShowKeyboardHints(!showKeyboardHints)}
           className="flex items-center gap-1.5 hover:text-slate-400 transition-colors"
         >
-          <Keyboard className="w-3.5 h-3.5" />
+          <Keyboard className="w-3.5 h-3.5" aria-hidden="true" />
           <span>{showKeyboardHints ? 'Hide Shortcuts' : 'Keyboard Hints'}</span>
         </button>
-        <span className="font-mono text-[10px]">Enter = Calculate • Esc = Clear</span>
+        <span className="font-mono text-[11px]">Enter = Calculate • Esc = Clear</span>
       </div>
 
       {showKeyboardHints && (
@@ -472,7 +483,7 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
               : 'bg-slate-900/80 border-slate-800 text-slate-300'
           }`}
         >
-          <div className="grid grid-cols-2 gap-2 font-mono text-[10px]">
+          <div className="grid grid-cols-2 gap-2 font-mono text-[11px]">
             <div>
               <kbd className="font-bold text-sky-400">0-9</kbd> : Numbers
             </div>

@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { AppSettings } from '../types';
+import { handleTablistKeydown } from '../utils/ariaTabs';
 
 type FinanceTab = 'emi' | 'compound' | 'gst' | 'discount' | 'roi';
 
 interface FinanceCalculatorProps {
   settings?: AppSettings;
 }
+
+const FINANCE_TABS = ['emi', 'compound', 'gst', 'discount', 'roi'] as const;
 
 export const FinanceCalculator: React.FC<FinanceCalculatorProps> = ({ settings: _settings }) => {
   const [activeTab, setActiveTab] = useState<FinanceTab>('emi');
@@ -88,7 +91,12 @@ export const FinanceCalculator: React.FC<FinanceCalculatorProps> = ({ settings: 
   return (
     <div className="max-w-4xl mx-auto w-full p-4 flex flex-col gap-6">
       {/* Finance Sub-Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+      <div
+        className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none"
+        role="tablist"
+        aria-label="Finance calculator modes"
+        onKeyDown={(e) => handleTablistKeydown(e, [...FINANCE_TABS], activeTab, (t) => setActiveTab(t as FinanceTab))}
+      >
         {[
           { id: 'emi' as FinanceTab, label: 'Loan EMI' },
           { id: 'compound' as FinanceTab, label: 'Compound Interest' },
@@ -98,6 +106,11 @@ export const FinanceCalculator: React.FC<FinanceCalculatorProps> = ({ settings: 
         ].map((tab) => (
           <button
             key={tab.id}
+            role="tab"
+            id={"fin-tab-" + tab.id}
+            aria-selected={activeTab === tab.id}
+            aria-controls={"fin-panel-" + tab.id}
+            tabIndex={activeTab === tab.id ? 0 : -1}
             onClick={() => setActiveTab(tab.id)}
             className={`
               px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border shadow-sm flex-shrink-0
@@ -114,8 +127,7 @@ export const FinanceCalculator: React.FC<FinanceCalculatorProps> = ({ settings: 
       </div>
 
       {/* Tab 1: EMI Calculator */}
-      {activeTab === 'emi' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div role="tabpanel" id="fin-panel-emi" aria-labelledby="fin-tab-emi" tabIndex={0} hidden={activeTab !== 'emi'} className={activeTab !== 'emi' ? 'hidden' : 'grid grid-cols-1 md:grid-cols-2 gap-6'}>
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col gap-5">
             <h3 className="text-sm font-bold text-slate-200 border-b border-slate-800 pb-3">
               Loan Inputs
@@ -211,11 +223,9 @@ export const FinanceCalculator: React.FC<FinanceCalculatorProps> = ({ settings: 
             </div>
           </div>
         </div>
-      )}
 
       {/* Tab 2: Compound Interest */}
-      {activeTab === 'compound' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div role="tabpanel" id="fin-panel-compound" aria-labelledby="fin-tab-compound" tabIndex={0} hidden={activeTab !== 'compound'} className={activeTab !== 'compound' ? 'hidden' : 'grid grid-cols-1 md:grid-cols-2 gap-6'}>
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col gap-4">
             <h3 className="text-sm font-bold text-slate-200 border-b border-slate-800 pb-3">
               Compound Investment
@@ -287,11 +297,9 @@ export const FinanceCalculator: React.FC<FinanceCalculatorProps> = ({ settings: 
             </div>
           </div>
         </div>
-      )}
 
       {/* Tab 3: GST / Tax Calculator */}
-      {activeTab === 'gst' && (
-        <div className="max-w-xl mx-auto w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col gap-5">
+      <div role="tabpanel" id="fin-panel-gst" aria-labelledby="fin-tab-gst" tabIndex={0} hidden={activeTab !== 'gst'} className={activeTab !== 'gst' ? 'hidden' : 'max-w-xl mx-auto w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col gap-5'}>
           <h3 className="text-sm font-bold text-slate-200 border-b border-slate-800 pb-3">
             GST & Tax Calculation
           </h3>
@@ -345,11 +353,9 @@ export const FinanceCalculator: React.FC<FinanceCalculatorProps> = ({ settings: 
             </div>
           </div>
         </div>
-      )}
 
       {/* Tab 4: Discount Calculator */}
-      {activeTab === 'discount' && (
-        <div className="max-w-xl mx-auto w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col gap-5">
+      <div role="tabpanel" id="fin-panel-discount" aria-labelledby="fin-tab-discount" tabIndex={0} hidden={activeTab !== 'discount'} className={activeTab !== 'discount' ? 'hidden' : 'max-w-xl mx-auto w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col gap-5'}>
           <h3 className="text-sm font-bold text-slate-200 border-b border-slate-800 pb-3">
             Discount & Savings
           </h3>
@@ -387,11 +393,9 @@ export const FinanceCalculator: React.FC<FinanceCalculatorProps> = ({ settings: 
             </div>
           </div>
         </div>
-      )}
 
       {/* Tab 5: ROI Calculator */}
-      {activeTab === 'roi' && (
-        <div className="max-w-xl mx-auto w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col gap-5">
+      <div role="tabpanel" id="fin-panel-roi" aria-labelledby="fin-tab-roi" tabIndex={0} hidden={activeTab !== 'roi'} className={activeTab !== 'roi' ? 'hidden' : 'max-w-xl mx-auto w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col gap-5'}>
           <h3 className="text-sm font-bold text-slate-200 border-b border-slate-800 pb-3">
             Return on Investment (ROI)
           </h3>
@@ -431,7 +435,6 @@ export const FinanceCalculator: React.FC<FinanceCalculatorProps> = ({ settings: 
             </div>
           </div>
         </div>
-      )}
     </div>
   );
 };

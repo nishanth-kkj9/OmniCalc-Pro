@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 import {
   Search,
   Calculator,
@@ -56,6 +57,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const trapRef = useFocusTrap<HTMLDivElement>(isOpen);
 
   const isLight = settings.theme === 'light';
   const isOled = settings.theme === 'oled';
@@ -441,10 +443,14 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Command palette"
       className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 px-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-150"
       onClick={onClose}
     >
       <div
+        ref={trapRef}
         className={`w-full max-w-2xl rounded-3xl border ${modalBg} overflow-hidden flex flex-col max-h-[80vh] transition-all`}
         onClick={(e) => e.stopPropagation()}
         onKeyDown={handleKeyDown}
@@ -473,7 +479,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         <div ref={listRef} className="flex-1 overflow-y-auto p-2 space-y-1">
           {filteredCommands.length === 0 ? (
             <div className="p-8 text-center text-xs text-slate-400">
-              No matching calculators or tools found for "{query}".
+              <span role="status">No matching calculators or tools found for "{query}".</span>
             </div>
           ) : (
             filteredCommands.map((cmd, idx) => {

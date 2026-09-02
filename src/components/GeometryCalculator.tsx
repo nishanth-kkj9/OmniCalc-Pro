@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { AppSettings } from '../types';
+import { handleTablistKeydown } from '../utils/ariaTabs';
 
 interface GeometryCalculatorProps {
   settings: AppSettings;
@@ -29,6 +30,10 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
   const [val3D1, setVal3D1] = useState<string>('4'); // radius / length
   const [val3D2, setVal3D2] = useState<string>('10'); // height / width
   const [val3D3, setVal3D3] = useState<string>('6'); // height for prism
+
+  const GEOMETRY_TABS = ['triangle', '2d_shapes', '3d_shapes'] as const;
+  const SHAPES_2D = ['circle', 'sector', 'ellipse', 'trapezoid', 'polygon'] as const;
+  const SHAPES_3D = ['sphere', 'cylinder', 'cone', 'prism', 'pyramid'] as const;
 
   const formatNum = (n: number) => {
     if (Math.abs(n) < 1e-12) return '0';
@@ -255,7 +260,12 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
   return (
     <div className="max-w-4xl mx-auto w-full p-4 flex flex-col gap-6">
       {/* Navigation Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+      <div
+        className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none"
+        role="tablist"
+        aria-label="Geometry calculator modes"
+        onKeyDown={(e) => handleTablistKeydown(e, [...GEOMETRY_TABS], tab, setTab as (tab: string) => void)}
+      >
         {[
           { id: 'triangle', label: 'Triangle & Trigonometry Solver' },
           { id: '2d_shapes', label: '2D Shapes (Area & Perimeter)' },
@@ -263,6 +273,11 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
         ].map((item) => (
           <button
             key={item.id}
+            role="tab"
+            id={`geo-tab-${item.id}`}
+            aria-selected={tab === item.id}
+            aria-controls={`geo-panel-${item.id}`}
+            tabIndex={tab === item.id ? 0 : -1}
             onClick={() => setTab(item.id as any)}
             className={`
               px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border shadow-sm flex-shrink-0
@@ -281,8 +296,7 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
       {/* Main Container */}
       <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col gap-6">
         {/* TRIANGLE SOLVER */}
-        {tab === 'triangle' && (
-          <div className="flex flex-col gap-6">
+        <div role="tabpanel" id="geo-panel-triangle" aria-labelledby="geo-tab-triangle" hidden={tab !== 'triangle'} className="flex flex-col gap-6">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <h3 className="text-base font-bold text-slate-100">Triangle Geometry Solver</h3>
@@ -337,13 +351,13 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
             {triData && (
               <div className="flex flex-col gap-4 bg-slate-950 border border-slate-800 rounded-2xl p-5">
                 {triData.error ? (
-                  <div className="text-rose-400 text-sm font-semibold">{triData.error}</div>
+                  <div role="alert" className="text-rose-400 text-sm font-semibold">{triData.error}</div>
                 ) : (
                   <>
                     {/* SVG Graphic & Key Stats */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
                       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex items-center justify-center relative min-h-[190px]">
-                        <svg className="w-full h-44 overflow-visible" viewBox="0 0 260 170">
+                        <svg className="w-full h-44 overflow-visible" viewBox="0 0 260 170" role="img" aria-label="Geometric triangle diagram">
                           {/* Triangle polygon */}
                           <polygon
                             points={triData.svgPoints}
@@ -426,32 +440,56 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
               </div>
             )}
           </div>
-        )}
 
         {/* 2D SHAPES */}
-        {tab === '2d_shapes' && (
-          <div className="flex flex-col gap-6">
+        <div role="tabpanel" id="geo-panel-2d_shapes" aria-labelledby="geo-tab-2d_shapes" hidden={tab !== '2d_shapes'} className="flex flex-col gap-6">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-base font-bold text-slate-100">2D Geometric Shapes</h3>
                 <p className="text-xs text-slate-400">Area, perimeter, and arc measurements</p>
               </div>
-              <select
-                value={shape2D}
-                onChange={(e) => setShape2D(e.target.value as any)}
-                className="bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs font-bold text-slate-200"
+              <div
+                className="flex items-center gap-2 overflow-x-auto"
+                role="tablist"
+                aria-label="2D shape selector"
+                onKeyDown={(e) => handleTablistKeydown(e, [...SHAPES_2D], shape2D, setShape2D as (tab: string) => void)}
               >
-                <option value="circle">Circle (Radius)</option>
-                <option value="sector">Circle Sector (Radius & Angle)</option>
-                <option value="ellipse">Ellipse (Semi-major & Minor axes)</option>
-                <option value="trapezoid">Trapezoid (Bases & Height)</option>
-                <option value="polygon">Regular Polygon (Side & n)</option>
-              </select>
+                {[
+                  { id: 'circle', label: 'Circle (Radius)' },
+                  { id: 'sector', label: 'Circle Sector (Radius & Angle)' },
+                  { id: 'ellipse', label: 'Ellipse (Semi-major & Minor axes)' },
+                  { id: 'trapezoid', label: 'Trapezoid (Bases & Height)' },
+                  { id: 'polygon', label: 'Regular Polygon (Side & n)' },
+                ].map((item) => (
+                  <button
+                    key={item.id}
+                    role="tab"
+                    id={`geo2d-tab-${item.id}`}
+                    aria-selected={shape2D === item.id}
+                    aria-controls={`geo2d-panel-${item.id}`}
+                    tabIndex={shape2D === item.id ? 0 : -1}
+                    onClick={() => setShape2D(item.id as any)}
+                    className={`bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs font-bold text-slate-200 ${shape2D === item.id ? 'bg-sky-600 text-white border-sky-500' : ''}`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Inputs based on shape */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {shape2D === 'circle' && (
+              <div role="tabpanel" id="geo2d-panel-circle" aria-labelledby="geo2d-tab-circle" hidden={shape2D !== 'circle'} className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-slate-400">Radius (r)</label>
+                <input
+                  type="number"
+                  value={val2D1}
+                  onChange={(e) => setVal2D1(e.target.value)}
+                  className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                />
+              </div>
+
+              <div role="tabpanel" id="geo2d-panel-sector" aria-labelledby="geo2d-tab-sector" hidden={shape2D !== 'sector'} className="flex flex-col gap-1">
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-bold text-slate-400">Radius (r)</label>
                   <input
@@ -461,109 +499,89 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
                     className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
                   />
                 </div>
-              )}
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-bold text-slate-400">Central Angle (°)</label>
+                  <input
+                    type="number"
+                    value={val2D2}
+                    onChange={(e) => setVal2D2(e.target.value)}
+                    className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                  />
+                </div>
+              </div>
 
-              {shape2D === 'sector' && (
-                <>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-bold text-slate-400">Radius (r)</label>
-                    <input
-                      type="number"
-                      value={val2D1}
-                      onChange={(e) => setVal2D1(e.target.value)}
-                      className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-bold text-slate-400">Central Angle (°)</label>
-                    <input
-                      type="number"
-                      value={val2D2}
-                      onChange={(e) => setVal2D2(e.target.value)}
-                      className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                    />
-                  </div>
-                </>
-              )}
+              <div role="tabpanel" id="geo2d-panel-ellipse" aria-labelledby="geo2d-tab-ellipse" hidden={shape2D !== 'ellipse'} className="flex flex-col gap-1">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-bold text-slate-400">Semi-Major Axis (a)</label>
+                  <input
+                    type="number"
+                    value={val2D1}
+                    onChange={(e) => setVal2D1(e.target.value)}
+                    className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-bold text-slate-400">Semi-Minor Axis (b)</label>
+                  <input
+                    type="number"
+                    value={val2D2}
+                    onChange={(e) => setVal2D2(e.target.value)}
+                    className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                  />
+                </div>
+              </div>
 
-              {shape2D === 'ellipse' && (
-                <>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-bold text-slate-400">Semi-Major Axis (a)</label>
-                    <input
-                      type="number"
-                      value={val2D1}
-                      onChange={(e) => setVal2D1(e.target.value)}
-                      className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-bold text-slate-400">Semi-Minor Axis (b)</label>
-                    <input
-                      type="number"
-                      value={val2D2}
-                      onChange={(e) => setVal2D2(e.target.value)}
-                      className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                    />
-                  </div>
-                </>
-              )}
+              <div role="tabpanel" id="geo2d-panel-trapezoid" aria-labelledby="geo2d-tab-trapezoid" hidden={shape2D !== 'trapezoid'} className="flex flex-col gap-1">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-bold text-slate-400">Base a</label>
+                  <input
+                    type="number"
+                    value={val2D1}
+                    onChange={(e) => setVal2D1(e.target.value)}
+                    className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-bold text-slate-400">Base b</label>
+                  <input
+                    type="number"
+                    value={val2D2}
+                    onChange={(e) => setVal2D2(e.target.value)}
+                    className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-bold text-slate-400">Height h</label>
+                  <input
+                    type="number"
+                    value={val2D3}
+                    onChange={(e) => setVal2D3(e.target.value)}
+                    className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                  />
+                </div>
+              </div>
 
-              {shape2D === 'trapezoid' && (
-                <>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-bold text-slate-400">Base a</label>
-                    <input
-                      type="number"
-                      value={val2D1}
-                      onChange={(e) => setVal2D1(e.target.value)}
-                      className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-bold text-slate-400">Base b</label>
-                    <input
-                      type="number"
-                      value={val2D2}
-                      onChange={(e) => setVal2D2(e.target.value)}
-                      className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-bold text-slate-400">Height h</label>
-                    <input
-                      type="number"
-                      value={val2D3}
-                      onChange={(e) => setVal2D3(e.target.value)}
-                      className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                    />
-                  </div>
-                </>
-              )}
-
-              {shape2D === 'polygon' && (
-                <>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-bold text-slate-400">Side Length (s)</label>
-                    <input
-                      type="number"
-                      value={val2D1}
-                      onChange={(e) => setVal2D1(e.target.value)}
-                      className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-bold text-slate-400">Number of Sides (n)</label>
-                    <input
-                      type="number"
-                      min="3"
-                      value={val2D2}
-                      onChange={(e) => setVal2D2(e.target.value)}
-                      className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                    />
-                  </div>
-                </>
-              )}
+              <div role="tabpanel" id="geo2d-panel-polygon" aria-labelledby="geo2d-tab-polygon" hidden={shape2D !== 'polygon'} className="flex flex-col gap-1">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-bold text-slate-400">Side Length (s)</label>
+                  <input
+                    type="number"
+                    value={val2D1}
+                    onChange={(e) => setVal2D1(e.target.value)}
+                    className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-bold text-slate-400">Number of Sides (n)</label>
+                  <input
+                    type="number"
+                    min="3"
+                    value={val2D2}
+                    onChange={(e) => setVal2D2(e.target.value)}
+                    className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Results */}
@@ -576,32 +594,56 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
               ))}
             </div>
           </div>
-        )}
 
         {/* 3D SHAPES */}
-        {tab === '3d_shapes' && (
-          <div className="flex flex-col gap-6">
+        <div role="tabpanel" id="geo-panel-3d_shapes" aria-labelledby="geo-tab-3d_shapes" hidden={tab !== '3d_shapes'} className="flex flex-col gap-6">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-base font-bold text-slate-100">3D Solid Geometries</h3>
                 <p className="text-xs text-slate-400">Volume and surface area computations</p>
               </div>
-              <select
-                value={shape3D}
-                onChange={(e) => setShape3D(e.target.value as any)}
-                className="bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs font-bold text-slate-200"
+              <div
+                className="flex items-center gap-2 overflow-x-auto"
+                role="tablist"
+                aria-label="3D shape selector"
+                onKeyDown={(e) => handleTablistKeydown(e, [...SHAPES_3D], shape3D, setShape3D as (tab: string) => void)}
               >
-                <option value="cylinder">Cylinder (Radius & Height)</option>
-                <option value="sphere">Sphere (Radius)</option>
-                <option value="cone">Cone (Radius & Height)</option>
-                <option value="prism">Rectangular Prism (l, w, h)</option>
-                <option value="pyramid">Square Pyramid (Base s & Height)</option>
-              </select>
+                {[
+                  { id: 'sphere', label: 'Sphere (Radius)' },
+                  { id: 'cylinder', label: 'Cylinder (Radius & Height)' },
+                  { id: 'cone', label: 'Cone (Radius & Height)' },
+                  { id: 'prism', label: 'Rectangular Prism (l, w, h)' },
+                  { id: 'pyramid', label: 'Square Pyramid (Base s & Height)' },
+                ].map((item) => (
+                  <button
+                    key={item.id}
+                    role="tab"
+                    id={`geo3d-tab-${item.id}`}
+                    aria-selected={shape3D === item.id}
+                    aria-controls={`geo3d-panel-${item.id}`}
+                    tabIndex={shape3D === item.id ? 0 : -1}
+                    onClick={() => setShape3D(item.id as any)}
+                    className={`bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs font-bold text-slate-200 ${shape3D === item.id ? 'bg-sky-600 text-white border-sky-500' : ''}`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Inputs */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {shape3D === 'sphere' && (
+              <div role="tabpanel" id="geo3d-panel-sphere" aria-labelledby="geo3d-tab-sphere" hidden={shape3D !== 'sphere'} className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-slate-400">Radius (r)</label>
+                <input
+                  type="number"
+                  value={val3D1}
+                  onChange={(e) => setVal3D1(e.target.value)}
+                  className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                />
+              </div>
+
+              <div role="tabpanel" id="geo3d-panel-cylinder" aria-labelledby="geo3d-tab-cylinder" hidden={shape3D !== 'cylinder'} className="flex flex-col gap-1">
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-bold text-slate-400">Radius (r)</label>
                   <input
@@ -611,85 +653,88 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
                     className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
                   />
                 </div>
-              )}
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-bold text-slate-400">Height (h)</label>
+                  <input
+                    type="number"
+                    value={val3D2}
+                    onChange={(e) => setVal3D2(e.target.value)}
+                    className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                  />
+                </div>
+              </div>
 
-              {(shape3D === 'cylinder' || shape3D === 'cone') && (
-                <>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-bold text-slate-400">Radius (r)</label>
-                    <input
-                      type="number"
-                      value={val3D1}
-                      onChange={(e) => setVal3D1(e.target.value)}
-                      className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-bold text-slate-400">Height (h)</label>
-                    <input
-                      type="number"
-                      value={val3D2}
-                      onChange={(e) => setVal3D2(e.target.value)}
-                      className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                    />
-                  </div>
-                </>
-              )}
+              <div role="tabpanel" id="geo3d-panel-cone" aria-labelledby="geo3d-tab-cone" hidden={shape3D !== 'cone'} className="flex flex-col gap-1">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-bold text-slate-400">Radius (r)</label>
+                  <input
+                    type="number"
+                    value={val3D1}
+                    onChange={(e) => setVal3D1(e.target.value)}
+                    className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-bold text-slate-400">Height (h)</label>
+                  <input
+                    type="number"
+                    value={val3D2}
+                    onChange={(e) => setVal3D2(e.target.value)}
+                    className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                  />
+                </div>
+              </div>
 
-              {shape3D === 'prism' && (
-                <>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-bold text-slate-400">Length (l)</label>
-                    <input
-                      type="number"
-                      value={val3D1}
-                      onChange={(e) => setVal3D1(e.target.value)}
-                      className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-bold text-slate-400">Width (w)</label>
-                    <input
-                      type="number"
-                      value={val3D2}
-                      onChange={(e) => setVal3D2(e.target.value)}
-                      className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-bold text-slate-400">Height (h)</label>
-                    <input
-                      type="number"
-                      value={val3D3}
-                      onChange={(e) => setVal3D3(e.target.value)}
-                      className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                    />
-                  </div>
-                </>
-              )}
+              <div role="tabpanel" id="geo3d-panel-prism" aria-labelledby="geo3d-tab-prism" hidden={shape3D !== 'prism'} className="flex flex-col gap-1">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-bold text-slate-400">Length (l)</label>
+                  <input
+                    type="number"
+                    value={val3D1}
+                    onChange={(e) => setVal3D1(e.target.value)}
+                    className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-bold text-slate-400">Width (w)</label>
+                  <input
+                    type="number"
+                    value={val3D2}
+                    onChange={(e) => setVal3D2(e.target.value)}
+                    className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-bold text-slate-400">Height (h)</label>
+                  <input
+                    type="number"
+                    value={val3D3}
+                    onChange={(e) => setVal3D3(e.target.value)}
+                    className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                  />
+                </div>
+              </div>
 
-              {shape3D === 'pyramid' && (
-                <>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-bold text-slate-400">Base Side (s)</label>
-                    <input
-                      type="number"
-                      value={val3D1}
-                      onChange={(e) => setVal3D1(e.target.value)}
-                      className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-bold text-slate-400">Pyramid Height (h)</label>
-                    <input
-                      type="number"
-                      value={val3D2}
-                      onChange={(e) => setVal3D2(e.target.value)}
-                      className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                    />
-                  </div>
-                </>
-              )}
+              <div role="tabpanel" id="geo3d-panel-pyramid" aria-labelledby="geo3d-tab-pyramid" hidden={shape3D !== 'pyramid'} className="flex flex-col gap-1">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-bold text-slate-400">Base Side (s)</label>
+                  <input
+                    type="number"
+                    value={val3D1}
+                    onChange={(e) => setVal3D1(e.target.value)}
+                    className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-bold text-slate-400">Pyramid Height (h)</label>
+                  <input
+                    type="number"
+                    value={val3D2}
+                    onChange={(e) => setVal3D2(e.target.value)}
+                    className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Results */}
@@ -702,7 +747,6 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
               ))}
             </div>
           </div>
-        )}
       </div>
     </div>
   );

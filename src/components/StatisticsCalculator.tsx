@@ -1,214 +1,248 @@
 import React, { useState } from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { Download, RefreshCw } from 'lucide-react';
+import { ExportModal } from './ExportModal';
+import { ExportReportData } from '../utils/exportEngine';
 import { AppSettings } from '../types';
 
 interface StatisticsCalculatorProps {
-  settings?: AppSettings;
+  settings: AppSettings;
 }
 
-export const StatisticsCalculator: React.FC<StatisticsCalculatorProps> = ({
-  settings: _settings,
-}) => {
-  const [rawInput, setRawInput] = useState<string>(
-    '12, 15, 18, 22, 25, 25, 28, 30, 32, 35, 40, 45, 50'
-  );
+export const StatisticsCalculator: React.FC<StatisticsCalculatorProps> = ({ settings }) => {
+  const [dataInput, setDataInput] = useState<string>('12, 15, 18, 22, 25, 28, 30, 35, 40, 42');
+  const [exportModalOpen, setExportModalOpen] = useState<boolean>(false);
 
-  // Parse numbers safely
-  const parseNumbers = (text: string): number[] => {
-    return text
-      .split(/[\s,;\n]+/)
-      .map((val) => parseFloat(val))
-      .filter((num) => !isNaN(num));
+  // Parse Numbers
+  const parseNumbers = () => {
+    return dataInput
+      .split(/[,;\s]+/)
+      .map((s) => parseFloat(s.trim()))
+      .filter((n) => !isNaN(n));
   };
 
-  const numbers = parseNumbers(rawInput);
+  const nums = parseNumbers();
 
-  // Stats Calculations
-  const calculateStats = () => {
-    if (numbers.length === 0) return null;
+  // Statistics Computations
+  const computeStats = () => {
+    if (nums.length === 0) return null;
 
-    const n = numbers.length;
-    const sorted = [...numbers].sort((a, b) => a - b);
-    const sum = numbers.reduce((acc, v) => acc + v, 0);
+    const n = nums.length;
+    const sorted = [...nums].sort((a, b) => a - b);
+    const sum = nums.reduce((acc, v) => acc + v, 0);
     const mean = sum / n;
 
     // Median
     let median = 0;
-    const mid = Math.floor(n / 2);
     if (n % 2 === 0) {
-      median = (sorted[mid - 1] + sorted[mid]) / 2;
+      median = (sorted[n / 2 - 1] + sorted[n / 2]) / 2;
     } else {
-      median = sorted[mid];
+      median = sorted[Math.floor(n / 2)];
     }
 
     // Mode
-    const freqMap: Record<number, number> = {};
+    const freqMap: { [key: number]: number } = {};
     let maxFreq = 0;
-    numbers.forEach((v) => {
+    nums.forEach((v) => {
       freqMap[v] = (freqMap[v] || 0) + 1;
       if (freqMap[v] > maxFreq) maxFreq = freqMap[v];
     });
     const modes = Object.keys(freqMap)
-      .filter((k) => freqMap[parseFloat(k)] === maxFreq && maxFreq > 1)
-      .map((k) => parseFloat(k));
+      .filter((k) => freqMap[Number(k)] === maxFreq && maxFreq > 1)
+      .map(Number);
 
-    // Variance & Std Dev
-    const sqDiffSum = numbers.reduce((acc, v) => acc + Math.pow(v - mean, 2), 0);
-    const popVar = sqDiffSum / n;
-    const popStdDev = Math.sqrt(popVar);
-    const sampleVar = n > 1 ? sqDiffSum / (n - 1) : 0;
-    const sampleStdDev = Math.sqrt(sampleVar);
-
+    // Min & Max & Range
     const min = sorted[0];
     const max = sorted[n - 1];
     const range = max - min;
 
-    // Histogram bins
-    const binCount = Math.min(8, Math.max(3, Math.floor(Math.sqrt(n))));
-    const binWidth = range > 0 ? range / binCount : 1;
-    const histogramData = Array.from({ length: binCount }, (_, i) => {
-      const bMin = min + i * binWidth;
-      const bMax = bMin + binWidth;
-      const count = numbers.filter(
-        (v) => v >= bMin && (i === binCount - 1 ? v <= bMax : v < bMax)
-      ).length;
-      return {
-        bin: `${bMin.toFixed(1)}-${bMax.toFixed(1)}`,
-        count,
-      };
-    });
+    // Variance & Std Dev (Sample n-1, Population n)
+    const ss = nums.reduce((acc, v) => acc + Math.pow(v - mean, 2), 0);
+    const popVariance = ss / n;
+    const popStdDev = Math.sqrt(popVariance);
+
+    const sampleVariance = n > 1 ? ss / (n - 1) : 0;
+    const sampleStdDev = Math.sqrt(sampleVariance);
+
+    // Quartiles & IQR
+    const getPercentile = (arr: number[], p: number) => {
+      const idx = p * (arr.length - 1);
+      const lower = Math.floor(idx);
+      const upper = Math.ceil(idx);
+      const weight = idx - lower;
+      return arr[lower] * (1 - weight) + arr[upper] * weight;
+    };
+
+    const q1 = getPercentile(sorted, 0.25);
+    const q3 = getPercentile(sorted, 0.75);
+    const iqr = q3 - q1;
 
     return {
       n,
-      sum,
-      mean,
-      median,
-      mode: modes.length > 0 ? modes.join(', ') : 'No unique mode',
-      popStdDev,
-      sampleStdDev,
-      popVar,
-      sampleVar,
+      sum: Math.round(sum * 1000) / 1000,
+      mean: Math.round(mean * 1000) / 1000,
+      median: Math.round(median * 1000) / 1000,
+      modes: modes.length > 0 ? modes.join(', ') : 'No unique mode',
       min,
       max,
       range,
-      histogramData,
+      popVariance: Math.round(popVariance * 10000) / 10000,
+      popStdDev: Math.round(popStdDev * 10000) / 10000,
+      sampleVariance: Math.round(sampleVariance * 10000) / 10000,
+      sampleStdDev: Math.round(sampleStdDev * 10000) / 10000,
+      q1: Math.round(q1 * 1000) / 1000,
+      q3: Math.round(q3 * 1000) / 1000,
+      iqr: Math.round(iqr * 1000) / 1000,
     };
   };
 
-  const stats = calculateStats();
+  const stats = computeStats();
 
-  const loadPreset = (preset: 'scores' | 'temps' | 'sales') => {
-    if (preset === 'scores') setRawInput('78, 85, 92, 65, 88, 95, 72, 80, 85, 90, 88, 76, 94');
-    else if (preset === 'temps')
-      setRawInput('22.5, 24.1, 23.8, 25.0, 26.2, 24.5, 22.9, 21.8, 25.4');
-    else if (preset === 'sales')
-      setRawInput('120, 150, 180, 130, 210, 250, 300, 280, 220, 190, 160');
+  // Export Data Builder
+  const exportReportData: ExportReportData = {
+    title: 'Descriptive Statistical Analysis Report',
+    engine: 'Statistics Engine',
+    timestamp: Date.now(),
+    inputDescription: `N = ${nums.length}, Data: [${dataInput}]`,
+    resultSummary: stats
+      ? `Mean: ${stats.mean}, Median: ${stats.median}, StdDev: ${stats.sampleStdDev}`
+      : 'No data',
+    tableHeaders: ['Index', 'Value (x)', 'Dev from Mean (x - μ)', 'Sq Dev (x - μ)²'],
+    tableRows: stats
+      ? nums.map((v, i) => {
+          const dev = v - stats.mean;
+          return [
+            String(i + 1),
+            String(v),
+            (Math.round(dev * 1000) / 1000).toString(),
+            (Math.round(dev * dev * 1000) / 1000).toString(),
+          ];
+        })
+      : [],
   };
 
   return (
     <div className="max-w-4xl mx-auto w-full p-4 flex flex-col gap-6">
-      {/* Input Section */}
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl flex flex-col gap-3">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
-          <label className="text-sm font-bold text-slate-200">
-            Dataset Input (Comma or Space Separated)
-          </label>
-          <div className="flex flex-wrap items-center gap-1.5 text-xs">
-            <span className="text-slate-400 font-semibold flex-shrink-0">Presets:</span>
-            <button
-              onClick={() => loadPreset('scores')}
-              className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded-lg flex-shrink-0"
-            >
-              Scores
-            </button>
-            <button
-              onClick={() => loadPreset('temps')}
-              className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded-lg flex-shrink-0"
-            >
-              Temps
-            </button>
-            <button
-              onClick={() => loadPreset('sales')}
-              className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded-lg flex-shrink-0"
-            >
-              Sales
-            </button>
-          </div>
+      {/* Header & Preset Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-4 bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl">
+        <div>
+          <h2 className="text-base font-bold text-slate-100">
+            Descriptive Statistics & Data Analysis
+          </h2>
+          <p className="text-xs text-slate-400">
+            Compute mean, median, mode, sample variance, standard deviation, and quartiles
+          </p>
         </div>
 
-        <textarea
-          rows={3}
-          value={rawInput}
-          onChange={(e) => setRawInput(e.target.value)}
-          placeholder="Enter numerical values, e.g., 10, 20, 30, 40..."
-          className="w-full bg-slate-800/90 border border-slate-700 rounded-2xl p-3 font-mono text-sm text-slate-100 focus:outline-none focus:border-sky-500"
-        />
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setDataInput('12, 15, 18, 22, 25, 28, 30, 35, 40, 42')}
+            className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs flex items-center gap-1.5 border border-slate-700 transition-all"
+          >
+            <RefreshCw className="w-3.5 h-3.5 text-sky-400" /> Sample Data
+          </button>
 
-        <div className="text-xs text-slate-400 font-mono">
-          Parsed Values Count: <span className="text-sky-400 font-bold">{numbers.length}</span>
+          <button
+            onClick={() => setExportModalOpen(true)}
+            disabled={!stats}
+            className="p-2 bg-slate-800 hover:bg-slate-700 text-sky-400 disabled:opacity-50 rounded-xl border border-slate-700 transition-all"
+            title="Export Report"
+            aria-label="Export report"
+          >
+            <Download className="w-4 h-4" />
+          </button>
         </div>
       </div>
 
-      {/* Summary Cards Grid */}
+      {/* Dataset Input Box */}
+      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl flex flex-col gap-2">
+        <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+          Enter Numbers (Comma, space, or semicolon separated)
+        </label>
+        <textarea
+          value={dataInput}
+          onChange={(e) => setDataInput(e.target.value)}
+          rows={3}
+          placeholder="e.g. 10, 20, 30, 40, 50..."
+          className="w-full bg-slate-950 border border-slate-800 focus:border-sky-500 rounded-2xl p-3.5 font-mono text-sm font-bold text-slate-100 focus:outline-none resize-none"
+        />
+        <div className="text-[11px] text-slate-500 flex justify-between px-1">
+          <span>Parsed Sample Count (N): {nums.length} items</span>
+          <span>Automatic real-time statistical processing</span>
+        </div>
+      </div>
+
+      {/* Stats Summary Cards */}
       {stats && (
-        <>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-            {[
-              { label: 'Count (n)', val: stats.n },
-              { label: 'Sum (Σx)', val: stats.sum.toFixed(2) },
-              { label: 'Mean (μ)', val: stats.mean.toFixed(4) },
-              { label: 'Median', val: stats.median.toFixed(4) },
-              { label: 'Mode', val: stats.mode },
-              { label: 'Sample Std Dev (s)', val: stats.sampleStdDev.toFixed(4) },
-              { label: 'Pop Std Dev (σ)', val: stats.popStdDev.toFixed(4) },
-              { label: 'Sample Variance (s²)', val: stats.sampleVar.toFixed(4) },
-              { label: 'Min Value', val: stats.min },
-              { label: 'Max Value', val: stats.max },
-              { label: 'Range', val: stats.range.toFixed(2) },
-            ].map(({ label, val }) => (
-              <div
-                key={label}
-                className="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 shadow-md flex flex-col justify-between"
-              >
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                  {label}
-                </span>
-                <span className="text-base sm:text-lg font-mono font-bold text-sky-300 mt-1 truncate">
-                  {val}
-                </span>
-              </div>
-            ))}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col gap-1">
+            <span className="text-xs text-slate-400 font-semibold">Mean (Average)</span>
+            <span className="text-2xl font-mono font-bold text-emerald-400">{stats.mean}</span>
+            <span className="text-[10px] text-slate-500 font-mono">Sum: {stats.sum}</span>
           </div>
 
-          {/* Distribution Histogram Chart */}
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl flex flex-col gap-3">
-            <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider border-b border-slate-800 pb-2">
-              Data Distribution Frequency Histogram
-            </h4>
-            <div className="h-56 w-full pt-2">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={stats.histogramData}>
-                  <XAxis dataKey="bin" stroke="#64748b" tick={{ fontSize: 11 }} />
-                  <YAxis stroke="#64748b" allowDecimals={false} tick={{ fontSize: 11 }} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: '#0f172a',
-                      borderColor: '#334155',
-                      borderRadius: '12px',
-                    }}
-                    itemStyle={{ color: '#38bdf8' }}
-                  />
-                  <Bar dataKey="count" radius={[6, 6, 0, 0]}>
-                    {stats.histogramData.map((_, index) => (
-                      <Cell key={`cell-${index}`} fill="#0284c7" />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col gap-1">
+            <span className="text-xs text-slate-400 font-semibold">Median</span>
+            <span className="text-2xl font-mono font-bold text-sky-400">{stats.median}</span>
+            <span className="text-[10px] text-slate-500 font-mono">Mode: {stats.modes}</span>
+          </div>
+
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col gap-1">
+            <span className="text-xs text-slate-400 font-semibold">Sample Std Dev (s)</span>
+            <span className="text-2xl font-mono font-bold text-amber-400">{stats.sampleStdDev}</span>
+            <span className="text-[10px] text-slate-500 font-mono">Var s²: {stats.sampleVariance}</span>
+          </div>
+
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col gap-1">
+            <span className="text-xs text-slate-400 font-semibold">Population Std Dev (σ)</span>
+            <span className="text-2xl font-mono font-bold text-rose-400">{stats.popStdDev}</span>
+            <span className="text-[10px] text-slate-500 font-mono">Var σ²: {stats.popVariance}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Five Number Summary Breakdown */}
+      {stats && (
+        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl flex flex-col gap-3">
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+            Quartiles & Five-Number Summary
+          </span>
+
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-center font-mono">
+            <div className="p-3 bg-slate-950 border border-slate-800 rounded-xl">
+              <span className="text-[10px] text-slate-500 block uppercase">Min</span>
+              <span className="text-base font-bold text-slate-200">{stats.min}</span>
+            </div>
+            <div className="p-3 bg-slate-950 border border-slate-800 rounded-xl">
+              <span className="text-[10px] text-slate-500 block uppercase">Q1 (25%)</span>
+              <span className="text-base font-bold text-sky-400">{stats.q1}</span>
+            </div>
+            <div className="p-3 bg-slate-950 border border-slate-800 rounded-xl">
+              <span className="text-[10px] text-slate-500 block uppercase">Q2 (Median)</span>
+              <span className="text-base font-bold text-emerald-400">{stats.median}</span>
+            </div>
+            <div className="p-3 bg-slate-950 border border-slate-800 rounded-xl">
+              <span className="text-[10px] text-slate-500 block uppercase">Q3 (75%)</span>
+              <span className="text-base font-bold text-sky-400">{stats.q3}</span>
+            </div>
+            <div className="p-3 bg-slate-950 border border-slate-800 rounded-xl">
+              <span className="text-[10px] text-slate-500 block uppercase">Max</span>
+              <span className="text-base font-bold text-slate-200">{stats.max}</span>
             </div>
           </div>
-        </>
+
+          <div className="border-t border-slate-800 pt-3 flex justify-between text-xs font-mono text-slate-400">
+            <span>Interquartile Range (IQR): {stats.iqr}</span>
+            <span>Total Range (Max - Min): {stats.range}</span>
+          </div>
+        </div>
       )}
+
+      <ExportModal
+        isOpen={exportModalOpen}
+        onClose={() => setExportModalOpen(false)}
+        data={exportReportData}
+        settings={settings}
+      />
     </div>
   );
 };

@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { AppSettings } from '../types';
+import { handleTablistKeydown } from '../utils/ariaTabs';
 
 interface DateTimeCalculatorProps {
   settings?: AppSettings;
 }
+
+const DATETIME_TABS = ['diff', 'addsub', 'age', 'worktime'] as const;
 
 export const DateTimeCalculator: React.FC<DateTimeCalculatorProps> = ({ settings: _settings }) => {
   const [tab, setTab] = useState<'diff' | 'addsub' | 'age' | 'worktime'>('diff');
@@ -188,7 +191,12 @@ export const DateTimeCalculator: React.FC<DateTimeCalculatorProps> = ({ settings
   return (
     <div className="max-w-4xl mx-auto w-full p-4 flex flex-col gap-6">
       {/* Navigation Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+      <div
+        className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none"
+        role="tablist"
+        aria-label="Date and time calculator modes"
+        onKeyDown={(e) => handleTablistKeydown(e, [...DATETIME_TABS], tab, (t) => setTab(t as any))}
+      >
         {[
           { id: 'diff', label: 'Date Difference & Working Days' },
           { id: 'addsub', label: 'Add / Subtract Time' },
@@ -197,6 +205,11 @@ export const DateTimeCalculator: React.FC<DateTimeCalculatorProps> = ({ settings
         ].map((item) => (
           <button
             key={item.id}
+            role="tab"
+            id={"dt-tab-" + item.id}
+            aria-selected={tab === item.id}
+            aria-controls={"dt-panel-" + item.id}
+            tabIndex={tab === item.id ? 0 : -1}
             onClick={() => setTab(item.id as any)}
             className={`
               px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border shadow-sm flex-shrink-0
@@ -215,8 +228,7 @@ export const DateTimeCalculator: React.FC<DateTimeCalculatorProps> = ({ settings
       {/* Main Container */}
       <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col gap-6">
         {/* DATE DIFFERENCE */}
-        {tab === 'diff' && (
-          <div className="flex flex-col gap-6">
+        <div role="tabpanel" id="dt-panel-diff" aria-labelledby="dt-tab-diff" tabIndex={0} hidden={tab !== 'diff'} className={tab !== 'diff' ? 'hidden' : 'flex flex-col gap-6'}>
             <div>
               <h3 className="text-base font-bold text-slate-100">Date Difference Calculator</h3>
               <p className="text-xs text-slate-400">
@@ -298,11 +310,9 @@ export const DateTimeCalculator: React.FC<DateTimeCalculatorProps> = ({ settings
               </div>
             )}
           </div>
-        )}
 
         {/* ADD / SUBTRACT TIME */}
-        {tab === 'addsub' && (
-          <div className="flex flex-col gap-6">
+        <div role="tabpanel" id="dt-panel-addsub" aria-labelledby="dt-tab-addsub" tabIndex={0} hidden={tab !== 'addsub'} className={tab !== 'addsub' ? 'hidden' : 'flex flex-col gap-6'}>
             <div>
               <h3 className="text-base font-bold text-slate-100">Add or Subtract from Date</h3>
               <p className="text-xs text-slate-400">
@@ -383,11 +393,9 @@ export const DateTimeCalculator: React.FC<DateTimeCalculatorProps> = ({ settings
               </div>
             )}
           </div>
-        )}
 
         {/* AGE CALCULATOR */}
-        {tab === 'age' && (
-          <div className="flex flex-col gap-6">
+        <div role="tabpanel" id="dt-panel-age" aria-labelledby="dt-tab-age" tabIndex={0} hidden={tab !== 'age'} className={tab !== 'age' ? 'hidden' : 'flex flex-col gap-6'}>
             <div>
               <h3 className="text-base font-bold text-slate-100">
                 Chronological Age & Birthday Countdown
@@ -436,11 +444,9 @@ export const DateTimeCalculator: React.FC<DateTimeCalculatorProps> = ({ settings
               </div>
             )}
           </div>
-        )}
 
         {/* WORK HOURS */}
-        {tab === 'worktime' && (
-          <div className="flex flex-col gap-6">
+        <div role="tabpanel" id="dt-panel-worktime" aria-labelledby="dt-tab-worktime" tabIndex={0} hidden={tab !== 'worktime'} className={tab !== 'worktime' ? 'hidden' : 'flex flex-col gap-6'}>
             <div>
               <h3 className="text-base font-bold text-slate-100">Work Hours & Wage Calculator</h3>
               <p className="text-xs text-slate-400">
@@ -510,7 +516,6 @@ export const DateTimeCalculator: React.FC<DateTimeCalculatorProps> = ({ settings
               </div>
             )}
           </div>
-        )}
       </div>
     </div>
   );

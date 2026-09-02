@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 import {
   X,
   Copy,
@@ -29,6 +30,14 @@ interface ExportModalProps {
 export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, data, settings }) => {
   const [activeTab, setActiveTab] = useState<'latex' | 'markdown' | 'csv' | 'pdf'>('latex');
   const [copied, setCopied] = useState<boolean>(false);
+  const trapRef = useFocusTrap<HTMLDivElement>(isOpen);
+
+  // Close on Escape key (F-150)
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  }, [onClose]);
 
   if (!isOpen) return null;
 
@@ -68,8 +77,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, data,
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
-      <div className={`w-full max-w-2xl border rounded-3xl p-6 flex flex-col gap-5 ${modalBg}`}>
+    <div role="dialog" aria-modal="true" aria-label="Export report" className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
+      <div ref={trapRef} className={`w-full max-w-2xl border rounded-3xl p-6 flex flex-col gap-5 ${modalBg}`}>
         {/* Header */}
         <div className="flex items-center justify-between border-b pb-3 border-slate-800/80">
           <div>
@@ -83,13 +92,14 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, data,
           <button
             onClick={onClose}
             className="p-1.5 text-slate-400 hover:text-slate-200 rounded-xl hover:bg-slate-800 transition-colors"
+            aria-label="Close export dialog"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex items-center gap-2 border-b border-slate-800/60 pb-2">
+        <div className="flex items-center gap-2 border-b border-slate-800/60 pb-2" role="tablist">
           <button
             onClick={() => setActiveTab('latex')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
@@ -146,6 +156,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, data,
                 <span className="font-mono text-[10px]">.tex</span>
               </div>
               <textarea
+                aria-label="Export content"
                 readOnly
                 value={latexText}
                 rows={6}
@@ -161,6 +172,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, data,
                 <span className="font-mono text-[10px]">.md</span>
               </div>
               <textarea
+                aria-label="Export content"
                 readOnly
                 value={markdownText}
                 rows={8}
@@ -176,6 +188,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, data,
                 <span className="font-mono text-[10px]">.csv</span>
               </div>
               <textarea
+                aria-label="Export content"
                 readOnly
                 value={csvText}
                 rows={6}

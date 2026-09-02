@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { AppSettings } from '../types';
+import { handleTablistKeydown } from '../utils/ariaTabs';
+
+const FRACTIONS_TABS = ['fractions', 'gcd_lcm', 'prime'] as const;
 
 interface FractionsCalculatorProps {
   settings?: AppSettings;
@@ -219,7 +222,12 @@ export const FractionsCalculator: React.FC<FractionsCalculatorProps> = ({
   return (
     <div className="max-w-4xl mx-auto w-full p-4 flex flex-col gap-6">
       {/* Navigation Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+      <div
+        role="tablist"
+        aria-label="Fractions calculator modes"
+        className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none"
+        onKeyDown={(e) => handleTablistKeydown(e, [...FRACTIONS_TABS], tab, (t) => setTab(t as any))}
+      >
         {[
           { id: 'fractions', label: 'Fraction Arithmetic & Simplifier' },
           { id: 'gcd_lcm', label: 'GCD & LCM (Factor Trees)' },
@@ -227,6 +235,11 @@ export const FractionsCalculator: React.FC<FractionsCalculatorProps> = ({
         ].map((item) => (
           <button
             key={item.id}
+            role="tab"
+            id={`frac-tab-${item.id}`}
+            aria-selected={tab === item.id}
+            aria-controls={`frac-panel-${item.id}`}
+            tabIndex={tab === item.id ? 0 : -1}
             onClick={() => setTab(item.id as any)}
             className={`
               px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border shadow-sm flex-shrink-0
@@ -245,8 +258,14 @@ export const FractionsCalculator: React.FC<FractionsCalculatorProps> = ({
       {/* Main Card */}
       <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col gap-6">
         {/* FRACTION ARITHMETIC */}
-        {tab === 'fractions' && (
-          <div className="flex flex-col gap-6">
+        <div
+          role="tabpanel"
+          id="frac-panel-fractions"
+          aria-labelledby="frac-tab-fractions"
+          tabIndex={0}
+          hidden={tab !== 'fractions'}
+          className={tab !== 'fractions' ? 'hidden' : 'flex flex-col gap-6'}
+        >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <h3 className="text-base font-bold text-slate-100">
@@ -276,6 +295,7 @@ export const FractionsCalculator: React.FC<FractionsCalculatorProps> = ({
               <div className="flex flex-col items-center gap-1.5 w-24">
                 <input
                   type="number"
+                  aria-label="Fraction 1 numerator"
                   value={f1Num}
                   onChange={(e) => setF1Num(e.target.value)}
                   className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2 text-center font-mono text-lg font-bold text-slate-100"
@@ -283,6 +303,7 @@ export const FractionsCalculator: React.FC<FractionsCalculatorProps> = ({
                 <div className="w-full h-1 bg-slate-600 rounded-full" />
                 <input
                   type="number"
+                  aria-label="Fraction 1 denominator"
                   value={f1Den}
                   onChange={(e) => setF1Den(e.target.value)}
                   className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2 text-center font-mono text-lg font-bold text-slate-100"
@@ -295,6 +316,7 @@ export const FractionsCalculator: React.FC<FractionsCalculatorProps> = ({
                   <button
                     key={o}
                     onClick={() => setOp(o)}
+                    aria-label={`Operator ${o}`}
                     className={`w-9 h-9 rounded-xl font-bold text-lg transition-all ${
                       op === o
                         ? 'bg-sky-600 text-white shadow-md'
@@ -310,6 +332,7 @@ export const FractionsCalculator: React.FC<FractionsCalculatorProps> = ({
               <div className="flex flex-col items-center gap-1.5 w-24">
                 <input
                   type="number"
+                  aria-label="Fraction 2 numerator"
                   value={f2Num}
                   onChange={(e) => setF2Num(e.target.value)}
                   className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2 text-center font-mono text-lg font-bold text-slate-100"
@@ -317,6 +340,7 @@ export const FractionsCalculator: React.FC<FractionsCalculatorProps> = ({
                 <div className="w-full h-1 bg-slate-600 rounded-full" />
                 <input
                   type="number"
+                  aria-label="Fraction 2 denominator"
                   value={f2Den}
                   onChange={(e) => setF2Den(e.target.value)}
                   className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2 text-center font-mono text-lg font-bold text-slate-100"
@@ -328,7 +352,7 @@ export const FractionsCalculator: React.FC<FractionsCalculatorProps> = ({
             {fracRes && (
               <div className="flex flex-col gap-4 bg-slate-950 border border-slate-800 rounded-2xl p-5">
                 {fracRes.error ? (
-                  <div className="text-rose-400 text-sm font-semibold">{fracRes.error}</div>
+                  <div role="alert" className="text-rose-400 text-sm font-semibold">{fracRes.error}</div>
                 ) : (
                   <>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -363,11 +387,16 @@ export const FractionsCalculator: React.FC<FractionsCalculatorProps> = ({
               </div>
             )}
           </div>
-        )}
 
         {/* GCD & LCM */}
-        {tab === 'gcd_lcm' && (
-          <div className="flex flex-col gap-6">
+        <div
+          role="tabpanel"
+          id="frac-panel-gcd_lcm"
+          aria-labelledby="frac-tab-gcd_lcm"
+          tabIndex={0}
+          hidden={tab !== 'gcd_lcm'}
+          className={tab !== 'gcd_lcm' ? 'hidden' : 'flex flex-col gap-6'}
+        >
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-base font-bold text-slate-100">
@@ -401,7 +430,7 @@ export const FractionsCalculator: React.FC<FractionsCalculatorProps> = ({
             {gcdRes && (
               <div className="flex flex-col gap-4 bg-slate-950 border border-slate-800 rounded-2xl p-5">
                 {gcdRes.error ? (
-                  <div className="text-amber-400 text-xs font-semibold">{gcdRes.error}</div>
+                  <div role="alert" className="text-amber-400 text-xs font-semibold">{gcdRes.error}</div>
                 ) : (
                   <>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -444,11 +473,16 @@ export const FractionsCalculator: React.FC<FractionsCalculatorProps> = ({
               </div>
             )}
           </div>
-        )}
 
         {/* PRIME ANALYZER */}
-        {tab === 'prime' && (
-          <div className="flex flex-col gap-6">
+        <div
+          role="tabpanel"
+          id="frac-panel-prime"
+          aria-labelledby="frac-tab-prime"
+          tabIndex={0}
+          hidden={tab !== 'prime'}
+          className={tab !== 'prime' ? 'hidden' : 'flex flex-col gap-6'}
+        >
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-base font-bold text-slate-100">
@@ -480,7 +514,7 @@ export const FractionsCalculator: React.FC<FractionsCalculatorProps> = ({
             {primeRes && (
               <div className="flex flex-col gap-4 bg-slate-950 border border-slate-800 rounded-2xl p-5">
                 {primeRes.error ? (
-                  <div className="text-rose-400 text-sm font-semibold">{primeRes.error}</div>
+                  <div role="alert" className="text-rose-400 text-sm font-semibold">{primeRes.error}</div>
                 ) : (
                   <>
                     <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl flex items-center justify-between">
@@ -552,7 +586,6 @@ export const FractionsCalculator: React.FC<FractionsCalculatorProps> = ({
               </div>
             )}
           </div>
-        )}
       </div>
     </div>
   );

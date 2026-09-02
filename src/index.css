@@ -673,3 +673,133 @@ html.light .recharts-text,
 html[data-theme='light'] .recharts-text {
   fill: #64748b !important;
 }
+
+/* =========================================================
+   LIGHT THEME PASS 2 — Gap fills for theme-broken components
+   Covers patterns used in Fractions, Geometry, Finance,
+   DateTime, Health, and Statistics calculators that were
+   missed in the initial override block.
+   ========================================================= */
+
+/* Slate bg gaps */
+html.light .bg-slate-700,
+html[data-theme='light'] .bg-slate-700,
+html:not(.dark):not(.oled) .bg-slate-700 {
+  background-color: #e2e8f0 !important;
+  color: #1e293b !important;
+}
+
+html.light .bg-slate-600,
+html[data-theme='light'] .bg-slate-600,
+html:not(.dark):not(.oled) .bg-slate-600 {
+  background-color: #cbd5e1 !important;
+}
+
+/* Colored bg opacity gaps (emerald-950/60, sky-500/30, etc.) */
+html.light .bg-emerald-950\/60,
+html[data-theme='light'] .bg-emerald-950\/60,
+html:not(.dark):not(.oled) .bg-emerald-950\/60 {
+  background-color: #ecfdf5 !important;
+  color: #047857 !important;
+  border-color: #a7f3d0 !important;
+}
+
+html.light .bg-sky-500\/30,
+html[data-theme='light'] .bg-sky-500\/30,
+html:not(.dark):not(.oled) .bg-sky-500\/30 {
+  background-color: #f0f9ff !important;
+  border-color: #bae6fd !important;
+}
+
+/* Colored bg plain gaps */
+html.light .bg-pink-600,
+html[data-theme='light'] .bg-pink-600,
+html:not(.dark):not(.oled) .bg-pink-600 {
+  background-color: #ec4899 !important;
+}
+
+html.light .bg-emerald-600,
+html[data-theme='light'] .bg-emerald-600,
+html:not(.dark):not(.oled) .bg-emerald-600 {
+  background-color: #059669 !important;
+}
+
+html.light .bg-rose-600,
+html[data-theme='light'] .bg-rose-600,
+html:not(.dark):not(.oled) .bg-rose-600 {
+  background-color: #e11d48 !important;
+}
+
+/* Border gaps with opacity variants */
+html.light .border-emerald-800\/60,
+html[data-theme='light'] .border-emerald-800\/60,
+html:not(.dark):not(.oled) .border-emerald-800\/60,
+html.light .border-emerald-500\/40,
+html[data-theme='light'] .border-emerald-500\/40,
+html:not(.dark):not(.oled) .border-emerald-500\/40 {
+  border-color: #a7f3d0 !important;
+}
+
+html.light .border-sky-800\/60,
+html[data-theme='light'] .border-sky-800\/60,
+html:not(.dark):not(.oled) .border-sky-800\/60,
+html.light .border-sky-500\/40,
+html[data-theme='light'] .border-sky-500\/40,
+html:not(.dark):not(.oled) .border-sky-500\/40,
+html.light .border-sky-500\/30,
+html[data-theme='light'] .border-sky-500\/30,
+html:not(.dark):not(.oled) .border-sky-500\/30 {
+  border-color: #bae6fd !important;
+}
+
+html.light .border-rose-500\/40,
+html[data-theme='light'] .border-rose-500\/40,
+html:not(.dark):not(.oled) .border-rose-500\/40 {
+  border-color: #fecdd3 !important;
+}
+
+html.light .border-amber-500\/40,
+html[data-theme='light'] .border-amber-500\/40,
+html:not(.dark):not(.oled) .border-amber-500\/40 {
+  border-color: #fde68a !important;
+}
+
+/* Text color gaps */
+html.light .text-pink-400,
+html[data-theme='light'] .text-pink-400,
+html:not(.dark):not(.oled) .text-pink-400 {
+  color: #db2777 !important;
+}
+
+html.light .text-orange-400,
+html[data-theme='light'] .text-orange-400,
+html:not(.dark):not(.oled) .text-orange-400 {
+  color: #ea580c !important;
+}
+
+/* Shadow color adjustments for light mode */
+html.light .shadow-sky-600\/20,
+html[data-theme='light'] .shadow-sky-600\/20,
+html:not(.dark):not(.oled) .shadow-sky-600\/20 {
+  box-shadow: 0 1px 3px 0 rgba(2, 132, 199, 0.12) !important;
+}
+
+/* Recharts Tooltip — also ensure item text is readable in light */
+html.light .recharts-tooltip-item,
+html[data-theme='light'] .recharts-tooltip-item {
+  color: #0f172a !important;
+}
+
+/* Accessibility: Global focus-visible indicators (F-006) */
+input:not([type="button"]):not([type="submit"]):not([type="reset"]):focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+button:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
