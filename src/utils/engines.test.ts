@@ -41,7 +41,7 @@ describe('Calculation Engines Comprehensive Mathematical Verification', () => {
     });
   });
 
-  describe('Engine 6 & 7: Calculus & Graphing Expressions', () => {
+  describe('Engine 6: Calculus Expressions', () => {
     it('evaluates expressions with custom variable scope x', () => {
       expect(evaluateExpression('x^2 + 2*x + 1', 'DEG', 6, { x: 3 })).toBe('16');
       expect(evaluateExpression('sin(x)', 'RAD', 6, { x: 0 })).toBe('0');

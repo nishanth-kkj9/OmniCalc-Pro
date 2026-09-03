@@ -9,7 +9,7 @@ import { ACCENT_COLOR_MAP } from './utils/formatting';
 import { loadInitialSettings, saveSettings } from './utils/settings';
 import { Loader2, AlertCircle } from 'lucide-react';
 
-// Lazy load the 17 engine views for optimal bundle splitting and fast initial render
+// Lazy load the 16 engine views for optimal bundle splitting and fast initial render
 const BasicCalculator = lazy(() =>
   import('./components/BasicCalculator').then((m) => ({ default: m.BasicCalculator }))
 );
@@ -27,9 +27,6 @@ const EquationSolver = lazy(() =>
 );
 const CalculusCalculator = lazy(() =>
   import('./components/CalculusCalculator').then((m) => ({ default: m.CalculusCalculator }))
-);
-const GraphingCalculator = lazy(() =>
-  import('./components/GraphingCalculator').then((m) => ({ default: m.GraphingCalculator }))
 );
 const ProgrammerCalculator = lazy(() =>
   import('./components/ProgrammerCalculator').then((m) => ({ default: m.ProgrammerCalculator }))
@@ -294,7 +291,6 @@ export function App() {
                 {currentMode === 'geometry' && <GeometryCalculator settings={settings} />}
                 {currentMode === 'equation' && <EquationSolver settings={settings} />}
                 {currentMode === 'calculus' && <CalculusCalculator settings={settings} />}
-                {currentMode === 'graphing' && <GraphingCalculator settings={settings} />}
                 {currentMode === 'programmer' && <ProgrammerCalculator settings={settings} />}
                 {currentMode === 'converter' && <ConverterCalculator settings={settings} />}
                 {currentMode === 'finance' && <FinanceCalculator settings={settings} />}

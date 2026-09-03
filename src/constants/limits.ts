@@ -25,8 +25,5 @@ export const MAX_MATRIX_DIMENSION = 10;
 /** Maximum iterations for numerical root-finding algorithms (e.g. Newton-Raphson). */
 export const MAX_ITERATIONS = 100;
 
-/** Maximum sample points generated when plotting functions in Graphing mode. */
-export const MAX_GRAPH_SAMPLES = 500;
-
 /** Minimum convergence threshold for numerical calculus/root finding solvers. */
 export const NUMERICAL_EPSILON = 1e-12;

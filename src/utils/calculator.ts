@@ -375,7 +375,7 @@ export function buildMathScope(angleMode: AngleMode = 'DEG'): Record<string, any
 
 /**
  * Compiles a mathematical expression with full AST allowlist validation for safe, high-frequency evaluation.
- * Used across Graphing and Calculus engines to prevent AST bypass.
+ * Used across Calculus and mathematical solver engines to prevent AST bypass.
  */
 export function compileSafeExpression(
   expr: string,

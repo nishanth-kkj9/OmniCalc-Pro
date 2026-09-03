@@ -58,7 +58,6 @@ const MODES_LIST: { mode: CalcMode; label: string }[] = [
   { mode: 'geometry', label: 'Triangle & Geometry Solver' },
   { mode: 'equation', label: 'Equation & System Solver' },
   { mode: 'calculus', label: 'Calculus & Numerical Suite' },
-  { mode: 'graphing', label: 'Graphing Calculator' },
   { mode: 'programmer', label: 'Programmer Calculator' },
   { mode: 'converter', label: 'Unit Converter' },
   { mode: 'finance', label: 'Finance & Loan EMI' },

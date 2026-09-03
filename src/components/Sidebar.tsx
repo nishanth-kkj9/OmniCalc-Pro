@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   Calculator,
   Binary,
-  LineChart,
   ArrowLeftRight,
   DollarSign,
   Grid,
@@ -95,13 +94,6 @@ const MENU_ITEMS: MenuItem[] = [
     keywords: 'integral derivative tangent newton simpson',
   },
   {
-    mode: 'graphing',
-    label: 'Graphing Calculator',
-    icon: <LineChart className="w-4 h-4 text-teal-400" />,
-    group: 'Advanced & Science',
-    keywords: 'plot graph curve cartesian table coordinate',
-  },
-  {
     mode: 'matrix',
     label: 'Matrix Calculator',
     icon: <Grid className="w-4 h-4 text-violet-400" />,
@@ -177,7 +169,7 @@ const MENU_ITEMS: MenuItem[] = [
   },
 ];
 
-const DEFAULT_PINNED: CalcMode[] = ['basic', 'scientific', 'graphing', 'converter', 'finance'];
+const DEFAULT_PINNED: CalcMode[] = ['basic', 'scientific', 'converter', 'finance'];
 
 export const Sidebar: React.FC<SidebarProps> = ({
   currentMode,

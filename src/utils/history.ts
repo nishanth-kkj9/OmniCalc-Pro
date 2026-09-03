@@ -15,7 +15,6 @@ export function sanitizeHistoryItem(item: unknown): HistoryItem | null {
   const validModes: CalcMode[] = [
     'basic',
     'scientific',
-    'graphing',
     'converter',
     'finance',
     'matrix',

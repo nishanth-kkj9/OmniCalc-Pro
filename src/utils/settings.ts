@@ -39,7 +39,6 @@ const VALID_CALC_MODES: ReadonlySet<string> = new Set([
   'basic',
   'scientific',
   'programmer',
-  'graphing',
   'converter',
   'finance',
   'matrix',

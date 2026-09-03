@@ -2,7 +2,6 @@ export type CalcMode =
   | 'basic'
   | 'scientific'
   | 'programmer'
-  | 'graphing'
   | 'converter'
   | 'finance'
   | 'matrix'

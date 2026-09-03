@@ -41,7 +41,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     numericValue: '3.14159265358979323846',
     description: 'Ratio of a circle circumference to its diameter in Euclidean space',
     category: 'Constants',
-    relatedModes: ['basic', 'scientific', 'geometry', 'calculus', 'graphing'],
+    relatedModes: ['basic', 'scientific', 'geometry', 'calculus'],
     notes:
       'Used in circle geometry, trigonometric radians, Fourier transforms, and Gaussian distributions.',
   },
@@ -53,7 +53,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     numericValue: '2.71828182845904523536',
     description: 'Base of the natural logarithm; rate of continuous growth',
     category: 'Constants',
-    relatedModes: ['scientific', 'calculus', 'finance', 'graphing', 'statistics'],
+    relatedModes: ['scientific', 'calculus', 'finance', 'statistics'],
     notes:
       'Derivative of e^x is e^x; essential for exponential decay, continuous compounding, and calculus.',
   },
@@ -210,7 +210,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     formula: 'd/dx [x^n] = n · x^(n - 1)',
     description: 'Derivative of polynomial terms for any real exponent n',
     category: 'Calculus',
-    relatedModes: ['calculus', 'scientific', 'graphing'],
+    relatedModes: ['calculus', 'scientific'],
     notes: 'Fundamental building block for differentiating polynomial expressions.',
   },
   {
@@ -219,7 +219,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     formula: "d/dx [u · v] = u' · v + u · v'",
     description: 'Derivative of the product of two differentiable functions',
     category: 'Calculus',
-    relatedModes: ['calculus', 'graphing'],
+    relatedModes: ['calculus'],
   },
   {
     id: 'calc_deriv_quotient',
@@ -227,7 +227,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     formula: "d/dx [u / v] = (u' · v - u · v') / v²",
     description: 'Derivative of ratio of two functions where denominator v ≠ 0',
     category: 'Calculus',
-    relatedModes: ['calculus', 'graphing'],
+    relatedModes: ['calculus'],
   },
   {
     id: 'calc_deriv_chain',
@@ -235,7 +235,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     formula: "d/dx [f(g(x))] = f'(g(x)) · g'(x)",
     description: 'Derivative of nested or composite functions',
     category: 'Calculus',
-    relatedModes: ['calculus', 'graphing'],
+    relatedModes: ['calculus'],
   },
   {
     id: 'calc_integ_power',
@@ -243,7 +243,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     formula: '∫ x^n dx = (x^(n+1)) / (n+1) + C, (n ≠ -1)',
     description: 'Indefinite integral of polynomial powers; for n = -1, integral is ln|x| + C',
     category: 'Calculus',
-    relatedModes: ['calculus', 'graphing'],
+    relatedModes: ['calculus'],
   },
   {
     id: 'calc_integ_parts',
@@ -275,7 +275,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     formula: 'f(x) = ∑[k=0..∞] (f^(k)(a) / k!) · (x - a)^k',
     description: 'Representation of a smooth function as an infinite sum of polynomial derivatives',
     category: 'Calculus',
-    relatedModes: ['calculus', 'scientific', 'graphing'],
+    relatedModes: ['calculus', 'scientific'],
   },
 
   // ==================== ALGEBRA & POLYNOMIALS ====================
@@ -286,7 +286,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     description:
       'Exact roots for ax² + bx + c = 0; Δ > 0 (2 real), Δ = 0 (1 real), Δ < 0 (complex)',
     category: 'Algebra',
-    relatedModes: ['equation', 'basic', 'scientific', 'graphing'],
+    relatedModes: ['equation', 'basic', 'scientific'],
   },
   {
     id: 'alg_vieta',
@@ -310,7 +310,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     formula: 'log(xy) = log(x) + log(y),  log(x/y) = log(x) - log(y),  log(x^k) = k·log(x)',
     description: 'Fundamental algebraic simplification identities for logarithms across any base',
     category: 'Algebra',
-    relatedModes: ['scientific', 'calculus', 'graphing'],
+    relatedModes: ['scientific', 'calculus'],
   },
   {
     id: 'alg_ap_gp',
@@ -328,7 +328,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     formula: 'a² + b² = c²,  d = √((x₂ - x₁)² + (y₂ - y₁)²)',
     description: 'Fundamental relation among sides in right triangle and Cartesian 2D distance',
     category: 'Geometry & Trig',
-    relatedModes: ['geometry', 'scientific', 'graphing', 'basic'],
+    relatedModes: ['geometry', 'scientific', 'basic'],
   },
   {
     id: 'geo_trig_identity',
@@ -450,7 +450,7 @@ export const FORMULAS_AND_CONSTANTS_DATABASE: FormulaConstantItem[] = [
     description:
       'Linear correlation metric bounded between -1 (negative) and +1 (perfect positive)',
     category: 'Statistics',
-    relatedModes: ['statistics', 'graphing'],
+    relatedModes: ['statistics'],
   },
 
   // ==================== COMPUTER SCIENCE & BINARY ====================

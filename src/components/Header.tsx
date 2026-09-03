@@ -8,7 +8,6 @@ import {
   Search,
   Sparkles,
   Calculator,
-  LineChart,
   DollarSign,
   ArrowLeftRight,
   Sigma,
@@ -67,12 +66,6 @@ const MODE_TITLES: Record<
     subtitle: 'Definite integrals, tangent derivatives, and Newton-Raphson root solver',
     category: 'Advanced',
     color: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
-  },
-  graphing: {
-    title: 'Graphing Calculator',
-    subtitle: 'Plot 2D function curves, customize bounds, & inspect coordinates',
-    category: 'Advanced',
-    color: 'text-teal-400 bg-teal-500/10 border-teal-500/20',
   },
   programmer: {
     title: 'Programmer Calculator',
@@ -139,7 +132,6 @@ const MODE_TITLES: Record<
 const QUICK_MODES: { mode: CalcMode; label: string; icon: React.ReactNode }[] = [
   { mode: 'basic', label: 'Basic', icon: <Calculator className="w-3.5 h-3.5" /> },
   { mode: 'scientific', label: 'Scientific', icon: <Sparkles className="w-3.5 h-3.5" /> },
-  { mode: 'graphing', label: 'Graphing', icon: <LineChart className="w-3.5 h-3.5" /> },
   { mode: 'calculus', label: 'Calculus', icon: <Sigma className="w-3.5 h-3.5" /> },
   { mode: 'converter', label: 'Converter', icon: <ArrowLeftRight className="w-3.5 h-3.5" /> },
   { mode: 'finance', label: 'Finance', icon: <DollarSign className="w-3.5 h-3.5" /> },
@@ -301,7 +293,7 @@ export const Header: React.FC<HeaderProps> = ({
         </button>
 
         {/* Quick Angle Unit Switcher for math modes */}
-        {['basic', 'scientific', 'graphing', 'calculus', 'geometry'].includes(currentMode) && (
+        {['basic', 'scientific', 'calculus', 'geometry'].includes(currentMode) && (
           <button
             onClick={toggleAngleMode}
             className={`px-2 sm:px-2.5 py-1 text-xs font-semibold rounded-lg border transition-colors shadow-xs flex-shrink-0 ${badgeClass}`}

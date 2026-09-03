@@ -8,7 +8,6 @@ import {
   Triangle,
   Equal,
   Sigma,
-  LineChart,
   Grid,
   BarChart2,
   Binary,
@@ -134,15 +133,6 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         'limit',
         'area under curve',
       ],
-    },
-    {
-      id: 'graphing',
-      title: 'Graphing Calculator',
-      subtitle: 'Plot up to 5 multi-colored functions, zoom, pan, table of values, export PNG',
-      category: 'Engines & Calculators',
-      icon: <LineChart className="w-4 h-4 text-teal-500" />,
-      action: () => onSelectMode('graphing'),
-      keywords: ['graph', 'plot', 'curve', 'cartesian', 'table', 'function', 'y=f(x)'],
     },
     {
       id: 'matrix',
