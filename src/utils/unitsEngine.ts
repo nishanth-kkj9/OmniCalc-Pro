@@ -852,3 +852,112 @@ export function convertPhysicalUnit(
 export function getCompatibleUnits(dim: DimensionVector): PhysicalUnit[] {
   return Object.values(UNIT_DICTIONARY).filter((u) => areDimensionsEqual(u.dimensions, dim));
 }
+
+export const PHYSICAL_UNITS: PhysicalUnit[] = Object.values(UNIT_DICTIONARY);
+
+export function convertUnit(val: number, fromSymbol: string, toSymbol: string): number {
+  const res = convertPhysicalUnit(val, fromSymbol, toSymbol);
+  if (!res.success || res.result === undefined) {
+    throw new Error(res.error || 'Conversion failed');
+  }
+  return res.result;
+}
+
+export function evaluateDimensionalExpression(expr: string): PhysicalQuantity {
+  const clean = expr.trim();
+  if (!clean) throw new Error('Empty expression');
+
+  // Simple token parser for "number unit * number unit / unit..."
+  // Example: "50 kg * 9.81 m/s^2" or "100 J / 5 s" or "12 V / 2 A"
+  // Split into tokens by space while preserving ops (*, /)
+  const tokens = clean.split(/\s+/);
+  let totalVal = 1;
+  const currentDim: DimensionVector = [0, 0, 0, 0, 0, 0, 0];
+  let currentOp: '*' | '/' = '*';
+
+  let i = 0;
+  while (i < tokens.length) {
+    const token = tokens[i];
+    if (token === '*') {
+      currentOp = '*';
+      i++;
+      continue;
+    }
+    if (token === '/') {
+      currentOp = '/';
+      i++;
+      continue;
+    }
+
+    // Try parsing number + optional unit or standalone unit
+    const numMatch = token.match(/^([+-]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)(.*)$/);
+    if (numMatch && numMatch[1]) {
+      const num = parseFloat(numMatch[1]);
+      if (!isNaN(num)) {
+        if (currentOp === '*') totalVal *= num;
+        else totalVal /= num;
+      }
+      const unitStr = numMatch[2].trim();
+      if (unitStr) {
+        processUnitToken(unitStr, currentOp, currentDim);
+      }
+    } else {
+      // Standalone unit token e.g. "kg", "m/s^2"
+      processUnitToken(token, currentOp, currentDim);
+    }
+    i++;
+  }
+
+  const dimensionName = identifyDimensionName(currentDim);
+  // Find a matching standard SI symbol if available
+  const matchingUnits = getCompatibleUnits(currentDim);
+  let unitSymbol = 'SI Base';
+  if (matchingUnits.length > 0) {
+    const siUnit = matchingUnits.find((u) => u.scale === 1) || matchingUnits[0];
+    unitSymbol = siUnit.symbol;
+  } else {
+    unitSymbol = formatDimensionVector(currentDim);
+  }
+
+  return {
+    value: totalVal,
+    dimensions: currentDim,
+    dimensionName,
+    unitSymbol,
+  };
+}
+
+function processUnitToken(
+  unitToken: string,
+  op: '*' | '/',
+  targetDim: DimensionVector
+) {
+  // Support compound unit formats like "m/s^2" or "kg" or "m/s"
+  if (unitToken.includes('/')) {
+    const parts = unitToken.split('/');
+    processUnitToken(parts[0], op, targetDim);
+    const subOp = op === '*' ? '/' : '*';
+    for (let k = 1; k < parts.length; k++) {
+      processUnitToken(parts[k], subOp, targetDim);
+    }
+    return;
+  }
+
+  // Handle exponent e.g. "s^2" or "m^3"
+  let sym = unitToken;
+  let power = 1;
+  if (unitToken.includes('^')) {
+    const expParts = unitToken.split('^');
+    sym = expParts[0];
+    power = parseInt(expParts[1], 10) || 1;
+  }
+
+  const u = UNIT_DICTIONARY[sym];
+  if (u) {
+    const mult = op === '*' ? power : -power;
+    for (let d = 0; d < 7; d++) {
+      targetDim[d] += u.dimensions[d] * mult;
+    }
+  }
+}
+

@@ -157,6 +157,18 @@ const MODE_TITLES: Record<
     category: 'Core Math',
     color: 'text-orange-400 bg-orange-500/10 border-orange-500/20',
   },
+  inference: {
+    title: 'Statistical Inference',
+    subtitle: 'Hypothesis tests, z-tests, t-tests, ANOVA, Chi-Square, & confidence intervals',
+    category: 'Advanced',
+    color: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20',
+  },
+  physical_units: {
+    title: 'Physical Units & Formulas',
+    subtitle: 'SI dimensional analysis, compound unit evaluation, constants, & interactive physics',
+    category: 'Practical',
+    color: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
+  },
 };
 
 const QUICK_MODES: { mode: CalcMode; label: string; icon: React.ReactNode }[] = [

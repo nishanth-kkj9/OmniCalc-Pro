@@ -221,6 +221,15 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       keywords: ['complex', 'imaginary', 'real', 'polar', 'euler', 'phasor', 'argand', 'roots', 'impedance', 'ac'],
     },
     {
+      id: 'inference',
+      title: 'Statistical Inference & Hypothesis Tests',
+      subtitle: "1/2-sample z/t-tests, ANOVA, Chi-Square tests, confidence intervals, effect sizes (Cohen's d, η²)",
+      category: 'Engines & Calculators',
+      icon: <Layers className="w-4 h-4 text-indigo-400" />,
+      action: () => onSelectMode('inference'),
+      keywords: ['inference', 'hypothesis test', 'z test', 't test', 'anova', 'chi square', 'p value', 'confidence interval', 'welch', 'effect size'],
+    },
+    {
       id: 'programmer',
       title: 'Programmer Calculator',
       subtitle: 'HEX, DEC, OCT, BIN live conversions, 64/32/16/8-bit toggles, bitwise logic',
@@ -260,6 +269,15 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         'megabytes',
         'gigabytes',
       ],
+    },
+    {
+      id: 'physical_units',
+      title: 'Physical Units & Formulas',
+      subtitle: 'SI dimensional analysis, compound physical unit evaluation, constants & interactive physics formulas',
+      category: 'Engines & Calculators',
+      icon: <Sparkles className="w-4 h-4 text-purple-400" />,
+      action: () => onSelectMode('physical_units'),
+      keywords: ['physics', 'units', 'dimension', 'si', 'newton', 'joule', 'watt', 'constants', 'formulas', 'compound'],
     },
     {
       id: 'finance',

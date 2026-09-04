@@ -70,6 +70,12 @@ const SequencesCalculator = lazy(() =>
 const ComplexCalculator = lazy(() =>
   import('./components/ComplexCalculator').then((m) => ({ default: m.ComplexCalculator }))
 );
+const InferenceCalculator = lazy(() =>
+  import('./components/InferenceCalculator').then((m) => ({ default: m.InferenceCalculator }))
+);
+const PhysicalUnitsCalculator = lazy(() =>
+  import('./components/PhysicalUnitsCalculator').then((m) => ({ default: m.PhysicalUnitsCalculator }))
+);
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -335,6 +341,14 @@ export function App() {
                   />
                 )}
                 {currentMode === 'complex' && <ComplexCalculator settings={settings} />}
+                {currentMode === 'inference' && (
+                  <InferenceCalculator
+                    settings={settings}
+                    onNavigateToStats={() => setCurrentMode('statistics')}
+                    onNavigateToGraph={() => setCurrentMode('graph')}
+                  />
+                )}
+                {currentMode === 'physical_units' && <PhysicalUnitsCalculator settings={settings} />}
                 {currentMode === 'formulas' && (
                   <FormulasPanel
                     settings={settings}

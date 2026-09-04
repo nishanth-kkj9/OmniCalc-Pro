@@ -134,6 +134,14 @@ const MENU_ITEMS: MenuItem[] = [
     keywords: 'probability distribution normal binomial poisson uniform exponential student t chi square cdf pdf',
   },
   {
+    mode: 'inference',
+    label: 'Statistical Inference & Tests',
+    icon: <Layers className="w-4 h-4 text-indigo-400" />,
+    group: 'Advanced & Science',
+    badge: 'NEW',
+    keywords: 'inference hypothesis test z-test t-test anova chi-square confidence interval effect size welch',
+  },
+  {
     mode: 'sequences',
     label: 'Sequences & Series',
     icon: <ListOrdered className="w-4 h-4 text-amber-400" />,
@@ -162,6 +170,14 @@ const MENU_ITEMS: MenuItem[] = [
     icon: <ArrowLeftRight className="w-4 h-4 text-cyan-400" />,
     group: 'Practical & Life',
     keywords: 'convert length mass weight temp temperature storage data speed',
+  },
+  {
+    mode: 'physical_units',
+    label: 'Physical Units & Formulas',
+    icon: <Sparkles className="w-4 h-4 text-purple-400" />,
+    group: 'Practical & Life',
+    badge: 'SI',
+    keywords: 'physics physical units dimension newton joule watt compound constants formulas',
   },
   {
     mode: 'finance',

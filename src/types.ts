@@ -18,8 +18,10 @@ export type CalcMode =
   | 'settings'
   | 'regression'
   | 'probability'
+  | 'inference'
   | 'sequences'
-  | 'complex';
+  | 'complex'
+  | 'physical_units';
 
 export type AngleMode = 'DEG' | 'RAD' | 'GRAD';
 
