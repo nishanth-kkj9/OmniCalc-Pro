@@ -192,6 +192,8 @@ class MainWindow(QMainWindow):
             ("Regression", lambda: getattr(importlib.import_module("ui.regression_page"), "RegressionPage")()),
             ("Probability", lambda: getattr(importlib.import_module("ui.probability_page"), "ProbabilityPage")()),
             ("Inference", lambda: getattr(importlib.import_module("ui.inference_page"), "InferencePage")()),
+            ("Equation", lambda: getattr(importlib.import_module("ui.equation_page"), "EquationPage")()),
+            ("Calculus", lambda: getattr(importlib.import_module("ui.calculus_page"), "CalculusPage")()),
             ("Finance", lambda: getattr(importlib.import_module("ui.finance_page"), "FinancePage")()),
             ("History", lambda: getattr(importlib.import_module("ui.history_page"), "HistoryPage")()),
             ("Settings", lambda: getattr(importlib.import_module("ui.settings_page"), "SettingsPage")())
@@ -392,7 +394,7 @@ class MainWindow(QMainWindow):
         page = self.page_factories[idx][1]()
         self.stack.addWidget(page)
         self.pages_created[idx] = True
-        if idx == 10:
+        if self.page_factories[idx][0] == "Settings":
             page.config_changed = self.apply_config
         logger.debug(f"Lazy-loaded page: {self.page_factories[idx][0]}")
 

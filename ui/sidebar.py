@@ -9,14 +9,14 @@ from utils.constants import (
 
 PAGE_NAMES = [
     "Dashboard", "Basic", "Scientific", "Graph", "Converter", "Programmer",
-    "Matrix", "Statistics", "Regression", "Probability", "Inference", "Finance",
-    "History", "Settings"
+    "Matrix", "Statistics", "Regression", "Probability", "Inference",
+    "Equation", "Calculus", "Finance", "History", "Settings"
 ]
 
 SIDE_ICONS = [
     "\U0001f3e0", "\U0001f522", "\U0001f52c", "\U0001f4c8", "\U0001f504", "\U0001f4bb",
-    "\U0001f532", "\U0001f4ca", "\U0001f4c9", "\U0001f3b2", "\U0001f9ea", "\U0001f4b0",
-    "\U0001f552", "\u2699"
+    "\U0001f532", "\U0001f4ca", "\U0001f4c9", "\U0001f3b2", "\U0001f9ea",
+    "\U0001f9ee", "\u222b", "\U0001f4b0", "\U0001f552", "\u2699"
 ]
 
 
