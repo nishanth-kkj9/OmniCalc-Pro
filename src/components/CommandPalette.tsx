@@ -4,6 +4,7 @@ import {
   Search,
   Calculator,
   Sparkles,
+  TrendingUp,
   Divide,
   Triangle,
   Equal,
@@ -80,6 +81,15 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       icon: <Sparkles className="w-4 h-4 text-amber-500" />,
       action: () => onSelectMode('scientific'),
       keywords: ['scientific', 'trig', 'sin', 'cos', 'tan', 'log', 'ln', 'exponent', 'pi', 'euler'],
+    },
+    {
+      id: 'graph',
+      title: 'Graphing Calculator',
+      subtitle: 'Interactive Cartesian curves, roots, extrema, tangents, parameter sliders, and numerical tables',
+      category: 'Engines & Calculators',
+      icon: <TrendingUp className="w-4 h-4 text-cyan-500" />,
+      action: () => onSelectMode('graph'),
+      keywords: ['graph', 'plot', 'curve', 'cartesian', 'parabola', 'roots', 'extrema', 'tangent', 'sliders', 'table', 'draw'],
     },
     {
       id: 'fractions',

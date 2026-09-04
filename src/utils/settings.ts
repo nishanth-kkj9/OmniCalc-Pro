@@ -38,6 +38,7 @@ const VALID_SOUND_PROFILES: ReadonlySet<string> = new Set(['mechanical', 'soft',
 const VALID_CALC_MODES: ReadonlySet<string> = new Set([
   'basic',
   'scientific',
+  'graph',
   'programmer',
   'converter',
   'finance',

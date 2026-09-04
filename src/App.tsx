@@ -16,6 +16,9 @@ const BasicCalculator = lazy(() =>
 const ScientificCalculator = lazy(() =>
   import('./components/ScientificCalculator').then((m) => ({ default: m.ScientificCalculator }))
 );
+const GraphingCalculator = lazy(() =>
+  import('./components/GraphingCalculator').then((m) => ({ default: m.GraphingCalculator }))
+);
 const FractionsCalculator = lazy(() =>
   import('./components/FractionsCalculator').then((m) => ({ default: m.FractionsCalculator }))
 );
@@ -279,13 +282,16 @@ export function App() {
           onUpdateSettings={updateSettings}
         />
 
-        <main className="flex-1 w-full p-2.5 sm:p-4 md:p-6 overflow-y-auto overscroll-contain">
-          <div className="w-full max-w-7xl mx-auto flex flex-col items-center justify-start">
+        <main className={`flex-1 w-full ${currentMode === 'graph' ? 'p-0 overflow-hidden' : 'p-2.5 sm:p-4 md:p-6 overflow-y-auto overscroll-contain'}`}>
+          <div className={`w-full ${currentMode === 'graph' ? 'h-full' : 'max-w-7xl mx-auto flex flex-col items-center justify-start'}`}>
             <EngineErrorBoundary key={currentMode}>
               <Suspense fallback={<EngineLoadingFallback theme={settings.theme} />}>
                 {currentMode === 'basic' && <BasicCalculator settings={settings} />}
                 {currentMode === 'scientific' && (
                   <ScientificCalculator settings={settings} onUpdateSettings={updateSettings} />
+                )}
+                {currentMode === 'graph' && (
+                  <GraphingCalculator settings={settings} onNavigate={setCurrentMode} />
                 )}
                 {currentMode === 'fractions' && <FractionsCalculator settings={settings} />}
                 {currentMode === 'geometry' && <GeometryCalculator settings={settings} />}

@@ -43,6 +43,12 @@ const MODE_TITLES: Record<
     category: 'Core Math',
     color: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
   },
+  graph: {
+    title: 'Graphing Calculator',
+    subtitle: 'Interactive Cartesian plotting, roots, extrema, tangents, & numerical tables',
+    category: 'Core Math',
+    color: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20',
+  },
   fractions: {
     title: 'Fractions & Number Theory',
     subtitle: 'Exact fraction arithmetic, GCD/LCM trees, and prime factorization',

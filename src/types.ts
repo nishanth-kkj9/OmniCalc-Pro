@@ -1,6 +1,7 @@
 export type CalcMode =
   | 'basic'
   | 'scientific'
+  | 'graph'
   | 'programmer'
   | 'converter'
   | 'finance'
@@ -17,6 +18,92 @@ export type CalcMode =
   | 'settings';
 
 export type AngleMode = 'DEG' | 'RAD' | 'GRAD';
+
+export type LineStyle = 'solid' | 'dashed' | 'dotted';
+
+export interface GraphExpression {
+  id: string;
+  expression: string;
+  visible: boolean;
+  color: string;
+  lineWidth: number;
+  lineStyle: LineStyle;
+  label?: string;
+  domainMin?: number;
+  domainMax?: number;
+  type?: 'function' | 'parametric' | 'polar' | 'inequality';
+  inequalityOp?: '<' | '<=' | '>' | '>=';
+}
+
+export interface GraphViewport {
+  xMin: number;
+  xMax: number;
+  yMin: number;
+  yMax: number;
+}
+
+export interface GraphSettings {
+  showGrid: boolean;
+  showMinorGrid: boolean;
+  showAxes: boolean;
+  showAxisLabels: boolean;
+  showCoordinates: boolean;
+  showCurveLabels: boolean;
+  lockAspectRatio: boolean;
+}
+
+export interface GraphSlider {
+  id: string;
+  name: string; // e.g. 'a', 'b', 'c', 'k'
+  value: number;
+  min: number;
+  max: number;
+  step: number;
+}
+
+export interface GraphSession {
+  id: string;
+  title: string;
+  version: number;
+  expressions: GraphExpression[];
+  sliders: GraphSlider[];
+  viewport: GraphViewport;
+  settings: GraphSettings;
+  timestamp: number;
+}
+
+export interface Point2D {
+  x: number;
+  y: number;
+}
+
+export interface CurveSegment {
+  points: Point2D[];
+}
+
+export interface GraphRoot {
+  x: number;
+  y: number;
+  expressionId: string;
+  expressionLabel: string;
+}
+
+export interface GraphExtremum {
+  x: number;
+  y: number;
+  type: 'min' | 'max';
+  expressionId: string;
+  expressionLabel: string;
+}
+
+export interface GraphIntersection {
+  x: number;
+  y: number;
+  expr1Id: string;
+  expr1Label: string;
+  expr2Id: string;
+  expr2Label: string;
+}
 
 export interface HistoryItem {
   id: string;

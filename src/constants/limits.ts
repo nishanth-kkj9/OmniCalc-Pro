@@ -27,3 +27,21 @@ export const MAX_ITERATIONS = 100;
 
 /** Minimum convergence threshold for numerical calculus/root finding solvers. */
 export const NUMERICAL_EPSILON = 1e-12;
+
+/** Maximum simultaneous functions plotted in Graphing Calculator. */
+export const MAX_GRAPH_EXPRESSIONS = 12;
+
+/** Maximum curve sampling points per function to ensure smooth 60fps rendering. */
+export const MAX_GRAPH_SAMPLES = 4000;
+
+/** Maximum recursion depth for adaptive curve subdivision. */
+export const MAX_ADAPTIVE_DEPTH = 6;
+
+/** Maximum rows in Graph Table view. */
+export const MAX_TABLE_ROWS = 500;
+
+/** Maximum iterations for numerical root/extrema search in graphing analysis. */
+export const MAX_ANALYSIS_ITERATIONS = 150;
+
+/** Maximum function pairs compared for intersection analysis. */
+export const MAX_INTERSECTION_PAIRS = 20;

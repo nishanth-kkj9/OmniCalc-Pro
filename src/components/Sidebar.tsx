@@ -19,6 +19,7 @@ import {
   Triangle,
   Divide,
   Search,
+  TrendingUp,
   X,
   Star,
   Pin,
@@ -62,6 +63,13 @@ const MENU_ITEMS: MenuItem[] = [
     icon: <Sparkles className="w-4 h-4 text-amber-400" />,
     group: 'Core & Math',
     keywords: 'trig sin cos tan log exponent power',
+  },
+  {
+    mode: 'graph',
+    label: 'Graphing Calculator',
+    icon: <TrendingUp className="w-4 h-4 text-cyan-400" />,
+    group: 'Core & Math',
+    keywords: 'graph plot curve function cartesian trace roots extrema intersection table zoom pan',
   },
   {
     mode: 'fractions',
