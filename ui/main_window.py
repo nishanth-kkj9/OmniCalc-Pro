@@ -194,6 +194,11 @@ class MainWindow(QMainWindow):
             ("Inference", lambda: getattr(importlib.import_module("ui.inference_page"), "InferencePage")()),
             ("Equation", lambda: getattr(importlib.import_module("ui.equation_page"), "EquationPage")()),
             ("Calculus", lambda: getattr(importlib.import_module("ui.calculus_page"), "CalculusPage")()),
+            ("Complex", lambda: getattr(importlib.import_module("ui.complex_page"), "ComplexPage")()),
+            ("Sequences", lambda: getattr(importlib.import_module("ui.sequences_page"), "SequencesPage")()),
+            ("Units", lambda: getattr(importlib.import_module("ui.physical_units_page"), "PhysicalUnitsPage")()),
+            ("Fractions", lambda: getattr(importlib.import_module("ui.fractions_page"), "FractionsPage")()),
+            ("Geometry", lambda: getattr(importlib.import_module("ui.geometry_page"), "GeometryPage")()),
             ("Finance", lambda: getattr(importlib.import_module("ui.finance_page"), "FinancePage")()),
             ("History", lambda: getattr(importlib.import_module("ui.history_page"), "HistoryPage")()),
             ("Settings", lambda: getattr(importlib.import_module("ui.settings_page"), "SettingsPage")())
