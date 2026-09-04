@@ -258,7 +258,205 @@ class DistributionsEngine:
         return math.comb(n, k) * (p ** k) * ((1.0 - p) ** (n - k))
 
     @staticmethod
+    def binomial_cdf(k: int, n: int, p: float) -> float:
+        if k < 0:
+            return 0.0
+        if k >= n:
+            return 1.0
+        return sum(DistributionsEngine.binomial_pmf(i, n, p) for i in range(k + 1))
+
+    @staticmethod
     def poisson_pmf(k: int, lambda_val: float) -> float:
         if k < 0 or lambda_val <= 0:
             return 0.0
         return (math.exp(-lambda_val) * (lambda_val ** k)) / math.factorial(k)
+
+    @staticmethod
+    def poisson_cdf(k: int, lambda_val: float) -> float:
+        if k < 0 or lambda_val <= 0:
+            return 0.0
+        return sum(DistributionsEngine.poisson_pmf(i, lambda_val) for i in range(k + 1))
+
+    @staticmethod
+    def exponential_pdf(x: float, rate: float = 1.0) -> float:
+        if x < 0 or rate <= 0:
+            return 0.0
+        return rate * math.exp(-rate * x)
+
+    @staticmethod
+    def exponential_cdf(x: float, rate: float = 1.0) -> float:
+        if x < 0 or rate <= 0:
+            return 0.0
+        return 1.0 - math.exp(-rate * x)
+
+    @staticmethod
+    def exponential_quantile(p: float, rate: float = 1.0) -> float:
+        if p <= 0.0 or rate <= 0:
+            return 0.0
+        if p >= 1.0:
+            return math.inf
+        return -math.log(1.0 - p) / rate
+
+    @staticmethod
+    def bernoulli_pmf(k: int, p: float) -> float:
+        if p < 0.0 or p > 1.0:
+            return 0.0
+        if k == 1:
+            return p
+        elif k == 0:
+            return 1.0 - p
+        return 0.0
+
+    @staticmethod
+    def bernoulli_cdf(k: int, p: float) -> float:
+        if k < 0:
+            return 0.0
+        if k >= 1:
+            return 1.0
+        return 1.0 - p
+
+    @staticmethod
+    def geometric_pmf(k: int, p: float) -> float:
+        if k < 1 or p <= 0.0 or p > 1.0:
+            return 0.0
+        return ((1.0 - p) ** (k - 1)) * p
+
+    @staticmethod
+    def geometric_cdf(k: int, p: float) -> float:
+        if k < 1 or p <= 0.0 or p > 1.0:
+            return 0.0
+        return 1.0 - ((1.0 - p) ** k)
+
+    @staticmethod
+    def uniform_pdf(x: float, a: float = 0.0, b: float = 1.0) -> float:
+        if a >= b or x < a or x > b:
+            return 0.0
+        return 1.0 / (b - a)
+
+    @staticmethod
+    def uniform_cdf(x: float, a: float = 0.0, b: float = 1.0) -> float:
+        if a >= b:
+            return 0.0
+        if x < a:
+            return 0.0
+        if x >= b:
+            return 1.0
+        return (x - a) / (b - a)
+
+    @staticmethod
+    def uniform_quantile(p: float, a: float = 0.0, b: float = 1.0) -> float:
+        if a >= b or p < 0.0 or p > 1.0:
+            return 0.0
+        return a + p * (b - a)
+
+    @staticmethod
+    def get_moments(dist_type: str, params: Dict[str, float]) -> Dict[str, float]:
+        d = dist_type.lower()
+        if d == "normal":
+            mu = params.get("mean", 0.0)
+            std = params.get("std", 1.0)
+            var = std * std
+            return {"mean": mu, "variance": var, "std_dev": std, "skewness": 0.0, "kurtosis": 3.0}
+        elif d == "student_t":
+            df = params.get("df", 10.0)
+            mean = 0.0 if df > 1 else math.nan
+            var = (df / (df - 2.0)) if df > 2 else math.nan
+            skew = 0.0 if df > 3 else math.nan
+            kurt = (3.0 + 6.0 / (df - 4.0)) if df > 4 else math.nan
+            return {"mean": mean, "variance": var, "std_dev": math.sqrt(var) if not math.isnan(var) else math.nan, "skewness": skew, "kurtosis": kurt}
+        elif d == "chi_square":
+            df = params.get("df", 1.0)
+            mean = df
+            var = 2.0 * df
+            skew = math.sqrt(8.0 / df)
+            kurt = 3.0 + 12.0 / df
+            return {"mean": mean, "variance": var, "std_dev": math.sqrt(var), "skewness": skew, "kurtosis": kurt}
+        elif d == "binomial":
+            n = int(params.get("n", 10))
+            p = params.get("p", 0.5)
+            mean = n * p
+            var = n * p * (1.0 - p)
+            std = math.sqrt(var)
+            skew = (1.0 - 2.0 * p) / std if std > 0 else 0.0
+            kurt = 3.0 + (1.0 - 6.0 * p * (1.0 - p)) / var if var > 0 else 3.0
+            return {"mean": mean, "variance": var, "std_dev": std, "skewness": skew, "kurtosis": kurt}
+        elif d == "poisson":
+            lam = params.get("lambda", 1.0)
+            mean = lam
+            var = lam
+            std = math.sqrt(lam)
+            skew = 1.0 / std if std > 0 else 0.0
+            kurt = 3.0 + 1.0 / lam if lam > 0 else 3.0
+            return {"mean": mean, "variance": var, "std_dev": std, "skewness": skew, "kurtosis": kurt}
+        elif d == "exponential":
+            rate = params.get("rate", 1.0)
+            mean = 1.0 / rate if rate > 0 else math.nan
+            var = 1.0 / (rate * rate) if rate > 0 else math.nan
+            return {"mean": mean, "variance": var, "std_dev": math.sqrt(var), "skewness": 2.0, "kurtosis": 9.0}
+        elif d == "bernoulli":
+            p = params.get("p", 0.5)
+            mean = p
+            var = p * (1.0 - p)
+            std = math.sqrt(var)
+            skew = (1.0 - 2.0 * p) / std if std > 0 else 0.0
+            return {"mean": mean, "variance": var, "std_dev": std, "skewness": skew, "kurtosis": 3.0}
+        elif d == "geometric":
+            p = params.get("p", 0.5)
+            mean = 1.0 / p if p > 0 else math.nan
+            var = (1.0 - p) / (p * p) if p > 0 else math.nan
+            std = math.sqrt(var)
+            skew = (2.0 - p) / math.sqrt(1.0 - p) if (1.0 - p) > 0 else 0.0
+            return {"mean": mean, "variance": var, "std_dev": std, "skewness": skew, "kurtosis": 3.0}
+        elif d == "uniform":
+            a = params.get("a", 0.0)
+            b = params.get("b", 1.0)
+            mean = (a + b) / 2.0
+            var = ((b - a) ** 2) / 12.0
+            std = math.sqrt(var)
+            return {"mean": mean, "variance": var, "std_dev": std, "skewness": 0.0, "kurtosis": 1.8}
+        return {"mean": math.nan, "variance": math.nan, "std_dev": math.nan, "skewness": math.nan, "kurtosis": math.nan}
+
+    @staticmethod
+    def range_probability(dist_type: str, params: Dict[str, float], x_min: float, x_max: float) -> float:
+        if x_min > x_max:
+            x_min, x_max = x_max, x_min
+        d = dist_type.lower()
+        if d == "normal":
+            mu = params.get("mean", 0.0)
+            std = params.get("std", 1.0)
+            return normal_cdf(x_max, mu, std) - normal_cdf(x_min, mu, std)
+        elif d == "student_t":
+            df = params.get("df", 10.0)
+            return student_t_cdf(x_max, df) - student_t_cdf(x_min, df)
+        elif d == "chi_square":
+            df = params.get("df", 1.0)
+            return chi_square_cdf(x_max, df) - chi_square_cdf(x_min, df)
+        elif d == "binomial":
+            n = int(params.get("n", 10))
+            p = params.get("p", 0.5)
+            k_min = math.ceil(x_min)
+            k_max = math.floor(x_max)
+            return sum(DistributionsEngine.binomial_pmf(k, n, p) for k in range(k_min, k_max + 1))
+        elif d == "poisson":
+            lam = params.get("lambda", 1.0)
+            k_min = max(0, math.ceil(x_min))
+            k_max = math.floor(x_max)
+            return sum(DistributionsEngine.poisson_pmf(k, lam) for k in range(k_min, k_max + 1))
+        elif d == "exponential":
+            rate = params.get("rate", 1.0)
+            return DistributionsEngine.exponential_cdf(x_max, rate) - DistributionsEngine.exponential_cdf(x_min, rate)
+        elif d == "bernoulli":
+            p = params.get("p", 0.5)
+            k_min = math.ceil(x_min)
+            k_max = math.floor(x_max)
+            return sum(DistributionsEngine.bernoulli_pmf(k, p) for k in range(k_min, k_max + 1))
+        elif d == "geometric":
+            p = params.get("p", 0.5)
+            k_min = max(1, math.ceil(x_min))
+            k_max = math.floor(x_max)
+            return sum(DistributionsEngine.geometric_pmf(k, p) for k in range(k_min, k_max + 1))
+        elif d == "uniform":
+            a = params.get("a", 0.0)
+            b = params.get("b", 1.0)
+            return DistributionsEngine.uniform_cdf(x_max, a, b) - DistributionsEngine.uniform_cdf(x_min, a, b)
+        return 0.0

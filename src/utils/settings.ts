@@ -1,4 +1,5 @@
 import { AppSettings, CalcMode, AngleMode } from '../types';
+import { CALCULATOR_REGISTRY } from '../constants/calculatorRegistry';
 
 export const SETTINGS_KEY = 'omnicalc_settings_v2';
 export const SETTINGS_VERSION = 2;
@@ -35,25 +36,7 @@ const VALID_NOTATIONS: ReadonlySet<string> = new Set(['standard', 'scientific', 
 const VALID_THOUSANDS: ReadonlySet<string> = new Set(['comma', 'space', 'period', 'none']);
 const VALID_FONT_SIZES: ReadonlySet<string> = new Set(['compact', 'normal', 'large']);
 const VALID_SOUND_PROFILES: ReadonlySet<string> = new Set(['mechanical', 'soft', 'beep', 'tap']);
-const VALID_CALC_MODES: ReadonlySet<string> = new Set([
-  'basic',
-  'scientific',
-  'graph',
-  'programmer',
-  'converter',
-  'finance',
-  'matrix',
-  'statistics',
-  'equation',
-  'calculus',
-  'datetime',
-  'health',
-  'geometry',
-  'fractions',
-  'formulas',
-  'history',
-  'settings',
-]);
+const VALID_CALC_MODES: ReadonlySet<string> = new Set(CALCULATOR_REGISTRY.map((c) => c.id));
 
 /**
  * Validates and sanitizes settings against strict schema rules and boundaries.

@@ -30,6 +30,11 @@ class InferencePage(QWidget):
             "One-Sample Z-Test (Known σ)",
             "One-Sample Student's t-Test (Unknown σ)",
             "Two-Sample t-Test / Welch's t-Test",
+            "Paired Samples t-Test",
+            "One-Sample Proportion Z-Test",
+            "Two-Sample Proportions Z-Test",
+            "Chi-Square Goodness-of-Fit Test",
+            "Chi-Square Test of Independence",
             "One-Way ANOVA",
         ])
         self.test_combo.currentIndexChanged.connect(self._on_test_change)
@@ -103,71 +108,107 @@ class InferencePage(QWidget):
         self.equal_var_cb.setVisible(False)
         self.anova_text.setVisible(False)
         self.alt_combo.setVisible(True)
+        self.field1_lbl.setVisible(True)
+        self.field1_input.setVisible(True)
+        self.field2_lbl.setVisible(True)
+        self.field2_input.setVisible(True)
+        self.field3_lbl.setVisible(True)
+        self.field3_input.setVisible(True)
+        self.field4_lbl.setVisible(True)
+        self.field4_input.setVisible(True)
 
         if idx == 0:  # One-sample Z
             self.field1_lbl.setText("Sample Mean (x̄):")
             self.field1_input.setText("10.5")
-            self.field1_lbl.setVisible(True)
-            self.field1_input.setVisible(True)
 
             self.field2_lbl.setText("Sample Size (n):")
             self.field2_input.setText("30")
-            self.field2_lbl.setVisible(True)
-            self.field2_input.setVisible(True)
 
             self.field3_lbl.setText("Pop Std Dev (σ):")
             self.field3_input.setText("2.0")
-            self.field3_lbl.setVisible(True)
-            self.field3_input.setVisible(True)
 
             self.field4_lbl.setText("Hypothesized Mean (μ0):")
             self.field4_input.setText("10.0")
-            self.field4_lbl.setVisible(True)
-            self.field4_input.setVisible(True)
 
         elif idx == 1:  # One-sample t
             self.field1_lbl.setText("Sample Mean (x̄):")
             self.field1_input.setText("10.5")
-            self.field1_lbl.setVisible(True)
-            self.field1_input.setVisible(True)
 
             self.field2_lbl.setText("Sample Std Dev (s):")
             self.field2_input.setText("2.5")
-            self.field2_lbl.setVisible(True)
-            self.field2_input.setVisible(True)
 
             self.field3_lbl.setText("Sample Size (n):")
             self.field3_input.setText("25")
-            self.field3_lbl.setVisible(True)
-            self.field3_input.setVisible(True)
 
             self.field4_lbl.setText("Hypothesized Mean (μ0):")
             self.field4_input.setText("10.0")
-            self.field4_lbl.setVisible(True)
-            self.field4_input.setVisible(True)
 
         elif idx == 2:  # Two-sample t
-            self.field1_lbl.setText("Sample 1 Mean (x̄1) & Std (s1) & n1:")
+            self.field1_lbl.setText("Sample 1 Mean (x̄1), Std (s1), n1:")
             self.field1_input.setText("12.5, 2.1, 20")
-            self.field1_lbl.setVisible(True)
-            self.field1_input.setVisible(True)
 
-            self.field2_lbl.setText("Sample 2 Mean (x̄2) & Std (s2) & n2:")
+            self.field2_lbl.setText("Sample 2 Mean (x̄2), Std (s2), n2:")
             self.field2_input.setText("10.1, 1.9, 22")
-            self.field2_lbl.setVisible(True)
-            self.field2_input.setVisible(True)
 
             self.field3_lbl.setText("Hypothesized Diff (μ1 - μ2):")
             self.field3_input.setText("0.0")
-            self.field3_lbl.setVisible(True)
-            self.field3_input.setVisible(True)
+
+            self.field4_lbl.setVisible(False)
+            self.field4_input.setVisible(False)
+            self.equal_var_cb.setVisible(True)
+
+        elif idx == 3:  # Paired t
+            self.field1_lbl.setText("Mean Difference (d̄):")
+            self.field1_input.setText("1.2")
+
+            self.field2_lbl.setText("Std Dev Difference (s_d):")
+            self.field2_input.setText("0.8")
+
+            self.field3_lbl.setText("Sample Pairs (n):")
+            self.field3_input.setText("15")
+
+            self.field4_lbl.setText("Hypothesized Diff (μ_d):")
+            self.field4_input.setText("0.0")
+
+        elif idx == 4:  # One-sample Prop
+            self.field1_lbl.setText("Successes (x):")
+            self.field1_input.setText("45")
+
+            self.field2_lbl.setText("Total Trials (n):")
+            self.field2_input.setText("100")
+
+            self.field3_lbl.setText("Hypothesized Prob (p0):")
+            self.field3_input.setText("0.5")
 
             self.field4_lbl.setVisible(False)
             self.field4_input.setVisible(False)
 
-            self.equal_var_cb.setVisible(True)
+        elif idx == 5:  # Two-sample Prop
+            self.field1_lbl.setText("Sample 1 Successes (x1), Trials (n1):")
+            self.field1_input.setText("45, 100")
 
-        elif idx == 3:  # ANOVA
+            self.field2_lbl.setText("Sample 2 Successes (x2), Trials (n2):")
+            self.field2_input.setText("30, 100")
+
+            self.field3_lbl.setVisible(False)
+            self.field3_input.setVisible(False)
+            self.field4_lbl.setVisible(False)
+            self.field4_input.setVisible(False)
+
+        elif idx == 6:  # Chi2 GOF
+            self.field1_lbl.setText("Observed Frequencies:")
+            self.field1_input.setText("20, 25, 15, 40")
+
+            self.field2_lbl.setText("Expected Frequencies (Optional):")
+            self.field2_input.setText("25, 25, 25, 25")
+
+            self.field3_lbl.setVisible(False)
+            self.field3_input.setVisible(False)
+            self.field4_lbl.setVisible(False)
+            self.field4_input.setVisible(False)
+            self.alt_combo.setVisible(False)
+
+        elif idx == 7:  # Chi2 Independence
             self.field1_lbl.setVisible(False)
             self.field1_input.setVisible(False)
             self.field2_lbl.setVisible(False)
@@ -177,6 +218,20 @@ class InferencePage(QWidget):
             self.field4_lbl.setVisible(False)
             self.field4_input.setVisible(False)
             self.alt_combo.setVisible(False)
+            self.anova_text.setPlaceholderText("Enter contingency table matrix line by line:\nRow1: 10, 20, 30\nRow2: 20, 15, 25")
+            self.anova_text.setVisible(True)
+
+        elif idx == 8:  # ANOVA
+            self.field1_lbl.setVisible(False)
+            self.field1_input.setVisible(False)
+            self.field2_lbl.setVisible(False)
+            self.field2_input.setVisible(False)
+            self.field3_lbl.setVisible(False)
+            self.field3_input.setVisible(False)
+            self.field4_lbl.setVisible(False)
+            self.field4_input.setVisible(False)
+            self.alt_combo.setVisible(False)
+            self.anova_text.setPlaceholderText("Enter group data line by line:\nGroup1: 12, 14, 15, 11\nGroup2: 18, 17, 21, 19\nGroup3: 22, 24, 20, 25")
             self.anova_text.setVisible(True)
 
     def run_test(self):
@@ -211,7 +266,48 @@ class InferencePage(QWidget):
                 eq_var = self.equal_var_cb.isChecked()
                 res = self.engine.two_sample_t_test(m1, std1, n1, m2, std2, n2, eq_var, diff0, alpha, alt)
 
-            elif idx == 3:  # ANOVA
+            elif idx == 3:  # Paired t
+                mean_d = float(self.field1_input.text())
+                std_d = float(self.field2_input.text())
+                n = int(float(self.field3_input.text()))
+                diff0 = float(self.field4_input.text())
+                res = self.engine.paired_t_test(mean_d, std_d, n, diff0, alpha, alt)
+
+            elif idx == 4:  # 1-prop z
+                x = int(float(self.field1_input.text()))
+                n = int(float(self.field2_input.text()))
+                p0 = float(self.field3_input.text())
+                res = self.engine.one_sample_proportion_test(x, n, p0, alpha, alt)
+
+            elif idx == 5:  # 2-prop z
+                s1_parts = [int(float(x.strip())) for x in self.field1_input.text().split(",") if x.strip()]
+                s2_parts = [int(float(x.strip())) for x in self.field2_input.text().split(",") if x.strip()]
+                if len(s1_parts) < 2 or len(s2_parts) < 2:
+                    self.output.setText("Error: Enter successes, total_trials separated by comma.")
+                    return
+                res = self.engine.two_sample_proportions_test(s1_parts[0], s1_parts[1], s2_parts[0], s2_parts[1], alpha, alt)
+
+            elif idx == 6:  # Chi2 GOF
+                obs = [float(x.strip()) for x in self.field1_input.text().split(",") if x.strip()]
+                exp_text = self.field2_input.text().strip()
+                exp = [float(x.strip()) for x in exp_text.split(",") if x.strip()] if exp_text else None
+                res = self.engine.chi_square_gof_test(obs, exp, alpha)
+
+            elif idx == 7:  # Chi2 Independence
+                raw_text = self.anova_text.toPlainText().strip()
+                if not raw_text:
+                    self.output.setText("Error: Enter contingency table matrix in text box.")
+                    return
+                table = []
+                for line in raw_text.splitlines():
+                    if ":" in line:
+                        line = line.split(":", 1)[1]
+                    vals = [float(x.strip()) for x in line.replace(",", " ").split() if x.strip()]
+                    if vals:
+                        table.append(vals)
+                res = self.engine.chi_square_independence_test(table, alpha)
+
+            elif idx == 8:  # ANOVA
                 raw_text = self.anova_text.toPlainText().strip()
                 if not raw_text:
                     self.output.setText("Error: Enter group data in text box.")

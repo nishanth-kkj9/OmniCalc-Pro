@@ -173,6 +173,181 @@ def two_sample_t_test(
     }
 
 
+def paired_t_test(
+    mean_diff: float,
+    std_diff: float,
+    sample_size: int,
+    hypothesized_diff: float = 0.0,
+    alpha: float = 0.05,
+    alternative: str = "two-sided",
+) -> Dict[str, Union[float, int, bool, str, Dict[str, float]]]:
+    """Paired samples t-test on differences."""
+    res = one_sample_t_test(mean_diff, std_diff, sample_size, hypothesized_diff, alpha, alternative)
+    res["test_name"] = "Paired Samples t-Test"
+    return res
+
+
+def one_sample_proportion_test(
+    successes: int,
+    trials: int,
+    hypothesized_p: float = 0.5,
+    alpha: float = 0.05,
+    alternative: str = "two-sided",
+) -> Dict[str, Union[float, int, bool, str, Dict[str, float]]]:
+    """One-sample proportion z-test."""
+    if trials <= 0 or successes < 0 or successes > trials or not (0.0 < hypothesized_p < 1.0):
+        raise ValueError("Invalid parameters for proportion test (0 <= successes <= trials, trials > 0, 0 < p < 1).")
+
+    sample_p = successes / trials
+    se = math.sqrt((hypothesized_p * (1.0 - hypothesized_p)) / trials)
+    z = (sample_p - hypothesized_p) / se
+
+    if alternative == "two-sided":
+        p_val = 2.0 * (1.0 - normal_cdf(abs(z), 0.0, 1.0))
+    elif alternative == "less":
+        p_val = normal_cdf(z, 0.0, 1.0)
+    else:
+        p_val = 1.0 - normal_cdf(z, 0.0, 1.0)
+
+    p_val = max(0.0, min(1.0, p_val))
+    z_crit = normal_quantile(1.0 - alpha / 2.0, 0.0, 1.0)
+    margin = z_crit * math.sqrt((sample_p * (1.0 - sample_p)) / trials) if trials > 0 else 0.0
+
+    return {
+        "test_name": "One-Sample Proportion Z-Test",
+        "statistic": z,
+        "p_value": p_val,
+        "alpha": alpha,
+        "reject_null": p_val < alpha,
+        "sample_p": sample_p,
+        "confidence_interval": {
+            "lower": max(0.0, sample_p - margin),
+            "upper": min(1.0, sample_p + margin),
+            "confidence_level": 1.0 - alpha,
+        },
+    }
+
+
+def two_sample_proportions_test(
+    x1: int,
+    n1: int,
+    x2: int,
+    n2: int,
+    alpha: float = 0.05,
+    alternative: str = "two-sided",
+) -> Dict[str, Union[float, int, bool, str, Dict[str, float]]]:
+    """Two-sample proportions z-test."""
+    if n1 <= 0 or n2 <= 0 or x1 < 0 or x1 > n1 or x2 < 0 or x2 > n2:
+        raise ValueError("Invalid counts or trial numbers for 2-proportion test.")
+
+    p1 = x1 / n1
+    p2 = x2 / n2
+    diff = p1 - p2
+
+    p_pooled = (x1 + x2) / (n1 + n2)
+    se_pooled = math.sqrt(p_pooled * (1.0 - p_pooled) * (1.0 / n1 + 1.0 / n2))
+    z = (p1 - p2) / (se_pooled or 1e-12)
+
+    if alternative == "two-sided":
+        p_val = 2.0 * (1.0 - normal_cdf(abs(z), 0.0, 1.0))
+    elif alternative == "less":
+        p_val = normal_cdf(z, 0.0, 1.0)
+    else:
+        p_val = 1.0 - normal_cdf(z, 0.0, 1.0)
+
+    p_val = max(0.0, min(1.0, p_val))
+    se_unpooled = math.sqrt((p1 * (1.0 - p1)) / n1 + (p2 * (1.0 - p2)) / n2)
+    z_crit = normal_quantile(1.0 - alpha / 2.0, 0.0, 1.0)
+    margin = z_crit * se_unpooled
+
+    return {
+        "test_name": "Two-Sample Proportions Z-Test",
+        "statistic": z,
+        "p_value": p_val,
+        "alpha": alpha,
+        "reject_null": p_val < alpha,
+        "p1": p1,
+        "p2": p2,
+        "confidence_interval": {
+            "lower": diff - margin,
+            "upper": diff + margin,
+            "confidence_level": 1.0 - alpha,
+        },
+    }
+
+
+def chi_square_gof_test(
+    observed: List[float],
+    expected: Optional[List[float]] = None,
+    alpha: float = 0.05,
+) -> Dict[str, Union[float, int, bool, str]]:
+    """Chi-Square Goodness-of-Fit Test."""
+    k = len(observed)
+    if k < 2:
+        raise ValueError("Chi-Square Goodness-of-Fit requires at least 2 categories.")
+
+    total_obs = sum(observed)
+    if expected is None or len(expected) != k:
+        exp_normalized = [total_obs / k] * k
+    else:
+        total_exp = sum(expected)
+        exp_normalized = [(e / total_exp) * total_obs for e in expected] if total_exp > 0 else expected
+
+    chi2 = 0.0
+    for obs, exp in zip(observed, exp_normalized):
+        if exp <= 0:
+            raise ValueError("Expected frequencies must be > 0.")
+        chi2 += ((obs - exp) ** 2) / exp
+
+    df = k - 1
+    p_val = max(0.0, min(1.0, 1.0 - chi_square_cdf(chi2, df)))
+
+    return {
+        "test_name": "Chi-Square Goodness-of-Fit Test",
+        "statistic": chi2,
+        "df": df,
+        "p_value": p_val,
+        "alpha": alpha,
+        "reject_null": p_val < alpha,
+    }
+
+
+def chi_square_independence_test(
+    contingency_table: List[List[float]],
+    alpha: float = 0.05,
+) -> Dict[str, Union[float, int, bool, str]]:
+    """Chi-Square Test of Independence for R x C table."""
+    r = len(contingency_table)
+    if r < 2:
+        raise ValueError("Contingency table requires at least 2 rows.")
+    c = len(contingency_table[0])
+    if c < 2:
+        raise ValueError("Contingency table requires at least 2 columns.")
+
+    row_totals = [sum(row) for row in contingency_table]
+    col_totals = [sum(contingency_table[i][j] for i in range(r)) for j in range(c)]
+    grand_total = sum(row_totals)
+
+    chi2 = 0.0
+    for i in range(r):
+        for j in range(c):
+            exp = (row_totals[i] * col_totals[j]) / grand_total if grand_total > 0 else 0.0
+            if exp > 0:
+                chi2 += ((contingency_table[i][j] - exp) ** 2) / exp
+
+    df = (r - 1) * (c - 1)
+    p_val = max(0.0, min(1.0, 1.0 - chi_square_cdf(chi2, df)))
+
+    return {
+        "test_name": "Chi-Square Test of Independence",
+        "statistic": chi2,
+        "df": df,
+        "p_value": p_val,
+        "alpha": alpha,
+        "reject_null": p_val < alpha,
+    }
+
+
 def one_way_anova(
     groups: List[List[float]],
     alpha: float = 0.05,
@@ -236,6 +411,26 @@ class InferenceEngine:
     @staticmethod
     def two_sample_t_test(mean1: float, std_dev1: float, n1: int, mean2: float, std_dev2: float, n2: int, equal_variances: bool = False, hypothesized_diff: float = 0.0, alpha: float = 0.05, alternative: str = "two-sided"):
         return two_sample_t_test(mean1, std_dev1, n1, mean2, std_dev2, n2, equal_variances, hypothesized_diff, alpha, alternative)
+
+    @staticmethod
+    def paired_t_test(mean_diff: float, std_diff: float, sample_size: int, hypothesized_diff: float = 0.0, alpha: float = 0.05, alternative: str = "two-sided"):
+        return paired_t_test(mean_diff, std_diff, sample_size, hypothesized_diff, alpha, alternative)
+
+    @staticmethod
+    def one_sample_proportion_test(successes: int, trials: int, hypothesized_p: float = 0.5, alpha: float = 0.05, alternative: str = "two-sided"):
+        return one_sample_proportion_test(successes, trials, hypothesized_p, alpha, alternative)
+
+    @staticmethod
+    def two_sample_proportions_test(x1: int, n1: int, x2: int, n2: int, alpha: float = 0.05, alternative: str = "two-sided"):
+        return two_sample_proportions_test(x1, n1, x2, n2, alpha, alternative)
+
+    @staticmethod
+    def chi_square_gof_test(observed: List[float], expected: Optional[List[float]] = None, alpha: float = 0.05):
+        return chi_square_gof_test(observed, expected, alpha)
+
+    @staticmethod
+    def chi_square_independence_test(contingency_table: List[List[float]], alpha: float = 0.05):
+        return chi_square_independence_test(contingency_table, alpha)
 
     @staticmethod
     def anova(groups: List[List[float]], alpha: float = 0.05):

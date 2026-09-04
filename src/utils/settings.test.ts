@@ -42,6 +42,7 @@ describe('Settings Management and Migration (BUG-02 Regression Tests)', () => {
       precision: 9999,
       soundVolume: -10,
       maxHistoryItems: -5,
+      defaultMode: 'non_existent_invalid_mode_xyz',
       __v: SETTINGS_VERSION,
     };
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(malicious));
@@ -52,6 +53,43 @@ describe('Settings Management and Migration (BUG-02 Regression Tests)', () => {
     expect(loaded.precision).toBe(12); // clamped to max
     expect(loaded.soundVolume).toBe(0); // clamped to min
     expect(loaded.maxHistoryItems).toBe(1); // clamped to min
+    expect(loaded.defaultMode).toBe('basic'); // falls back to basic for invalid mode
+  });
+
+  it('accepts and preserves all 23 valid CalcMode values as defaultMode', () => {
+    const allModes = [
+      'basic',
+      'scientific',
+      'graph',
+      'programmer',
+      'converter',
+      'finance',
+      'matrix',
+      'statistics',
+      'equation',
+      'calculus',
+      'datetime',
+      'health',
+      'geometry',
+      'fractions',
+      'formulas',
+      'history',
+      'settings',
+      'regression',
+      'probability',
+      'inference',
+      'sequences',
+      'complex',
+      'physical_units',
+    ] as const;
+
+    expect(allModes.length).toBe(23);
+
+    allModes.forEach((mode) => {
+      saveSettings({ ...DEFAULT_SETTINGS, defaultMode: mode });
+      const loaded = loadInitialSettings();
+      expect(loaded.defaultMode).toBe(mode);
+    });
   });
 
   it('safely rejects unsupported future or corrupted schema versions without leaking stale data', () => {

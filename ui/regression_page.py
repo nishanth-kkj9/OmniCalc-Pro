@@ -75,11 +75,11 @@ class RegressionPage(QWidget):
         self.output.setStyleSheet("font-family: monospace; font-size: 13px;")
         result_layout.addWidget(self.output)
 
-        # Prediction Sub-section
+        # Prediction & Inverse Prediction Sub-section
         pred_layout = QHBoxLayout()
         pred_layout.addWidget(QLabel("Predict Y for X ="))
         self.pred_x_input = QLineEdit()
-        self.pred_x_input.setPlaceholderText("Enter X value")
+        self.pred_x_input.setPlaceholderText("X value")
         pred_layout.addWidget(self.pred_x_input)
 
         self.pred_btn = QPushButton("Predict Y")
@@ -91,6 +91,22 @@ class RegressionPage(QWidget):
         pred_layout.addWidget(self.pred_result_lbl)
 
         result_layout.addLayout(pred_layout)
+
+        inv_layout = QHBoxLayout()
+        inv_layout.addWidget(QLabel("Inverse Predict X for Y ="))
+        self.pred_y_input = QLineEdit()
+        self.pred_y_input.setPlaceholderText("Y value")
+        inv_layout.addWidget(self.pred_y_input)
+
+        self.inv_btn = QPushButton("Predict X")
+        self.inv_btn.clicked.connect(self.predict_x)
+        inv_layout.addWidget(self.inv_btn)
+
+        self.inv_result_lbl = QLabel("")
+        self.inv_result_lbl.setStyleSheet("font-weight: bold; color: #00ffaa;")
+        inv_layout.addWidget(self.inv_result_lbl)
+
+        result_layout.addLayout(inv_layout)
         layout.addWidget(result_group)
 
     def _parse_list(self, text: str):
@@ -139,6 +155,9 @@ class RegressionPage(QWidget):
                 f"Model: {res.get('type', 'Custom')}",
                 f"Equation: {res.get('equation', 'N/A')}",
                 f"R² (Coefficient of Determination): {res.get('r2', 0.0):.6f}",
+                f"Adjusted R²: {res.get('adjusted_r2', 0.0):.6f}",
+                f"RMSE: {res.get('rmse', 0.0):.6f}",
+                f"MAE: {res.get('mae', 0.0):.6f}",
                 f"Sum of Squared Residuals (SS_res): {res.get('ss_res', 0.0):.6f}",
                 f"Total Sum of Squares (SS_tot): {res.get('ss_tot', 0.0):.6f}",
             ]
@@ -151,8 +170,16 @@ class RegressionPage(QWidget):
                 lines.append(f"Parameter a: {res['a']:.6f}")
                 lines.append(f"Parameter b: {res['b']:.6f}")
 
+            if "residuals" in res and res["residuals"]:
+                lines.append("\nResidual Analysis Table:")
+                lines.append("  # |      X      |  Observed Y  | Predicted Y  |   Residual   ")
+                lines.append("-" * 65)
+                for idx, item in enumerate(res["residuals"]):
+                    lines.append(f"{idx+1:3d} | {item['x']:11.4f} | {item['y_observed']:12.4f} | {item['y_predicted']:12.4f} | {item['residual']:12.4f}")
+
             self.output.setText("\n".join(lines))
             self.pred_result_lbl.setText("")
+            self.inv_result_lbl.setText("")
         except Exception as e:
             self.output.setText(f"Error: {str(e)}")
             self.last_fit_result = None
@@ -167,3 +194,18 @@ class RegressionPage(QWidget):
             self.pred_result_lbl.setText(f"Predicted Y = {y_pred:.6f}")
         except Exception as e:
             self.pred_result_lbl.setText(f"Error: {str(e)}")
+
+    def predict_x(self):
+        if not self.last_fit_result:
+            self.inv_result_lbl.setText("Fit a model first!")
+            return
+        try:
+            y_val = float(self.pred_y_input.text().strip())
+            x_roots = self.engine.inverse_predict(self.last_fit_result, y_val)
+            if not x_roots:
+                self.inv_result_lbl.setText("No real root found for Y")
+            else:
+                formatted = ", ".join(f"{r:.6f}" for r in x_roots)
+                self.inv_result_lbl.setText(f"Predicted X ≈ {formatted}")
+        except Exception as e:
+            self.inv_result_lbl.setText(f"Error: {str(e)}")

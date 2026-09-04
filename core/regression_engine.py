@@ -1,6 +1,7 @@
 """
 OmniCalc Pro Regression & Curve Fitting Engine (Python Desktop Parity - Pure Python)
-Supports Linear, Polynomial, Exponential, Logarithmic, and Power regressions.
+Supports Linear, Polynomial, Exponential, Logarithmic, and Power regressions
+with residuals, ANOVA metrics (R², adjusted R², RMSE, MAE), and inverse prediction.
 """
 
 import math
@@ -8,6 +9,44 @@ from typing import List, Dict, Any, Tuple
 
 
 class RegressionEngine:
+    @staticmethod
+    def _compute_metrics(x_pts: List[float], y_pts: List[float], y_preds: List[float], num_params: int) -> Dict[str, Any]:
+        n = len(y_pts)
+        mean_y = sum(y_pts) / n
+        ss_tot = sum((y - mean_y) ** 2 for y in y_pts)
+        ss_res = sum((y - yp) ** 2 for y, yp in zip(y_pts, y_preds))
+
+        r2 = 1.0 - (ss_res / ss_tot) if ss_tot > 0 else 1.0
+        r2 = max(0.0, min(1.0, r2))
+
+        adj_r2 = r2
+        if n > num_params:
+            adj_r2 = 1.0 - ((1.0 - r2) * (n - 1) / (n - num_params))
+            adj_r2 = max(0.0, min(1.0, adj_r2))
+
+        mae = sum(abs(y - yp) for y, yp in zip(y_pts, y_preds)) / n
+        rmse = math.sqrt(ss_res / n)
+
+        residuals = [
+            {
+                "x": float(x),
+                "y_observed": float(y),
+                "y_predicted": float(yp),
+                "residual": float(y - yp)
+            }
+            for x, y, yp in zip(x_pts, y_pts, y_preds)
+        ]
+
+        return {
+            "r2": float(r2),
+            "adjusted_r2": float(adj_r2),
+            "ss_res": float(ss_res),
+            "ss_tot": float(ss_tot),
+            "mae": float(mae),
+            "rmse": float(rmse),
+            "residuals": residuals,
+        }
+
     @staticmethod
     def linear_fit(x_pts: List[float], y_pts: List[float]) -> Dict[str, Any]:
         n = len(x_pts)
@@ -26,11 +65,8 @@ class RegressionEngine:
         slope = (n * sum_xy - sum_x * sum_y) / denom
         intercept = (sum_y - slope * sum_x) / n
 
-        mean_y = sum_y / n
-        ss_tot = sum((y - mean_y) ** 2 for y in y_pts)
-        ss_res = sum((y - (slope * x + intercept)) ** 2 for x, y in zip(x_pts, y_pts))
-
-        r2 = 1.0 - (ss_res / ss_tot) if ss_tot > 0 else 1.0
+        y_preds = [slope * x + intercept for x in x_pts]
+        metrics = RegressionEngine._compute_metrics(x_pts, y_pts, y_preds, num_params=2)
 
         sign_str = '+' if intercept >= 0 else '-'
         eq_str = f"y = {slope:.4f}x {sign_str} {abs(intercept):.4f}"
@@ -39,15 +75,16 @@ class RegressionEngine:
             "type": "linear",
             "slope": float(slope),
             "intercept": float(intercept),
-            "r2": float(r2),
+            "coefficients": [float(intercept), float(slope)],
             "equation": eq_str,
-            "ss_res": float(ss_res),
-            "ss_tot": float(ss_tot),
+            **metrics,
         }
 
     @staticmethod
     def polynomial_fit(x_pts: List[float], y_pts: List[float], degree: int = 2) -> Dict[str, Any]:
         n = len(x_pts)
+        if degree < 1 or degree > 5:
+            raise ValueError("Polynomial degree must be between 1 and 5.")
         if n <= degree or len(y_pts) != n:
             raise ValueError(f"Polynomial regression of degree {degree} requires at least {degree + 1} points.")
 
@@ -61,7 +98,6 @@ class RegressionEngine:
                 A[i][j] = sum((x ** (i + j)) for x in x_pts)
             B[i] = sum((y * (x ** i)) for x, y in zip(x_pts, y_pts))
 
-        # Gaussian Elimination with Partial Pivoting
         for i in range(m):
             max_row = i
             for k in range(i + 1, m):
@@ -80,14 +116,12 @@ class RegressionEngine:
                     A[k][j] -= factor * A[i][j]
                 B[k] -= factor * B[i]
 
-        # Back Substitution
         coeffs_asc = [0.0] * m
         for i in range(m - 1, -1, -1):
             s = B[i] - sum(A[i][j] * coeffs_asc[j] for j in range(i + 1, m))
             coeffs_asc[i] = s / A[i][i]
 
-        # Reverse to descending order (highest degree first)
-        coeffs = coeffs_asc[::-1]
+        coeffs = coeffs_asc[::-1]  # descending order
 
         def poly_eval(x_val: float) -> float:
             res = 0.0
@@ -95,12 +129,9 @@ class RegressionEngine:
                 res = res * x_val + c
             return res
 
-        mean_y = sum(y_pts) / n
-        ss_tot = sum((y - mean_y) ** 2 for y in y_pts)
-        ss_res = sum((y - poly_eval(x)) ** 2 for x, y in zip(x_pts, y_pts))
-        r2 = 1.0 - (ss_res / ss_tot) if ss_tot > 0 else 1.0
+        y_preds = [poly_eval(x) for x in x_pts]
+        metrics = RegressionEngine._compute_metrics(x_pts, y_pts, y_preds, num_params=m)
 
-        # Build readable equation string
         terms = []
         deg = degree
         for c in coeffs:
@@ -116,10 +147,9 @@ class RegressionEngine:
         return {
             "type": f"polynomial_deg_{degree}",
             "coefficients": [float(c) for c in coeffs],
-            "r2": float(r2),
             "equation": eq_str,
-            "ss_res": float(ss_res),
-            "ss_tot": float(ss_tot),
+            "degree": degree,
+            **metrics,
         }
 
     @staticmethod
@@ -131,19 +161,16 @@ class RegressionEngine:
         b = lin_res["slope"]
         a = math.exp(lin_res["intercept"])
 
-        mean_y = sum(y_pts) / len(y_pts)
-        ss_tot = sum((y - mean_y) ** 2 for y in y_pts)
-        ss_res = sum((y - a * math.exp(b * x)) ** 2 for x, y in zip(x_pts, y_pts))
-        r2 = 1.0 - (ss_res / ss_tot) if ss_tot > 0 else 1.0
+        y_preds = [a * math.exp(b * x) for x in x_pts]
+        metrics = RegressionEngine._compute_metrics(x_pts, y_pts, y_preds, num_params=2)
 
         return {
             "type": "exponential",
             "a": float(a),
             "b": float(b),
-            "r2": float(r2),
+            "coefficients": [float(a), float(b)],
             "equation": f"y = {a:.4f} * e^({b:.4f}x)",
-            "ss_res": float(ss_res),
-            "ss_tot": float(ss_tot),
+            **metrics,
         }
 
     @staticmethod
@@ -155,20 +182,17 @@ class RegressionEngine:
         b = lin_res["slope"]
         a = lin_res["intercept"]
 
-        mean_y = sum(y_pts) / len(y_pts)
-        ss_tot = sum((y - mean_y) ** 2 for y in y_pts)
-        ss_res = sum((y - (a + b * math.log(x))) ** 2 for x, y in zip(x_pts, y_pts))
-        r2 = 1.0 - (ss_res / ss_tot) if ss_tot > 0 else 1.0
+        y_preds = [a + b * math.log(x) for x in x_pts]
+        metrics = RegressionEngine._compute_metrics(x_pts, y_pts, y_preds, num_params=2)
 
         sign_str = '+' if b >= 0 else '-'
         return {
             "type": "logarithmic",
             "a": float(a),
             "b": float(b),
-            "r2": float(r2),
+            "coefficients": [float(a), float(b)],
             "equation": f"y = {a:.4f} {sign_str} {abs(b):.4f} * ln(x)",
-            "ss_res": float(ss_res),
-            "ss_tot": float(ss_tot),
+            **metrics,
         }
 
     @staticmethod
@@ -181,19 +205,16 @@ class RegressionEngine:
         b = lin_res["slope"]
         a = math.exp(lin_res["intercept"])
 
-        mean_y = sum(y_pts) / len(y_pts)
-        ss_tot = sum((y - mean_y) ** 2 for y in y_pts)
-        ss_res = sum((y - a * (x ** b)) ** 2 for x, y in zip(x_pts, y_pts))
-        r2 = 1.0 - (ss_res / ss_tot) if ss_tot > 0 else 1.0
+        y_preds = [a * (x ** b) for x in x_pts]
+        metrics = RegressionEngine._compute_metrics(x_pts, y_pts, y_preds, num_params=2)
 
         return {
             "type": "power",
             "a": float(a),
             "b": float(b),
-            "r2": float(r2),
+            "coefficients": [float(a), float(b)],
             "equation": f"y = {a:.4f} * x^({b:.4f})",
-            "ss_res": float(ss_res),
-            "ss_tot": float(ss_tot),
+            **metrics,
         }
 
     @staticmethod
@@ -221,6 +242,84 @@ class RegressionEngine:
             raise ValueError(f"Unknown regression model type: {model_type}")
 
     @staticmethod
+    def inverse_predict(fit_res: Dict[str, Any], y_val: float) -> List[float]:
+        model_type = fit_res.get("type", "")
+        if model_type == "linear":
+            slope = fit_res["slope"]
+            intercept = fit_res["intercept"]
+            if abs(slope) < 1e-12:
+                return []
+            return [(y_val - intercept) / slope]
+        elif model_type == "exponential":
+            a = fit_res["a"]
+            b = fit_res["b"]
+            if a <= 0 or abs(b) < 1e-12 or (y_val / a) <= 0:
+                return []
+            return [math.log(y_val / a) / b]
+        elif model_type == "logarithmic":
+            a = fit_res["a"]
+            b = fit_res["b"]
+            if abs(b) < 1e-12:
+                return []
+            return [math.exp((y_val - a) / b)]
+        elif model_type == "power":
+            a = fit_res["a"]
+            b = fit_res["b"]
+            if a <= 0 or abs(b) < 1e-12 or (y_val / a) <= 0:
+                return []
+            return [(y_val / a) ** (1.0 / b)]
+        elif model_type.startswith("polynomial"):
+            coeffs = fit_res["coefficients"]
+            deg = len(coeffs) - 1
+            if deg == 1:
+                a_c, b_c = coeffs[0], coeffs[1]
+                if abs(a_c) < 1e-12:
+                    return []
+                return [(y_val - b_c) / a_c]
+            elif deg == 2:
+                a_c, b_c, c_c = coeffs[0], coeffs[1], coeffs[2] - y_val
+                if abs(a_c) < 1e-12:
+                    return [(y_val - coeffs[2]) / b_c] if abs(b_c) >= 1e-12 else []
+                disc = b_c * b_c - 4 * a_c * c_c
+                if disc < 0:
+                    return []
+                elif abs(disc) < 1e-12:
+                    return [-b_c / (2 * a_c)]
+                else:
+                    s_disc = math.sqrt(disc)
+                    return [(-b_c + s_disc) / (2 * a_c), (-b_c - s_disc) / (2 * a_c)]
+            else:
+                # Bisection root finding
+                roots = []
+                def obj(x):
+                    res = 0.0
+                    for c in coeffs:
+                        res = res * x + c
+                    return res - y_val
+
+                grid = [i * 0.5 for i in range(-200, 201)]
+                for k in range(len(grid) - 1):
+                    x1, x2 = grid[k], grid[k + 1]
+                    f1, f2 = obj(x1), obj(x2)
+                    if f1 * f2 <= 0:
+                        a_root, b_root = x1, x2
+                        for _ in range(40):
+                            mid = 0.5 * (a_root + b_root)
+                            fmid = obj(mid)
+                            if abs(fmid) < 1e-7:
+                                break
+                            if f1 * fmid <= 0:
+                                b_root = mid
+                            else:
+                                a_root = mid
+                                f1 = fmid
+                        root = 0.5 * (a_root + b_root)
+                        if not any(abs(root - r) < 1e-4 for r in roots):
+                            roots.append(root)
+                return roots
+        return []
+
+    @staticmethod
     def fit(x_pts: List[float], y_pts: List[float], model_type: str = "linear", degree: int = 2) -> Dict[str, Any]:
         model = model_type.lower()
         if model == "linear":
@@ -235,4 +334,5 @@ class RegressionEngine:
             return RegressionEngine.power_fit(x_pts, y_pts)
         else:
             raise ValueError(f"Unsupported regression model type: {model_type}")
+
 
