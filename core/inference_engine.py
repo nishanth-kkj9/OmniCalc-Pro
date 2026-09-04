@@ -222,3 +222,22 @@ def one_way_anova(
         "reject_null": p_val < alpha,
         "eta_squared": eta_sq,
     }
+
+
+class InferenceEngine:
+    @staticmethod
+    def z_test(sample_mean: float, sample_size: int, pop_std_dev: float, hypothesized_mean: float = 0.0, alpha: float = 0.05, alternative: str = "two-sided"):
+        return one_sample_z_test(sample_mean, sample_size, pop_std_dev, hypothesized_mean, alpha, alternative)
+
+    @staticmethod
+    def one_sample_t_test(sample_mean: float, sample_std_dev: float, sample_size: int, hypothesized_mean: float = 0.0, alpha: float = 0.05, alternative: str = "two-sided"):
+        return one_sample_t_test(sample_mean, sample_std_dev, sample_size, hypothesized_mean, alpha, alternative)
+
+    @staticmethod
+    def two_sample_t_test(mean1: float, std_dev1: float, n1: int, mean2: float, std_dev2: float, n2: int, equal_variances: bool = False, hypothesized_diff: float = 0.0, alpha: float = 0.05, alternative: str = "two-sided"):
+        return two_sample_t_test(mean1, std_dev1, n1, mean2, std_dev2, n2, equal_variances, hypothesized_diff, alpha, alternative)
+
+    @staticmethod
+    def anova(groups: List[List[float]], alpha: float = 0.05):
+        return one_way_anova(groups, alpha)
+

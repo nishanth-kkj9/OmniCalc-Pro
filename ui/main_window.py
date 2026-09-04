@@ -189,6 +189,9 @@ class MainWindow(QMainWindow):
             ("Programmer", lambda: getattr(importlib.import_module("ui.programmer_page"), "ProgrammerPage")()),
             ("Matrix", lambda: getattr(importlib.import_module("ui.matrix_page"), "MatrixPage")()),
             ("Statistics", lambda: getattr(importlib.import_module("ui.statistics_page"), "StatisticsPage")()),
+            ("Regression", lambda: getattr(importlib.import_module("ui.regression_page"), "RegressionPage")()),
+            ("Probability", lambda: getattr(importlib.import_module("ui.probability_page"), "ProbabilityPage")()),
+            ("Inference", lambda: getattr(importlib.import_module("ui.inference_page"), "InferencePage")()),
             ("Finance", lambda: getattr(importlib.import_module("ui.finance_page"), "FinancePage")()),
             ("History", lambda: getattr(importlib.import_module("ui.history_page"), "HistoryPage")()),
             ("Settings", lambda: getattr(importlib.import_module("ui.settings_page"), "SettingsPage")())
