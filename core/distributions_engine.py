@@ -351,69 +351,93 @@ class DistributionsEngine:
 
     @staticmethod
     def get_moments(dist_type: str, params: Dict[str, float]) -> Dict[str, float]:
+        """
+        Analytical moments (mean, variance, std_dev, skewness, excess kurtosis).
+        Note: Kurtosis is strictly EXCESS KURTOSIS (Normal = 0.0) across all distributions.
+        """
         d = dist_type.lower()
         if d == "normal":
-            mu = params.get("mean", 0.0)
-            std = params.get("std", 1.0)
+            mu = params.get("mean", params.get("mu", 0.0))
+            std = params.get("std", params.get("sigma", 1.0))
             var = std * std
-            return {"mean": mu, "variance": var, "std_dev": std, "skewness": 0.0, "kurtosis": 3.0}
+            return {"mean": mu, "variance": var, "std_dev": std, "skewness": 0.0, "kurtosis": 0.0}
         elif d == "student_t":
             df = params.get("df", 10.0)
             mean = 0.0 if df > 1 else math.nan
             var = (df / (df - 2.0)) if df > 2 else math.nan
             skew = 0.0 if df > 3 else math.nan
-            kurt = (3.0 + 6.0 / (df - 4.0)) if df > 4 else math.nan
+            kurt = (6.0 / (df - 4.0)) if df > 4 else math.nan
             return {"mean": mean, "variance": var, "std_dev": math.sqrt(var) if not math.isnan(var) else math.nan, "skewness": skew, "kurtosis": kurt}
         elif d == "chi_square":
             df = params.get("df", 1.0)
             mean = df
             var = 2.0 * df
-            skew = math.sqrt(8.0 / df)
-            kurt = 3.0 + 12.0 / df
-            return {"mean": mean, "variance": var, "std_dev": math.sqrt(var), "skewness": skew, "kurtosis": kurt}
+            skew = math.sqrt(8.0 / df) if df > 0 else math.nan
+            kurt = (12.0 / df) if df > 0 else math.nan
+            return {"mean": mean, "variance": var, "std_dev": math.sqrt(var) if var >= 0 else math.nan, "skewness": skew, "kurtosis": kurt}
         elif d == "binomial":
             n = int(params.get("n", 10))
             p = params.get("p", 0.5)
             mean = n * p
             var = n * p * (1.0 - p)
-            std = math.sqrt(var)
-            skew = (1.0 - 2.0 * p) / std if std > 0 else 0.0
-            kurt = 3.0 + (1.0 - 6.0 * p * (1.0 - p)) / var if var > 0 else 3.0
+            std = math.sqrt(var) if var >= 0 else math.nan
+            if var <= 0:
+                skew = math.nan
+                kurt = math.nan
+            else:
+                skew = (1.0 - 2.0 * p) / std
+                kurt = (1.0 - 6.0 * p * (1.0 - p)) / var
             return {"mean": mean, "variance": var, "std_dev": std, "skewness": skew, "kurtosis": kurt}
         elif d == "poisson":
             lam = params.get("lambda", 1.0)
             mean = lam
             var = lam
-            std = math.sqrt(lam)
-            skew = 1.0 / std if std > 0 else 0.0
-            kurt = 3.0 + 1.0 / lam if lam > 0 else 3.0
+            std = math.sqrt(lam) if lam >= 0 else math.nan
+            skew = (1.0 / std) if std > 0 else math.nan
+            kurt = (1.0 / lam) if lam > 0 else math.nan
             return {"mean": mean, "variance": var, "std_dev": std, "skewness": skew, "kurtosis": kurt}
         elif d == "exponential":
-            rate = params.get("rate", 1.0)
-            mean = 1.0 / rate if rate > 0 else math.nan
-            var = 1.0 / (rate * rate) if rate > 0 else math.nan
-            return {"mean": mean, "variance": var, "std_dev": math.sqrt(var), "skewness": 2.0, "kurtosis": 9.0}
+            rate = params.get("rate", params.get("lambda", 1.0))
+            if rate <= 0:
+                return {"mean": math.nan, "variance": math.nan, "std_dev": math.nan, "skewness": math.nan, "kurtosis": math.nan}
+            mean = 1.0 / rate
+            var = 1.0 / (rate * rate)
+            return {"mean": mean, "variance": var, "std_dev": math.sqrt(var), "skewness": 2.0, "kurtosis": 6.0}
         elif d == "bernoulli":
             p = params.get("p", 0.5)
             mean = p
             var = p * (1.0 - p)
-            std = math.sqrt(var)
-            skew = (1.0 - 2.0 * p) / std if std > 0 else 0.0
-            return {"mean": mean, "variance": var, "std_dev": std, "skewness": skew, "kurtosis": 3.0}
+            std = math.sqrt(var) if var >= 0 else math.nan
+            if var <= 0 or p <= 0 or p >= 1:
+                skew = math.nan
+                kurt = math.nan
+            else:
+                skew = (1.0 - 2.0 * p) / std
+                kurt = (1.0 - 6.0 * p * (1.0 - p)) / var
+            return {"mean": mean, "variance": var, "std_dev": std, "skewness": skew, "kurtosis": kurt}
         elif d == "geometric":
             p = params.get("p", 0.5)
-            mean = 1.0 / p if p > 0 else math.nan
-            var = (1.0 - p) / (p * p) if p > 0 else math.nan
+            if p <= 0 or p > 1:
+                return {"mean": math.nan, "variance": math.nan, "std_dev": math.nan, "skewness": math.nan, "kurtosis": math.nan}
+            mean = 1.0 / p
+            var = (1.0 - p) / (p * p)
             std = math.sqrt(var)
-            skew = (2.0 - p) / math.sqrt(1.0 - p) if (1.0 - p) > 0 else 0.0
-            return {"mean": mean, "variance": var, "std_dev": std, "skewness": skew, "kurtosis": 3.0}
+            if p == 1.0 or var <= 0:
+                skew = math.nan
+                kurt = math.nan
+            else:
+                skew = (2.0 - p) / math.sqrt(1.0 - p)
+                kurt = 6.0 + (p * p) / (1.0 - p)
+            return {"mean": mean, "variance": var, "std_dev": std, "skewness": skew, "kurtosis": kurt}
         elif d == "uniform":
             a = params.get("a", 0.0)
             b = params.get("b", 1.0)
+            if a >= b:
+                return {"mean": math.nan, "variance": math.nan, "std_dev": math.nan, "skewness": math.nan, "kurtosis": math.nan}
             mean = (a + b) / 2.0
             var = ((b - a) ** 2) / 12.0
             std = math.sqrt(var)
-            return {"mean": mean, "variance": var, "std_dev": std, "skewness": 0.0, "kurtosis": 1.8}
+            return {"mean": mean, "variance": var, "std_dev": std, "skewness": 0.0, "kurtosis": -1.2}
         return {"mean": math.nan, "variance": math.nan, "std_dev": math.nan, "skewness": math.nan, "kurtosis": math.nan}
 
     @staticmethod

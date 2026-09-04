@@ -302,13 +302,17 @@ export const BinomialDist: DistributionDefinition = {
     }
     return n;
   },
-  moments: ({ n = 10, p = 0.5 }) => ({
-    mean: n * p,
-    variance: n * p * (1 - p),
-    stdDev: Math.sqrt(n * p * (1 - p)),
-    skewness: (1 - 2 * p) / Math.sqrt(n * p * (1 - p)),
-    kurtosis: (1 - 6 * p * (1 - p)) / (n * p * (1 - p)),
-  }),
+  moments: ({ n = 10, p = 0.5 }) => {
+    const varVal = n * p * (1 - p);
+    const sd = Math.sqrt(varVal);
+    return {
+      mean: n * p,
+      variance: varVal,
+      stdDev: sd,
+      skewness: sd > 0 ? (1 - 2 * p) / sd : NaN,
+      kurtosis: varVal > 0 ? (1 - 6 * p * (1 - p)) / varVal : NaN,
+    };
+  },
   suggestedDomain: ({ n = 10, p = 0.5 }) => {
     const mean = n * p;
     const sd = Math.sqrt(n * p * (1 - p));
@@ -336,13 +340,17 @@ export const BernoulliDist: DistributionDefinition = {
     if (prob <= 1 - p) return 0;
     return 1;
   },
-  moments: ({ p = 0.5 }) => ({
-    mean: p,
-    variance: p * (1 - p),
-    stdDev: Math.sqrt(p * (1 - p)),
-    skewness: (1 - 2 * p) / Math.sqrt(p * (1 - p)),
-    kurtosis: (1 - 6 * p * (1 - p)) / (p * (1 - p)),
-  }),
+  moments: ({ p = 0.5 }) => {
+    const varVal = p * (1 - p);
+    const sd = Math.sqrt(varVal);
+    return {
+      mean: p,
+      variance: varVal,
+      stdDev: sd,
+      skewness: sd > 0 ? (1 - 2 * p) / sd : NaN,
+      kurtosis: varVal > 0 ? (1 - 6 * p * (1 - p)) / varVal : NaN,
+    };
+  },
   suggestedDomain: () => ({ min: -0.5, max: 1.5 }),
 };
 
@@ -409,13 +417,20 @@ export const GeometricDist: DistributionDefinition = {
     if (prob >= 1) return Infinity;
     return Math.ceil(Math.log(1 - prob) / Math.log(1 - p));
   },
-  moments: ({ p = 0.5 }) => ({
-    mean: 1 / p,
-    variance: (1 - p) / (p * p),
-    stdDev: Math.sqrt(1 - p) / p,
-    skewness: (2 - p) / Math.sqrt(1 - p),
-    kurtosis: 6 + (p * p) / (1 - p),
-  }),
+  moments: ({ p = 0.5 }) => {
+    if (p <= 0 || p > 1) {
+      return { mean: NaN, variance: NaN, stdDev: NaN, skewness: NaN, kurtosis: NaN };
+    }
+    const varVal = (1 - p) / (p * p);
+    const sd = Math.sqrt(varVal);
+    return {
+      mean: 1 / p,
+      variance: varVal,
+      stdDev: sd,
+      skewness: p < 1 ? (2 - p) / Math.sqrt(1 - p) : NaN,
+      kurtosis: p < 1 ? 6 + (p * p) / (1 - p) : NaN,
+    };
+  },
   suggestedDomain: ({ p = 0.5 }) => ({
     min: 1,
     max: Math.max(10, Math.ceil((1 / p) * 3)),
