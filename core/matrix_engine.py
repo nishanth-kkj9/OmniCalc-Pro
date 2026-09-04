@@ -69,3 +69,37 @@ class MatrixEngine:
     @staticmethod
     def trans(a: npt.NDArray) -> npt.NDArray:
         return a.T
+
+    @staticmethod
+    def trace(a: npt.NDArray) -> float:
+        if a.ndim != 2 or a.shape[0] != a.shape[1]:
+            raise MatrixError(f"Trace requires a square matrix, got shape {a.shape}")
+        return float(np.trace(a))
+
+    @staticmethod
+    def rank(a: npt.NDArray) -> int:
+        if a.ndim != 2:
+            raise MatrixError(f"Rank requires a 2D matrix, got shape {a.shape}")
+        return int(np.linalg.matrix_rank(a))
+
+    @staticmethod
+    def eigenvalues(a: npt.NDArray) -> npt.NDArray:
+        if a.ndim != 2 or a.shape[0] != a.shape[1]:
+            raise MatrixError(f"Eigenvalues require a square matrix, got shape {a.shape}")
+        try:
+            return np.linalg.eigvals(a)
+        except LinAlgError as e:
+            raise MatrixError(f"Could not compute eigenvalues: {e}") from e
+
+    @staticmethod
+    def power(a: npt.NDArray, p: int) -> npt.NDArray:
+        if a.ndim != 2 or a.shape[0] != a.shape[1]:
+            raise MatrixError(f"Matrix power requires a square matrix, got shape {a.shape}")
+        try:
+            return np.linalg.matrix_power(a, p)
+        except LinAlgError as e:
+            raise MatrixError(f"Could not compute matrix power: {e}") from e
+
+    @staticmethod
+    def scalar_mul(a: npt.NDArray, k: float) -> npt.NDArray:
+        return a * k

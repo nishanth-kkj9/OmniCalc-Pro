@@ -58,6 +58,18 @@ const FormulasPanel = lazy(() =>
 const HistoryPanel = lazy(() =>
   import('./components/HistoryPanel').then((m) => ({ default: m.HistoryPanel }))
 );
+const RegressionCalculator = lazy(() =>
+  import('./components/RegressionCalculator').then((m) => ({ default: m.RegressionCalculator }))
+);
+const ProbabilityCalculator = lazy(() =>
+  import('./components/ProbabilityCalculator').then((m) => ({ default: m.ProbabilityCalculator }))
+);
+const SequencesCalculator = lazy(() =>
+  import('./components/SequencesCalculator').then((m) => ({ default: m.SequencesCalculator }))
+);
+const ComplexCalculator = lazy(() =>
+  import('./components/ComplexCalculator').then((m) => ({ default: m.ComplexCalculator }))
+);
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -294,7 +306,12 @@ export function App() {
                   <GraphingCalculator settings={settings} onNavigate={setCurrentMode} />
                 )}
                 {currentMode === 'fractions' && <FractionsCalculator settings={settings} />}
-                {currentMode === 'geometry' && <GeometryCalculator settings={settings} />}
+                {currentMode === 'geometry' && (
+                  <GeometryCalculator
+                    settings={settings}
+                    onNavigateToGraph={() => setCurrentMode('graph')}
+                  />
+                )}
                 {currentMode === 'equation' && <EquationSolver settings={settings} />}
                 {currentMode === 'calculus' && <CalculusCalculator settings={settings} />}
                 {currentMode === 'programmer' && <ProgrammerCalculator settings={settings} />}
@@ -304,6 +321,20 @@ export function App() {
                 {currentMode === 'health' && <HealthCalculator settings={settings} />}
                 {currentMode === 'matrix' && <MatrixCalculator settings={settings} />}
                 {currentMode === 'statistics' && <StatisticsCalculator settings={settings} />}
+                {currentMode === 'regression' && (
+                  <RegressionCalculator
+                    settings={settings}
+                    onNavigateToGraph={() => setCurrentMode('graph')}
+                  />
+                )}
+                {currentMode === 'probability' && <ProbabilityCalculator settings={settings} />}
+                {currentMode === 'sequences' && (
+                  <SequencesCalculator
+                    settings={settings}
+                    onNavigateToGraph={() => setCurrentMode('graph')}
+                  />
+                )}
+                {currentMode === 'complex' && <ComplexCalculator settings={settings} />}
                 {currentMode === 'formulas' && (
                   <FormulasPanel
                     settings={settings}

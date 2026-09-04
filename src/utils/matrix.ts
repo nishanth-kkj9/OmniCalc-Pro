@@ -289,3 +289,237 @@ export function subtractMatrices(a: Matrix, b: Matrix): Matrix | null {
 
   return a.map((row, r) => row.map((val, c) => val - b[r][c]));
 }
+
+/**
+ * Multiplies a matrix by a scalar: k * A.
+ */
+export function scaleMatrix(mat: Matrix, scalar: number): Matrix {
+  return mat.map((row) => row.map((val) => val * scalar));
+}
+
+/**
+ * Computes the trace of a square matrix: sum of diagonal elements.
+ */
+export function matrixTrace(mat: Matrix): number | null {
+  const check = validateMatrix(mat);
+  if (!check.valid || check.rows !== check.cols) return null;
+  let tr = 0;
+  for (let i = 0; i < check.rows; i++) {
+    tr += mat[i][i];
+  }
+  return tr;
+}
+
+/**
+ * Computes the rank of a matrix using Gaussian row echelon elimination with partial pivoting.
+ */
+export function matrixRank(mat: Matrix, tol: number = 1e-10): number {
+  const check = validateMatrix(mat);
+  if (!check.valid) return 0;
+
+  const rows = check.rows;
+  const cols = check.cols;
+  const A = mat.map((row) => [...row]);
+
+  let rank = 0;
+  let col = 0;
+
+  for (let row = 0; row < rows && col < cols; col++) {
+    // Find pivot in current column
+    let pivotRow = row;
+    for (let i = row + 1; i < rows; i++) {
+      if (Math.abs(A[i][col]) > Math.abs(A[pivotRow][col])) {
+        pivotRow = i;
+      }
+    }
+
+    if (Math.abs(A[pivotRow][col]) <= tol) {
+      continue; // No pivot in this column, move to next column
+    }
+
+    // Swap pivot row
+    if (pivotRow !== row) {
+      const tmp = A[row];
+      A[row] = A[pivotRow];
+      A[pivotRow] = tmp;
+    }
+
+    // Eliminate below
+    for (let i = row + 1; i < rows; i++) {
+      const factor = A[i][col] / A[row][col];
+      for (let j = col; j < cols; j++) {
+        A[i][j] -= factor * A[row][j];
+      }
+    }
+
+    rank++;
+    row++;
+  }
+
+  return rank;
+}
+
+/**
+ * Computes integer matrix power A^k for square matrix.
+ */
+export function matrixPower(mat: Matrix, power: number): Matrix | null {
+  const check = validateMatrix(mat);
+  if (!check.valid || check.rows !== check.cols || !Number.isInteger(power) || power < 0) {
+    return null;
+  }
+
+  const n = check.rows;
+  if (power === 0) {
+    // Identity matrix
+    return Array.from({ length: n }, (_, r) =>
+      Array.from({ length: n }, (_, c) => (r === c ? 1 : 0))
+    );
+  }
+
+  let result: Matrix = Array.from({ length: n }, (_, r) =>
+    Array.from({ length: n }, (_, c) => (r === c ? 1 : 0))
+  );
+  let base = mat.map((row) => [...row]);
+  let p = power;
+
+  // Exponentiation by squaring
+  while (p > 0) {
+    if (p % 2 === 1) {
+      const mul = multiplyMatrices(result, base);
+      if (!mul) return null;
+      result = mul;
+    }
+    if (p > 1) {
+      const sq = multiplyMatrices(base, base);
+      if (!sq) return null;
+      base = sq;
+    }
+    p = Math.floor(p / 2);
+  }
+
+  return result;
+}
+
+export interface QRDecompositionResult {
+  Q: Matrix;
+  R: Matrix;
+}
+
+/**
+ * Computes QR decomposition of matrix A (m x n, m >= n) using Gram-Schmidt orthogonalization: A = Q * R.
+ */
+export function decomposeQR(mat: Matrix): QRDecompositionResult | null {
+  const check = validateMatrix(mat);
+  if (!check.valid || check.rows < check.cols) return null;
+
+  const m = check.rows;
+  const n = check.cols;
+
+  const Q: Matrix = Array.from({ length: m }, () => Array(n).fill(0));
+  const R: Matrix = Array.from({ length: n }, () => Array(n).fill(0));
+
+  for (let j = 0; j < n; j++) {
+    // v = a_j
+    const v = Array.from({ length: m }, (_, i) => mat[i][j]);
+
+    for (let i = 0; i < j; i++) {
+      // R[i][j] = q_i . a_j
+      let dot = 0;
+      for (let k = 0; k < m; k++) {
+        dot += Q[k][i] * mat[k][j];
+      }
+      R[i][j] = dot;
+
+      // v = v - R[i][j] * q_i
+      for (let k = 0; k < m; k++) {
+        v[k] -= dot * Q[k][i];
+      }
+    }
+
+    // R[j][j] = ||v||
+    let norm = 0;
+    for (let k = 0; k < m; k++) norm += v[k] * v[k];
+    norm = Math.sqrt(norm);
+    R[j][j] = norm;
+
+    if (norm > 1e-12) {
+      for (let k = 0; k < m; k++) {
+        Q[k][j] = v[k] / norm;
+      }
+    }
+  }
+
+  return { Q, R };
+}
+
+/**
+ * Computes Cholesky decomposition A = L * L^T for symmetric positive-definite matrix.
+ */
+export function decomposeCholesky(mat: Matrix): Matrix | null {
+  const check = validateMatrix(mat);
+  if (!check.valid || check.rows !== check.cols) return null;
+
+  const n = check.rows;
+  const L: Matrix = Array.from({ length: n }, () => Array(n).fill(0));
+
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j <= i; j++) {
+      let sum = 0;
+      for (let k = 0; k < j; k++) {
+        sum += L[i][k] * L[j][k];
+      }
+
+      if (i === j) {
+        const val = mat[i][i] - sum;
+        if (val <= 0) {
+          return null; // Not positive definite
+        }
+        L[i][j] = Math.sqrt(val);
+      } else {
+        if (Math.abs(L[j][j]) < 1e-12) return null;
+        L[i][j] = (mat[i][j] - sum) / L[j][j];
+      }
+    }
+  }
+
+  return L;
+}
+
+/**
+ * Computes eigenvalues of a 2x2 matrix analytically: λ² - tr(A)λ + det(A) = 0.
+ */
+export function eigenvalues2x2(mat: Matrix): { re: number; im: number }[] | null {
+  const check = validateMatrix(mat);
+  if (!check.valid || check.rows !== 2 || check.cols !== 2) return null;
+
+  const tr = mat[0][0] + mat[1][1];
+  const det = mat[0][0] * mat[1][1] - mat[0][1] * mat[1][0];
+  const disc = tr * tr - 4 * det;
+
+  if (disc >= 0) {
+    const sqrtD = Math.sqrt(disc);
+    return [
+      { re: (tr + sqrtD) / 2, im: 0 },
+      { re: (tr - sqrtD) / 2, im: 0 },
+    ];
+  } else {
+    const sqrtAbsD = Math.sqrt(-disc);
+    return [
+      { re: tr / 2, im: sqrtAbsD / 2 },
+      { re: tr / 2, im: -sqrtAbsD / 2 },
+    ];
+  }
+}
+
+/**
+ * Computes Frobenius norm of a matrix: sqrt(sum(a_ij^2))
+ */
+export function matrixFrobeniusNorm(mat: Matrix): number {
+  let sumSq = 0;
+  for (const row of mat) {
+    for (const val of row) {
+      sumSq += val * val;
+    }
+  }
+  return Math.sqrt(sumSq);
+}

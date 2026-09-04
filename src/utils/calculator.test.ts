@@ -167,6 +167,34 @@ describe('Calculator Evaluator', () => {
   });
 
   describe('formatNumber utility', () => {
+    it('supports safe piecewise evaluations with ternary operators', () => {
+      const resPos = evaluateWithResult('x >= 0 ? x^2 : -x', 'RAD', 4, { x: 3 });
+      expect(resPos.ok).toBe(true);
+      if (resPos.ok) expect(resPos.value).toBe('9');
+
+      const resNeg = evaluateWithResult('x >= 0 ? x^2 : -x', 'RAD', 4, { x: -4 });
+      expect(resNeg.ok).toBe(true);
+      if (resNeg.ok) expect(resNeg.value).toBe('4');
+    });
+
+    it('evaluates combinations, permutations, gcd, and lcm', () => {
+      const c = evaluateWithResult('ncr(5, 2)');
+      expect(c.ok).toBe(true);
+      if (c.ok) expect(c.value).toBe('10');
+
+      const p = evaluateWithResult('npr(5, 2)');
+      expect(p.ok).toBe(true);
+      if (p.ok) expect(p.value).toBe('20');
+
+      const g = evaluateWithResult('gcd(48, 18)');
+      expect(g.ok).toBe(true);
+      if (g.ok) expect(g.value).toBe('6');
+
+      const l = evaluateWithResult('lcm(12, 15)');
+      expect(l.ok).toBe(true);
+      if (l.ok) expect(l.value).toBe('60');
+    });
+
     it('formats numbers with thousand separators', () => {
       expect(formatNumber(1234567.89, 2)).toBe('1,234,567.89');
       expect(formatNumber('Infinity')).toBe('Infinity');

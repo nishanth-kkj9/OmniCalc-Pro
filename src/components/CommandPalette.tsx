@@ -25,6 +25,10 @@ import {
   Volume2,
   VolumeX,
   Keyboard,
+  Layers,
+  Activity,
+  ListOrdered,
+  Compass,
 } from 'lucide-react';
 import { CalcMode, AppSettings } from '../types';
 
@@ -179,6 +183,42 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         'variance',
         'quartiles',
       ],
+    },
+    {
+      id: 'regression',
+      title: 'Regression & Fitting',
+      subtitle: 'Linear, polynomial, exponential, logarithmic, power fits, ANOVA statistics, residuals & inverse prediction',
+      category: 'Engines & Calculators',
+      icon: <Layers className="w-4 h-4 text-blue-500" />,
+      action: () => onSelectMode('regression'),
+      keywords: ['regression', 'fit', 'curve', 'linear', 'exponential', 'polynomial', 'r2', 'least squares'],
+    },
+    {
+      id: 'probability',
+      title: 'Probability & Distributions',
+      subtitle: 'Normal, Binomial, Poisson, Uniform, Exponential, Student t, Chi-Square PDF/CDF & quantiles',
+      category: 'Engines & Calculators',
+      icon: <Activity className="w-4 h-4 text-emerald-500" />,
+      action: () => onSelectMode('probability'),
+      keywords: ['probability', 'distribution', 'normal', 'gaussian', 'binomial', 'poisson', 'quantile', 'cdf', 'pdf'],
+    },
+    {
+      id: 'sequences',
+      title: 'Sequences & Series',
+      subtitle: 'Arithmetic, Geometric, Fibonacci, explicit f(n), recursive relations, partial sums & limits',
+      category: 'Engines & Calculators',
+      icon: <ListOrdered className="w-4 h-4 text-amber-500" />,
+      action: () => onSelectMode('sequences'),
+      keywords: ['sequence', 'series', 'progression', 'fibonacci', 'arithmetic', 'geometric', 'partial sum', 'convergence'],
+    },
+    {
+      id: 'complex',
+      title: 'Complex Numbers & Phasor',
+      subtitle: 'Rectangular a+bi, Polar r∠θ, Euler forms, Argand plane, n-th roots, and AC electrical phasors',
+      category: 'Engines & Calculators',
+      icon: <Compass className="w-4 h-4 text-purple-500" />,
+      action: () => onSelectMode('complex'),
+      keywords: ['complex', 'imaginary', 'real', 'polar', 'euler', 'phasor', 'argand', 'roots', 'impedance', 'ac'],
     },
     {
       id: 'programmer',

@@ -23,6 +23,9 @@ export interface GraphCanvasProps {
   settings: GraphSettings;
   expressions: GraphExpression[];
   segmentsMap: Map<string, CurveSegment[]>;
+  inequalityPolygonsMap?: Map<string, Point2D[][]>;
+  derivativeSegmentsMap?: Map<string, { d1?: CurveSegment[]; d2?: CurveSegment[] }>;
+  asymptotes?: number[];
   activeExpressionId?: string;
   theme: 'dark' | 'light' | 'oled';
   accentColor: string;
@@ -36,7 +39,9 @@ export interface GraphCanvasProps {
     tangentLine?: { x0: number; y0: number; slope: number } | null;
     normalLine?: { x0: number; y0: number; slope: number | null; isVertical: boolean } | null;
     integralPolygon?: Point2D[] | null;
+    integralPolygons?: Point2D[][] | null;
     integralLabel?: string | null;
+    areaBetweenPolygons?: Point2D[][] | null;
   };
   canvasRef?: React.RefObject<HTMLCanvasElement>;
 }
@@ -47,6 +52,9 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
   settings,
   expressions,
   segmentsMap,
+  inequalityPolygonsMap,
+  derivativeSegmentsMap,
+  asymptotes = [],
   activeExpressionId,
   theme,
   isTraceActive,
@@ -141,19 +149,100 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
       ctx.stroke();
     }
 
-    // 3. Shaded Area under curve (if requested in analysis)
-    if (analysisMarkers?.integralPolygon && analysisMarkers.integralPolygon.length > 2) {
+    // 3. Shaded Area under curve or between curves (if requested in analysis or inequality)
+    // 3a. Inequality shaded polygons
+    if (inequalityPolygonsMap) {
+      ctx.save();
+      for (const expr of expressions) {
+        if (!expr.visible) continue;
+        const polys = inequalityPolygonsMap.get(expr.id);
+        if (!polys || polys.length === 0) continue;
+
+        ctx.fillStyle = expr.color.startsWith('#')
+          ? `${expr.color}33` // ~20% alpha hex
+          : 'rgba(56, 189, 248, 0.2)';
+
+        for (const poly of polys) {
+          if (poly.length < 3) continue;
+          ctx.beginPath();
+          const first = graphToScreen(poly[0].x, poly[0].y, viewport, dims);
+          ctx.moveTo(first.x, first.y);
+          for (let i = 1; i < poly.length; i++) {
+            const scr = graphToScreen(poly[i].x, poly[i].y, viewport, dims);
+            ctx.lineTo(scr.x, scr.y);
+          }
+          ctx.closePath();
+          ctx.fill();
+        }
+      }
+      ctx.restore();
+    }
+
+    // 3b. Integral polygon (single or segmented)
+    const intPolys: Point2D[][] = analysisMarkers?.integralPolygons
+      ? analysisMarkers.integralPolygons
+      : analysisMarkers?.integralPolygon && analysisMarkers.integralPolygon.length > 2
+        ? [analysisMarkers.integralPolygon]
+        : [];
+
+    if (intPolys.length > 0) {
       ctx.save();
       ctx.fillStyle = isLight ? 'rgba(56, 189, 248, 0.25)' : 'rgba(56, 189, 248, 0.2)';
-      ctx.beginPath();
-      const first = graphToScreen(analysisMarkers.integralPolygon[0].x, analysisMarkers.integralPolygon[0].y, viewport, dims);
-      ctx.moveTo(first.x, first.y);
-      for (let i = 1; i < analysisMarkers.integralPolygon.length; i++) {
-        const scr = graphToScreen(analysisMarkers.integralPolygon[i].x, analysisMarkers.integralPolygon[i].y, viewport, dims);
-        ctx.lineTo(scr.x, scr.y);
+      for (const poly of intPolys) {
+        if (poly.length < 3) continue;
+        ctx.beginPath();
+        const first = graphToScreen(poly[0].x, poly[0].y, viewport, dims);
+        ctx.moveTo(first.x, first.y);
+        for (let i = 1; i < poly.length; i++) {
+          const scr = graphToScreen(poly[i].x, poly[i].y, viewport, dims);
+          ctx.lineTo(scr.x, scr.y);
+        }
+        ctx.closePath();
+        ctx.fill();
       }
-      ctx.closePath();
-      ctx.fill();
+      ctx.restore();
+    }
+
+    // 3c. Area between functions
+    if (analysisMarkers?.areaBetweenPolygons && analysisMarkers.areaBetweenPolygons.length > 0) {
+      ctx.save();
+      ctx.fillStyle = isLight ? 'rgba(168, 85, 247, 0.25)' : 'rgba(168, 85, 247, 0.2)';
+      for (const poly of analysisMarkers.areaBetweenPolygons) {
+        if (poly.length < 3) continue;
+        ctx.beginPath();
+        const first = graphToScreen(poly[0].x, poly[0].y, viewport, dims);
+        ctx.moveTo(first.x, first.y);
+        for (let i = 1; i < poly.length; i++) {
+          const scr = graphToScreen(poly[i].x, poly[i].y, viewport, dims);
+          ctx.lineTo(scr.x, scr.y);
+        }
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    // 3d. Vertical Asymptotes
+    if (asymptotes && asymptotes.length > 0) {
+      ctx.save();
+      ctx.strokeStyle = isLight ? 'rgba(239, 68, 68, 0.65)' : 'rgba(248, 113, 113, 0.65)';
+      ctx.lineWidth = 1.25;
+      ctx.setLineDash([4, 4]);
+      for (const asymX of asymptotes) {
+        if (asymX >= viewport.xMin && asymX <= viewport.xMax) {
+          const sx = graphToScreen(asymX, 0, viewport, dims).x;
+          ctx.beginPath();
+          ctx.moveTo(sx, 0);
+          ctx.lineTo(sx, height);
+          ctx.stroke();
+
+          // Subtle asymptote label
+          ctx.font = '9px "JetBrains Mono", monospace';
+          ctx.fillStyle = isLight ? '#ef4444' : '#f87171';
+          ctx.textAlign = 'center';
+          ctx.fillText(`x=${asymX.toFixed(2)}`, sx, 12);
+        }
+      }
       ctx.restore();
     }
 
@@ -307,6 +396,55 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
       ctx.restore();
     }
 
+    // 6b. Derivative Curves (f'(x) and f''(x))
+    if (derivativeSegmentsMap) {
+      for (const expr of expressions) {
+        if (!expr.visible) continue;
+        const derivs = derivativeSegmentsMap.get(expr.id);
+        if (!derivs) continue;
+
+        // First derivative (dashed)
+        if (derivs.d1 && derivs.d1.length > 0) {
+          ctx.save();
+          ctx.strokeStyle = '#a855f7'; // Purple for f'(x)
+          ctx.lineWidth = Math.max(1.5, expr.lineWidth - 0.5);
+          ctx.setLineDash([5, 4]);
+          for (const seg of derivs.d1) {
+            if (seg.points.length < 2) continue;
+            ctx.beginPath();
+            const start = graphToScreen(seg.points[0].x, seg.points[0].y, viewport, dims);
+            ctx.moveTo(start.x, start.y);
+            for (let i = 1; i < seg.points.length; i++) {
+              const pt = graphToScreen(seg.points[i].x, seg.points[i].y, viewport, dims);
+              ctx.lineTo(pt.x, pt.y);
+            }
+            ctx.stroke();
+          }
+          ctx.restore();
+        }
+
+        // Second derivative (dotted)
+        if (derivs.d2 && derivs.d2.length > 0) {
+          ctx.save();
+          ctx.strokeStyle = '#f59e0b'; // Amber for f''(x)
+          ctx.lineWidth = Math.max(1.5, expr.lineWidth - 0.5);
+          ctx.setLineDash([2.5, 3]);
+          for (const seg of derivs.d2) {
+            if (seg.points.length < 2) continue;
+            ctx.beginPath();
+            const start = graphToScreen(seg.points[0].x, seg.points[0].y, viewport, dims);
+            ctx.moveTo(start.x, start.y);
+            for (let i = 1; i < seg.points.length; i++) {
+              const pt = graphToScreen(seg.points[i].x, seg.points[i].y, viewport, dims);
+              ctx.lineTo(pt.x, pt.y);
+            }
+            ctx.stroke();
+          }
+          ctx.restore();
+        }
+      }
+    }
+
     // 7. Analysis Markers (Roots, Extrema, Intersections)
     if (analysisMarkers) {
       // Roots (Emerald circles)
@@ -421,6 +559,9 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
     settings,
     expressions,
     segmentsMap,
+    inequalityPolygonsMap,
+    derivativeSegmentsMap,
+    asymptotes,
     activeExpressionId,
     isTraceActive,
     tracePoint,

@@ -39,3 +39,8 @@ OmniCalc Pro executes arbitrary mathematical calculations across two platforms:
   - `MAX_NESTING_DEPTH`: 25 levels
   - `MAX_EXPONENT`: 10,000
   - Matrix Dimension Limit: 5x5 with O(N^3) LU decomposition
+
+### 3. Data Export & CSV Security (`src/utils/exportEngine.ts`)
+- **Formula Injection Mitigation**: Neutralizes spreadsheet execution vectors in CSV generation by single-quoting leading characters (`=`, `+`, `-`, `@`, `\t`, `\r`).
+- **HTML DOM-XSS Protection**: Sanitizes all user-supplied metadata, equation strings, and table headers before DOM or export interpolation.
+- **Malformed Input Rejection**: Strict validation and schema verification for LocalStorage sessions, graph presets, and imported JSON state files.

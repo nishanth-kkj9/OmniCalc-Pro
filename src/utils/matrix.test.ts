@@ -7,6 +7,14 @@ import {
   subtractMatrices,
   multiplyMatrices,
   validateMatrix,
+  scaleMatrix,
+  matrixTrace,
+  matrixRank,
+  matrixPower,
+  decomposeQR,
+  decomposeCholesky,
+  eigenvalues2x2,
+  matrixFrobeniusNorm,
 } from './matrix';
 
 describe('Matrix Engine — Numerical Linear Algebra & Verification', () => {
@@ -191,6 +199,116 @@ describe('Matrix Engine — Numerical Linear Algebra & Verification', () => {
         [-4, -4],
         [-4, -4],
       ]);
+    });
+
+    it('scales matrix by constant scalar', () => {
+      const A = [
+        [1, -2],
+        [3, 0],
+      ];
+      expect(scaleMatrix(A, 3)).toEqual([
+        [3, -6],
+        [9, 0],
+      ]);
+    });
+
+    it('computes matrix trace', () => {
+      const A = [
+        [2, 1, 5],
+        [0, -4, 3],
+        [1, 2, 7],
+      ];
+      expect(matrixTrace(A)).toBe(5); // 2 + (-4) + 7 = 5
+    });
+
+    it('computes matrix rank accurately with partial pivoting', () => {
+      const fullRank = [
+        [1, 2],
+        [3, 4],
+      ];
+      expect(matrixRank(fullRank)).toBe(2);
+
+      const rank1 = [
+        [1, 2],
+        [2, 4],
+      ];
+      expect(matrixRank(rank1)).toBe(1);
+
+      const zero = [
+        [0, 0],
+        [0, 0],
+      ];
+      expect(matrixRank(zero)).toBe(0);
+    });
+
+    it('computes integer matrix powers A^k', () => {
+      const A = [
+        [1, 1],
+        [1, 0],
+      ];
+      // Fibonacci generator: A^2 = [[2, 1], [1, 1]], A^3 = [[3, 2], [2, 1]], A^4 = [[5, 3], [3, 2]]
+      const A4 = matrixPower(A, 4);
+      expect(A4).toEqual([
+        [5, 3],
+        [3, 2],
+      ]);
+    });
+
+    it('computes QR decomposition where Q^T Q = I and Q*R = A', () => {
+      const A = [
+        [12, -51, 4],
+        [6, 167, -68],
+        [-4, 24, -41],
+      ];
+      const res = decomposeQR(A);
+      expect(res).not.toBeNull();
+      if (res) {
+        // Check Q * R ≈ A
+        const recon = multiplyMatrices(res.Q, res.R);
+        expect(recon).not.toBeNull();
+        expect(recon![0][0]).toBeCloseTo(12, 4);
+        expect(recon![1][1]).toBeCloseTo(167, 4);
+      }
+    });
+
+    it('computes Cholesky decomposition for symmetric positive-definite matrix', () => {
+      const A = [
+        [4, 12, -16],
+        [12, 37, -43],
+        [-16, -43, 98],
+      ];
+      const L = decomposeCholesky(A);
+      expect(L).not.toBeNull();
+      if (L) {
+        const LT = transposeMatrix(L);
+        const recon = multiplyMatrices(L, LT);
+        expect(recon).not.toBeNull();
+        expect(recon![0][0]).toBeCloseTo(4, 4);
+        expect(recon![1][1]).toBeCloseTo(37, 4);
+        expect(recon![2][2]).toBeCloseTo(98, 4);
+      }
+    });
+
+    it('computes 2x2 eigenvalues correctly', () => {
+      const A = [
+        [2, 1],
+        [1, 2],
+      ];
+      // det(A - λI) = (2-λ)^2 - 1 = λ^2 - 4λ + 3 = (λ-3)(λ-1) => eigenvalues 3, 1
+      const eigs = eigenvalues2x2(A);
+      expect(eigs).not.toBeNull();
+      const vals = eigs!.map((e) => e.re).sort((a, b) => a - b);
+      expect(vals[0]).toBeCloseTo(1, 4);
+      expect(vals[1]).toBeCloseTo(3, 4);
+    });
+
+    it('computes Frobenius norm of matrix', () => {
+      const A = [
+        [1, 2],
+        [3, 4],
+      ];
+      // sqrt(1 + 4 + 9 + 16) = sqrt(30) ≈ 5.4772
+      expect(matrixFrobeniusNorm(A)).toBeCloseTo(Math.sqrt(30), 4);
     });
   });
 });

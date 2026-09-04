@@ -3,12 +3,41 @@ import { Download } from 'lucide-react';
 import { ExportModal } from './ExportModal';
 import { ExportReportData } from '../utils/exportEngine';
 import { AppSettings } from '../types';
+import {
+  matrixDet,
+  matrixTrace,
+  matrixTranspose,
+  matrixAdd,
+  matrixSub,
+  matrixMul,
+  matrixScalarMul,
+  matrixPower,
+  matrixInverse,
+  matrixRREF,
+  matrixEigenvalues,
+  EigenResult,
+} from '../utils/matrixEngine';
 
 type MatrixSize = '2x2' | '3x3';
 
+type MatrixOperation =
+  | 'add'
+  | 'sub'
+  | 'mul'
+  | 'detA'
+  | 'invA'
+  | 'transA'
+  | 'traceA'
+  | 'rankA'
+  | 'rrefA'
+  | 'eigA'
+  | 'powerA'
+  | 'scalarA';
+
 type MatrixResult =
   | { type: 'matrix'; data: number[][]; label: string }
-  | { type: 'scalar'; val: number; label: string }
+  | { type: 'scalar'; val: number | string; label: string }
+  | { type: 'eigen'; data: EigenResult[]; label: string }
   | { type: 'error'; msg: string; label?: string };
 
 interface MatrixCalculatorProps {
@@ -32,10 +61,9 @@ export const MatrixCalculator: React.FC<MatrixCalculatorProps> = ({ settings }) 
     [1, 0, 2],
   ]);
 
-  const [operation, setOperation] = useState<'add' | 'sub' | 'mul' | 'detA' | 'invA' | 'transA'>(
-    'add'
-  );
-
+  const [operation, setOperation] = useState<MatrixOperation>('add');
+  const [scalarK, setScalarK] = useState<number>(2);
+  const [powerN, setPowerN] = useState<number>(2);
   const [exportModalOpen, setExportModalOpen] = useState<boolean>(false);
 
   const dim = size === '2x2' ? 2 : 3;
@@ -60,129 +88,95 @@ export const MatrixCalculator: React.FC<MatrixCalculatorProps> = ({ settings }) 
     }
   };
 
-  // Determinant helper
-  const det2x2 = (m: number[][]) => m[0][0] * m[1][1] - m[0][1] * m[1][0];
-  const det3x3 = (m: number[][]) =>
-    m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1]) -
-    m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0]) +
-    m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]);
+  const currentA = mA.slice(0, dim).map((row) => row.slice(0, dim));
+  const currentB = mB.slice(0, dim).map((row) => row.slice(0, dim));
 
-  const getDetA = () => {
-    return dim === 2 ? det2x2(mA) : det3x3(mA);
-  };
-
-  // Matrix Operations
+  // Compute result using matrixEngine
   const computeResult = (): MatrixResult => {
-    if (operation === 'add') {
-      const res: number[][] = [];
-      for (let r = 0; r < dim; r++) {
-        const row: number[] = [];
-        for (let c = 0; c < dim; c++) {
-          row.push(mA[r][c] + mB[r][c]);
+    try {
+      switch (operation) {
+        case 'add':
+          return {
+            type: 'matrix',
+            data: matrixAdd(currentA, currentB),
+            label: 'A + B',
+          };
+        case 'sub':
+          return {
+            type: 'matrix',
+            data: matrixSub(currentA, currentB),
+            label: 'A − B',
+          };
+        case 'mul':
+          return {
+            type: 'matrix',
+            data: matrixMul(currentA, currentB),
+            label: 'A × B',
+          };
+        case 'transA':
+          return {
+            type: 'matrix',
+            data: matrixTranspose(currentA),
+            label: 'Transpose (Aᵀ)',
+          };
+        case 'detA':
+          return {
+            type: 'scalar',
+            val: Number(matrixDet(currentA).toFixed(6)),
+            label: 'Determinant det(A)',
+          };
+        case 'traceA':
+          return {
+            type: 'scalar',
+            val: Number(matrixTrace(currentA).toFixed(6)),
+            label: 'Trace Tr(A)',
+          };
+        case 'invA':
+          return {
+            type: 'matrix',
+            data: matrixInverse(currentA),
+            label: 'Inverse (A⁻¹)',
+          };
+        case 'rankA': {
+          const { rank } = matrixRREF(currentA);
+          return {
+            type: 'scalar',
+            val: `Rank(A) = ${rank} (Nullity = ${dim - rank})`,
+            label: 'Matrix Rank & Nullity',
+          };
         }
-        res.push(row);
-      }
-      return { type: 'matrix', data: res, label: 'A + B' };
-    } else if (operation === 'sub') {
-      const res: number[][] = [];
-      for (let r = 0; r < dim; r++) {
-        const row: number[] = [];
-        for (let c = 0; c < dim; c++) {
-          row.push(mA[r][c] - mB[r][c]);
+        case 'rrefA': {
+          const { rref } = matrixRREF(currentA);
+          return {
+            type: 'matrix',
+            data: rref,
+            label: 'Reduced Row Echelon Form RREF(A)',
+          };
         }
-        res.push(row);
+        case 'eigA':
+          return {
+            type: 'eigen',
+            data: matrixEigenvalues(currentA),
+            label: 'Eigenvalues λ of A',
+          };
+        case 'powerA':
+          return {
+            type: 'matrix',
+            data: matrixPower(currentA, powerN),
+            label: `Matrix Power (A^${powerN})`,
+          };
+        case 'scalarA':
+          return {
+            type: 'matrix',
+            data: matrixScalarMul(currentA, scalarK),
+            label: `Scalar Multiplication (${scalarK} × A)`,
+          };
+        default:
+          return { type: 'error', msg: 'Invalid operation' };
       }
-      return { type: 'matrix', data: res, label: 'A - B' };
-    } else if (operation === 'mul') {
-      const res: number[][] = [];
-      for (let r = 0; r < dim; r++) {
-        const row: number[] = [];
-        for (let c = 0; c < dim; c++) {
-          let sum = 0;
-          for (let k = 0; k < dim; k++) {
-            sum += mA[r][k] * mB[k][c];
-          }
-          row.push(sum);
-        }
-        res.push(row);
-      }
-      return { type: 'matrix', data: res, label: 'A × B' };
-    } else if (operation === 'transA') {
-      const res: number[][] = [];
-      for (let r = 0; r < dim; r++) {
-        const row: number[] = [];
-        for (let c = 0; c < dim; c++) {
-          row.push(mA[c][r]);
-        }
-        res.push(row);
-      }
-      return { type: 'matrix', data: res, label: 'Transpose (Aᵀ)' };
-    } else if (operation === 'detA') {
-      const det = getDetA();
-      return { type: 'scalar', val: det, label: 'Determinant det(A)' };
-    } else if (operation === 'invA') {
-      const det = getDetA();
-      if (Math.abs(det) < 1e-12) {
-        return { type: 'error', msg: 'Matrix A is singular (det(A) = 0) and has no inverse.' };
-      }
-      if (dim === 2) {
-        const inv = [
-          [mA[1][1] / det, -mA[0][1] / det],
-          [-mA[1][0] / det, mA[0][0] / det],
-        ];
-        return { type: 'matrix', data: inv, label: 'Inverse (A⁻¹)' };
-      } else {
-        // 3x3 Inverse via adjugate
-        const m = mA;
-        const adj = [
-          [
-            det2x2([
-              [m[1][1], m[1][2]],
-              [m[2][1], m[2][2]],
-            ]),
-            -det2x2([
-              [m[0][1], m[0][2]],
-              [m[2][1], m[2][2]],
-            ]),
-            det2x2([
-              [m[0][1], m[0][2]],
-              [m[1][1], m[1][2]],
-            ]),
-          ],
-          [
-            -det2x2([
-              [m[1][0], m[1][2]],
-              [m[2][0], m[2][2]],
-            ]),
-            det2x2([
-              [m[0][0], m[0][2]],
-              [m[2][0], m[2][2]],
-            ]),
-            -det2x2([
-              [m[0][0], m[0][2]],
-              [m[1][0], m[1][2]],
-            ]),
-          ],
-          [
-            det2x2([
-              [m[1][0], m[1][1]],
-              [m[2][0], m[2][1]],
-            ]),
-            -det2x2([
-              [m[0][0], m[0][1]],
-              [m[2][0], m[2][1]],
-            ]),
-            det2x2([
-              [m[0][0], m[0][1]],
-              [m[1][0], m[1][1]],
-            ]),
-          ],
-        ];
-        const inv = adj.map((row) => row.map((col) => col / det));
-        return { type: 'matrix', data: inv, label: 'Inverse (A⁻¹)' };
-      }
+    } catch (err: any) {
+      return { type: 'error', msg: err.message || 'Computation error' };
     }
-    return { type: 'error', msg: 'Invalid operation' };
   };
 
   const resObj = computeResult();
@@ -192,13 +186,21 @@ export const MatrixCalculator: React.FC<MatrixCalculatorProps> = ({ settings }) 
     title: `Linear Algebra Matrix Operations (${size})`,
     engine: 'Matrix Engine',
     timestamp: Date.now(),
-    inputDescription: `Operation: ${operation}, Dim: ${size}, A: [${mA.slice(0, dim).map((r) => r.slice(0, dim).join(' ')).join(' ; ')}]`,
+    inputDescription: `Operation: ${operation}, Dim: ${size}, A: [${currentA.map((r) => r.join(' ')).join(' ; ')}]`,
     resultSummary:
       resObj.type === 'scalar'
         ? String(resObj.val)
         : resObj.type === 'matrix'
           ? resObj.data.map((r) => r.map((n) => n.toFixed(3)).join(', ')).join(' | ')
-          : resObj.msg,
+          : resObj.type === 'eigen'
+            ? resObj.data
+                .map((e) =>
+                  e.imag !== 0
+                    ? `${e.real.toFixed(3)} ${e.imag > 0 ? '+' : '-'} ${Math.abs(e.imag).toFixed(3)}i`
+                    : e.real.toFixed(3)
+                )
+                .join(', ')
+            : resObj.msg,
     tableHeaders:
       resObj.type === 'matrix'
         ? Array.from({ length: dim }, (_, i) => `Col ${i + 1}`)
@@ -216,7 +218,7 @@ export const MatrixCalculator: React.FC<MatrixCalculatorProps> = ({ settings }) 
         <div>
           <h2 className="text-base font-bold text-slate-100">Linear Algebra & Matrix Suite</h2>
           <p className="text-xs text-slate-400">
-            Operations on 2×2 and 3×3 real matrices: addition, determinant, inverse, transpose
+            2×2 and 3×3 real matrices: arithmetic, determinant, inverse, eigenvalues, rank, RREF, power
           </p>
         </div>
 
@@ -277,33 +279,66 @@ export const MatrixCalculator: React.FC<MatrixCalculatorProps> = ({ settings }) 
           </div>
         </div>
 
-        {/* Matrix B */}
+        {/* Matrix B / Scalar Controls */}
         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl flex flex-col gap-3">
-          <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
-            Matrix B
-          </span>
-          <div
-            className="grid gap-2"
-            style={{ gridTemplateColumns: `repeat(${dim}, minmax(0, 1fr))` }}
-          >
-            {Array.from({ length: dim }).map((_, r) =>
-              Array.from({ length: dim }).map((_, c) => (
-                <input
-                  key={`B-${r}-${c}`}
-                  type="number"
-                  aria-label={`Matrix B row ${r + 1} column ${c + 1}`}
-                  value={mB[r][c]}
-                  onChange={(e) => handleCellChange('B', r, c, e.target.value)}
-                  className="bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl p-3 text-center font-mono text-base font-bold text-slate-100 focus:outline-none"
-                />
-              ))
+          <div className="flex justify-between items-center">
+            <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
+              Matrix B / Scalar Parameter
+            </span>
+            {operation === 'scalarA' && (
+              <span className="text-xs text-slate-400 font-mono">k = {scalarK}</span>
+            )}
+            {operation === 'powerA' && (
+              <span className="text-xs text-slate-400 font-mono">n = {powerN}</span>
             )}
           </div>
+
+          {operation === 'scalarA' ? (
+            <div className="flex flex-col gap-2 my-auto">
+              <label className="text-xs text-slate-300">Scalar multiplier k:</label>
+              <input
+                type="number"
+                value={scalarK}
+                onChange={(e) => setScalarK(parseFloat(e.target.value) || 0)}
+                className="bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl p-3 text-center font-mono text-base font-bold text-slate-100"
+              />
+            </div>
+          ) : operation === 'powerA' ? (
+            <div className="flex flex-col gap-2 my-auto">
+              <label className="text-xs text-slate-300">Exponent n (integer ≥ 0):</label>
+              <input
+                type="number"
+                min="0"
+                max="10"
+                value={powerN}
+                onChange={(e) => setPowerN(parseInt(e.target.value) || 0)}
+                className="bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl p-3 text-center font-mono text-base font-bold text-slate-100"
+              />
+            </div>
+          ) : (
+            <div
+              className="grid gap-2"
+              style={{ gridTemplateColumns: `repeat(${dim}, minmax(0, 1fr))` }}
+            >
+              {Array.from({ length: dim }).map((_, r) =>
+                Array.from({ length: dim }).map((_, c) => (
+                  <input
+                    key={`B-${r}-${c}`}
+                    type="number"
+                    aria-label={`Matrix B row ${r + 1} column ${c + 1}`}
+                    value={mB[r][c]}
+                    onChange={(e) => handleCellChange('B', r, c, e.target.value)}
+                    className="bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl p-3 text-center font-mono text-base font-bold text-slate-100 focus:outline-none"
+                  />
+                ))
+              )}
+            </div>
+          )}
         </div>
       </div>
 
       {/* Operation Selector */}
-      <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2">
         {[
           { id: 'add', label: 'A + B' },
           { id: 'sub', label: 'A − B' },
@@ -311,10 +346,16 @@ export const MatrixCalculator: React.FC<MatrixCalculatorProps> = ({ settings }) 
           { id: 'detA', label: 'det(A)' },
           { id: 'invA', label: 'A⁻¹' },
           { id: 'transA', label: 'Aᵀ' },
+          { id: 'traceA', label: 'Tr(A)' },
+          { id: 'rankA', label: 'Rank(A)' },
+          { id: 'rrefA', label: 'RREF(A)' },
+          { id: 'eigA', label: 'Eigen λ' },
+          { id: 'powerA', label: 'Aⁿ Power' },
+          { id: 'scalarA', label: 'k · A' },
         ].map((op) => (
           <button
             key={op.id}
-            onClick={() => setOperation(op.id as any)}
+            onClick={() => setOperation(op.id as MatrixOperation)}
             className={`py-2.5 rounded-2xl font-bold text-xs transition-all border ${
               operation === op.id
                 ? 'bg-sky-600 text-white border-sky-500 shadow-md shadow-sky-600/20'
@@ -340,7 +381,27 @@ export const MatrixCalculator: React.FC<MatrixCalculatorProps> = ({ settings }) 
 
         {resObj.type === 'scalar' && (
           <div className="p-6 bg-slate-950 border border-slate-800 rounded-2xl text-center">
-            <span className="text-4xl font-mono font-bold text-sky-400">{resObj.val}</span>
+            <span className="text-2xl sm:text-3xl font-mono font-bold text-sky-400">
+              {resObj.val}
+            </span>
+          </div>
+        )}
+
+        {resObj.type === 'eigen' && (
+          <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl flex flex-col gap-2">
+            {resObj.data.map((e, idx) => (
+              <div
+                key={idx}
+                className="flex items-center justify-between p-3 bg-slate-900 rounded-xl font-mono text-sm"
+              >
+                <span className="text-purple-400 font-bold">λ_{idx + 1}:</span>
+                <span className="text-slate-100 font-semibold">
+                  {e.imag !== 0
+                    ? `${e.real.toFixed(4)} ${e.imag > 0 ? '+' : '-'} ${Math.abs(e.imag).toFixed(4)}i`
+                    : e.real.toFixed(4)}
+                </span>
+              </div>
+            ))}
           </div>
         )}
 
@@ -374,3 +435,5 @@ export const MatrixCalculator: React.FC<MatrixCalculatorProps> = ({ settings }) 
     </div>
   );
 };
+
+export default MatrixCalculator;

@@ -9,15 +9,22 @@ import {
   panViewport,
   getOrCompileGraphExpression,
 } from './graph';
-import { sampleGraphCurve } from './graphSampling';
+import {
+  sampleGraphCurve,
+  sampleParametricCurve,
+  samplePolarCurve,
+  generateInequalityPolygon,
+} from './graphSampling';
 import {
   findRoots,
   findExtrema,
   findIntersections,
+  findYIntercept,
   calculateDerivative,
   calculateTangentLine,
   calculateNormalLine,
   calculateDefiniteIntegral,
+  calculateAreaBetweenCurves,
 } from './graphAnalysis';
 import { sanitizeGraphSession, PRESET_SESSIONS } from './graphStorage';
 import { exportGraphAsSvg } from './graphExport';
@@ -198,6 +205,45 @@ describe('Mathematical Analysis Engine', () => {
     const integral = calculateDefiniteIntegral(compiled, 0, 3);
     expect(integral).not.toBeNull();
     expect(integral?.value).toBeCloseTo(9, 3);
+  });
+
+  it('samples parametric curves (e.g. circle x=cos(t), y=sin(t))', () => {
+    const compX = getOrCompileGraphExpression('cos(t)', 'RAD')!;
+    const compY = getOrCompileGraphExpression('sin(t)', 'RAD')!;
+    const segs = sampleParametricCurve(compX, compY, { tMin: 0, tMax: 2 * Math.PI, steps: 100 });
+    expect(segs.length).toBeGreaterThan(0);
+    const pts = segs[0].points;
+    expect(pts.length).toBeGreaterThan(50);
+    // Radius should be approximately 1
+    const r0 = Math.hypot(pts[0].x, pts[0].y);
+    expect(r0).toBeCloseTo(1, 2);
+  });
+
+  it('samples polar curves (e.g. cardioid r = 1 - cos(theta))', () => {
+    const compR = getOrCompileGraphExpression('1 - cos(theta)', 'RAD')!;
+    const segs = samplePolarCurve(compR, { thetaMin: 0, thetaMax: 2 * Math.PI, steps: 100 });
+    expect(segs.length).toBeGreaterThan(0);
+    expect(segs[0].points.length).toBeGreaterThan(50);
+  });
+
+  it('generates inequality polygons for shading', () => {
+    const compiled = getOrCompileGraphExpression('x^2', 'RAD')!;
+    const poly = generateInequalityPolygon(compiled, '<=', DEFAULT_VIEWPORT, {}, 50);
+    expect(poly.length).toBeGreaterThan(10);
+  });
+
+  it('calculates area between two curves and finds y-intercept', () => {
+    const f = getOrCompileGraphExpression('x + 2', 'RAD')!;
+    const g = getOrCompileGraphExpression('x^2', 'RAD')!;
+    const yInt = findYIntercept(f);
+    expect(yInt).not.toBeNull();
+    expect(yInt?.x).toBe(0);
+    expect(yInt?.y).toBe(2);
+
+    // Area between x+2 and x^2 from -1 to 2: \int_{-1}^2 (x+2 - x^2) dx = 4.5
+    const area = calculateAreaBetweenCurves(f, g, -1, 2);
+    expect(area).not.toBeNull();
+    expect(Number(area?.value)).toBeCloseTo(4.5, 2);
   });
 });
 

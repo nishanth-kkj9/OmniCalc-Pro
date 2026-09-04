@@ -15,7 +15,11 @@ export type CalcMode =
   | 'fractions'
   | 'formulas'
   | 'history'
-  | 'settings';
+  | 'settings'
+  | 'regression'
+  | 'probability'
+  | 'sequences'
+  | 'complex';
 
 export type AngleMode = 'DEG' | 'RAD' | 'GRAD';
 
@@ -33,6 +37,13 @@ export interface GraphExpression {
   domainMax?: number;
   type?: 'function' | 'parametric' | 'polar' | 'inequality';
   inequalityOp?: '<' | '<=' | '>' | '>=';
+  parametricY?: string;
+  tMin?: number;
+  tMax?: number;
+  thetaMin?: number;
+  thetaMax?: number;
+  showDerivative?: boolean;
+  showSecondDerivative?: boolean;
 }
 
 export interface GraphViewport {

@@ -80,3 +80,24 @@ class TestGraphEngine(unittest.TestCase):
         engine = GraphEngine()
         engine.export_png("test.png")
         engine.figure.savefig.assert_called_once_with("test.png", dpi=150)
+
+    def test_graph_model_and_sampler(self, mock_np, MockFigure, mock_mpl_use):
+        from core.graph_engine import GraphModel, GraphSampler, GraphAnalysis
+        model = GraphModel(expression="x**2 - 4", curve_type="function")
+        self.assertEqual(model.expression, "x**2 - 4")
+        self.assertEqual(model.curve_type, "function")
+
+        # Test GraphSampler
+        func = lambda x: x ** 2
+        mock_np.linspace.return_value = [-2.0, 0.0, 2.0]
+        mock_np.where.side_effect = lambda cond, a, b: a
+        mock_np.isnan.return_value = [False, False, False]
+        mock_np.isfinite.return_value = [True, True, True]
+        mock_np.array.side_effect = lambda x: list(x)
+        segs = GraphSampler.sample_function(func, -2.0, 2.0, points=3)
+        self.assertTrue(len(segs) >= 1)
+
+        # Test GraphAnalysis
+        roots = GraphAnalysis.find_roots(lambda x: x ** 2 - 4, -3.0, 3.0, samples=20)
+        self.assertIsInstance(roots, list)
+

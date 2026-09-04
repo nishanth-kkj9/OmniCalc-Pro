@@ -1,7 +1,15 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { AppSettings, GraphExpression, GraphViewport, GraphSettings as IGraphSettings, GraphSlider, GraphSession, Point2D, CurveSegment, CalcMode } from '../types';
 import { DEFAULT_VIEWPORT, GRAPH_PALETTE, getOrCompileGraphExpression, zoomViewportAroundPoint } from '../utils/graph';
-import { sampleGraphCurve, computeAutoFitViewport } from '../utils/graphSampling';
+import {
+  sampleGraphCurve,
+  sampleParametricCurve,
+  samplePolarCurve,
+  generateInequalitySegments,
+  sampleDerivativeCurve,
+  detectVerticalAsymptotes,
+  computeAutoFitViewport,
+} from '../utils/graphSampling';
 import {
   DEFAULT_GRAPH_SETTINGS,
   loadGraphSessions,
@@ -117,9 +125,10 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({
 
   const sliderNames = useMemo(() => sliders.map((s) => s.name), [sliders]);
 
-  // Safe compilation of all expressions
-  const { compiledMap, validExpressionIds } = useMemo(() => {
+  // Safe compilation of all expressions (including parametric Y)
+  const { compiledMap, compiledParametricYMap, validExpressionIds } = useMemo(() => {
     const map = new Map<string, CompiledSafeExpression>();
+    const yMap = new Map<string, CompiledSafeExpression>();
     const validIds = new Set<string>();
 
     for (const expr of expressions) {
@@ -128,33 +137,92 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({
         map.set(expr.id, compiled);
         validIds.add(expr.id);
       }
+
+      if (expr.type === 'parametric' && expr.parametricY) {
+        const compY = getOrCompileGraphExpression(expr.parametricY, settings.angleMode, sliderNames);
+        if (compY) {
+          yMap.set(expr.id, compY);
+        }
+      }
     }
 
-    return { compiledMap: map, validExpressionIds: validIds };
+    return { compiledMap: map, compiledParametricYMap: yMap, validExpressionIds: validIds };
   }, [expressions, settings.angleMode, sliderNames]);
 
-  // Curve sampling with adaptive subdivision and asymptote detection
-  const segmentsMap = useMemo<Map<string, CurveSegment[]>>(() => {
+  // Curve sampling with adaptive subdivision, parametric, polar, and asymptote detection
+  const { segmentsMap, inequalityPolygonsMap, derivativeSegmentsMap, detectedAsymptotes } = useMemo(() => {
     const segMap = new Map<string, CurveSegment[]>();
+    const ineqMap = new Map<string, Point2D[][]>();
+    const derivMap = new Map<string, { d1?: CurveSegment[]; d2?: CurveSegment[] }>();
+    const allAsymptotes: number[] = [];
 
     for (const expr of expressions) {
       if (!expr.visible) continue;
       const compiled = compiledMap.get(expr.id);
       if (!compiled) continue;
 
-      const segments = sampleGraphCurve(compiled, {
-        viewport,
-        domainMin: expr.domainMin,
-        domainMax: expr.domainMax,
-        scope: sliderScope,
-        pixelWidth: 900,
-      });
+      let segments: CurveSegment[] = [];
+
+      if (expr.type === 'parametric') {
+        const compY = compiledParametricYMap.get(expr.id);
+        if (compY) {
+          segments = sampleParametricCurve(compiled, compY, {
+            tMin: expr.tMin ?? 0,
+            tMax: expr.tMax ?? 2 * Math.PI,
+            viewport,
+            scope: sliderScope,
+          });
+        }
+      } else if (expr.type === 'polar') {
+        segments = samplePolarCurve(compiled, {
+          thetaMin: expr.thetaMin ?? 0,
+          thetaMax: expr.thetaMax ?? 2 * Math.PI,
+          viewport,
+          scope: sliderScope,
+        });
+      } else {
+        // Cartesian Function or Inequality
+        segments = sampleGraphCurve(compiled, {
+          viewport,
+          domainMin: expr.domainMin,
+          domainMax: expr.domainMax,
+          scope: sliderScope,
+          pixelWidth: 900,
+        });
+
+        if (expr.type === 'inequality') {
+          const polys = generateInequalitySegments(segments, expr.inequalityOp || '<=', viewport);
+          ineqMap.set(expr.id, polys);
+        }
+
+        // Derivative curves if toggled
+        if (expr.showDerivative || expr.showSecondDerivative) {
+          const d1 = expr.showDerivative
+            ? sampleDerivativeCurve(compiled, { viewport, domainMin: expr.domainMin, domainMax: expr.domainMax, scope: sliderScope }, 1)
+            : undefined;
+          const d2 = expr.showSecondDerivative
+            ? sampleDerivativeCurve(compiled, { viewport, domainMin: expr.domainMin, domainMax: expr.domainMax, scope: sliderScope }, 2)
+            : undefined;
+          derivMap.set(expr.id, { d1, d2 });
+        }
+
+        // Detect vertical asymptotes for active or function curves
+        if (expr.id === activeExpressionId || expressions.length <= 2) {
+          const asyms = detectVerticalAsymptotes(compiled, viewport, sliderScope);
+          allAsymptotes.push(...asyms);
+        }
+      }
 
       segMap.set(expr.id, segments);
     }
 
-    return segMap;
-  }, [expressions, compiledMap, viewport, sliderScope]);
+    return {
+      segmentsMap: segMap,
+      inequalityPolygonsMap: ineqMap,
+      derivativeSegmentsMap: derivMap,
+      detectedAsymptotes: allAsymptotes,
+    };
+  }, [expressions, compiledMap, compiledParametricYMap, viewport, sliderScope, activeExpressionId]);
 
   // Toolbar Actions
   const handleZoomIn = useCallback(() => {
@@ -423,6 +491,9 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({
             settings={graphSettings}
             expressions={expressions}
             segmentsMap={segmentsMap}
+            inequalityPolygonsMap={inequalityPolygonsMap}
+            derivativeSegmentsMap={derivativeSegmentsMap}
+            asymptotes={detectedAsymptotes}
             activeExpressionId={activeExpressionId}
             theme={settings.theme}
             accentColor={settings.accentColor}

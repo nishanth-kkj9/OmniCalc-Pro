@@ -1,7 +1,10 @@
 import os
 import json
 from typing import Any, Dict, Union
-import pyperclip
+try:
+    import pyperclip
+except ImportError:
+    pyperclip = None
 from utils.constants import BASE_DIR, CONFIG_PATH
 from utils.logger import get_logger
 from core.safe_evaluator import safe_eval as _safe_eval
@@ -56,6 +59,9 @@ def safe_eval(expression: str, mode: str = "degrees") -> Union[float, str]:
 
 
 def copy_to_clipboard(text: str) -> None:
+    if pyperclip is None:
+        logger.warning("pyperclip is not installed. Clipboard copy ignored.")
+        return
     try:
         pyperclip.copy(str(text))
         logger.debug(f"Copied to clipboard: {text}")
@@ -64,6 +70,9 @@ def copy_to_clipboard(text: str) -> None:
 
 
 def paste_from_clipboard() -> str:
+    if pyperclip is None:
+        logger.warning("pyperclip is not installed. Returning empty string.")
+        return ""
     try:
         return str(pyperclip.paste())
     except Exception:

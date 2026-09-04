@@ -133,6 +133,30 @@ const MODE_TITLES: Record<
     category: 'Config',
     color: 'text-slate-400 bg-slate-500/10 border-slate-500/20',
   },
+  regression: {
+    title: 'Regression & Curve Fitting',
+    subtitle: 'Linear, polynomial, exponential, power, and logarithmic regressions with R²',
+    category: 'Advanced',
+    color: 'text-teal-400 bg-teal-500/10 border-teal-500/20',
+  },
+  probability: {
+    title: 'Probability & Distributions',
+    subtitle: 'Binomial, Poisson, Normal distributions, combinatorics, and odds',
+    category: 'Advanced',
+    color: 'text-fuchsia-400 bg-fuchsia-500/10 border-fuchsia-500/20',
+  },
+  sequences: {
+    title: 'Sequences & Series',
+    subtitle: 'Arithmetic, geometric, Fibonacci, partial sums, and convergence tests',
+    category: 'Core Math',
+    color: 'text-lime-400 bg-lime-500/10 border-lime-500/20',
+  },
+  complex: {
+    title: 'Complex Numbers',
+    subtitle: 'Rectangular, polar & Euler forms, roots of unity, and phasor math',
+    category: 'Core Math',
+    color: 'text-orange-400 bg-orange-500/10 border-orange-500/20',
+  },
 };
 
 const QUICK_MODES: { mode: CalcMode; label: string; icon: React.ReactNode }[] = [

@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, TrendingUp } from 'lucide-react';
 import { AppSettings } from '../types';
 import { handleTablistKeydown } from '../utils/ariaTabs';
+import { analyze2DLine, analyze3DVectors } from '../utils/geometryEngine';
 
 interface GeometryCalculatorProps {
   settings: AppSettings;
+  onNavigateToGraph?: (expression?: string) => void;
 }
 
-export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings }) => {
-  const [tab, setTab] = useState<'triangle' | '2d_shapes' | '3d_shapes'>('triangle');
+export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings, onNavigateToGraph }) => {
+  const [tab, setTab] = useState<'triangle' | '2d_shapes' | '3d_shapes' | 'coordinate'>('triangle');
 
   // Triangle State (Sides a, b, c)
   const [sideA, setSideA] = useState<string>('5');
@@ -31,7 +33,20 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
   const [val3D2, setVal3D2] = useState<string>('10'); // height / width
   const [val3D3, setVal3D3] = useState<string>('6'); // height for prism
 
-  const GEOMETRY_TABS = ['triangle', '2d_shapes', '3d_shapes'] as const;
+  // Coordinate & Vectors State
+  const [p1x, setP1x] = useState<string>('1');
+  const [p1y, setP1y] = useState<string>('2');
+  const [p2x, setP2x] = useState<string>('5');
+  const [p2y, setP2y] = useState<string>('8');
+
+  const [u3x, setU3x] = useState<string>('2');
+  const [u3y, setU3y] = useState<string>('3');
+  const [u3z, setU3z] = useState<string>('-1');
+  const [v3x, setV3x] = useState<string>('4');
+  const [v3y, setV3y] = useState<string>('0');
+  const [v3z, setV3z] = useState<string>('5');
+
+  const GEOMETRY_TABS = ['triangle', '2d_shapes', '3d_shapes', 'coordinate'] as const;
   const SHAPES_2D = ['circle', 'sector', 'ellipse', 'trapezoid', 'polygon'] as const;
   const SHAPES_3D = ['sphere', 'cylinder', 'cone', 'prism', 'pyramid'] as const;
 
@@ -270,6 +285,7 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
           { id: 'triangle', label: 'Triangle & Trigonometry Solver' },
           { id: '2d_shapes', label: '2D Shapes (Area & Perimeter)' },
           { id: '3d_shapes', label: '3D Solid Shapes (Volume & Surface)' },
+          { id: 'coordinate', label: 'Coordinate & Vectors' },
         ].map((item) => (
           <button
             key={item.id}
@@ -747,6 +763,181 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
               ))}
             </div>
           </div>
+
+        {/* COORDINATE & VECTORS */}
+        <div role="tabpanel" id="geo-panel-coordinate" aria-labelledby="geo-tab-coordinate" hidden={tab !== 'coordinate'} className="flex flex-col gap-6">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
+            <div>
+              <h3 className="text-base font-bold text-slate-100">2D Lines & 3D Vectors Analysis</h3>
+              <p className="text-xs text-slate-400">
+                Calculates distance, midpoint, slope, perpendicular bisector, dot/cross products, and angles
+              </p>
+            </div>
+            {onNavigateToGraph && (
+              <button
+                onClick={() => onNavigateToGraph()}
+                className="px-3 py-1.5 bg-sky-600/20 hover:bg-sky-600/30 text-sky-400 border border-sky-500/30 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors"
+              >
+                <TrendingUp className="w-3.5 h-3.5" /> Open Graphing Calculator
+              </button>
+            )}
+          </div>
+
+          {/* 2D Line Section */}
+          <div className="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 flex flex-col gap-4">
+            <h4 className="text-sm font-bold text-sky-400 uppercase tracking-wider">2D Line Between Points P₁ and P₂</h4>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-slate-400">P₁ X</label>
+                <input
+                  type="number"
+                  value={p1x}
+                  onChange={(e) => setP1x(e.target.value)}
+                  className="bg-slate-800 border border-slate-700 rounded-xl p-2.5 font-mono text-sm font-bold text-slate-100"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-slate-400">P₁ Y</label>
+                <input
+                  type="number"
+                  value={p1y}
+                  onChange={(e) => setP1y(e.target.value)}
+                  className="bg-slate-800 border border-slate-700 rounded-xl p-2.5 font-mono text-sm font-bold text-slate-100"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-slate-400">P₂ X</label>
+                <input
+                  type="number"
+                  value={p2x}
+                  onChange={(e) => setP2x(e.target.value)}
+                  className="bg-slate-800 border border-slate-700 rounded-xl p-2.5 font-mono text-sm font-bold text-slate-100"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-slate-400">P₂ Y</label>
+                <input
+                  type="number"
+                  value={p2y}
+                  onChange={(e) => setP2y(e.target.value)}
+                  className="bg-slate-800 border border-slate-700 rounded-xl p-2.5 font-mono text-sm font-bold text-slate-100"
+                />
+              </div>
+            </div>
+
+            {(() => {
+              const p1 = { x: parseFloat(p1x) || 0, y: parseFloat(p1y) || 0 };
+              const p2 = { x: parseFloat(p2x) || 0, y: parseFloat(p2y) || 0 };
+              const lineRes = analyze2DLine(p1, p2);
+              return (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-1">
+                  <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                    <span className="text-xs text-slate-400 block mb-0.5">Euclidean Distance</span>
+                    <span className="font-mono text-sm font-bold text-emerald-400">{formatNum(lineRes.distance)}</span>
+                  </div>
+                  <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                    <span className="text-xs text-slate-400 block mb-0.5">Midpoint (x, y)</span>
+                    <span className="font-mono text-sm font-bold text-sky-400">({formatNum(lineRes.midpoint.x)}, {formatNum(lineRes.midpoint.y)})</span>
+                  </div>
+                  <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                    <span className="text-xs text-slate-400 block mb-0.5">Slope (m)</span>
+                    <span className="font-mono text-sm font-bold text-amber-400">{isFinite(lineRes.slope) ? formatNum(lineRes.slope) : 'Undefined (Vertical)'}</span>
+                  </div>
+                  <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                    <span className="text-xs text-slate-400 block mb-0.5">Line Equation</span>
+                    <span className="font-mono text-sm font-bold text-cyan-400">{lineRes.equation}</span>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+
+          {/* 3D Vector Operations */}
+          <div className="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 flex flex-col gap-4">
+            <h4 className="text-sm font-bold text-amber-400 uppercase tracking-wider">3D Vector Operations (u × v, u · v)</h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="flex flex-col gap-2">
+                <span className="text-xs font-bold text-slate-300">Vector u = (ux, uy, uz)</span>
+                <div className="grid grid-cols-3 gap-2">
+                  <input
+                    type="number"
+                    value={u3x}
+                    onChange={(e) => setU3x(e.target.value)}
+                    placeholder="ux"
+                    className="bg-slate-800 border border-slate-700 rounded-xl p-2 font-mono text-sm font-bold text-slate-100"
+                  />
+                  <input
+                    type="number"
+                    value={u3y}
+                    onChange={(e) => setU3y(e.target.value)}
+                    placeholder="uy"
+                    className="bg-slate-800 border border-slate-700 rounded-xl p-2 font-mono text-sm font-bold text-slate-100"
+                  />
+                  <input
+                    type="number"
+                    value={u3z}
+                    onChange={(e) => setU3z(e.target.value)}
+                    placeholder="uz"
+                    className="bg-slate-800 border border-slate-700 rounded-xl p-2 font-mono text-sm font-bold text-slate-100"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <span className="text-xs font-bold text-slate-300">Vector v = (vx, vy, vz)</span>
+                <div className="grid grid-cols-3 gap-2">
+                  <input
+                    type="number"
+                    value={v3x}
+                    onChange={(e) => setV3x(e.target.value)}
+                    placeholder="vx"
+                    className="bg-slate-800 border border-slate-700 rounded-xl p-2 font-mono text-sm font-bold text-slate-100"
+                  />
+                  <input
+                    type="number"
+                    value={v3y}
+                    onChange={(e) => setV3y(e.target.value)}
+                    placeholder="vy"
+                    className="bg-slate-800 border border-slate-700 rounded-xl p-2 font-mono text-sm font-bold text-slate-100"
+                  />
+                  <input
+                    type="number"
+                    value={v3z}
+                    onChange={(e) => setV3z(e.target.value)}
+                    placeholder="vz"
+                    className="bg-slate-800 border border-slate-700 rounded-xl p-2 font-mono text-sm font-bold text-slate-100"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {(() => {
+              const u = { x: parseFloat(u3x) || 0, y: parseFloat(u3y) || 0, z: parseFloat(u3z) || 0 };
+              const v = { x: parseFloat(v3x) || 0, y: parseFloat(v3y) || 0, z: parseFloat(v3z) || 0 };
+              const vRes = analyze3DVectors(u, v);
+              return (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-1">
+                  <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                    <span className="text-xs text-slate-400 block mb-0.5">|u|, |v|</span>
+                    <span className="font-mono text-sm font-bold text-slate-200">{formatNum(vRes.magnitudeU)}, {formatNum(vRes.magnitudeV)}</span>
+                  </div>
+                  <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                    <span className="text-xs text-slate-400 block mb-0.5">Dot Product (u · v)</span>
+                    <span className="font-mono text-sm font-bold text-emerald-400">{formatNum(vRes.dotProduct)}</span>
+                  </div>
+                  <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                    <span className="text-xs text-slate-400 block mb-0.5">Cross Product (u × v)</span>
+                    <span className="font-mono text-sm font-bold text-sky-400">({formatNum(vRes.crossProduct.x)}, {formatNum(vRes.crossProduct.y)}, {formatNum(vRes.crossProduct.z)})</span>
+                  </div>
+                  <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                    <span className="text-xs text-slate-400 block mb-0.5">Enclosed Angle</span>
+                    <span className="font-mono text-sm font-bold text-amber-400">{formatNum(vRes.angleDeg)}°</span>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+        </div>
       </div>
     </div>
   );

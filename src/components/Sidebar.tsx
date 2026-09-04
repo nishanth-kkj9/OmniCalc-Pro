@@ -25,6 +25,10 @@ import {
   Pin,
   PanelLeftClose,
   PanelLeftOpen,
+  Layers,
+  Activity,
+  ListOrdered,
+  Compass,
 } from 'lucide-react';
 import { CalcMode, AppSettings } from '../types';
 import { APP_NAME, APP_VERSION } from '../constants/version';
@@ -114,6 +118,34 @@ const MENU_ITEMS: MenuItem[] = [
     icon: <BarChart2 className="w-4 h-4 text-sky-400" />,
     group: 'Advanced & Science',
     keywords: 'stats mean median mode variance std dev',
+  },
+  {
+    mode: 'regression',
+    label: 'Regression & Fitting',
+    icon: <Layers className="w-4 h-4 text-blue-400" />,
+    group: 'Advanced & Science',
+    keywords: 'regression linear polynomial exponential logarithmic power fit least squares curve r2',
+  },
+  {
+    mode: 'probability',
+    label: 'Probability & Distributions',
+    icon: <Activity className="w-4 h-4 text-emerald-400" />,
+    group: 'Advanced & Science',
+    keywords: 'probability distribution normal binomial poisson uniform exponential student t chi square cdf pdf',
+  },
+  {
+    mode: 'sequences',
+    label: 'Sequences & Series',
+    icon: <ListOrdered className="w-4 h-4 text-amber-400" />,
+    group: 'Core & Math',
+    keywords: 'sequence series arithmetic geometric fibonacci progression sum partial convergence limit',
+  },
+  {
+    mode: 'complex',
+    label: 'Complex Numbers & Phasor',
+    icon: <Compass className="w-4 h-4 text-purple-400" />,
+    group: 'Core & Math',
+    keywords: 'complex imaginary real polar rectangular euler phasor argand ac impedance rlc roots',
   },
   {
     mode: 'programmer',

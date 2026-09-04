@@ -60,14 +60,18 @@ OmniCalc Pro employs a **parallel dual-UI monorepo architecture**, allowing the 
 | **Core & Math** | **Basic Calculator** | Arithmetic (`+`, `-`, `×`, `÷`), parentheses, percentage conversion, and memory bank (`M+`, `M-`, `MR`, `MC`). |
 | | **Scientific Calculator** | Trigonometry (`sin`, `cos`, `tan`, `asin`, `acos`, `atan`), hyperbolic, logarithms (`ln`, `log10`, `log2`), powers (`xʸ`, `√x`, `³√x`), factorials, and physical constants (`π`, `e`, `φ`). Angle modes: **DEG**, **RAD**, **GRAD**. |
 | | **Fractions & Number Theory** | Exact rational arithmetic (`a/b ± c/d`), auto-simplification, GCD / LCM decomposition tree, prime factorization, and decimal-to-fraction conversions. |
-| | **Geometry & Triangle Solver** | Complete triangle solver (SSS, SAS, ASA, AAS, SSA) with dynamic vector preview, area, perimeter, inradius, circumradius, and 2D/3D shape mensuration. |
+| | **Geometry & Coordinate Engine** | Complete triangle solver (SSS, SAS, ASA, AAS, SSA), 2D line analyzer (distance, slope, midpoint, line equation), and 2D/3D vector operations (dot/cross products, projections). |
+| | **Complex Numbers & Phasor Engine** | Rectangular, Polar ($r\angle\theta$), Euler ($re^{i\theta}$), $n$-th roots of unity, AC RLC impedance ($\omega L, 1/\omega C$), and phasor addition. |
 | **Advanced & Science** | **Equation & System Solver** | Linear equation solver, Quadratic ($ax^2 + bx + c = 0$) with discriminant breakdown, Cubic solver, and $2\times2$ / $3\times3$ Linear System Solver via Cramer's Rule. |
 | | **Calculus & Numerical Suite** | Numerical integration using Simpson's Composite Rule ($\int_a^b f(x)dx$), tangent line derivative calculator ($f'(x_0)$), and Newton-Raphson root finder. |
 | | **Graphing Calculator** | Multi-function plotting (up to 5 simultaneous functions), adaptive coordinate bounds, dynamic zoom/pan, hover coordinate tracker, table of values, and PNG image export. |
-| | **Matrix Calculator** | Matrix addition, subtraction, multiplication, determinant ($2\times2$, $3\times3$), matrix inverse, transpose, trace, and eigenvalue estimates. |
-| | **Statistics Calculator** | Descriptive stats: Mean, Median, Mode, Sample/Population Variance, Standard Deviation, IQR, Range, Sum, Min/Max, and single-value Z-Score computation. |
+| | **Matrix Calculator** | Matrix arithmetic, determinant, Gauss-Jordan inverse, transpose, trace, rank, nullity, RREF, matrix powers $A^n$, scalar multiplication, and exact eigenvalues. |
+| | **Statistics & Data Analysis** | Descriptive stats: Mean, Median, Mode, Sample/Population Variance, Standard Deviation, IQR, Range, Sum, Min/Max, and single-value Z-Score computation. |
+| | **Regression & Curve Fitting** | Linear, Polynomial (degree 2–5), Exponential, Power, and Logarithmic regression with ANOVA ($R^2$, RMSE, $F$-statistic), residuals table, and inverse prediction. |
+| | **Probability Distributions** | Continuous and discrete distributions: Normal, Binomial, Poisson, Student's $t$, Chi-Square, and Exponential with PDF/PMF, CDF, quantiles, and moments. |
+| | **Sequences & Series Analysis** | Arithmetic, Geometric, Fibonacci, and Harmonic series with closed-form $n$-th term formulas, partial sums $S_n$, limit approximations, and ratio convergence tests. |
 | | **Programmer Calculator** | Live radix conversions (**HEX**, **DEC**, **OCT**, **BIN**), bit width toggles (64-bit, 32-bit, 16-bit, 8-bit), Bitwise logic (`AND`, `OR`, `XOR`, `NOT`, `NAND`, `NOR`), bit-shifts (`LSH`, `RSH`), and 2's complement. |
-| **Practical & Life** | **Unit Converter** | 8 categories: Length, Mass & Weight, Temperature, Digital Data Storage, Speed, Time, Pressure, and Area with instant bidirectional updates. |
+| **Practical & Life** | **Unit Converter & Physical Units** | 8 standard categories + comprehensive dimensional physical units engine (Length, Mass, Temp, Time, Energy, Force, Power, Pressure, Electricity, etc.). |
 | | **Finance & Loan EMI** | Mortgage & Car Loan amortization scheduler, Compound Interest (FD/SIP wealth builder), GST / Sales Tax calculator, and percentage Discount/Markup. |
 | | **Date & Time Calculator** | Date span/duration, Business working days (excluding custom weekends/holidays), Target event countdown, and hourly work shift wage logger. |
 | | **Health & Fitness Suite** | Body Mass Index (BMI) with category visualizer, Basal Metabolic Rate (BMR: Harris-Benedict & Mifflin-St Jeor), Total Daily Energy Expenditure (TDEE), and Karvonen Target Heart Rate training zones. |

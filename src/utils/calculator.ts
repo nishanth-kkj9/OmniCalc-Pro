@@ -41,6 +41,7 @@ const ALLOWED_NODE_TYPES = new Set([
   'FunctionNode',
   'ParenthesisNode',
   'BlockNode',
+  'ConditionalNode',
 ]);
 
 // Whitelist of approved mathematical functions
@@ -77,6 +78,19 @@ export const ALLOWED_FUNCTIONS = new Set([
   'factorial',
   'sign',
   'gamma',
+  'min',
+  'max',
+  'clamp',
+  'step',
+  'sinc',
+  'erf',
+  'hypot',
+  'ncr',
+  'npr',
+  'combinations',
+  'permutations',
+  'gcd',
+  'lcm',
 ]);
 
 // Whitelist of approved constants and variables
@@ -100,6 +114,12 @@ export const ALLOWED_SYMBOLS = new Set([
   'n',
   'r',
   'k',
+  'a',
+  'b',
+  'c',
+  'm',
+  'u',
+  'v',
 ]);
 
 /**
@@ -290,6 +310,87 @@ export function buildMathScope(angleMode: AngleMode = 'DEG'): Record<string, any
     factorial: factorialFn,
     fact: factorialFn,
     gamma: gammaFn,
+
+    // Advanced & Piecewise Helper Functions
+    min: (...args: number[]) => Math.min(...args),
+    max: (...args: number[]) => Math.max(...args),
+    clamp: (x: number, a: number, b: number) => Math.min(Math.max(x, a), b),
+    step: (x: number) => (x >= 0 ? 1 : 0),
+    sinc: (x: number) => (x === 0 ? 1 : Math.sin(x) / x),
+    hypot: (...args: number[]) => Math.hypot(...args),
+    erf: (x: number) => {
+      // Numerical approximation of error function (Abramowitz and Stegun 7.1.26)
+      const sign = x >= 0 ? 1 : -1;
+      const a = Math.abs(x);
+      const p = 0.3275911;
+      const t = 1.0 / (1.0 + p * a);
+      const y =
+        1.0 -
+        (((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t +
+          0.254829592) *
+          t) *
+          Math.exp(-a * a);
+      return sign * y;
+    },
+    ncr: (n: number, r: number) => {
+      if (r < 0 || r > n || !Number.isInteger(n) || !Number.isInteger(r)) return 0;
+      if (r === 0 || r === n) return 1;
+      let res = 1;
+      const k = Math.min(r, n - r);
+      for (let i = 1; i <= k; i++) {
+        res = (res * (n - k + i)) / i;
+      }
+      return Math.round(res);
+    },
+    combinations: (n: number, r: number) => {
+      if (r < 0 || r > n || !Number.isInteger(n) || !Number.isInteger(r)) return 0;
+      if (r === 0 || r === n) return 1;
+      let res = 1;
+      const k = Math.min(r, n - r);
+      for (let i = 1; i <= k; i++) {
+        res = (res * (n - k + i)) / i;
+      }
+      return Math.round(res);
+    },
+    npr: (n: number, r: number) => {
+      if (r < 0 || r > n || !Number.isInteger(n) || !Number.isInteger(r)) return 0;
+      let res = 1;
+      for (let i = 0; i < r; i++) {
+        res *= (n - i);
+      }
+      return Math.round(res);
+    },
+    permutations: (n: number, r: number) => {
+      if (r < 0 || r > n || !Number.isInteger(n) || !Number.isInteger(r)) return 0;
+      let res = 1;
+      for (let i = 0; i < r; i++) {
+        res *= (n - i);
+      }
+      return Math.round(res);
+    },
+    gcd: (a: number, b: number) => {
+      let x = Math.abs(Math.round(a));
+      let y = Math.abs(Math.round(b));
+      while (y !== 0) {
+        const t = y;
+        y = x % y;
+        x = t;
+      }
+      return x;
+    },
+    lcm: (a: number, b: number) => {
+      const x = Math.abs(Math.round(a));
+      const y = Math.abs(Math.round(b));
+      if (x === 0 || y === 0) return 0;
+      let u = x;
+      let v = y;
+      while (v !== 0) {
+        const t = v;
+        v = u % v;
+        u = t;
+      }
+      return Math.abs(Math.round((x * y) / u));
+    },
   };
 
   if (angleMode === 'DEG') {

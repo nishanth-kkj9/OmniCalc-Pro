@@ -90,21 +90,95 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = ({
           />
         </div>
 
-        {/* Math input: y = f(x) */}
-        <div className="flex-1 flex items-center gap-1.5 min-w-0 bg-transparent">
-          <span className="font-mono text-xs font-bold text-slate-400 select-none">y =</span>
-          <input
-            ref={inputRef}
-            type="text"
-            value={expression.expression}
-            onChange={(e) => onUpdate({ expression: e.target.value })}
-            placeholder="e.g. x^2 - 4"
-            spellCheck={false}
-            autoCapitalize="none"
-            autoCorrect="off"
-            className={`flex-1 bg-transparent border-none text-xs font-mono font-semibold focus:outline-none min-w-0 ${inputClass}`}
-          />
-        </div>
+        {/* Math input based on curve type */}
+        {expression.type === 'parametric' ? (
+          <div className="flex-1 flex flex-col gap-1 min-w-0">
+            <div className="flex items-center gap-1.5">
+              <span className="font-mono text-xs font-bold text-sky-400 select-none">x(t) =</span>
+              <input
+                ref={inputRef}
+                type="text"
+                value={expression.expression}
+                onChange={(e) => onUpdate({ expression: e.target.value })}
+                placeholder="e.g. 5*cos(t)"
+                spellCheck={false}
+                autoCapitalize="none"
+                autoCorrect="off"
+                className={`flex-1 bg-transparent border-none text-xs font-mono font-semibold focus:outline-none min-w-0 ${inputClass}`}
+              />
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="font-mono text-xs font-bold text-sky-400 select-none">y(t) =</span>
+              <input
+                type="text"
+                value={expression.parametricY || ''}
+                onChange={(e) => onUpdate({ parametricY: e.target.value })}
+                placeholder="e.g. 5*sin(t)"
+                spellCheck={false}
+                autoCapitalize="none"
+                autoCorrect="off"
+                className={`flex-1 bg-transparent border-none text-xs font-mono font-semibold focus:outline-none min-w-0 ${inputClass}`}
+              />
+            </div>
+          </div>
+        ) : expression.type === 'polar' ? (
+          <div className="flex-1 flex items-center gap-1.5 min-w-0 bg-transparent">
+            <span className="font-mono text-xs font-bold text-purple-400 select-none">r(θ) =</span>
+            <input
+              ref={inputRef}
+              type="text"
+              value={expression.expression}
+              onChange={(e) => onUpdate({ expression: e.target.value })}
+              placeholder="e.g. 2 + 2*cos(θ)"
+              spellCheck={false}
+              autoCapitalize="none"
+              autoCorrect="off"
+              className={`flex-1 bg-transparent border-none text-xs font-mono font-semibold focus:outline-none min-w-0 ${inputClass}`}
+            />
+          </div>
+        ) : expression.type === 'inequality' ? (
+          <div className="flex-1 flex items-center gap-1.5 min-w-0 bg-transparent">
+            <span className="font-mono text-xs font-bold text-slate-400 select-none">y</span>
+            <select
+              value={expression.inequalityOp || '<='}
+              onChange={(e) =>
+                onUpdate({ inequalityOp: e.target.value as '<' | '<=' | '>' | '>=' })
+              }
+              className="bg-slate-800/80 text-sky-400 text-xs font-mono font-bold rounded px-1 py-0.5 border border-slate-700/60 focus:outline-none"
+            >
+              <option value="<">&lt;</option>
+              <option value="<=">≤</option>
+              <option value=">">&gt;</option>
+              <option value=">=">≥</option>
+            </select>
+            <input
+              ref={inputRef}
+              type="text"
+              value={expression.expression}
+              onChange={(e) => onUpdate({ expression: e.target.value })}
+              placeholder="e.g. x^2 - 4"
+              spellCheck={false}
+              autoCapitalize="none"
+              autoCorrect="off"
+              className={`flex-1 bg-transparent border-none text-xs font-mono font-semibold focus:outline-none min-w-0 ${inputClass}`}
+            />
+          </div>
+        ) : (
+          <div className="flex-1 flex items-center gap-1.5 min-w-0 bg-transparent">
+            <span className="font-mono text-xs font-bold text-slate-400 select-none">y =</span>
+            <input
+              ref={inputRef}
+              type="text"
+              value={expression.expression}
+              onChange={(e) => onUpdate({ expression: e.target.value })}
+              placeholder="e.g. x^2 - 4"
+              spellCheck={false}
+              autoCapitalize="none"
+              autoCorrect="off"
+              className={`flex-1 bg-transparent border-none text-xs font-mono font-semibold focus:outline-none min-w-0 ${inputClass}`}
+            />
+          </div>
+        )}
 
         {/* Syntax Error Warning icon */}
         {!isValid && expression.expression.trim() && (
@@ -155,6 +229,63 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = ({
               <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
                 Curve Options
               </div>
+
+              {/* Curve Type Selector */}
+              <div className="mb-3">
+                <label className="text-[11px] font-medium text-slate-400 block mb-1">Type</label>
+                <div className="grid grid-cols-2 gap-1 bg-slate-800/40 p-1 rounded-xl">
+                  {(
+                    [
+                      { id: 'function', label: 'Cartesian' },
+                      { id: 'parametric', label: 'Parametric' },
+                      { id: 'polar', label: 'Polar' },
+                      { id: 'inequality', label: 'Inequality' },
+                    ] as const
+                  ).map((t) => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => onUpdate({ type: t.id })}
+                      className={`px-1.5 py-1 text-[10px] font-bold rounded-lg transition-colors ${
+                        (expression.type || 'function') === t.id
+                          ? 'bg-sky-500 text-white'
+                          : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Derivative Toggles for Cartesian functions */}
+              {(!expression.type || expression.type === 'function') && (
+                <div className="mb-3 space-y-1.5 bg-slate-800/30 p-2 rounded-xl border border-slate-700/40">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                    Calculus Curves
+                  </label>
+                  <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={!!expression.showDerivative}
+                      onChange={(e) => onUpdate({ showDerivative: e.target.checked })}
+                      className="accent-purple-500 rounded"
+                    />
+                    <span className="font-mono text-[11px] text-purple-400 font-bold">f&apos;(x)</span>
+                    <span className="text-[10px] text-slate-400">(First Derivative)</span>
+                  </label>
+                  <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={!!expression.showSecondDerivative}
+                      onChange={(e) => onUpdate({ showSecondDerivative: e.target.checked })}
+                      className="accent-amber-500 rounded"
+                    />
+                    <span className="font-mono text-[11px] text-amber-400 font-bold">f&apos;&apos;(x)</span>
+                    <span className="text-[10px] text-slate-400">(Second Derivative)</span>
+                  </label>
+                </div>
+              )}
 
               {/* Color Palette Selection */}
               <div className="mb-3">

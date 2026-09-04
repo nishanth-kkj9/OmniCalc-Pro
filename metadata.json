@@ -1,6 +1,6 @@
 {
   "name": "OmniCalc Pro",
-  "description": "Comprehensive multi-functional calculator suite featuring basic, scientific, graphing calculator, equation solver, calculus & numerical suite, fractions & number theory, geometry & triangle solver, unit conversion, financial, date/time, health/fitness, matrix, and statistics calculation tools.",
+  "description": "Comprehensive professional multi-functional calculator and mathematical engineering suite featuring graphing, numerical analysis, linear algebra & matrices, probability distributions, regression & curve fitting, sequences & series, complex numbers & phasor analysis, calculus, geometry, and specialized solvers.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

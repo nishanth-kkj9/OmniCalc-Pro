@@ -2,9 +2,17 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { Copy, Check, Download, FileText, ChevronDown, ChevronUp } from 'lucide-react';
 import { AppSettings } from '../types';
 import { evaluateExpression } from '../utils/calculator';
-import { MAX_ITERATIONS, NUMERICAL_EPSILON } from '../constants/limits';
+import { MAX_ITERATIONS } from '../constants/limits';
 import { ExportModal } from './ExportModal';
 import { ExportReportData } from '../utils/exportEngine';
+import {
+  calculateDerivative,
+  calculateSecondDerivative,
+  calculateTangentLine,
+  calculateNormalLine,
+  integrateDefinite,
+  solveNewtonRaphson,
+} from '../utils/numericalAnalysis';
 
 interface CalculusCalculatorProps {
   settings: AppSettings;
@@ -88,19 +96,16 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
     const fb = evalAt(intFunc, b);
     if (fa === null || fb === null) return { error: 'Function is undefined at boundary.' };
 
-    let simpsonSum = fa + fb;
-    let trapSum = 0.5 * (fa + fb);
+    const fn = (x: number) => evalAt(intFunc, x);
+    const simpsonRes = integrateDefinite(fn, a, b, { method: 'simpson', subdivisions: n });
+    const trapRes = integrateDefinite(fn, a, b, { method: 'trapezoid', subdivisions: n });
 
-    for (let i = 1; i < n; i++) {
-      const x = a + i * h;
-      const fx = evalAt(intFunc, x);
-      if (fx === null) return { error: `Function undefined at x = ${formatNum(x)}` };
-      simpsonSum += (i % 2 === 0 ? 2 : 4) * fx;
-      trapSum += fx;
+    if (!simpsonRes || !trapRes) {
+      return { error: 'Function is undefined or discontinuous across integration interval.' };
     }
 
-    const simpsonTotal = (h / 3) * simpsonSum;
-    const trapTotal = h * trapSum;
+    const simpsonTotal = simpsonRes.value;
+    const trapTotal = trapRes.value;
 
     return {
       result: formatNum(simpsonTotal),
@@ -111,8 +116,7 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
         `Interval: [a = ${a}, b = ${b}] with n = ${n} subdivisions (step size h = ${formatNum(h)})`,
         `Simpson's 1/3 Formula: (h / 3) · [f(x₀) + 4∑f(x_odd) + 2∑f(x_even) + f(x_n)]`,
         `Boundary Values: f(${a}) = ${formatNum(fa)}, f(${b}) = ${formatNum(fb)}`,
-        `Weighted Sum = ${formatNum(simpsonSum)}`,
-        `Simpson Integral = (${formatNum(h)} / 3) · ${formatNum(simpsonSum)} = ${formatNum(simpsonTotal)}`,
+        `Simpson Integral = (${formatNum(h)} / 3) · Weighted Sum = ${formatNum(simpsonTotal)}`,
         `Trapezoidal Rule Comparison = ${formatNum(trapTotal)}`,
       ],
       latex: `\\int_{${a}}^{${b}} \\left( ${intFunc} \\right) dx \\approx ${formatNum(simpsonTotal)}`,
@@ -127,35 +131,18 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
     const f0 = evalAt(diffFunc, x0);
     if (f0 === null) return { error: 'Function undefined at point x₀.' };
 
-    const h = 1e-4;
-    const fp2 = evalAt(diffFunc, x0 + 2 * h);
-    const fp1 = evalAt(diffFunc, x0 + h);
-    const fm1 = evalAt(diffFunc, x0 - h);
-    const fm2 = evalAt(diffFunc, x0 - 2 * h);
+    const fn = (x: number) => evalAt(diffFunc, x);
+    const d1 = calculateDerivative(fn, x0);
+    const d2 = calculateSecondDerivative(fn, x0);
+    const tangent = calculateTangentLine(fn, x0);
+    const normal = calculateNormalLine(fn, x0);
 
-    if (fp2 === null || fp1 === null || fm1 === null || fm2 === null) {
+    if (d1 === null || d2 === null || !tangent || !normal) {
       return { error: 'Could not compute derivative in the neighborhood of x₀.' };
     }
 
-    // Five-point stencil derivative: (-f(x+2h) + 8f(x+h) - 8f(x-h) + f(x-2h)) / (12h)
-    const d1 = (-fp2 + 8 * fp1 - 8 * fm1 + fm2) / (12 * h);
-
-    // Second derivative: (-f(x+2h) + 16f(x+h) - 30f(x) + 16f(x-h) - f(x-2h)) / (12h^2)
-    const d2 = (-fp2 + 16 * fp1 - 30 * f0 + 16 * fm1 - fm2) / (12 * h * h);
-
-    // Tangent line: y = m*x + (y0 - m*x0)
-    const tangentIntercept = f0 - d1 * x0;
-    const tangentLine = `y = ${formatNum(d1)}x ${tangentIntercept >= 0 ? '+' : '-'} ${formatNum(Math.abs(tangentIntercept))}`;
-
-    // Normal line
-    let normalLine = '';
-    if (Math.abs(d1) > 1e-12) {
-      const normalSlope = -1 / d1;
-      const normalIntercept = f0 - normalSlope * x0;
-      normalLine = `y = ${formatNum(normalSlope)}x ${normalIntercept >= 0 ? '+' : '-'} ${formatNum(Math.abs(normalIntercept))}`;
-    } else {
-      normalLine = `x = ${formatNum(x0)} (Vertical Line)`;
-    }
+    const tangentLine = tangent.equation;
+    const normalLine = normal.equation;
 
     return {
       f0: formatNum(f0),
@@ -166,13 +153,13 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
       steps: [
         `Evaluation Point: x₀ = ${x0}`,
         `Base Function Value: f(${x0}) = ${formatNum(f0)}`,
-        `Five-Point Central Stencil with h = ${h}:`,
-        `   f'(x₀) = [-f(x+2h) + 8f(x+h) - 8f(x-h) + f(x-2h)] / (12h) = ${formatNum(d1)}`,
+        `High-Order Five-Point Central Stencil:`,
+        `   f'(x₀) = ${formatNum(d1)}`,
         `Second Derivative Concavity Check:`,
         `   f''(x₀) = ${formatNum(d2)} (${d2 > 0 ? 'Concave Upwards / Local Minima' : d2 < 0 ? 'Concave Downwards / Local Maxima' : 'Inflection candidate'})`,
         `Tangent Line at (x₀, f(x₀)): Point-Slope form y - f(x₀) = f'(x₀)(x - x₀)`,
         `   ${tangentLine}`,
-        `Normal (Perpendicular) Line: Slope m_perp = -1 / f'(x₀) = ${Math.abs(d1) > 1e-12 ? formatNum(-1 / d1) : 'undefined'}`,
+        `Normal (Perpendicular) Line:`,
         `   ${normalLine}`,
       ],
       latex: `\\left. \\frac{d}{dx} \\left( ${diffFunc} \\right) \\right|_{x = ${x0}} = ${formatNum(d1)}`,
@@ -181,57 +168,25 @@ export const CalculusCalculator: React.FC<CalculusCalculatorProps> = ({ settings
 
   // Newton-Raphson Root Solver
   const rootData = useMemo(() => {
-    let currentX = parseFloat(rootGuess);
+    const currentX = parseFloat(rootGuess);
     if (isNaN(currentX)) return { error: 'Invalid initial guess x₀.' };
 
-    const iterations = [];
-    const h = 1e-5;
     const boundedMaxIter = Math.min(Math.max(1, maxIter), MAX_ITERATIONS);
+    const fn = (x: number) => evalAt(rootFunc, x);
+    const res = solveNewtonRaphson(fn, currentX, { maxIterations: boundedMaxIter });
 
-    for (let i = 0; i < boundedMaxIter; i++) {
-      const fx = evalAt(rootFunc, currentX);
-      if (fx === null) {
-        return { error: `Function undefined at x = ${formatNum(currentX)}`, iterations };
-      }
-
-      // Derivative at currentX
-      const fxh = evalAt(rootFunc, currentX + h);
-      const fxmh = evalAt(rootFunc, currentX - h);
-      if (fxh === null || fxmh === null) break;
-
-      const fPrime = (fxh - fxmh) / (2 * h);
-      if (Math.abs(fPrime) < 1e-14) {
-        iterations.push({ iter: i + 1, x: currentX, fx, fPrime, nextX: currentX, error: 0 });
-        return {
-          error: 'Derivative reached 0 (tangent is horizontal). Cannot continue.',
-          iterations,
-        };
-      }
-
-      const nextX = currentX - fx / fPrime;
-      const err = Math.abs(nextX - currentX);
-
-      iterations.push({
-        iter: i + 1,
-        x: currentX,
-        fx,
-        fPrime,
-        nextX,
-        error: err,
-      });
-
-      currentX = nextX;
-      if (err < NUMERICAL_EPSILON || err < 1e-10) break;
+    if (!res.converged && res.iterations.length === 0) {
+      return { error: res.error || 'Function undefined at initial guess.', iterations: [] };
     }
 
     return {
-      root: formatNum(currentX),
-      iterations,
-      steps: iterations.map(
+      root: formatNum(res.root),
+      iterations: res.iterations,
+      steps: res.iterations.map(
         (it) =>
           `Iteration ${it.iter}: x_${it.iter - 1} = ${formatNum(it.x)}, f(x) = ${formatNum(it.fx)}, f'(x) = ${formatNum(it.fPrime)} ➔ x_${it.iter} = ${formatNum(it.nextX)} (Error: ${it.error.toExponential(2)})`
       ),
-      latex: `f(x) = ${rootFunc} = 0 \\implies x \\approx ${formatNum(currentX)}`,
+      latex: `f(x) = ${rootFunc} = 0 \\implies x \\approx ${formatNum(res.root)}`,
     };
   }, [rootGuess, maxIter, rootFunc, evalAt, formatNum]);
 
