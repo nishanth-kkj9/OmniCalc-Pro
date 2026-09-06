@@ -163,7 +163,7 @@ class PhysicalUnitsPage(QWidget):
                 res = self.engine.convert_unit(val, u1, u2)
                 dim_vector_str = self.engine.format_dimension_vector(res["dimension_vector"])
                 out = [
-                    f"=== UNIT CONVERSION RESULTS ===",
+                    "=== UNIT CONVERSION RESULTS ===",
                     f"Conversion: {val:g} {u1}  ➔  {res['value']:.8g} {u2}",
                     "",
                     f"Physical Quantity:  {res['dimension_name']}",
@@ -182,10 +182,10 @@ class PhysicalUnitsPage(QWidget):
 
                 res = self.engine.evaluate_compound_unit(v1, u1, op, v2, u2)
                 out = [
-                    f"=== COMPOUND UNIT ARITHMETIC ===",
+                    "=== COMPOUND UNIT ARITHMETIC ===",
                     f"Operation: ({v1:g} {u1}) {op} ({v2:g} {u2})",
                     "",
-                    f"Dimensional Consistency: VALID",
+                    "Dimensional Consistency: VALID",
                     f"Resulting Quantity Name: {res['dimension_name']}",
                     f"Resulting Dimensions:    {res['formatted_dimensions']}",
                     f"Result Base Value:       {res['result_base_val']:.8g} (SI)",
@@ -209,7 +209,7 @@ class PhysicalUnitsPage(QWidget):
                     res = self.engine.solve_physics_formula("ohms_law", {"i": float(self.form_p1.text()), "r": float(self.form_p2.text())})
 
                 out = [
-                    f"=== PHYSICS FORMULA SOLVER ===",
+                    "=== PHYSICS FORMULA SOLVER ===",
                     f"Formula: {res['formula']}",
                     f"Result:  {res['result_value']:.8g} {res['result_unit']}",
                     f"Quantity:{res['dimension_name']}",

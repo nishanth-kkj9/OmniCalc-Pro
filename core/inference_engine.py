@@ -133,7 +133,7 @@ def two_sample_t_test(
 
     diff = mean1 - mean2
     if equal_variances:
-        df = n1 + n2 - 2
+        df: float = float(n1 + n2 - 2)
         sp2 = ((n1 - 1) * std_dev1**2 + (n2 - 1) * std_dev2**2) / df
         sp = math.sqrt(sp2)
         se = sp * math.sqrt(1.0 / n1 + 1.0 / n2)

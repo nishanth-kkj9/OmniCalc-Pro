@@ -162,18 +162,18 @@ class GeometryEngine:
             surface_area = math.pi * r * slant_l + math.pi * (r ** 2)
             return {"shape": "Cone", "radius": r, "height": h, "slant_height": slant_l, "volume": volume, "surface_area": surface_area}
         elif shape_type == "prism":
-            l, w, h = p1, p2, p3
-            volume = l * w * h
-            surface_area = 2.0 * (l * w + l * h + w * h)
-            return {"shape": "Rectangular Prism", "length": l, "width": w, "height": h, "volume": volume, "surface_area": surface_area}
+            length, w, h = p1, p2, p3
+            volume = length * w * h
+            surface_area = 2.0 * (length * w + length * h + w * h)
+            return {"shape": "Rectangular Prism", "length": length, "width": w, "height": h, "volume": volume, "surface_area": surface_area}
         elif shape_type == "pyramid":
-            l, w, h = p1, p2, p3
-            volume = (1.0 / 3.0) * l * w * h
-            base_area = l * w
+            length, w, h = p1, p2, p3
+            volume = (1.0 / 3.0) * length * w * h
+            base_area = length * w
             slant1 = math.sqrt((w / 2.0) ** 2 + h ** 2)
-            slant2 = math.sqrt((l / 2.0) ** 2 + h ** 2)
-            surface_area = base_area + l * slant1 + w * slant2
-            return {"shape": "Rectangular Pyramid", "length": l, "width": w, "height": h, "volume": volume, "surface_area": surface_area}
+            slant2 = math.sqrt((length / 2.0) ** 2 + h ** 2)
+            surface_area = base_area + length * slant1 + w * slant2
+            return {"shape": "Rectangular Pyramid", "length": length, "width": w, "height": h, "volume": volume, "surface_area": surface_area}
         else:
             raise ValueError(f"Unknown 3D shape type: {shape_type}")
 
@@ -191,11 +191,13 @@ class GeometryEngine:
 
         if not math.isfinite(slope):
             eq = f"x = {x1:g}"
-        elif slope == 0:
+        elif slope == 0 and intercept is not None:
             eq = f"y = {intercept:g}"
-        else:
+        elif intercept is not None:
             sign = "+" if intercept >= 0 else "-"
             eq = f"y = {slope:.4g}x {sign} {abs(intercept):.4g}"
+        else:
+            eq = f"x = {x1:g}"
 
         return {
             "p1": (x1, y1), "p2": (x2, y2),

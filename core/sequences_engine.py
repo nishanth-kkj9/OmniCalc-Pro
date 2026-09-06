@@ -7,14 +7,20 @@ formula generation, and convergence analysis.
 
 import math
 from typing import List, Dict, Any, Optional
-from core.safe_evaluator import safe_eval
+from core.safe_evaluator import SafeEvaluator
+
+_evaluator = SafeEvaluator(angle_mode="radians")
+
+
+def _eval_expr(expr: str, scope: Dict[str, float]) -> float:
+    return float(_evaluator._eval_worker_func(expr, list(scope.keys()), "radians", scope))
 
 
 class SequencesEngine:
     @staticmethod
     def arithmetic(a1: float, d: float, n_terms: int, start_n: int = 1) -> Dict[str, Any]:
         n_terms = max(1, min(500, int(n_terms)))
-        terms = []
+        terms: List[Dict[str, Any]] = []
         running_sum = 0.0
         for i in range(n_terms):
             n = start_n + i
@@ -53,7 +59,7 @@ class SequencesEngine:
     @staticmethod
     def geometric(a1: float, r: float, n_terms: int, start_n: int = 1) -> Dict[str, Any]:
         n_terms = max(1, min(500, int(n_terms)))
-        terms = []
+        terms: List[Dict[str, Any]] = []
         running_sum = 0.0
         for i in range(n_terms):
             n = start_n + i
@@ -95,7 +101,7 @@ class SequencesEngine:
     @staticmethod
     def fibonacci(n_terms: int) -> Dict[str, Any]:
         n_terms = max(1, min(500, int(n_terms)))
-        terms = []
+        terms: List[Dict[str, Any]] = []
         running_sum = 0.0
         a, b = 1.0, 1.0
         for i in range(n_terms):
@@ -105,7 +111,7 @@ class SequencesEngine:
             elif n == 2:
                 an = 1.0
             else:
-                an = terms[-1]["an"] + terms[-2]["an"]
+                an = float(terms[-1]["an"]) + float(terms[-2]["an"])
             running_sum += an
             prev_an = terms[i - 1]["an"] if i > 0 else None
             terms.append({
@@ -135,7 +141,7 @@ class SequencesEngine:
     def harmonic(n_terms: int, a: float = 1.0, d: float = 1.0) -> Dict[str, Any]:
         """Harmonic sequence: a_n = 1 / (a + (n-1)*d)"""
         n_terms = max(1, min(500, int(n_terms)))
-        terms = []
+        terms: List[Dict[str, Any]] = []
         running_sum = 0.0
         for i in range(n_terms):
             n = i + 1
@@ -171,12 +177,12 @@ class SequencesEngine:
     def explicit(expr: str, n_terms: int, start_n: int = 1) -> Dict[str, Any]:
         """Evaluates an explicit sequence formula a_n = f(n)."""
         n_terms = max(1, min(500, int(n_terms)))
-        terms = []
+        terms: List[Dict[str, Any]] = []
         running_sum = 0.0
 
         for i in range(n_terms):
             n = start_n + i
-            an = float(safe_eval(expr, {"n": float(n)}))
+            an = _eval_expr(expr, {"n": float(n)})
             running_sum += an
             prev_an = terms[i - 1]["an"] if i > 0 else None
             terms.append({
@@ -188,9 +194,9 @@ class SequencesEngine:
             })
 
         # Convergence limit check using the last term and ratio
-        last_an = terms[-1]["an"]
-        second_last_an = terms[-2]["an"] if len(terms) >= 2 else last_an
-        ratio = (last_an / second_last_an) if second_last_an != 0 else 0
+        last_an = float(terms[-1]["an"])
+        second_last_an = float(terms[-2]["an"]) if len(terms) >= 2 else last_an
+        ratio = (last_an / second_last_an) if second_last_an != 0 else 0.0
 
         is_conv = abs(last_an - second_last_an) < 1e-4
         return {
@@ -216,7 +222,7 @@ class SequencesEngine:
         if not initial_terms:
             initial_terms = [1.0]
 
-        terms = []
+        terms: List[Dict[str, Any]] = []
         running_sum = 0.0
 
         for i in range(n_terms):
@@ -224,15 +230,15 @@ class SequencesEngine:
             if i < len(initial_terms):
                 an = float(initial_terms[i])
             else:
-                a_prev1 = terms[-1]["an"]
-                a_prev2 = terms[-2]["an"] if len(terms) >= 2 else a_prev1
+                a_prev1 = float(terms[-1]["an"])
+                a_prev2 = float(terms[-2]["an"]) if len(terms) >= 2 else a_prev1
                 scope = {
                     "a_prev": a_prev1,
                     "a_prev1": a_prev1,
                     "a_prev2": a_prev2,
                     "n": float(n)
                 }
-                an = float(safe_eval(expr, scope))
+                an = _eval_expr(expr, scope)
 
             running_sum += an
             prev_an = terms[i - 1]["an"] if i > 0 else None

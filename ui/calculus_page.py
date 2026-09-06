@@ -74,7 +74,9 @@ class CalculusPage(QWidget):
         self.integ_subdiv = QLineEdit("100")
         integ_form.addRow("f(x):", self.integ_expr)
         r_lim = QHBoxLayout()
-        r_lim.addWidget(self.integ_a); r_lim.addWidget(QLabel("to")); r_lim.addWidget(self.integ_b)
+        r_lim.addWidget(self.integ_a)
+        r_lim.addWidget(QLabel("to"))
+        r_lim.addWidget(self.integ_b)
         integ_form.addRow("Limits [a, b]:", r_lim)
         integ_form.addRow("Method:", self.integ_method)
         integ_form.addRow("Subdivisions:", self.integ_subdiv)
@@ -97,7 +99,9 @@ class CalculusPage(QWidget):
         self.root_b = QLineEdit("10")
         root_form.addRow("f(x):", self.root_expr)
         r_r = QHBoxLayout()
-        r_r.addWidget(self.root_a); r_r.addWidget(QLabel("to")); r_r.addWidget(self.root_b)
+        r_r.addWidget(self.root_a)
+        r_r.addWidget(QLabel("to"))
+        r_r.addWidget(self.root_b)
         root_form.addRow("Search Interval:", r_r)
         self.inputs_layout.addWidget(root_widget)
 
@@ -122,7 +126,9 @@ class CalculusPage(QWidget):
         area_form.addRow("f₁(x):", self.area_f1)
         area_form.addRow("f₂(x):", self.area_f2)
         r_a = QHBoxLayout()
-        r_a.addWidget(self.area_a); r_a.addWidget(QLabel("to")); r_a.addWidget(self.area_b)
+        r_a.addWidget(self.area_a)
+        r_a.addWidget(QLabel("to"))
+        r_a.addWidget(self.area_b)
         area_form.addRow("Limits [a, b]:", r_a)
         self.inputs_layout.addWidget(area_widget)
 
@@ -178,7 +184,7 @@ class CalculusPage(QWidget):
 
                 if val is not None:
                     res_str = f"f'({x0:g}) = {val:.8g}"
-                    out = [f"=== FIRST DERIVATIVE ===", f"Function: f(x) = {expr}", f"Point x₀: {x0:g}", "", res_str]
+                    out = ["=== FIRST DERIVATIVE ===", f"Function: f(x) = {expr}", f"Point x₀: {x0:g}", "", res_str]
                 else:
                     res_str = "Error: Undefined derivative"
                     out = [res_str]
@@ -192,7 +198,7 @@ class CalculusPage(QWidget):
 
                 if val is not None:
                     res_str = f"f''({x0:g}) = {val:.8g}"
-                    out = [f"=== SECOND DERIVATIVE ===", f"Function: f(x) = {expr}", f"Point x₀: {x0:g}", "", res_str]
+                    out = ["=== SECOND DERIVATIVE ===", f"Function: f(x) = {expr}", f"Point x₀: {x0:g}", "", res_str]
                 else:
                     res_str = "Error: Undefined second derivative"
                     out = [res_str]
@@ -210,7 +216,7 @@ class CalculusPage(QWidget):
                 if res:
                     res_str = f"Integral Value = {res['value']:.8g}"
                     out = [
-                        f"=== DEFINITE INTEGRATION ===",
+                        "=== DEFINITE INTEGRATION ===",
                         f"Function: f(x) = {expr}",
                         f"Limits: [{a:g}, {b:g}]",
                         f"Method: {res['method']} (Subdivisions: {res['subdivisions']})",
@@ -228,7 +234,7 @@ class CalculusPage(QWidget):
                 norm_res = self.engine.calculate_normal_line(expr, x0)
                 expr_str = f"Tangent & Normal to ({expr}) at x = {x0}"
 
-                out = [f"=== TANGENT & NORMAL LINES ===", f"Function: f(x) = {expr}", f"Point: x₀ = {x0:g}"]
+                out = ["=== TANGENT & NORMAL LINES ===", f"Function: f(x) = {expr}", f"Point: x₀ = {x0:g}"]
                 self.last_plottable_expressions = [expr]
 
                 if tan_res:
@@ -254,7 +260,7 @@ class CalculusPage(QWidget):
                 expr_str = f"Roots of ({expr}) = 0 on [{a}, {b}]"
                 self.last_plottable_expressions = [expr]
 
-                out = [f"=== BRENT ROOT FINDER ===", f"Function: f(x) = {expr}", f"Interval: [{a:g}, {b:g}]", ""]
+                out = ["=== BRENT ROOT FINDER ===", f"Function: f(x) = {expr}", f"Interval: [{a:g}, {b:g}]", ""]
                 if res["ok"] and res["roots"]:
                     out.append(f"Roots ({len(res['roots'])}):")
                     for r in res["roots"]:
@@ -273,11 +279,12 @@ class CalculusPage(QWidget):
                 self.last_plottable_expressions = [expr]
 
                 res_str = f"Root ≈ {res['root']:.8g}"
-                out = [f"=== NEWTON-RAPHSON SOLVER ===", f"Function: f(x) = {expr}", f"Initial x₀: {x0:g}", ""]
+                out = ["=== NEWTON-RAPHSON SOLVER ===", f"Function: f(x) = {expr}", f"Initial x₀: {x0:g}", ""]
                 out.append(f"Status: {'Converged' if res['converged'] else 'Failed/Max Iterations'}")
                 out.append(f"Final Root Approximation: {res['root']:.8g}")
                 out.append("\n--- Iteration Log ---")
-                out.append(f"{'Iter':<6} {'x_n':<12} {'f(x_n)':<12} {'f\'(x_n)':<12} {'x_{n+1}':<12} {'Error':<12}")
+                f_prime_header = "f'(x_n)"
+                out.append(f"{'Iter':<6} {'x_n':<12} {'f(x_n)':<12} {f_prime_header:<12} {'x_{n+1}':<12} {'Error':<12}")
                 for row in res["iterations"]:
                     out.append(f"{row['iter']:<6} {row['x']:<12.6g} {row['fx']:<12.6g} {row['fPrime']:<12.6g} {row['nextX']:<12.6g} {row['error']:<12.6g}")
 
@@ -293,7 +300,7 @@ class CalculusPage(QWidget):
                 if res:
                     res_str = f"Area = {res['value']:.8g}"
                     out = [
-                        f"=== AREA BETWEEN CURVES ===",
+                        "=== AREA BETWEEN CURVES ===",
                         f"Upper/Lower Curves: f₁(x) = {f1}, f₂(x) = {f2}",
                         f"Interval: [{a:g}, {b:g}]",
                         "",

@@ -166,12 +166,12 @@ class ComplexEngine:
         }
 
     @staticmethod
-    def rlc_impedance(r: float, l: float, c: float, freq: float) -> Dict[str, Any]:
+    def rlc_impedance(r: float, inductance: float, c: float, freq: float) -> Dict[str, Any]:
         omega = 2.0 * math.pi * freq
-        x_l = omega * l
+        x_l = omega * inductance
         x_c = 1.0 / (omega * c) if (c > 0 and omega > 0) else 0.0
         z = complex(r, x_l - x_c)
-        f0 = 1.0 / (2.0 * math.pi * math.sqrt(l * c)) if (l > 0 and c > 0) else 0.0
+        f0 = 1.0 / (2.0 * math.pi * math.sqrt(inductance * c)) if (inductance > 0 and c > 0) else 0.0
 
         return {
             "impedance": z,

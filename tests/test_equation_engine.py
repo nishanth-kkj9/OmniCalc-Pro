@@ -60,16 +60,16 @@ class TestEquationEngine(unittest.TestCase):
         # x + y + z = 6
         # 0x + 2y + 5z = -4
         # 2x + 5y - z = 27
-        # Solution: x = 7, y = 3, z = -4
+        # Solution: x = 5, y = 3, z = -2
         res = EquationEngine.solve_linear_system_3x3(
             1.0, 1.0, 1.0, 6.0,
             0.0, 2.0, 5.0, -4.0,
             2.0, 5.0, -1.0, 27.0
         )
         self.assertTrue(res["is_solvable"])
-        self.assertAlmostEqual(res["x"], 7.0, places=4)
+        self.assertAlmostEqual(res["x"], 5.0, places=4)
         self.assertAlmostEqual(res["y"], 3.0, places=4)
-        self.assertAlmostEqual(res["z"], -4.0, places=4)
+        self.assertAlmostEqual(res["z"], -2.0, places=4)
 
     def test_solve_general_equation(self):
         # x^3 - 2x - 5 = 0 -> root approx 2.09455148

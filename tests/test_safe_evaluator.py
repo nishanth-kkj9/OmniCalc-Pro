@@ -5,6 +5,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core.safe_evaluator import SafeEvaluator, safe_eval
+from unittest.mock import patch
 
 
 class TestSafeEvaluator(unittest.TestCase):

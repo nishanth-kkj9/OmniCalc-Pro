@@ -1,10 +1,16 @@
 import unittest
 import sys
 from unittest.mock import patch, MagicMock, PropertyMock
-from PySide6.QtWidgets import QApplication
+try:
+    from PySide6.QtWidgets import QApplication
+    HAS_PYSIDE6 = True
+except ImportError:
+    QApplication = None
+    HAS_PYSIDE6 = False
 
 
 # Mock the entire backend_qt to prevent FigureCanvasQTAgg init issues
+@unittest.skipUnless(HAS_PYSIDE6, "PySide6 not installed")
 @patch("core.graph_engine.matplotlib.use")
 @patch("core.graph_engine.Figure")
 @patch("core.graph_engine.np")
@@ -88,7 +94,8 @@ class TestGraphEngine(unittest.TestCase):
         self.assertEqual(model.curve_type, "function")
 
         # Test GraphSampler
-        func = lambda x: x ** 2
+        def func(x):
+            return x ** 2
         mock_np.linspace.return_value = [-2.0, 0.0, 2.0]
         mock_np.where.side_effect = lambda cond, a, b: a
         mock_np.isnan.return_value = [False, False, False]

@@ -23,6 +23,8 @@ class StatisticsEngine:
         sample_var = float(np.var(arr, ddof=1)) if n > 1 else 0.0
         q1 = float(np.percentile(sorted_arr, 25))
         q3 = float(np.percentile(sorted_arr, 75))
+        min_val = float(np.min(arr))
+        max_val = float(np.max(arr))
 
         return {
             "Count": float(n),
@@ -34,9 +36,9 @@ class StatisticsEngine:
             "Sample Std Dev": sample_std,
             "Variance": pop_var,
             "Sample Variance": sample_var,
-            "Min": float(np.min(arr)),
-            "Max": float(np.max(arr)),
-            "Range": float(np.max(arr) - np.min(arr)),
+            "Min": min_val,
+            "Max": max_val,
+            "Range": max_val - min_val,
             "IQR": q3 - q1,
             "Q1": q1,
             "Q3": q3,

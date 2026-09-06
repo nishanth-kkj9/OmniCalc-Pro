@@ -40,8 +40,12 @@ class TestEquationPage(unittest.TestCase):
     def test_linear_system_2x2_ui(self):
         page = EquationPage()
         page.mode_combo.setCurrentIndex(2)  # Linear 2x2
-        page.sys2_a1.setText("2"); page.sys2_b1.setText("3"); page.sys2_c1.setText("8")
-        page.sys2_a2.setText("1"); page.sys2_b2.setText("-1"); page.sys2_c2.setText("1")
+        page.sys2_a1.setText("2")
+        page.sys2_b1.setText("3")
+        page.sys2_c1.setText("8")
+        page.sys2_a2.setText("1")
+        page.sys2_b2.setText("-1")
+        page.sys2_c2.setText("1")
         page.solve()
         output_text = page.output.toPlainText()
         self.assertIn("x = 2.2, y = 1.2", output_text)
@@ -49,12 +53,21 @@ class TestEquationPage(unittest.TestCase):
     def test_linear_system_3x3_ui(self):
         page = EquationPage()
         page.mode_combo.setCurrentIndex(3)  # Linear 3x3
-        page.sys3_a1.setText("1"); page.sys3_b1.setText("1"); page.sys3_c1.setText("1"); page.sys3_d1.setText("6")
-        page.sys3_a2.setText("0"); page.sys3_b2.setText("2"); page.sys3_c2.setText("5"); page.sys3_d2.setText("-4")
-        page.sys3_a3.setText("2"); page.sys3_b3.setText("5"); page.sys3_c3.setText("-1"); page.sys3_d3.setText("27")
+        page.sys3_a1.setText("1")
+        page.sys3_b1.setText("1")
+        page.sys3_c1.setText("1")
+        page.sys3_d1.setText("6")
+        page.sys3_a2.setText("0")
+        page.sys3_b2.setText("2")
+        page.sys3_c2.setText("5")
+        page.sys3_d2.setText("-4")
+        page.sys3_a3.setText("2")
+        page.sys3_b3.setText("5")
+        page.sys3_c3.setText("-1")
+        page.sys3_d3.setText("27")
         page.solve()
         output_text = page.output.toPlainText()
-        self.assertIn("x = 7, y = 3, z = -4", output_text)
+        self.assertIn("x = 5, y = 3, z = -2", output_text)
 
     def test_single_equation_ui(self):
         page = EquationPage()

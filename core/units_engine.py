@@ -11,7 +11,7 @@ Supports:
 """
 
 import math
-from typing import List, Dict, Any, Tuple, Optional
+from typing import List, Dict, Any, Tuple, Optional, Sequence, Union, cast
 
 # Dimension Vector: [M, L, T, I, Theta, N, J]
 # 0: Mass (kg)
@@ -49,11 +49,11 @@ DENSITY_DIM = [1, -3, 0, 0, 0, 0, 0]
 
 class UnitsEngine:
     @staticmethod
-    def are_dimensions_equal(a: List[float], b: List[float]) -> bool:
+    def are_dimensions_equal(a: Sequence[Union[float, int]], b: Sequence[Union[float, int]]) -> bool:
         return all(abs(a[i] - b[i]) < 1e-6 for i in range(7))
 
     @staticmethod
-    def format_dimension_vector(dim: List[float]) -> str:
+    def format_dimension_vector(dim: Sequence[Union[float, int]]) -> str:
         symbols = ['M', 'L', 'T', 'I', 'Θ', 'N', 'J']
         parts = []
         for idx, exp in enumerate(dim):
@@ -65,7 +65,7 @@ class UnitsEngine:
         return "·".join(parts) if parts else "Dimensionless [1]"
 
     @staticmethod
-    def identify_quantity_name(dim: List[float]) -> str:
+    def identify_quantity_name(dim: Sequence[Union[float, int]]) -> str:
         if UnitsEngine.are_dimensions_equal(dim, DIMENSIONLESS):
             return "Dimensionless (Ratio / Number)"
         if UnitsEngine.are_dimensions_equal(dim, LENGTH):
@@ -113,7 +113,7 @@ class UnitsEngine:
         return UnitsEngine.format_dimension_vector(dim)
 
     # Master Unit Dictionary: {symbol: {name, category, dimensions, scale, offset}}
-    UNITS = {
+    UNITS: Dict[str, Dict[str, Any]] = {
         # Length (Base: m)
         "m": {"name": "Meter", "category": "Length", "dimensions": LENGTH, "scale": 1.0},
         "km": {"name": "Kilometer", "category": "Length", "dimensions": LENGTH, "scale": 1000.0},
@@ -209,10 +209,15 @@ class UnitsEngine:
         if not u2:
             raise ValueError(f"Unknown target unit symbol: {to_unit_symbol}")
 
-        if not UnitsEngine.are_dimensions_equal(u1["dimensions"], u2["dimensions"]):
+        dim1 = cast(List[float], u1["dimensions"])
+        dim2 = cast(List[float], u2["dimensions"])
+        scale1 = float(u1["scale"])
+        scale2 = float(u2["scale"])
+
+        if not UnitsEngine.are_dimensions_equal(dim1, dim2):
             raise ValueError(
-                f"Dimensional mismatch: Cannot convert '{from_unit_symbol}' ({UnitsEngine.identify_quantity_name(u1['dimensions'])}) "
-                f"to '{to_unit_symbol}' ({UnitsEngine.identify_quantity_name(u2['dimensions'])})."
+                f"Dimensional mismatch: Cannot convert '{from_unit_symbol}' ({UnitsEngine.identify_quantity_name(dim1)}) "
+                f"to '{to_unit_symbol}' ({UnitsEngine.identify_quantity_name(dim2)})."
             )
 
         # Temperature offset conversion handling
@@ -223,7 +228,7 @@ class UnitsEngine:
             elif from_unit_symbol == "degF":
                 base_val = (value - 32.0) * (5.0 / 9.0) + 273.15
             else:
-                base_val = value * u1["scale"]
+                base_val = value * scale1
 
             # Convert Kelvin to target
             if to_unit_symbol == "degC":
@@ -231,18 +236,18 @@ class UnitsEngine:
             elif to_unit_symbol == "degF":
                 res = (base_val - 273.15) * (9.0 / 5.0) + 32.0
             else:
-                res = base_val / u2["scale"]
+                res = base_val / scale2
         else:
-            base_val = value * u1["scale"]
-            res = base_val / u2["scale"]
+            base_val = value * scale1
+            res = base_val / scale2
 
         return {
             "value": res,
             "from_value": value,
             "from_unit": from_unit_symbol,
             "to_unit": to_unit_symbol,
-            "dimension_name": UnitsEngine.identify_quantity_name(u1["dimensions"]),
-            "dimension_vector": u1["dimensions"],
+            "dimension_name": UnitsEngine.identify_quantity_name(dim1),
+            "dimension_vector": dim1,
             "base_si_value": base_val
         }
 
@@ -253,8 +258,10 @@ class UnitsEngine:
         if not u1 or not u2:
             raise ValueError("Invalid unit symbols.")
 
-        dim1 = u1["dimensions"]
-        dim2 = u2["dimensions"]
+        dim1 = cast(List[float], u1["dimensions"])
+        dim2 = cast(List[float], u2["dimensions"])
+        scale1 = float(u1["scale"])
+        scale2 = float(u2["scale"])
 
         if op == "+" or op == "-":
             if not UnitsEngine.are_dimensions_equal(dim1, dim2):
@@ -262,22 +269,22 @@ class UnitsEngine:
                     f"Inconsistent Dimensions: Cannot {op} {unit1} ({UnitsEngine.identify_quantity_name(dim1)}) "
                     f"and {unit2} ({UnitsEngine.identify_quantity_name(dim2)})."
                 )
-            base_val1 = val1 * u1["scale"]
-            base_val2 = val2 * u2["scale"]
+            base_val1 = val1 * scale1
+            base_val2 = val2 * scale2
             res_base = base_val1 + base_val2 if op == "+" else base_val1 - base_val2
-            res_user = res_base / u1["scale"]
+            res_user = res_base / scale1
             res_dim = dim1
             res_unit = unit1
         elif op == "*":
-            base_val1 = val1 * u1["scale"]
-            base_val2 = val2 * u2["scale"]
+            base_val1 = val1 * scale1
+            base_val2 = val2 * scale2
             res_base = base_val1 * base_val2
             res_dim = [dim1[i] + dim2[i] for i in range(7)]
             res_user = res_base
             res_unit = "SI Base"
         elif op == "/":
-            base_val1 = val1 * u1["scale"]
-            base_val2 = val2 * u2["scale"]
+            base_val1 = val1 * scale1
+            base_val2 = val2 * scale2
             if base_val2 == 0:
                 raise ZeroDivisionError("Division by zero quantity.")
             res_base = base_val1 / base_val2

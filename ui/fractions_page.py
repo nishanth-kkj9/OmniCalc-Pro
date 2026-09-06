@@ -111,7 +111,7 @@ class FractionsPage(QWidget):
 
                 res = self.engine.evaluate_binary_op(n1, d1, op, n2, d2)
                 out = [
-                    f"=== FRACTION ARITHMETIC ===",
+                    "=== FRACTION ARITHMETIC ===",
                     f"Expression: ({n1}/{d1}) {op} ({n2}/{d2})",
                     "",
                     f"Simplified Fraction:  {res['simplified_str']}",
@@ -127,7 +127,7 @@ class FractionsPage(QWidget):
                 nums = [int(x.strip()) for x in raw.replace(";", ",").split(",") if x.strip()]
                 res = self.engine.gcd_lcm_list(nums)
                 out = [
-                    f"=== GCD & LCM SOLVER ===",
+                    "=== GCD & LCM SOLVER ===",
                     f"Input Numbers: {res['numbers']}",
                     "",
                     f"Greatest Common Divisor (GCD): {res['gcd']}",
@@ -140,7 +140,7 @@ class FractionsPage(QWidget):
                 n = int(self.prime_input.text())
                 res = self.engine.prime_factorization(n)
                 out = [
-                    f"=== PRIME FACTORIZATION & NUMBER THEORY ===",
+                    "=== PRIME FACTORIZATION & NUMBER THEORY ===",
                     f"Number n = {res['n']}",
                     "",
                     f"Is Prime:              {'YES' if res['is_prime'] else 'NO'}",

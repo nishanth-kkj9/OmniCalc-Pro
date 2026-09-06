@@ -193,15 +193,20 @@ class SequencesPage(QWidget):
 
             # Format Analysis Text
             conv = res["convergence"]
+            est_limit = conv.get("estimated_limit")
+            est_limit_str = f"{est_limit:.8g}" if est_limit is not None else "Diverges / Infinite"
+            est_sum = conv.get("estimated_sum")
+            est_sum_str = f"{est_sum:.8g}" if est_sum is not None else "Diverges / Undefined"
+
             out = [
-                f"=== SEQUENCE ANALYSIS ===",
+                "=== SEQUENCE ANALYSIS ===",
                 f"Closed Form: {res.get('closed_form', 'N/A')}",
                 f"Sum Formula: {res.get('sum_formula', 'N/A')}",
                 "",
                 f"Sequence Convergent: {'YES' if conv['is_convergent'] else 'NO'}",
-                f"Estimated Limit L:   {f'{conv[\"estimated_limit\"]:.8g}' if conv['estimated_limit'] is not None else 'Diverges / Infinite'}",
+                f"Estimated Limit L:   {est_limit_str}",
                 f"Series Convergent:   {'YES' if conv.get('sum_convergent') else 'NO'}",
-                f"Infinite Sum S_∞:    {f'{conv[\"estimated_sum\"]:.8g}' if conv.get('estimated_sum') is not None else 'Diverges / Undefined'}",
+                f"Infinite Sum S_∞:    {est_sum_str}",
                 "",
                 "--- Analysis Notes ---"
             ]

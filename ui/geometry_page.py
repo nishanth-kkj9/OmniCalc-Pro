@@ -176,7 +176,7 @@ class GeometryPage(QWidget):
                 if t_idx == 0:  # SSS
                     res = self.engine.solve_triangle_sss(a, b, c_or_A)
                     out = [
-                        f"=== TRIANGLE SOLVER (SSS) ===",
+                        "=== TRIANGLE SOLVER (SSS) ===",
                         f"Sides: a = {res['a']:g}, b = {res['b']:g}, c = {res['c']:g}",
                         "",
                         f"Angle A (α): {res['angle_A_deg']:.4f}°",
@@ -192,7 +192,7 @@ class GeometryPage(QWidget):
                 else:  # SSA
                     res = self.engine.solve_triangle_ssa(a, b, c_or_A)
                     out = [
-                        f"=== TRIANGLE SOLVER (SSA AMBIGUOUS CASE) ===",
+                        "=== TRIANGLE SOLVER (SSA AMBIGUOUS CASE) ===",
                         f"Message: {res['message']}",
                         f"Valid Solutions Found: {res['num_solutions']}",
                         ""
@@ -239,15 +239,20 @@ class GeometryPage(QWidget):
                 x2, y2 = float(self.line_x2.text()), float(self.line_y2.text())
 
                 res = self.engine.analyze_2d_line(x1, y1, x2, y2)
+                slope_val = res['slope']
+                slope_str = str(slope_val) if isinstance(slope_val, str) else f"{slope_val:.8g}"
+                perp_val = res['perpendicular_slope']
+                perp_str = str(perp_val) if isinstance(perp_val, str) else f"{perp_val:.8g}"
+
                 out = [
-                    f"=== 2D LINE ANALYSIS ===",
+                    "=== 2D LINE ANALYSIS ===",
                     f"Point 1: ({x1:g}, {y1:g}), Point 2: ({x2:g}, {y2:g})",
                     "",
                     f"Line Equation:        {res['equation']}",
                     f"Distance P1-P2:        {res['distance']:.8g}",
                     f"Midpoint:             ({res['midpoint'][0]:g}, {res['midpoint'][1]:g})",
-                    f"Slope m:              {res['slope'] if isinstance(res['slope'], str) else f'{res[\"slope\"]:.8g}'}",
-                    f"Perpendicular Slope:  {res['perpendicular_slope'] if isinstance(res['perpendicular_slope'], str) else f'{res[\"perpendicular_slope\"]:.8g}'}",
+                    f"Slope m:              {slope_str}",
+                    f"Perpendicular Slope:  {perp_str}",
                     f"Angle deg:            {res['angle_deg']:.4f}°"
                 ]
                 res_str = res['equation']
@@ -261,7 +266,7 @@ class GeometryPage(QWidget):
                 if v_dim == 0:  # 2D Vectors
                     res = self.engine.analyze_vectors_2d(ux, uy, vx, vy)
                     out = [
-                        f"=== 2D VECTOR ALGEBRA ===",
+                        "=== 2D VECTOR ALGEBRA ===",
                         f"Vector u = ({ux:g}, {uy:g}), Vector v = ({vx:g}, {vy:g})",
                         "",
                         f"Magnitude |u|:    {res['magnitude_u']:.8g}",
@@ -277,7 +282,7 @@ class GeometryPage(QWidget):
                     vz = float(self.vec_vz.text())
                     res = self.engine.analyze_vectors_3d(ux, uy, uz, vx, vy, vz)
                     out = [
-                        f"=== 3D VECTOR ALGEBRA ===",
+                        "=== 3D VECTOR ALGEBRA ===",
                         f"Vector u = ({ux:g}, {uy:g}, {uz:g}), Vector v = ({vx:g}, {vy:g}, {vz:g})",
                         "",
                         f"Magnitude |u|:       {res['magnitude_u']:.8g}",

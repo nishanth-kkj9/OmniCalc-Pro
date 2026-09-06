@@ -290,7 +290,7 @@ class RegressionEngine:
                     return [(-b_c + s_disc) / (2 * a_c), (-b_c - s_disc) / (2 * a_c)]
             else:
                 # Bisection root finding
-                roots = []
+                roots: List[float] = []
                 def obj(x):
                     res = 0.0
                     for c in coeffs:

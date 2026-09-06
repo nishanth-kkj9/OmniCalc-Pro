@@ -71,12 +71,24 @@ class EquationPage(QWidget):
         # 2. Linear 2x2 Panel
         sys2_widget = QWidget()
         sys2_form = QFormLayout(sys2_widget)
-        self.sys2_a1 = QLineEdit("2"); self.sys2_b1 = QLineEdit("3"); self.sys2_c1 = QLineEdit("8")
-        self.sys2_a2 = QLineEdit("1"); self.sys2_b2 = QLineEdit("-1"); self.sys2_c2 = QLineEdit("1")
+        self.sys2_a1 = QLineEdit("2")
+        self.sys2_b1 = QLineEdit("3")
+        self.sys2_c1 = QLineEdit("8")
+        self.sys2_a2 = QLineEdit("1")
+        self.sys2_b2 = QLineEdit("-1")
+        self.sys2_c2 = QLineEdit("1")
         row1 = QHBoxLayout()
-        row1.addWidget(self.sys2_a1); row1.addWidget(QLabel("x +")); row1.addWidget(self.sys2_b1); row1.addWidget(QLabel("y =")); row1.addWidget(self.sys2_c1)
+        row1.addWidget(self.sys2_a1)
+        row1.addWidget(QLabel("x +"))
+        row1.addWidget(self.sys2_b1)
+        row1.addWidget(QLabel("y ="))
+        row1.addWidget(self.sys2_c1)
         row2 = QHBoxLayout()
-        row2.addWidget(self.sys2_a2); row2.addWidget(QLabel("x +")); row2.addWidget(self.sys2_b2); row2.addWidget(QLabel("y =")); row2.addWidget(self.sys2_c2)
+        row2.addWidget(self.sys2_a2)
+        row2.addWidget(QLabel("x +"))
+        row2.addWidget(self.sys2_b2)
+        row2.addWidget(QLabel("y ="))
+        row2.addWidget(self.sys2_c2)
         sys2_form.addRow("Eq 1:", row1)
         sys2_form.addRow("Eq 2:", row2)
         self.inputs_layout.addWidget(sys2_widget)
@@ -84,12 +96,42 @@ class EquationPage(QWidget):
         # 3. Linear 3x3 Panel
         sys3_widget = QWidget()
         sys3_form = QFormLayout(sys3_widget)
-        self.sys3_a1 = QLineEdit("1"); self.sys3_b1 = QLineEdit("1"); self.sys3_c1 = QLineEdit("1"); self.sys3_d1 = QLineEdit("6")
-        self.sys3_a2 = QLineEdit("0"); self.sys3_b2 = QLineEdit("2"); self.sys3_c2 = QLineEdit("5"); self.sys3_d2 = QLineEdit("-4")
-        self.sys3_a3 = QLineEdit("2"); self.sys3_b3 = QLineEdit("5"); self.sys3_c3 = QLineEdit("-1"); self.sys3_d3 = QLineEdit("27")
-        r3_1 = QHBoxLayout(); r3_1.addWidget(self.sys3_a1); r3_1.addWidget(QLabel("x +")); r3_1.addWidget(self.sys3_b1); r3_1.addWidget(QLabel("y +")); r3_1.addWidget(self.sys3_c1); r3_1.addWidget(QLabel("z =")); r3_1.addWidget(self.sys3_d1)
-        r3_2 = QHBoxLayout(); r3_2.addWidget(self.sys3_a2); r3_2.addWidget(QLabel("x +")); r3_2.addWidget(self.sys3_b2); r3_2.addWidget(QLabel("y +")); r3_2.addWidget(self.sys3_c2); r3_2.addWidget(QLabel("z =")); r3_2.addWidget(self.sys3_d2)
-        r3_3 = QHBoxLayout(); r3_3.addWidget(self.sys3_a3); r3_3.addWidget(QLabel("x +")); r3_3.addWidget(self.sys3_b3); r3_3.addWidget(QLabel("y +")); r3_3.addWidget(self.sys3_c3); r3_3.addWidget(QLabel("z =")); r3_3.addWidget(self.sys3_d3)
+        self.sys3_a1 = QLineEdit("1")
+        self.sys3_b1 = QLineEdit("1")
+        self.sys3_c1 = QLineEdit("1")
+        self.sys3_d1 = QLineEdit("6")
+        self.sys3_a2 = QLineEdit("0")
+        self.sys3_b2 = QLineEdit("2")
+        self.sys3_c2 = QLineEdit("5")
+        self.sys3_d2 = QLineEdit("-4")
+        self.sys3_a3 = QLineEdit("2")
+        self.sys3_b3 = QLineEdit("5")
+        self.sys3_c3 = QLineEdit("-1")
+        self.sys3_d3 = QLineEdit("27")
+        r3_1 = QHBoxLayout()
+        r3_1.addWidget(self.sys3_a1)
+        r3_1.addWidget(QLabel("x +"))
+        r3_1.addWidget(self.sys3_b1)
+        r3_1.addWidget(QLabel("y +"))
+        r3_1.addWidget(self.sys3_c1)
+        r3_1.addWidget(QLabel("z ="))
+        r3_1.addWidget(self.sys3_d1)
+        r3_2 = QHBoxLayout()
+        r3_2.addWidget(self.sys3_a2)
+        r3_2.addWidget(QLabel("x +"))
+        r3_2.addWidget(self.sys3_b2)
+        r3_2.addWidget(QLabel("y +"))
+        r3_2.addWidget(self.sys3_c2)
+        r3_2.addWidget(QLabel("z ="))
+        r3_2.addWidget(self.sys3_d2)
+        r3_3 = QHBoxLayout()
+        r3_3.addWidget(self.sys3_a3)
+        r3_3.addWidget(QLabel("x +"))
+        r3_3.addWidget(self.sys3_b3)
+        r3_3.addWidget(QLabel("y +"))
+        r3_3.addWidget(self.sys3_c3)
+        r3_3.addWidget(QLabel("z ="))
+        r3_3.addWidget(self.sys3_d3)
         sys3_form.addRow("Eq 1:", r3_1)
         sys3_form.addRow("Eq 2:", r3_2)
         sys3_form.addRow("Eq 3:", r3_3)
@@ -103,7 +145,9 @@ class EquationPage(QWidget):
         self.single_max = QLineEdit("10")
         single_form.addRow("f(x) = 0:", self.single_expr)
         r_range = QHBoxLayout()
-        r_range.addWidget(self.single_min); r_range.addWidget(QLabel("to")); r_range.addWidget(self.single_max)
+        r_range.addWidget(self.single_min)
+        r_range.addWidget(QLabel("to"))
+        r_range.addWidget(self.single_max)
         single_form.addRow("Search Range:", r_range)
         self.inputs_layout.addWidget(single_widget)
 
@@ -210,7 +254,7 @@ class EquationPage(QWidget):
                 expr_str = f"2x2 System: {a1}x+{b1}y={c1}, {a2}x+{b2}y={c2}"
                 self.last_plottable_expression = None
 
-                out = [f"=== LINEAR SYSTEM 2x2 SOLVER ===", ""]
+                out = ["=== LINEAR SYSTEM 2x2 SOLVER ===", ""]
                 if res["is_solvable"]:
                     out.append(f"Solution: x = {res['x']:g}, y = {res['y']:g}")
                 else:
@@ -227,7 +271,7 @@ class EquationPage(QWidget):
                 expr_str = "3x3 Linear System"
                 self.last_plottable_expression = None
 
-                out = [f"=== LINEAR SYSTEM 3x3 SOLVER ===", ""]
+                out = ["=== LINEAR SYSTEM 3x3 SOLVER ===", ""]
                 if res["is_solvable"]:
                     out.append(f"Solution: x = {res['x']:g}, y = {res['y']:g}, z = {res['z']:g}")
                 else:
@@ -265,7 +309,7 @@ class EquationPage(QWidget):
                 expr_str = f"{a}x² + {b}x + {c} {op} 0"
                 self.last_plottable_expression = f"{a}*x**2 + {b}*x + {c}"
 
-                out = [f"=== QUADRATIC INEQUALITY SOLVER ===", f"Inequality: {expr_str}", ""]
+                out = ["=== QUADRATIC INEQUALITY SOLVER ===", f"Inequality: {expr_str}", ""]
                 out.append(f"Solution Interval: {res['intervals']}")
                 result_str = "\n".join(out)
 

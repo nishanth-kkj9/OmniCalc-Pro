@@ -118,11 +118,11 @@ class EquationEngine:
     def solve_cubic(a: float, b: float, c: float, d: float) -> Dict[str, Any]:
         """Solves ax^3 + bx^2 + cx + d = 0 using Cardano's formula / Vieta's trigonometric method."""
         if abs(a) < 1e-12:
-            q = EquationEngine.solve_quadratic(b, c, d)
+            quad_res = EquationEngine.solve_quadratic(b, c, d)
             return {
                 "a": a, "b": b, "c": c, "d": d,
-                "roots": q["roots"],
-                "steps": ["Leading coefficient a = 0. Reduced to quadratic equation."] + q["steps"],
+                "roots": quad_res["roots"],
+                "steps": ["Leading coefficient a = 0. Reduced to quadratic equation."] + quad_res["steps"],
             }
 
         A = b / a

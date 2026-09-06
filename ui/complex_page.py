@@ -187,15 +187,15 @@ class ComplexPage(QWidget):
 
             elif idx == 3:  # RLC Circuit
                 r = float(self.rlc_r.text())
-                l = float(self.rlc_l.text())
+                inductance = float(self.rlc_l.text())
                 c = float(self.rlc_c.text())
                 freq = float(self.rlc_f.text())
 
-                res = self.engine.rlc_impedance(r, l, c, freq)
+                res = self.engine.rlc_impedance(r, inductance, c, freq)
                 reps = res["representations"]
                 out = [
-                    f"=== RLC CIRCUIT IMPEDANCE & RESONANCE ===",
-                    f"R = {r:g} Ω, L = {l:g} H, C = {c:g} F, f = {freq:g} Hz",
+                    "=== RLC CIRCUIT IMPEDANCE & RESONANCE ===",
+                    f"R = {r:g} Ω, L = {inductance:g} H, C = {c:g} F, f = {freq:g} Hz",
                     "",
                     f"Angular Frequency ω:     {res['omega']:g} rad/s",
                     f"Inductive Reactance X_L: {res['X_L']:g} Ω",
@@ -207,7 +207,7 @@ class ComplexPage(QWidget):
                     f"Resonance Frequency f₀:  {res['resonance_freq_Hz']:g} Hz"
                 ]
                 res_str = f"Z = {reps['rectangular']} Ω"
-                summary_expr = f"RLC Z: R={r}, L={l}, C={c}, f={freq}"
+                summary_expr = f"RLC Z: R={r}, L={inductance}, C={c}, f={freq}"
 
             result_text = "\n".join(out)
             self.output.setText(result_text)

@@ -60,8 +60,8 @@ class GraphSampler:
         cur_y: List[float] = []
 
         for i in range(len(x_vals)):
-            xi = x_vals[i]
-            yi = y_vals[i]
+            xi = float(x_vals[i])
+            yi = float(y_vals[i])
             if np.isnan(yi):
                 if cur_x:
                     segments.append((np.array(cur_x), np.array(cur_y)))

@@ -151,7 +151,7 @@ class RegressionPage(QWidget):
             self.last_fit_result = res
 
             lines = [
-                f"=== REGRESSION FIT RESULT ===",
+                "=== REGRESSION FIT RESULT ===",
                 f"Model: {res.get('type', 'Custom')}",
                 f"Equation: {res.get('equation', 'N/A')}",
                 f"R² (Coefficient of Determination): {res.get('r2', 0.0):.6f}",

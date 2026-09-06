@@ -255,7 +255,7 @@ class CalculusEngine:
     ) -> Dict[str, Any]:
         """Newton-Raphson root solver with iteration tracking."""
         x = initial_guess
-        history = []
+        history: List[Dict[str, Any]] = []
 
         for iter_num in range(1, max_iterations + 1):
             y = self._eval(expr, x)

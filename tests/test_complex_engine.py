@@ -20,7 +20,8 @@ class TestComplexEngine(unittest.TestCase):
 
     def test_rlc_impedance(self):
         # R=10, L=0.01, C=0.0001, f=50
-        z = ComplexEngine.rlc_impedance(10.0, 0.01, 0.0001, 50.0)
+        res = ComplexEngine.rlc_impedance(10.0, 0.01, 0.0001, 50.0)
+        z = res["impedance"]
         self.assertEqual(z.real, 10.0)
         # omega = 2*pi*50 = 314.159, X_L = 3.1416, X_C = 1 / (314.159 * 0.0001) = 31.83
         self.assertAlmostEqual(z.imag, 3.14159 - 31.83099, places=2)
