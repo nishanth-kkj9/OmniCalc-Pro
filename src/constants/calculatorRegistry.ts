@@ -325,19 +325,6 @@ export const CALCULATOR_REGISTRY: CalculatorEntry[] = [
     status: 'stable',
     iconName: 'History',
   },
-  {
-    id: 'settings',
-    label: 'Preferences & Settings',
-    shortLabel: 'Settings',
-    category: 'Tools & Reference',
-    description: 'Custom themes (Dark Slate, Light, OLED True Black), accent colors, synthesized mechanical audio feedback, precision, and default angle units.',
-    keywords: ['settings', 'preferences', 'theme', 'dark mode', 'oled', 'accent color', 'audio', 'sound', 'precision', 'angle mode'],
-    capabilities: ['Dark / Light / OLED True Black Themes', '6 Accent Color Presets', 'Synthesized Web Audio Feedback', 'Precision & Number Formatting Controls', 'Default Angle Unit Selection'],
-    webSupported: true,
-    desktopSupported: true,
-    status: 'stable',
-    iconName: 'Settings',
-  },
 ];
 
 /**

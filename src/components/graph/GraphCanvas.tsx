@@ -43,7 +43,7 @@ export interface GraphCanvasProps {
     integralLabel?: string | null;
     areaBetweenPolygons?: Point2D[][] | null;
   };
-  canvasRef?: React.RefObject<HTMLCanvasElement>;
+  canvasRef?: React.RefObject<HTMLCanvasElement | null>;
 }
 
 export const GraphCanvas: React.FC<GraphCanvasProps> = ({

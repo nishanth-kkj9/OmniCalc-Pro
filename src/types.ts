@@ -1,4 +1,4 @@
-export type CalcMode =
+export type CalculatorMode =
   | 'basic'
   | 'scientific'
   | 'graph'
@@ -15,13 +15,39 @@ export type CalcMode =
   | 'fractions'
   | 'formulas'
   | 'history'
-  | 'settings'
   | 'regression'
   | 'probability'
   | 'inference'
   | 'sequences'
   | 'complex'
   | 'physical_units';
+
+export type CalcMode = CalculatorMode | 'settings';
+
+export const ALL_CALCULATOR_MODES: readonly CalculatorMode[] = [
+  'basic',
+  'scientific',
+  'graph',
+  'fractions',
+  'geometry',
+  'equation',
+  'calculus',
+  'matrix',
+  'complex',
+  'sequences',
+  'statistics',
+  'regression',
+  'probability',
+  'inference',
+  'programmer',
+  'converter',
+  'physical_units',
+  'finance',
+  'datetime',
+  'health',
+  'formulas',
+  'history',
+] as const;
 
 export type AngleMode = 'DEG' | 'RAD' | 'GRAD';
 

@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import { CalcMode, AppSettings } from '../types';
 import { APP_NAME, APP_VERSION } from '../constants/version';
+import { CALCULATOR_REGISTRY } from '../constants/calculatorRegistry';
 
 interface SidebarProps {
   currentMode: CalcMode;
@@ -356,7 +357,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   style={{ color: 'var(--accent)' }}
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  17 Specialized Engines
+                  {CALCULATOR_REGISTRY.length} Specialized Engines
                 </p>
               </div>
             )}

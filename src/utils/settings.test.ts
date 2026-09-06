@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import { CALCULATOR_REGISTRY } from '../constants/calculatorRegistry';
 import {
   loadInitialSettings,
   saveSettings,
@@ -56,34 +57,10 @@ describe('Settings Management and Migration (BUG-02 Regression Tests)', () => {
     expect(loaded.defaultMode).toBe('basic'); // falls back to basic for invalid mode
   });
 
-  it('accepts and preserves all 23 valid CalcMode values as defaultMode', () => {
-    const allModes = [
-      'basic',
-      'scientific',
-      'graph',
-      'programmer',
-      'converter',
-      'finance',
-      'matrix',
-      'statistics',
-      'equation',
-      'calculus',
-      'datetime',
-      'health',
-      'geometry',
-      'fractions',
-      'formulas',
-      'history',
-      'settings',
-      'regression',
-      'probability',
-      'inference',
-      'sequences',
-      'complex',
-      'physical_units',
-    ] as const;
+  it('accepts and preserves all 22 valid CalcMode values as defaultMode', () => {
+    const allModes = CALCULATOR_REGISTRY.map((c) => c.id);
 
-    expect(allModes.length).toBe(23);
+    expect(allModes.length).toBe(22);
 
     allModes.forEach((mode) => {
       saveSettings({ ...DEFAULT_SETTINGS, defaultMode: mode });
