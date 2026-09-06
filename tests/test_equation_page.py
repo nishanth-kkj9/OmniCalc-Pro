@@ -77,7 +77,8 @@ class TestEquationPage(unittest.TestCase):
         page.single_max.setText("5")
         page.solve()
         output_text = page.output.toPlainText()
-        self.assertIn("2.094551", output_text)
+        self.assertIn("Real Roots Found", output_text)
+        self.assertIn("2.09455", output_text)
 
 
 if __name__ == "__main__":

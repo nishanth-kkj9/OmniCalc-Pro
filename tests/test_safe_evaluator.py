@@ -70,8 +70,10 @@ class TestSafeEvaluator(unittest.TestCase):
 
     def test_sqrt_and_roots(self):
         """Test square root and other roots."""
-        self.assertEqual(self.evaluator.evaluate("sqrt(16)"), 4.0)
-        self.assertEqual(self.evaluator.evaluate("cbrt(27)"), 3.0)
+        self.assertAlmostEqual(self.evaluator.evaluate("sqrt(16)"), 4.0, places=10)
+        self.assertAlmostEqual(self.evaluator.evaluate("cbrt(27)"), 3.0, places=10)
+        self.assertAlmostEqual(self.evaluator.evaluate("cbrt(-27)"), -3.0, places=10)
+        self.assertAlmostEqual(self.evaluator.evaluate("cbrt(0)"), 0.0, places=10)
 
     def test_factorial(self):
         """Test factorial function."""

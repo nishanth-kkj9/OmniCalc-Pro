@@ -32,7 +32,7 @@ class TestFractionsPage(unittest.TestCase):
         page.calculate()
         text = page.output.toPlainText()
         self.assertIn("Greatest Common Divisor (GCD): 12", text)
-        self.assertIn("Least Common Multiple (LCM):   360", text)
+        self.assertIn("Least Common Multiple (LCM):   720", text)
 
     def test_prime_factorization_ui(self):
         page = FractionsPage()

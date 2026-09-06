@@ -87,24 +87,41 @@ class TestGraphEngine(unittest.TestCase):
         engine.export_png("test.png")
         engine.figure.savefig.assert_called_once_with("test.png", dpi=150)
 
-    def test_graph_model_and_sampler(self, mock_np, MockFigure, mock_mpl_use):
-        from core.graph_engine import GraphModel, GraphSampler, GraphAnalysis
+
+class TestGraphSamplerAndAnalysis(unittest.TestCase):
+    def test_graph_model(self):
+        from core.graph_engine import GraphModel
         model = GraphModel(expression="x**2 - 4", curve_type="function")
         self.assertEqual(model.expression, "x**2 - 4")
         self.assertEqual(model.curve_type, "function")
+        self.assertTrue(model.visible)
 
-        # Test GraphSampler
-        def func(x):
-            return x ** 2
-        mock_np.linspace.return_value = [-2.0, 0.0, 2.0]
-        mock_np.where.side_effect = lambda cond, a, b: a
-        mock_np.isnan.return_value = [False, False, False]
-        mock_np.isfinite.return_value = [True, True, True]
-        mock_np.array.side_effect = lambda x: list(x)
-        segs = GraphSampler.sample_function(func, -2.0, 2.0, points=3)
-        self.assertTrue(len(segs) >= 1)
+    def test_sampler_continuous_function(self):
+        from core.graph_engine import GraphSampler
+        # Test f(x) = x^2 on [-2, 2]
+        segs = GraphSampler.sample_function(lambda x: x ** 2, -2.0, 2.0, points=50)
+        self.assertEqual(len(segs), 1)
+        xs, ys = segs[0]
+        self.assertEqual(len(xs), 50)
+        self.assertAlmostEqual(float(ys[0]), 4.0, places=5)
+        self.assertAlmostEqual(float(ys[len(ys) // 2]), 0.0, places=1)
 
-        # Test GraphAnalysis
-        roots = GraphAnalysis.find_roots(lambda x: x ** 2 - 4, -3.0, 3.0, samples=20)
-        self.assertIsInstance(roots, list)
+    def test_sampler_discontinuity_and_asymptote(self):
+        from core.graph_engine import GraphSampler
+        # Test f(x) = 1/x on [-2, 2] with jump across vertical asymptote at x=0
+        def inv_f(x):
+            import numpy as np
+            return np.where(np.abs(x) < 1e-6, np.nan, 1.0 / x)
+
+        segs = GraphSampler.sample_function(inv_f, -2.0, 2.0, points=101, jump_threshold=10.0)
+        # Should be split into at least 2 segments around the asymptote
+        self.assertGreaterEqual(len(segs), 2)
+
+    def test_analysis_find_roots(self):
+        from core.graph_engine import GraphAnalysis
+        roots = GraphAnalysis.find_roots(lambda x: x ** 2 - 4, -3.0, 3.0, samples=100)
+        self.assertEqual(len(roots), 2)
+        sorted_roots = sorted(roots)
+        self.assertAlmostEqual(sorted_roots[0], -2.0, places=2)
+        self.assertAlmostEqual(sorted_roots[1], 2.0, places=2)
 

@@ -37,39 +37,38 @@ class TestDesktopPages(unittest.TestCase):
         page.predict_x()
         self.assertIn("Predicted X ≈ 7.000000", page.inv_result_lbl.text())
 
-        # 2. Polynomial Regression Fit
+        # 2. Polynomial Regression Fit (Degree 2)
         page.x_input.setText("1, 2, 3, 4, 5")
         page.y_input.setText("1, 4, 9, 16, 25")
-        page.model_combo.setCurrentIndex(1)  # Polynomial
-        page.degree_spin.setValue(2)
+        page.model_combo.setCurrentIndex(1)  # Polynomial Deg 2
         page.calculate_regression()
         self.assertIn("1.0000x^2", page.output.toPlainText())
 
         # 3. Exponential Regression Fit
         page.x_input.setText("0, 1, 2, 3")
         page.y_input.setText("1, 2.7182818, 7.389056, 20.085537")
-        page.model_combo.setCurrentIndex(2)  # Exponential
+        page.model_combo.setCurrentIndex(5)  # Exponential
         page.calculate_regression()
-        self.assertIn("exponential", page.output.toPlainText())
+        self.assertIn("exponential", page.output.toPlainText().lower())
 
         # 4. Logarithmic Regression Fit
         page.x_input.setText("1, 2, 3, 4")
         page.y_input.setText("0, 0.693147, 1.098612, 1.386294")
-        page.model_combo.setCurrentIndex(3)  # Logarithmic
+        page.model_combo.setCurrentIndex(6)  # Logarithmic
         page.calculate_regression()
-        self.assertIn("logarithmic", page.output.toPlainText())
+        self.assertIn("logarithmic", page.output.toPlainText().lower())
 
         # 5. Power Regression Fit
         page.x_input.setText("1, 2, 3, 4")
         page.y_input.setText("1, 4, 9, 16")
-        page.model_combo.setCurrentIndex(4)  # Power
+        page.model_combo.setCurrentIndex(7)  # Power
         page.calculate_regression()
-        self.assertIn("power", page.output.toPlainText())
+        self.assertIn("power", page.output.toPlainText().lower())
 
         # 6. Invalid Input Error Handling
         page.x_input.setText("1, 2")
         page.y_input.setText("-1, -2")
-        page.model_combo.setCurrentIndex(2)  # Exponential with y <= 0
+        page.model_combo.setCurrentIndex(5)  # Exponential with y <= 0
         page.calculate_regression()
         self.assertIn("Error:", page.output.toPlainText())
 
