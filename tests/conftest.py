@@ -15,6 +15,7 @@ if project_root not in sys.path:
 # Global test session fixture for QApplication
 @pytest.fixture(scope="session", autouse=True)
 def qapp():
+    app = None
     try:
         from PySide6.QtWidgets import QApplication
         app = QApplication.instance()
@@ -23,5 +24,14 @@ def qapp():
         yield app
     except Exception:
         yield None
+    finally:
+        if app is not None:
+            try:
+                for widget in app.topLevelWidgets():
+                    widget.close()
+                    widget.deleteLater()
+                app.processEvents()
+            except Exception:
+                pass
 
 

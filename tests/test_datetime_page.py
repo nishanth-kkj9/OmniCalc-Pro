@@ -17,15 +17,16 @@ os.environ["QT_QPA_PLATFORM"] = "offscreen"
 
 try:
     from PySide6.QtWidgets import QApplication
-    app = QApplication.instance() or QApplication([sys.argv[0] if sys.argv else "test", "-platform", "offscreen"])
+    app = QApplication.instance() or QApplication(sys.argv)
     from ui.datetime_page import DateTimePage
-    from ui.main_window import MainWindow
+    from ui.main_window import MainWindow, get_default_page_factories
     from ui.sidebar import PAGE_NAMES, SIDE_ICONS
     HAS_PYSIDE6 = True
 except ImportError:
     HAS_PYSIDE6 = False
     DateTimePage = None  # type: ignore
     MainWindow = None  # type: ignore
+    get_default_page_factories = None  # type: ignore
     PAGE_NAMES = []  # type: ignore
     SIDE_ICONS = []  # type: ignore
 
@@ -147,6 +148,14 @@ class TestDateTimePageUI(unittest.TestCase):
     def setUp(self):
         self.page = DateTimePage()
 
+    def tearDown(self):
+        if hasattr(self, "page") and self.page is not None:
+            self.page.cleanup()
+            self.page.deleteLater()
+            self.page = None
+        if app is not None:
+            app.processEvents()
+
     def test_tabs_initialization(self):
         self.assertEqual(self.page.tabs.count(), 4)
         tab_names = [self.page.tabs.tabText(i) for i in range(4)]
@@ -245,13 +254,18 @@ class TestMainWindowDateTimeIntegration(unittest.TestCase):
         self.assertEqual(SIDE_ICONS[idx], "\U0001f4c5")
 
     def test_mainwindow_factory_registration(self):
-        window = MainWindow()
-        names = [f[0] for f in window.page_factories]
+        factories = get_default_page_factories()
+        names = [f[0] for f in factories]
         self.assertIn("DateTime", names)
         dt_idx = names.index("DateTime")
         # Instantiate page via lazy factory
-        dt_page = window.page_factories[dt_idx][1]()
+        dt_page = factories[dt_idx][1]()
         self.assertIsInstance(dt_page, DateTimePage)
+        if hasattr(dt_page, "cleanup"):
+            dt_page.cleanup()
+        dt_page.deleteLater()
+        if app is not None:
+            app.processEvents()
 
 
 if __name__ == "__main__":

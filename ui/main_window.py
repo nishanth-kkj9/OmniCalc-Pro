@@ -140,7 +140,37 @@ class FadeStackedWidget(QStackedWidget):
             self._pending_idx = -1
 
 
+def get_default_page_factories(config=None):
+    cfg = config or {}
+    return [
+        ("Dashboard", lambda: getattr(importlib.import_module("ui.dashboard"), "DashboardPage")()),
+        ("Basic", lambda: getattr(importlib.import_module("ui.basic_page"), "BasicPage")(cfg)),
+        ("Scientific", lambda: getattr(importlib.import_module("ui.scientific_page"), "ScientificPage")(cfg)),
+        ("Graph", lambda: getattr(importlib.import_module("ui.graph_page"), "GraphPage")()),
+        ("Converter", lambda: getattr(importlib.import_module("ui.converter_page"), "ConverterPage")()),
+        ("Programmer", lambda: getattr(importlib.import_module("ui.programmer_page"), "ProgrammerPage")()),
+        ("Matrix", lambda: getattr(importlib.import_module("ui.matrix_page"), "MatrixPage")()),
+        ("Statistics", lambda: getattr(importlib.import_module("ui.statistics_page"), "StatisticsPage")()),
+        ("Regression", lambda: getattr(importlib.import_module("ui.regression_page"), "RegressionPage")()),
+        ("Probability", lambda: getattr(importlib.import_module("ui.probability_page"), "ProbabilityPage")()),
+        ("Inference", lambda: getattr(importlib.import_module("ui.inference_page"), "InferencePage")()),
+        ("Equation", lambda: getattr(importlib.import_module("ui.equation_page"), "EquationPage")()),
+        ("Calculus", lambda: getattr(importlib.import_module("ui.calculus_page"), "CalculusPage")()),
+        ("Complex", lambda: getattr(importlib.import_module("ui.complex_page"), "ComplexPage")()),
+        ("Sequences", lambda: getattr(importlib.import_module("ui.sequences_page"), "SequencesPage")()),
+        ("Units", lambda: getattr(importlib.import_module("ui.physical_units_page"), "PhysicalUnitsPage")()),
+        ("Fractions", lambda: getattr(importlib.import_module("ui.fractions_page"), "FractionsPage")()),
+        ("Geometry", lambda: getattr(importlib.import_module("ui.geometry_page"), "GeometryPage")()),
+        ("Finance", lambda: getattr(importlib.import_module("ui.finance_page"), "FinancePage")()),
+        ("DateTime", lambda: getattr(importlib.import_module("ui.datetime_page"), "DateTimePage")()),
+        ("History", lambda: getattr(importlib.import_module("ui.history_page"), "HistoryPage")()),
+        ("Settings", lambda: getattr(importlib.import_module("ui.settings_page"), "SettingsPage")())
+    ]
+
+
 class MainWindow(QMainWindow):
+    get_default_page_factories = staticmethod(get_default_page_factories)
+
     def __init__(self):
         super().__init__()
         self.config = load_config()
@@ -180,30 +210,7 @@ class MainWindow(QMainWindow):
         c_layout.addWidget(self.stack, 1)
         v_layout.addWidget(content)
 
-        self.page_factories = [
-            ("Dashboard", lambda: getattr(importlib.import_module("ui.dashboard"), "DashboardPage")()),
-            ("Basic", lambda: getattr(importlib.import_module("ui.basic_page"), "BasicPage")(self.config)),
-            ("Scientific", lambda: getattr(importlib.import_module("ui.scientific_page"), "ScientificPage")(self.config)),
-            ("Graph", lambda: getattr(importlib.import_module("ui.graph_page"), "GraphPage")()),
-            ("Converter", lambda: getattr(importlib.import_module("ui.converter_page"), "ConverterPage")()),
-            ("Programmer", lambda: getattr(importlib.import_module("ui.programmer_page"), "ProgrammerPage")()),
-            ("Matrix", lambda: getattr(importlib.import_module("ui.matrix_page"), "MatrixPage")()),
-            ("Statistics", lambda: getattr(importlib.import_module("ui.statistics_page"), "StatisticsPage")()),
-            ("Regression", lambda: getattr(importlib.import_module("ui.regression_page"), "RegressionPage")()),
-            ("Probability", lambda: getattr(importlib.import_module("ui.probability_page"), "ProbabilityPage")()),
-            ("Inference", lambda: getattr(importlib.import_module("ui.inference_page"), "InferencePage")()),
-            ("Equation", lambda: getattr(importlib.import_module("ui.equation_page"), "EquationPage")()),
-            ("Calculus", lambda: getattr(importlib.import_module("ui.calculus_page"), "CalculusPage")()),
-            ("Complex", lambda: getattr(importlib.import_module("ui.complex_page"), "ComplexPage")()),
-            ("Sequences", lambda: getattr(importlib.import_module("ui.sequences_page"), "SequencesPage")()),
-            ("Units", lambda: getattr(importlib.import_module("ui.physical_units_page"), "PhysicalUnitsPage")()),
-            ("Fractions", lambda: getattr(importlib.import_module("ui.fractions_page"), "FractionsPage")()),
-            ("Geometry", lambda: getattr(importlib.import_module("ui.geometry_page"), "GeometryPage")()),
-            ("Finance", lambda: getattr(importlib.import_module("ui.finance_page"), "FinancePage")()),
-            ("DateTime", lambda: getattr(importlib.import_module("ui.datetime_page"), "DateTimePage")()),
-            ("History", lambda: getattr(importlib.import_module("ui.history_page"), "HistoryPage")()),
-            ("Settings", lambda: getattr(importlib.import_module("ui.settings_page"), "SettingsPage")())
-        ]
+        self.page_factories = get_default_page_factories(self.config)
         self.pages_created = [False] * len(self.page_factories)
         self.current_idx = -1
         self._create_page(0)
@@ -319,7 +326,7 @@ class MainWindow(QMainWindow):
         pixmap = QPixmap(32, 32)
         pixmap.fill(QColor(0, 255, 170))
         self.tray.setIcon(QIcon(pixmap))
-        tray_menu = QMenu()
+        tray_menu = QMenu(self)
         show_action = QAction("Show OmniCalc", self)
         show_action.triggered.connect(self.show)
         tray_menu.addAction(show_action)
@@ -332,7 +339,8 @@ class MainWindow(QMainWindow):
         tray_menu.addAction(quit_action)
         self.tray.setContextMenu(tray_menu)
         self.tray.setToolTip("OmniCalc Pro")
-        self.tray.show()
+        if QSystemTrayIcon.isSystemTrayAvailable() and os.environ.get("QT_QPA_PLATFORM") != "offscreen":
+            self.tray.show()
         self.tray.activated.connect(self._trayActivated)
 
     def _toggle_pin(self):
@@ -364,7 +372,8 @@ class MainWindow(QMainWindow):
         if hasattr(self, 'tray') and self.tray is not None:
             self.tray.hide()
         event.accept()
-        QApplication.quit()
+        if not os.environ.get("PYTEST_CURRENT_TEST"):
+            QApplication.quit()
 
     def switch_page(self, idx):
         if idx == self.current_idx and self.pages_created[idx]:

@@ -40,18 +40,18 @@ class DateTimePage(QWidget):
         main_layout.setSpacing(12)
 
         # Title
-        title = QLabel("📅 Date & Time Calculator")
+        title = QLabel("📅 Date & Time Calculator", self)
         title.setObjectName("Title")
         title.setStyleSheet("font-size: 18px; font-weight: bold; color: #00ffaa;")
         main_layout.addWidget(title)
 
         # Mode Selection ComboBox (kept in sync with QTabWidget for dual accessibility)
         mode_bar = QHBoxLayout()
-        mode_label = QLabel("Section:")
+        mode_label = QLabel("Section:", self)
         mode_label.setObjectName("Subtitle")
         mode_bar.addWidget(mode_label)
 
-        self.mode_combo = QComboBox()
+        self.mode_combo = QComboBox(self)
         self.mode_combo.addItems([
             "Date Difference & Working Days",
             "Add / Subtract Time",
@@ -62,7 +62,7 @@ class DateTimePage(QWidget):
         main_layout.addLayout(mode_bar)
 
         # Tab Widget for native section switching
-        self.tabs = QTabWidget()
+        self.tabs = QTabWidget(self)
         self.tabs.setObjectName("DateTimeTabs")
 
         # Tab 0: Date Difference
@@ -87,60 +87,96 @@ class DateTimePage(QWidget):
         self.mode_combo.currentIndexChanged.connect(self._on_combo_index_changed)
         self.tabs.currentChanged.connect(self._on_tab_index_changed)
 
+    def cleanup(self) -> None:
+        """Safely disconnect signals to prevent crash during Qt teardown."""
+        try:
+            self.mode_combo.blockSignals(True)
+            self.tabs.blockSignals(True)
+        except Exception:
+            pass
+        try:
+            self.mode_combo.currentIndexChanged.disconnect(self._on_combo_index_changed)
+        except Exception:
+            pass
+        try:
+            self.tabs.currentChanged.disconnect(self._on_tab_index_changed)
+        except Exception:
+            pass
+
+    def closeEvent(self, event) -> None:
+        self.cleanup()
+        super().closeEvent(event)
+
     def _on_combo_index_changed(self, idx: int) -> None:
+        if idx < 0 or idx >= self.tabs.count():
+            return
         if self.tabs.currentIndex() != idx:
             self.tabs.setCurrentIndex(idx)
 
     def _on_tab_index_changed(self, idx: int) -> None:
+        if idx < 0 or idx >= self.mode_combo.count():
+            return
         if self.mode_combo.currentIndex() != idx:
             self.mode_combo.setCurrentIndex(idx)
+
+    def _set_start_today(self) -> None:
+        self.start_date_input.setText(datetime.date.today().isoformat())
+
+    def _set_end_today(self) -> None:
+        self.end_date_input.setText(datetime.date.today().isoformat())
+
+    def _set_base_today(self) -> None:
+        self.base_date_input.setText(datetime.date.today().isoformat())
+
+    def _set_as_of_today(self) -> None:
+        self.as_of_input.setText(datetime.date.today().isoformat())
 
     # --------------------------------------------------------------------------
     # Tab 0: Date Difference
     # --------------------------------------------------------------------------
     def _create_diff_tab(self) -> QWidget:
-        widget = QWidget()
+        widget = QWidget(self.tabs)
         layout = QVBoxLayout(widget)
         layout.setContentsMargins(8, 8, 8, 8)
         layout.setSpacing(10)
 
         today_str = datetime.date.today().isoformat()
 
-        inputs_group = QGroupBox("Date Range")
+        inputs_group = QGroupBox("Date Range", widget)
         form = QFormLayout(inputs_group)
 
         # Start Date
         start_box = QHBoxLayout()
-        self.start_date_input = QLineEdit(today_str)
+        self.start_date_input = QLineEdit(today_str, inputs_group)
         self.start_date_input.setPlaceholderText("YYYY-MM-DD")
         start_box.addWidget(self.start_date_input)
-        start_today_btn = QPushButton("Today")
-        start_today_btn.clicked.connect(lambda: self.start_date_input.setText(datetime.date.today().isoformat()))
+        start_today_btn = QPushButton("Today", inputs_group)
+        start_today_btn.clicked.connect(self._set_start_today)
         start_box.addWidget(start_today_btn)
         form.addRow("Start Date:", start_box)
 
         # End Date
         end_box = QHBoxLayout()
         future_date = (datetime.date.today() + datetime.timedelta(days=30)).isoformat()
-        self.end_date_input = QLineEdit(future_date)
+        self.end_date_input = QLineEdit(future_date, inputs_group)
         self.end_date_input.setPlaceholderText("YYYY-MM-DD")
         end_box.addWidget(self.end_date_input)
-        end_today_btn = QPushButton("Today")
-        end_today_btn.clicked.connect(lambda: self.end_date_input.setText(datetime.date.today().isoformat()))
+        end_today_btn = QPushButton("Today", inputs_group)
+        end_today_btn.clicked.connect(self._set_end_today)
         end_box.addWidget(end_today_btn)
         form.addRow("End Date:", end_box)
 
         layout.addWidget(inputs_group)
 
         # Action Button
-        self.diff_btn = QPushButton("Calculate Date Difference")
+        self.diff_btn = QPushButton("Calculate Date Difference", widget)
         self.diff_btn.clicked.connect(self.calculate_date_diff)
         layout.addWidget(self.diff_btn)
 
         # Results Display
-        out_group = QGroupBox("Difference & Working Days Analysis")
+        out_group = QGroupBox("Difference & Working Days Analysis", widget)
         out_layout = QVBoxLayout(out_group)
-        self.diff_output = QTextEdit()
+        self.diff_output = QTextEdit(out_group)
         self.diff_output.setReadOnly(True)
         self.diff_output.setStyleSheet("font-family: monospace; font-size: 13px;")
         out_layout.addWidget(self.diff_output)
@@ -172,34 +208,34 @@ class DateTimePage(QWidget):
     # Tab 1: Add / Subtract Time
     # --------------------------------------------------------------------------
     def _create_add_sub_tab(self) -> QWidget:
-        widget = QWidget()
+        widget = QWidget(self.tabs)
         layout = QVBoxLayout(widget)
         layout.setContentsMargins(8, 8, 8, 8)
         layout.setSpacing(10)
 
-        inputs_group = QGroupBox("Date & Offset Values")
+        inputs_group = QGroupBox("Date & Offset Values", widget)
         form = QFormLayout(inputs_group)
 
         # Base Date
         base_box = QHBoxLayout()
-        self.base_date_input = QLineEdit(datetime.date.today().isoformat())
+        self.base_date_input = QLineEdit(datetime.date.today().isoformat(), inputs_group)
         self.base_date_input.setPlaceholderText("YYYY-MM-DD")
         base_box.addWidget(self.base_date_input)
-        base_today_btn = QPushButton("Today")
-        base_today_btn.clicked.connect(lambda: self.base_date_input.setText(datetime.date.today().isoformat()))
+        base_today_btn = QPushButton("Today", inputs_group)
+        base_today_btn.clicked.connect(self._set_base_today)
         base_box.addWidget(base_today_btn)
         form.addRow("Starting Date:", base_box)
 
         # Operation
-        self.op_combo = QComboBox()
+        self.op_combo = QComboBox(inputs_group)
         self.op_combo.addItems(["Add (+)", "Subtract (-)"])
         form.addRow("Operation:", self.op_combo)
 
         # Offsets
-        self.years_input = QLineEdit("0")
-        self.months_input = QLineEdit("0")
-        self.weeks_input = QLineEdit("0")
-        self.days_input = QLineEdit("0")
+        self.years_input = QLineEdit("0", inputs_group)
+        self.months_input = QLineEdit("0", inputs_group)
+        self.weeks_input = QLineEdit("0", inputs_group)
+        self.days_input = QLineEdit("0", inputs_group)
         form.addRow("Years to Offset:", self.years_input)
         form.addRow("Months to Offset:", self.months_input)
         form.addRow("Weeks to Offset:", self.weeks_input)
@@ -208,14 +244,14 @@ class DateTimePage(QWidget):
         layout.addWidget(inputs_group)
 
         # Action Button
-        self.add_sub_btn = QPushButton("Calculate Target Date")
+        self.add_sub_btn = QPushButton("Calculate Target Date", widget)
         self.add_sub_btn.clicked.connect(self.calculate_add_sub)
         layout.addWidget(self.add_sub_btn)
 
         # Results Display
-        out_group = QGroupBox("Calculated Date Result")
+        out_group = QGroupBox("Calculated Date Result", widget)
         out_layout = QVBoxLayout(out_group)
-        self.add_sub_output = QTextEdit()
+        self.add_sub_output = QTextEdit(out_group)
         self.add_sub_output.setReadOnly(True)
         self.add_sub_output.setStyleSheet("font-family: monospace; font-size: 13px;")
         out_layout.addWidget(self.add_sub_output)
@@ -250,38 +286,38 @@ class DateTimePage(QWidget):
     # Tab 2: Age / Birthday
     # --------------------------------------------------------------------------
     def _create_age_tab(self) -> QWidget:
-        widget = QWidget()
+        widget = QWidget(self.tabs)
         layout = QVBoxLayout(widget)
         layout.setContentsMargins(8, 8, 8, 8)
         layout.setSpacing(10)
 
-        inputs_group = QGroupBox("Birthday Parameters")
+        inputs_group = QGroupBox("Birthday Parameters", widget)
         form = QFormLayout(inputs_group)
 
-        self.birth_date_input = QLineEdit("2000-01-01")
+        self.birth_date_input = QLineEdit("2000-01-01", inputs_group)
         self.birth_date_input.setPlaceholderText("YYYY-MM-DD")
         form.addRow("Birth Date (DOB):", self.birth_date_input)
 
         as_of_box = QHBoxLayout()
-        self.as_of_input = QLineEdit()
+        self.as_of_input = QLineEdit(inputs_group)
         self.as_of_input.setPlaceholderText("Today (leave blank or YYYY-MM-DD)")
         as_of_box.addWidget(self.as_of_input)
-        as_of_today_btn = QPushButton("Today")
-        as_of_today_btn.clicked.connect(lambda: self.as_of_input.setText(datetime.date.today().isoformat()))
+        as_of_today_btn = QPushButton("Today", inputs_group)
+        as_of_today_btn.clicked.connect(self._set_as_of_today)
         as_of_box.addWidget(as_of_today_btn)
         form.addRow("As of Date (Optional):", as_of_box)
 
         layout.addWidget(inputs_group)
 
         # Action Button
-        self.age_btn = QPushButton("Calculate Age & Countdown")
+        self.age_btn = QPushButton("Calculate Age & Countdown", widget)
         self.age_btn.clicked.connect(self.calculate_age)
         layout.addWidget(self.age_btn)
 
         # Results Display
-        out_group = QGroupBox("Age & Birthday Breakdown")
+        out_group = QGroupBox("Age & Birthday Breakdown", widget)
         out_layout = QVBoxLayout(out_group)
-        self.age_output = QTextEdit()
+        self.age_output = QTextEdit(out_group)
         self.age_output.setReadOnly(True)
         self.age_output.setStyleSheet("font-family: monospace; font-size: 13px;")
         out_layout.addWidget(self.age_output)
@@ -311,41 +347,41 @@ class DateTimePage(QWidget):
     # Tab 3: Work Hours / Wage
     # --------------------------------------------------------------------------
     def _create_work_tab(self) -> QWidget:
-        widget = QWidget()
+        widget = QWidget(self.tabs)
         layout = QVBoxLayout(widget)
         layout.setContentsMargins(8, 8, 8, 8)
         layout.setSpacing(10)
 
-        inputs_group = QGroupBox("Shift & Wage Settings")
+        inputs_group = QGroupBox("Shift & Wage Settings", widget)
         form = QFormLayout(inputs_group)
 
-        self.work_start_input = QLineEdit("09:00")
+        self.work_start_input = QLineEdit("09:00", inputs_group)
         self.work_start_input.setPlaceholderText("HH:MM (e.g. 09:00)")
         form.addRow("Shift Start Time:", self.work_start_input)
 
-        self.work_end_input = QLineEdit("17:30")
+        self.work_end_input = QLineEdit("17:30", inputs_group)
         self.work_end_input.setPlaceholderText("HH:MM (e.g. 17:30 or 02:00 next day)")
         form.addRow("Shift End Time:", self.work_end_input)
 
-        self.break_mins_input = QLineEdit("45")
+        self.break_mins_input = QLineEdit("45", inputs_group)
         self.break_mins_input.setPlaceholderText("Minutes (e.g. 30)")
         form.addRow("Unpaid Break (Minutes):", self.break_mins_input)
 
-        self.hourly_rate_input = QLineEdit("25.00")
+        self.hourly_rate_input = QLineEdit("25.00", inputs_group)
         self.hourly_rate_input.setPlaceholderText("Rate per hour (e.g. 25.00)")
         form.addRow("Hourly Wage / Rate ($):", self.hourly_rate_input)
 
         layout.addWidget(inputs_group)
 
         # Action Button
-        self.work_btn = QPushButton("Calculate Hours & Earnings")
+        self.work_btn = QPushButton("Calculate Hours & Earnings", widget)
         self.work_btn.clicked.connect(self.calculate_work_hours)
         layout.addWidget(self.work_btn)
 
         # Results Display
-        out_group = QGroupBox("Shift Summary & Total Earnings")
+        out_group = QGroupBox("Shift Summary & Total Earnings", widget)
         out_layout = QVBoxLayout(out_group)
-        self.work_output = QTextEdit()
+        self.work_output = QTextEdit(out_group)
         self.work_output.setReadOnly(True)
         self.work_output.setStyleSheet("font-family: monospace; font-size: 13px;")
         out_layout.addWidget(self.work_output)
