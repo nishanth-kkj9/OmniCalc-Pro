@@ -11,6 +11,7 @@ from utils.logger import get_logger
 from core.history_manager import get_history_manager
 import atexit
 import importlib
+import os
 
 logger = get_logger()
 
