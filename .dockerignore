@@ -7,7 +7,8 @@ coverage
 .env*
 *.key
 *.pem
-tests/
+tests/*
+!tests/math-spec
 core/
 ui/
 utils/

@@ -100,7 +100,7 @@ OmniCalc Pro employs a **parallel dual-UI monorepo architecture**, allowing the 
 ### 🌐 1. Web Application (React + Vite + TypeScript)
 
 #### Prerequisites
-- Node.js 20.x+ (see `.nvmrc`)
+- Node.js 22.x+ (see `.nvmrc`)
 - npm or bun
 
 #### Setup & Development

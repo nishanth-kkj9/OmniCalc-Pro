@@ -115,9 +115,9 @@ export const GraphSliderPanel: React.FC<GraphSliderPanelProps> = ({
           <div className="p-8 text-center text-slate-400 text-xs border border-dashed rounded-2xl border-slate-800">
             <p className="font-semibold text-slate-300 mb-1">No variable sliders defined</p>
             <p className="text-[11px] text-slate-400">
-              Create parameters like <code className="text-purple-400 font-mono font-bold">a</code> or{' '}
-              <code className="text-purple-400 font-mono font-bold">b</code> to use in expressions like{' '}
-              <code className="text-sky-400 font-mono">y = a*x^2 + b</code>.
+              Create parameters like <code className="text-purple-400 font-mono font-bold">a</code>{' '}
+              or <code className="text-purple-400 font-mono font-bold">b</code> to use in
+              expressions like <code className="text-sky-400 font-mono">y = a*x^2 + b</code>.
             </p>
           </div>
         ) : (
@@ -147,7 +147,11 @@ export const GraphSliderPanel: React.FC<GraphSliderPanelProps> = ({
                       }`}
                       title={isPlaying ? 'Pause animation' : 'Animate parameter'}
                     >
-                      {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                      {isPlaying ? (
+                        <Pause className="w-3.5 h-3.5" />
+                      ) : (
+                        <Play className="w-3.5 h-3.5" />
+                      )}
                     </button>
 
                     {/* Reset to 1 or 0 */}
@@ -191,7 +195,9 @@ export const GraphSliderPanel: React.FC<GraphSliderPanelProps> = ({
                     <input
                       type="number"
                       value={s.min}
-                      onChange={(e) => onUpdateSlider(s.id, { min: parseFloat(e.target.value) || -10 })}
+                      onChange={(e) =>
+                        onUpdateSlider(s.id, { min: parseFloat(e.target.value) || -10 })
+                      }
                       className="w-12 px-1 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-slate-200 text-center"
                     />
                   </div>
@@ -203,7 +209,11 @@ export const GraphSliderPanel: React.FC<GraphSliderPanelProps> = ({
                       step="0.05"
                       min="0.01"
                       value={s.step}
-                      onChange={(e) => onUpdateSlider(s.id, { step: Math.max(0.01, parseFloat(e.target.value) || 0.1) })}
+                      onChange={(e) =>
+                        onUpdateSlider(s.id, {
+                          step: Math.max(0.01, parseFloat(e.target.value) || 0.1),
+                        })
+                      }
                       className="w-12 px-1 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-slate-200 text-center"
                     />
                   </div>
@@ -213,7 +223,9 @@ export const GraphSliderPanel: React.FC<GraphSliderPanelProps> = ({
                     <input
                       type="number"
                       value={s.max}
-                      onChange={(e) => onUpdateSlider(s.id, { max: parseFloat(e.target.value) || 10 })}
+                      onChange={(e) =>
+                        onUpdateSlider(s.id, { max: parseFloat(e.target.value) || 10 })
+                      }
                       className="w-12 px-1 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-slate-200 text-center"
                     />
                   </div>

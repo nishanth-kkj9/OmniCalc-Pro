@@ -74,7 +74,9 @@ const InferenceCalculator = lazy(() =>
   import('./components/InferenceCalculator').then((m) => ({ default: m.InferenceCalculator }))
 );
 const PhysicalUnitsCalculator = lazy(() =>
-  import('./components/PhysicalUnitsCalculator').then((m) => ({ default: m.PhysicalUnitsCalculator }))
+  import('./components/PhysicalUnitsCalculator').then((m) => ({
+    default: m.PhysicalUnitsCalculator,
+  }))
 );
 
 interface ErrorBoundaryProps {
@@ -300,8 +302,12 @@ export function App() {
           onUpdateSettings={updateSettings}
         />
 
-        <main className={`flex-1 w-full ${currentMode === 'graph' ? 'p-0 overflow-hidden' : 'p-2.5 sm:p-4 md:p-6 overflow-y-auto overscroll-contain'}`}>
-          <div className={`w-full ${currentMode === 'graph' ? 'h-full' : 'max-w-7xl mx-auto flex flex-col items-center justify-start'}`}>
+        <main
+          className={`flex-1 w-full ${currentMode === 'graph' ? 'p-0 overflow-hidden' : 'p-2.5 sm:p-4 md:p-6 overflow-y-auto overscroll-contain'}`}
+        >
+          <div
+            className={`w-full ${currentMode === 'graph' ? 'h-full' : 'max-w-7xl mx-auto flex flex-col items-center justify-start'}`}
+          >
             <EngineErrorBoundary key={currentMode}>
               <Suspense fallback={<EngineLoadingFallback theme={settings.theme} />}>
                 {currentMode === 'basic' && <BasicCalculator settings={settings} />}
@@ -348,7 +354,9 @@ export function App() {
                     onNavigateToGraph={() => setCurrentMode('graph')}
                   />
                 )}
-                {currentMode === 'physical_units' && <PhysicalUnitsCalculator settings={settings} />}
+                {currentMode === 'physical_units' && (
+                  <PhysicalUnitsCalculator settings={settings} />
+                )}
                 {currentMode === 'formulas' && (
                   <FormulasPanel
                     settings={settings}

@@ -107,8 +107,16 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
       const xTicks = generateAxisTicks(viewport.xMin, viewport.xMax, width, true, viewport, dims);
       const yTicks = generateAxisTicks(viewport.yMin, viewport.yMax, height, false, viewport, dims);
 
-      const majorGridColor = isLight ? 'rgba(226, 232, 240, 0.9)' : isOled ? 'rgba(39, 39, 42, 0.6)' : 'rgba(30, 41, 59, 0.7)';
-      const minorGridColor = isLight ? 'rgba(241, 245, 249, 0.6)' : isOled ? 'rgba(24, 24, 27, 0.4)' : 'rgba(15, 23, 42, 0.5)';
+      const majorGridColor = isLight
+        ? 'rgba(226, 232, 240, 0.9)'
+        : isOled
+          ? 'rgba(39, 39, 42, 0.6)'
+          : 'rgba(30, 41, 59, 0.7)';
+      const minorGridColor = isLight
+        ? 'rgba(241, 245, 249, 0.6)'
+        : isOled
+          ? 'rgba(24, 24, 27, 0.4)'
+          : 'rgba(15, 23, 42, 0.5)';
 
       // Minor grid
       if (settings.showMinorGrid && xTicks.length > 1) {
@@ -117,14 +125,22 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
         ctx.strokeStyle = minorGridColor;
         ctx.lineWidth = 0.75;
         ctx.beginPath();
-        for (let gx = Math.floor(viewport.xMin / minorStep) * minorStep; gx <= viewport.xMax; gx += minorStep) {
+        for (
+          let gx = Math.floor(viewport.xMin / minorStep) * minorStep;
+          gx <= viewport.xMax;
+          gx += minorStep
+        ) {
           const sx = graphToScreen(gx, 0, viewport, dims).x;
           ctx.moveTo(sx, 0);
           ctx.lineTo(sx, height);
         }
         const yStep = Math.abs(yTicks[1]?.value - yTicks[0]?.value) || xStep;
         const yMinorStep = yStep / 5;
-        for (let gy = Math.floor(viewport.yMin / yMinorStep) * yMinorStep; gy <= viewport.yMax; gy += yMinorStep) {
+        for (
+          let gy = Math.floor(viewport.yMin / yMinorStep) * yMinorStep;
+          gy <= viewport.yMax;
+          gy += yMinorStep
+        ) {
           const sy = graphToScreen(0, gy, viewport, dims).y;
           ctx.moveTo(0, sy);
           ctx.lineTo(width, sy);
@@ -274,7 +290,14 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
         ctx.font = '10px "JetBrains Mono", monospace';
 
         const xTicks = generateAxisTicks(viewport.xMin, viewport.xMax, width, true, viewport, dims);
-        const yTicks = generateAxisTicks(viewport.yMin, viewport.yMax, height, false, viewport, dims);
+        const yTicks = generateAxisTicks(
+          viewport.yMin,
+          viewport.yMax,
+          height,
+          false,
+          viewport,
+          dims
+        );
 
         // X Labels
         const labelY = Math.max(14, Math.min(height - 4, origin.y + 14));
@@ -337,8 +360,18 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
         ctx.moveTo(topP.x, topP.y);
         ctx.lineTo(botP.x, botP.y);
       } else if (slope !== null) {
-        const pLeft = graphToScreen(viewport.xMin, y0 + slope * (viewport.xMin - x0), viewport, dims);
-        const pRight = graphToScreen(viewport.xMax, y0 + slope * (viewport.xMax - x0), viewport, dims);
+        const pLeft = graphToScreen(
+          viewport.xMin,
+          y0 + slope * (viewport.xMin - x0),
+          viewport,
+          dims
+        );
+        const pRight = graphToScreen(
+          viewport.xMax,
+          y0 + slope * (viewport.xMax - x0),
+          viewport,
+          dims
+        );
         ctx.moveTo(pLeft.x, pLeft.y);
         ctx.lineTo(pRight.x, pRight.y);
       }
@@ -389,7 +422,11 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
           ctx.fillStyle = expr.color;
           ctx.font = 'bold 11px sans-serif';
           ctx.textAlign = 'left';
-          ctx.fillText(expr.label, Math.min(width - 70, scrPt.x + 6), Math.max(16, Math.min(height - 10, scrPt.y - 4)));
+          ctx.fillText(
+            expr.label,
+            Math.min(width - 70, scrPt.x + 6),
+            Math.max(16, Math.min(height - 10, scrPt.y - 4))
+          );
         }
       }
 
@@ -600,7 +637,10 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
       const sx = e.clientX - rect.left;
       const sy = e.clientY - rect.top;
 
-      const cursorGraph = screenToGraph(sx, sy, viewport, { width: cvs.clientWidth, height: cvs.clientHeight });
+      const cursorGraph = screenToGraph(sx, sy, viewport, {
+        width: cvs.clientWidth,
+        height: cvs.clientHeight,
+      });
       const zoomFactor = e.deltaY > 0 ? 1.15 : 0.87;
       const newVp = zoomViewportAroundPoint(viewport, cursorGraph.x, cursorGraph.y, zoomFactor);
       onUpdateViewport(newVp);
@@ -667,7 +707,16 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
         }
       }
     },
-    [viewport, onUpdateViewport, isTraceActive, onTraceMove, expressions, segmentsMap, activeExpressionId, externalCanvasRef]
+    [
+      viewport,
+      onUpdateViewport,
+      isTraceActive,
+      onTraceMove,
+      expressions,
+      segmentsMap,
+      activeExpressionId,
+      externalCanvasRef,
+    ]
   );
 
   const handleMouseUp = useCallback(() => {
@@ -675,20 +724,23 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
   }, []);
 
   // Touch gestures for mobile/tablet (pan & pinch-to-zoom)
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    if (e.touches.length === 1) {
-      isDraggingRef.current = true;
-      dragStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-      initialPinchDistRef.current = null;
-    } else if (e.touches.length === 2) {
-      isDraggingRef.current = false;
-      const t1 = e.touches[0];
-      const t2 = e.touches[1];
-      const dist = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
-      initialPinchDistRef.current = dist;
-      initialPinchViewportRef.current = { ...viewport };
-    }
-  }, [viewport]);
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      if (e.touches.length === 1) {
+        isDraggingRef.current = true;
+        dragStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        initialPinchDistRef.current = null;
+      } else if (e.touches.length === 2) {
+        isDraggingRef.current = false;
+        const t1 = e.touches[0];
+        const t2 = e.touches[1];
+        const dist = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+        initialPinchDistRef.current = dist;
+        initialPinchViewportRef.current = { ...viewport };
+      }
+    },
+    [viewport]
+  );
 
   const handleTouchMove = useCallback(
     (e: React.TouchEvent) => {
@@ -704,7 +756,11 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
 
         const newVp = panViewport(viewport, deltaX, deltaY, dims);
         onUpdateViewport(newVp);
-      } else if (e.touches.length === 2 && initialPinchDistRef.current && initialPinchViewportRef.current) {
+      } else if (
+        e.touches.length === 2 &&
+        initialPinchDistRef.current &&
+        initialPinchViewportRef.current
+      ) {
         e.preventDefault();
         const t1 = e.touches[0];
         const t2 = e.touches[1];
@@ -715,7 +771,12 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
           const midX = (t1.clientX + t2.clientX) / 2 - rect.left;
           const midY = (t1.clientY + t2.clientY) / 2 - rect.top;
           const centerGraph = screenToGraph(midX, midY, initialPinchViewportRef.current, dims);
-          const newVp = zoomViewportAroundPoint(initialPinchViewportRef.current, centerGraph.x, centerGraph.y, ratio);
+          const newVp = zoomViewportAroundPoint(
+            initialPinchViewportRef.current,
+            centerGraph.x,
+            centerGraph.y,
+            ratio
+          );
           onUpdateViewport(newVp);
         }
       }

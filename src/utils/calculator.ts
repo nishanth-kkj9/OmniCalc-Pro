@@ -326,9 +326,9 @@ export function buildMathScope(angleMode: AngleMode = 'DEG'): Record<string, any
       const t = 1.0 / (1.0 + p * a);
       const y =
         1.0 -
-        (((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t +
+        ((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t +
           0.254829592) *
-          t) *
+          t *
           Math.exp(-a * a);
       return sign * y;
     },
@@ -356,7 +356,7 @@ export function buildMathScope(angleMode: AngleMode = 'DEG'): Record<string, any
       if (r < 0 || r > n || !Number.isInteger(n) || !Number.isInteger(r)) return 0;
       let res = 1;
       for (let i = 0; i < r; i++) {
-        res *= (n - i);
+        res *= n - i;
       }
       return Math.round(res);
     },
@@ -364,7 +364,7 @@ export function buildMathScope(angleMode: AngleMode = 'DEG'): Record<string, any
       if (r < 0 || r > n || !Number.isInteger(n) || !Number.isInteger(r)) return 0;
       let res = 1;
       for (let i = 0; i < r; i++) {
-        res *= (n - i);
+        res *= n - i;
       }
       return Math.round(res);
     },
@@ -631,4 +631,3 @@ export function formatNumber(
   if (!isFinite(num)) return num > 0 ? 'Infinity' : '-Infinity';
   return num.toLocaleString('en-US', { maximumFractionDigits: precision });
 }
-

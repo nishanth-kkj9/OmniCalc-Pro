@@ -97,7 +97,10 @@ export function fitLinearRegression(points: DataPoint[]): RegressionResult | nul
  * Computes Polynomial Regression of specified degree (e.g. 2 for quadratic, 3 for cubic)
  * using the OLS normal equation: (X^T X) * Beta = X^T Y.
  */
-export function fitPolynomialRegression(points: DataPoint[], degree: number = 2): RegressionResult | null {
+export function fitPolynomialRegression(
+  points: DataPoint[],
+  degree: number = 2
+): RegressionResult | null {
   const n = points.length;
   const numCoeffs = degree + 1;
   if (n < numCoeffs || degree < 1) return null;

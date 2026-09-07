@@ -1,9 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  fitModel,
-  evaluateAllModels,
-  DataPoint,
-} from './regression';
+import { fitModel, evaluateAllModels, DataPoint } from './regression';
 
 describe('Regression Engine Extended Tests', () => {
   const linearData: DataPoint[] = [

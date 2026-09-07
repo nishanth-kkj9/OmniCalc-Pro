@@ -195,7 +195,9 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = ({
             onUpdate({ visible: !expression.visible });
           }}
           className={`p-1 rounded-lg transition-colors flex-shrink-0 ${
-            expression.visible ? 'text-sky-400 hover:text-sky-300' : 'text-slate-500 hover:text-slate-400'
+            expression.visible
+              ? 'text-sky-400 hover:text-sky-300'
+              : 'text-slate-500 hover:text-slate-400'
           }`}
           title={expression.visible ? 'Hide Curve' : 'Show Curve'}
           aria-label={expression.visible ? 'Hide curve' : 'Show curve'}
@@ -223,7 +225,11 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = ({
             <div
               onClick={(e) => e.stopPropagation()}
               className={`absolute right-0 top-full mt-1.5 w-60 rounded-2xl border p-3 z-50 shadow-2xl ${
-                isLight ? 'bg-white border-slate-200 text-slate-900' : isOled ? 'bg-zinc-950 border-zinc-800 text-white' : 'bg-slate-900 border-slate-800 text-slate-100'
+                isLight
+                  ? 'bg-white border-slate-200 text-slate-900'
+                  : isOled
+                    ? 'bg-zinc-950 border-zinc-800 text-white'
+                    : 'bg-slate-900 border-slate-800 text-slate-100'
               }`}
             >
               <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
@@ -271,7 +277,9 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = ({
                       onChange={(e) => onUpdate({ showDerivative: e.target.checked })}
                       className="accent-purple-500 rounded"
                     />
-                    <span className="font-mono text-[11px] text-purple-400 font-bold">f&apos;(x)</span>
+                    <span className="font-mono text-[11px] text-purple-400 font-bold">
+                      f&apos;(x)
+                    </span>
                     <span className="text-[10px] text-slate-400">(First Derivative)</span>
                   </label>
                   <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer select-none">
@@ -281,7 +289,9 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = ({
                       onChange={(e) => onUpdate({ showSecondDerivative: e.target.checked })}
                       className="accent-amber-500 rounded"
                     />
-                    <span className="font-mono text-[11px] text-amber-400 font-bold">f&apos;&apos;(x)</span>
+                    <span className="font-mono text-[11px] text-amber-400 font-bold">
+                      f&apos;&apos;(x)
+                    </span>
                     <span className="text-[10px] text-slate-400">(Second Derivative)</span>
                   </label>
                 </div>
@@ -299,7 +309,9 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = ({
                       style={{ backgroundColor: color }}
                       className="w-6 h-6 rounded-full flex items-center justify-center border border-white/20 hover:scale-110 transition-transform"
                     >
-                      {expression.color === color && <Check className="w-3 h-3 text-white drop-shadow" />}
+                      {expression.color === color && (
+                        <Check className="w-3 h-3 text-white drop-shadow" />
+                      )}
                     </button>
                   ))}
                 </div>
@@ -307,7 +319,9 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = ({
 
               {/* Line Style */}
               <div className="mb-3">
-                <label className="text-[11px] font-medium text-slate-400 block mb-1">Line Style</label>
+                <label className="text-[11px] font-medium text-slate-400 block mb-1">
+                  Line Style
+                </label>
                 <div className="grid grid-cols-3 gap-1 bg-slate-800/40 p-1 rounded-xl">
                   {(['solid', 'dashed', 'dotted'] as LineStyle[]).map((style) => (
                     <button
@@ -315,7 +329,9 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = ({
                       type="button"
                       onClick={() => onUpdate({ lineStyle: style })}
                       className={`px-2 py-1 text-[10px] font-bold rounded-lg capitalize transition-colors ${
-                        expression.lineStyle === style ? 'bg-sky-500 text-white' : 'text-slate-400 hover:text-white'
+                        expression.lineStyle === style
+                          ? 'bg-sky-500 text-white'
+                          : 'text-slate-400 hover:text-white'
                       }`}
                     >
                       {style}
@@ -343,7 +359,9 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = ({
 
               {/* Domain Restriction */}
               <div className="mb-3">
-                <label className="text-[11px] font-medium text-slate-400 block mb-1">Domain Restriction [min, max]</label>
+                <label className="text-[11px] font-medium text-slate-400 block mb-1">
+                  Domain Restriction [min, max]
+                </label>
                 <div className="flex items-center gap-1.5">
                   <input
                     type="number"
@@ -373,7 +391,9 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = ({
 
               {/* Optional Curve Label */}
               <div className="mb-3">
-                <label className="text-[11px] font-medium text-slate-400 block mb-1">Curve Label</label>
+                <label className="text-[11px] font-medium text-slate-400 block mb-1">
+                  Curve Label
+                </label>
                 <input
                   type="text"
                   placeholder="e.g. Parabola"
@@ -429,12 +449,17 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = ({
       </div>
 
       {/* Domain restriction badge if set */}
-      {(expression.domainMin !== undefined || expression.domainMax !== undefined || expression.label) && (
+      {(expression.domainMin !== undefined ||
+        expression.domainMax !== undefined ||
+        expression.label) && (
         <div className="flex items-center gap-2 text-[10px] text-slate-400 pl-6">
-          {expression.label && <span className="font-semibold text-slate-300 truncate">{expression.label}</span>}
+          {expression.label && (
+            <span className="font-semibold text-slate-300 truncate">{expression.label}</span>
+          )}
           {(expression.domainMin !== undefined || expression.domainMax !== undefined) && (
             <span className="font-mono bg-slate-800/60 px-1.5 py-0.5 rounded border border-slate-700/60">
-              {expression.domainMin !== undefined ? expression.domainMin : '-∞'} ≤ x ≤ {expression.domainMax !== undefined ? expression.domainMax : '+∞'}
+              {expression.domainMin !== undefined ? expression.domainMin : '-∞'} ≤ x ≤{' '}
+              {expression.domainMax !== undefined ? expression.domainMax : '+∞'}
             </span>
           )}
         </div>

@@ -9,7 +9,10 @@ interface GeometryCalculatorProps {
   onNavigateToGraph?: (expression?: string) => void;
 }
 
-export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings, onNavigateToGraph }) => {
+export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({
+  settings,
+  onNavigateToGraph,
+}) => {
   const [tab, setTab] = useState<'triangle' | '2d_shapes' | '3d_shapes' | 'coordinate'>('triangle');
 
   // Triangle State (Sides a, b, c)
@@ -279,7 +282,9 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
         className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none"
         role="tablist"
         aria-label="Geometry calculator modes"
-        onKeyDown={(e) => handleTablistKeydown(e, [...GEOMETRY_TABS], tab, setTab as (tab: string) => void)}
+        onKeyDown={(e) =>
+          handleTablistKeydown(e, [...GEOMETRY_TABS], tab, setTab as (tab: string) => void)
+        }
       >
         {[
           { id: 'triangle', label: 'Triangle & Trigonometry Solver' },
@@ -312,190 +317,239 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
       {/* Main Container */}
       <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col gap-6">
         {/* TRIANGLE SOLVER */}
-        <div role="tabpanel" id="geo-panel-triangle" aria-labelledby="geo-tab-triangle" hidden={tab !== 'triangle'} className="flex flex-col gap-6">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div>
-                <h3 className="text-base font-bold text-slate-100">Triangle Geometry Solver</h3>
-                <p className="text-xs text-slate-400">
-                  Computes all angles, area, inradius, circumradius, and renders dynamic geometric
-                  diagram
-                </p>
-              </div>
-              <button
-                onClick={() => {
-                  setSideA('5');
-                  setSideB('6');
-                  setSideC('7');
-                }}
-                className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs flex items-center gap-1.5 border border-slate-700 flex-shrink-0"
-              >
-                <RefreshCw className="w-3.5 h-3.5" /> Example (5, 6, 7)
-              </button>
+        <div
+          role="tabpanel"
+          id="geo-panel-triangle"
+          aria-labelledby="geo-tab-triangle"
+          hidden={tab !== 'triangle'}
+          className="flex flex-col gap-6"
+        >
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h3 className="text-base font-bold text-slate-100">Triangle Geometry Solver</h3>
+              <p className="text-xs text-slate-400">
+                Computes all angles, area, inradius, circumradius, and renders dynamic geometric
+                diagram
+              </p>
             </div>
-
-            {/* Inputs */}
-            <div className="grid grid-cols-3 gap-3">
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-slate-400">Side a</label>
-                <input
-                  type="number"
-                  value={sideA}
-                  onChange={(e) => setSideA(e.target.value)}
-                  className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-slate-400">Side b</label>
-                <input
-                  type="number"
-                  value={sideB}
-                  onChange={(e) => setSideB(e.target.value)}
-                  className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-slate-400">Side c</label>
-                <input
-                  type="number"
-                  value={sideC}
-                  onChange={(e) => setSideC(e.target.value)}
-                  className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                />
-              </div>
-            </div>
-
-            {triData && (
-              <div className="flex flex-col gap-4 bg-slate-950 border border-slate-800 rounded-2xl p-5">
-                {triData.error ? (
-                  <div role="alert" className="text-rose-400 text-sm font-semibold">{triData.error}</div>
-                ) : (
-                  <>
-                    {/* SVG Graphic & Key Stats */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-                      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex items-center justify-center relative min-h-[190px]">
-                        <svg className="w-full h-44 overflow-visible" viewBox="0 0 260 170" role="img" aria-label="Geometric triangle diagram">
-                          {/* Triangle polygon */}
-                          <polygon
-                            points={triData.svgPoints}
-                            className="fill-sky-500/20 stroke-sky-400 stroke-2"
-                          />
-                          {/* Vertex Points */}
-                          <circle
-                            cx={triData.pA?.x}
-                            cy={triData.pA?.y}
-                            r="4"
-                            className="fill-emerald-400"
-                          />
-                          <circle
-                            cx={triData.pB?.x}
-                            cy={triData.pB?.y}
-                            r="4"
-                            className="fill-emerald-400"
-                          />
-                          <circle
-                            cx={triData.pC?.x}
-                            cy={triData.pC?.y}
-                            r="4"
-                            className="fill-emerald-400"
-                          />
-
-                          {/* Vertex Labels */}
-                          <text
-                            x={(triData.pA?.x || 0) - 12}
-                            y={(triData.pA?.y || 0) + 14}
-                            className="fill-slate-300 text-[10px] font-bold"
-                          >
-                            A (α: {triData.alphaDeg})
-                          </text>
-                          <text
-                            x={(triData.pB?.x || 0) + 4}
-                            y={(triData.pB?.y || 0) + 14}
-                            className="fill-slate-300 text-[10px] font-bold"
-                          >
-                            B (β: {triData.betaDeg})
-                          </text>
-                          <text
-                            x={(triData.pC?.x || 0) - 15}
-                            y={(triData.pC?.y || 0) - 10}
-                            className="fill-slate-300 text-[10px] font-bold"
-                          >
-                            C (γ: {triData.gammaDeg})
-                          </text>
-                        </svg>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-2.5">
-                        <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
-                          <span className="text-[10px] text-slate-400 block">Total Area (A)</span>
-                          <span className="text-lg font-mono font-bold text-emerald-400">
-                            {triData.area}
-                          </span>
-                        </div>
-                        <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
-                          <span className="text-[10px] text-slate-400 block">Perimeter (P)</span>
-                          <span className="text-lg font-mono font-bold text-sky-400">
-                            {triData.perimeter}
-                          </span>
-                        </div>
-                        <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
-                          <span className="text-[10px] text-slate-400 block">Inradius (r)</span>
-                          <span className="text-lg font-mono font-bold text-slate-200">
-                            {triData.inradius}
-                          </span>
-                        </div>
-                        <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
-                          <span className="text-[10px] text-slate-400 block">Circumradius (R)</span>
-                          <span className="text-lg font-mono font-bold text-slate-200">
-                            {triData.circumradius}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-            )}
+            <button
+              onClick={() => {
+                setSideA('5');
+                setSideB('6');
+                setSideC('7');
+              }}
+              className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs flex items-center gap-1.5 border border-slate-700 flex-shrink-0"
+            >
+              <RefreshCw className="w-3.5 h-3.5" /> Example (5, 6, 7)
+            </button>
           </div>
 
+          {/* Inputs */}
+          <div className="grid grid-cols-3 gap-3">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold text-slate-400">Side a</label>
+              <input
+                type="number"
+                value={sideA}
+                onChange={(e) => setSideA(e.target.value)}
+                className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold text-slate-400">Side b</label>
+              <input
+                type="number"
+                value={sideB}
+                onChange={(e) => setSideB(e.target.value)}
+                className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold text-slate-400">Side c</label>
+              <input
+                type="number"
+                value={sideC}
+                onChange={(e) => setSideC(e.target.value)}
+                className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+              />
+            </div>
+          </div>
+
+          {triData && (
+            <div className="flex flex-col gap-4 bg-slate-950 border border-slate-800 rounded-2xl p-5">
+              {triData.error ? (
+                <div role="alert" className="text-rose-400 text-sm font-semibold">
+                  {triData.error}
+                </div>
+              ) : (
+                <>
+                  {/* SVG Graphic & Key Stats */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex items-center justify-center relative min-h-[190px]">
+                      <svg
+                        className="w-full h-44 overflow-visible"
+                        viewBox="0 0 260 170"
+                        role="img"
+                        aria-label="Geometric triangle diagram"
+                      >
+                        {/* Triangle polygon */}
+                        <polygon
+                          points={triData.svgPoints}
+                          className="fill-sky-500/20 stroke-sky-400 stroke-2"
+                        />
+                        {/* Vertex Points */}
+                        <circle
+                          cx={triData.pA?.x}
+                          cy={triData.pA?.y}
+                          r="4"
+                          className="fill-emerald-400"
+                        />
+                        <circle
+                          cx={triData.pB?.x}
+                          cy={triData.pB?.y}
+                          r="4"
+                          className="fill-emerald-400"
+                        />
+                        <circle
+                          cx={triData.pC?.x}
+                          cy={triData.pC?.y}
+                          r="4"
+                          className="fill-emerald-400"
+                        />
+
+                        {/* Vertex Labels */}
+                        <text
+                          x={(triData.pA?.x || 0) - 12}
+                          y={(triData.pA?.y || 0) + 14}
+                          className="fill-slate-300 text-[10px] font-bold"
+                        >
+                          A (α: {triData.alphaDeg})
+                        </text>
+                        <text
+                          x={(triData.pB?.x || 0) + 4}
+                          y={(triData.pB?.y || 0) + 14}
+                          className="fill-slate-300 text-[10px] font-bold"
+                        >
+                          B (β: {triData.betaDeg})
+                        </text>
+                        <text
+                          x={(triData.pC?.x || 0) - 15}
+                          y={(triData.pC?.y || 0) - 10}
+                          className="fill-slate-300 text-[10px] font-bold"
+                        >
+                          C (γ: {triData.gammaDeg})
+                        </text>
+                      </svg>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                        <span className="text-[10px] text-slate-400 block">Total Area (A)</span>
+                        <span className="text-lg font-mono font-bold text-emerald-400">
+                          {triData.area}
+                        </span>
+                      </div>
+                      <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                        <span className="text-[10px] text-slate-400 block">Perimeter (P)</span>
+                        <span className="text-lg font-mono font-bold text-sky-400">
+                          {triData.perimeter}
+                        </span>
+                      </div>
+                      <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                        <span className="text-[10px] text-slate-400 block">Inradius (r)</span>
+                        <span className="text-lg font-mono font-bold text-slate-200">
+                          {triData.inradius}
+                        </span>
+                      </div>
+                      <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                        <span className="text-[10px] text-slate-400 block">Circumradius (R)</span>
+                        <span className="text-lg font-mono font-bold text-slate-200">
+                          {triData.circumradius}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+
         {/* 2D SHAPES */}
-        <div role="tabpanel" id="geo-panel-2d_shapes" aria-labelledby="geo-tab-2d_shapes" hidden={tab !== '2d_shapes'} className="flex flex-col gap-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-base font-bold text-slate-100">2D Geometric Shapes</h3>
-                <p className="text-xs text-slate-400">Area, perimeter, and arc measurements</p>
-              </div>
-              <div
-                className="flex items-center gap-2 overflow-x-auto"
-                role="tablist"
-                aria-label="2D shape selector"
-                onKeyDown={(e) => handleTablistKeydown(e, [...SHAPES_2D], shape2D, setShape2D as (tab: string) => void)}
-              >
-                {[
-                  { id: 'circle', label: 'Circle (Radius)' },
-                  { id: 'sector', label: 'Circle Sector (Radius & Angle)' },
-                  { id: 'ellipse', label: 'Ellipse (Semi-major & Minor axes)' },
-                  { id: 'trapezoid', label: 'Trapezoid (Bases & Height)' },
-                  { id: 'polygon', label: 'Regular Polygon (Side & n)' },
-                ].map((item) => (
-                  <button
-                    key={item.id}
-                    role="tab"
-                    id={`geo2d-tab-${item.id}`}
-                    aria-selected={shape2D === item.id}
-                    aria-controls={`geo2d-panel-${item.id}`}
-                    tabIndex={shape2D === item.id ? 0 : -1}
-                    onClick={() => setShape2D(item.id as any)}
-                    className={`bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs font-bold text-slate-200 ${shape2D === item.id ? 'bg-sky-600 text-white border-sky-500' : ''}`}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </div>
+        <div
+          role="tabpanel"
+          id="geo-panel-2d_shapes"
+          aria-labelledby="geo-tab-2d_shapes"
+          hidden={tab !== '2d_shapes'}
+          className="flex flex-col gap-6"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-base font-bold text-slate-100">2D Geometric Shapes</h3>
+              <p className="text-xs text-slate-400">Area, perimeter, and arc measurements</p>
+            </div>
+            <div
+              className="flex items-center gap-2 overflow-x-auto"
+              role="tablist"
+              aria-label="2D shape selector"
+              onKeyDown={(e) =>
+                handleTablistKeydown(
+                  e,
+                  [...SHAPES_2D],
+                  shape2D,
+                  setShape2D as (tab: string) => void
+                )
+              }
+            >
+              {[
+                { id: 'circle', label: 'Circle (Radius)' },
+                { id: 'sector', label: 'Circle Sector (Radius & Angle)' },
+                { id: 'ellipse', label: 'Ellipse (Semi-major & Minor axes)' },
+                { id: 'trapezoid', label: 'Trapezoid (Bases & Height)' },
+                { id: 'polygon', label: 'Regular Polygon (Side & n)' },
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  role="tab"
+                  id={`geo2d-tab-${item.id}`}
+                  aria-selected={shape2D === item.id}
+                  aria-controls={`geo2d-panel-${item.id}`}
+                  tabIndex={shape2D === item.id ? 0 : -1}
+                  onClick={() => setShape2D(item.id as any)}
+                  className={`bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs font-bold text-slate-200 ${shape2D === item.id ? 'bg-sky-600 text-white border-sky-500' : ''}`}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Inputs based on shape */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div
+              role="tabpanel"
+              id="geo2d-panel-circle"
+              aria-labelledby="geo2d-tab-circle"
+              hidden={shape2D !== 'circle'}
+              className="flex flex-col gap-1"
+            >
+              <label className="text-xs font-bold text-slate-400">Radius (r)</label>
+              <input
+                type="number"
+                value={val2D1}
+                onChange={(e) => setVal2D1(e.target.value)}
+                className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+              />
             </div>
 
-            {/* Inputs based on shape */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div role="tabpanel" id="geo2d-panel-circle" aria-labelledby="geo2d-tab-circle" hidden={shape2D !== 'circle'} className="flex flex-col gap-1">
+            <div
+              role="tabpanel"
+              id="geo2d-panel-sector"
+              aria-labelledby="geo2d-tab-sector"
+              hidden={shape2D !== 'sector'}
+              className="flex flex-col gap-1"
+            >
+              <div className="flex flex-col gap-1">
                 <label className="text-xs font-bold text-slate-400">Radius (r)</label>
                 <input
                   type="number"
@@ -504,152 +558,195 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
                   className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
                 />
               </div>
-
-              <div role="tabpanel" id="geo2d-panel-sector" aria-labelledby="geo2d-tab-sector" hidden={shape2D !== 'sector'} className="flex flex-col gap-1">
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-slate-400">Radius (r)</label>
-                  <input
-                    type="number"
-                    value={val2D1}
-                    onChange={(e) => setVal2D1(e.target.value)}
-                    className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-slate-400">Central Angle (°)</label>
-                  <input
-                    type="number"
-                    value={val2D2}
-                    onChange={(e) => setVal2D2(e.target.value)}
-                    className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                  />
-                </div>
-              </div>
-
-              <div role="tabpanel" id="geo2d-panel-ellipse" aria-labelledby="geo2d-tab-ellipse" hidden={shape2D !== 'ellipse'} className="flex flex-col gap-1">
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-slate-400">Semi-Major Axis (a)</label>
-                  <input
-                    type="number"
-                    value={val2D1}
-                    onChange={(e) => setVal2D1(e.target.value)}
-                    className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-slate-400">Semi-Minor Axis (b)</label>
-                  <input
-                    type="number"
-                    value={val2D2}
-                    onChange={(e) => setVal2D2(e.target.value)}
-                    className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                  />
-                </div>
-              </div>
-
-              <div role="tabpanel" id="geo2d-panel-trapezoid" aria-labelledby="geo2d-tab-trapezoid" hidden={shape2D !== 'trapezoid'} className="flex flex-col gap-1">
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-slate-400">Base a</label>
-                  <input
-                    type="number"
-                    value={val2D1}
-                    onChange={(e) => setVal2D1(e.target.value)}
-                    className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-slate-400">Base b</label>
-                  <input
-                    type="number"
-                    value={val2D2}
-                    onChange={(e) => setVal2D2(e.target.value)}
-                    className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-slate-400">Height h</label>
-                  <input
-                    type="number"
-                    value={val2D3}
-                    onChange={(e) => setVal2D3(e.target.value)}
-                    className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                  />
-                </div>
-              </div>
-
-              <div role="tabpanel" id="geo2d-panel-polygon" aria-labelledby="geo2d-tab-polygon" hidden={shape2D !== 'polygon'} className="flex flex-col gap-1">
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-slate-400">Side Length (s)</label>
-                  <input
-                    type="number"
-                    value={val2D1}
-                    onChange={(e) => setVal2D1(e.target.value)}
-                    className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-slate-400">Number of Sides (n)</label>
-                  <input
-                    type="number"
-                    min="3"
-                    value={val2D2}
-                    onChange={(e) => setVal2D2(e.target.value)}
-                    className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                  />
-                </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-slate-400">Central Angle (°)</label>
+                <input
+                  type="number"
+                  value={val2D2}
+                  onChange={(e) => setVal2D2(e.target.value)}
+                  className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                />
               </div>
             </div>
 
-            {/* Results */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-950 border border-slate-800 rounded-2xl p-5">
-              {res2D.map((r, i) => (
-                <div key={i} className="p-3.5 bg-slate-900 border border-slate-800 rounded-xl">
-                  <span className="text-xs text-slate-400 block mb-1">{r.label}</span>
-                  <span className="text-xl font-mono font-bold text-emerald-400">{r.value}</span>
-                </div>
+            <div
+              role="tabpanel"
+              id="geo2d-panel-ellipse"
+              aria-labelledby="geo2d-tab-ellipse"
+              hidden={shape2D !== 'ellipse'}
+              className="flex flex-col gap-1"
+            >
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-slate-400">Semi-Major Axis (a)</label>
+                <input
+                  type="number"
+                  value={val2D1}
+                  onChange={(e) => setVal2D1(e.target.value)}
+                  className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-slate-400">Semi-Minor Axis (b)</label>
+                <input
+                  type="number"
+                  value={val2D2}
+                  onChange={(e) => setVal2D2(e.target.value)}
+                  className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                />
+              </div>
+            </div>
+
+            <div
+              role="tabpanel"
+              id="geo2d-panel-trapezoid"
+              aria-labelledby="geo2d-tab-trapezoid"
+              hidden={shape2D !== 'trapezoid'}
+              className="flex flex-col gap-1"
+            >
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-slate-400">Base a</label>
+                <input
+                  type="number"
+                  value={val2D1}
+                  onChange={(e) => setVal2D1(e.target.value)}
+                  className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-slate-400">Base b</label>
+                <input
+                  type="number"
+                  value={val2D2}
+                  onChange={(e) => setVal2D2(e.target.value)}
+                  className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-slate-400">Height h</label>
+                <input
+                  type="number"
+                  value={val2D3}
+                  onChange={(e) => setVal2D3(e.target.value)}
+                  className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                />
+              </div>
+            </div>
+
+            <div
+              role="tabpanel"
+              id="geo2d-panel-polygon"
+              aria-labelledby="geo2d-tab-polygon"
+              hidden={shape2D !== 'polygon'}
+              className="flex flex-col gap-1"
+            >
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-slate-400">Side Length (s)</label>
+                <input
+                  type="number"
+                  value={val2D1}
+                  onChange={(e) => setVal2D1(e.target.value)}
+                  className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-slate-400">Number of Sides (n)</label>
+                <input
+                  type="number"
+                  min="3"
+                  value={val2D2}
+                  onChange={(e) => setVal2D2(e.target.value)}
+                  className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Results */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-950 border border-slate-800 rounded-2xl p-5">
+            {res2D.map((r, i) => (
+              <div key={i} className="p-3.5 bg-slate-900 border border-slate-800 rounded-xl">
+                <span className="text-xs text-slate-400 block mb-1">{r.label}</span>
+                <span className="text-xl font-mono font-bold text-emerald-400">{r.value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 3D SHAPES */}
+        <div
+          role="tabpanel"
+          id="geo-panel-3d_shapes"
+          aria-labelledby="geo-tab-3d_shapes"
+          hidden={tab !== '3d_shapes'}
+          className="flex flex-col gap-6"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-base font-bold text-slate-100">3D Solid Geometries</h3>
+              <p className="text-xs text-slate-400">Volume and surface area computations</p>
+            </div>
+            <div
+              className="flex items-center gap-2 overflow-x-auto"
+              role="tablist"
+              aria-label="3D shape selector"
+              onKeyDown={(e) =>
+                handleTablistKeydown(
+                  e,
+                  [...SHAPES_3D],
+                  shape3D,
+                  setShape3D as (tab: string) => void
+                )
+              }
+            >
+              {[
+                { id: 'sphere', label: 'Sphere (Radius)' },
+                { id: 'cylinder', label: 'Cylinder (Radius & Height)' },
+                { id: 'cone', label: 'Cone (Radius & Height)' },
+                { id: 'prism', label: 'Rectangular Prism (l, w, h)' },
+                { id: 'pyramid', label: 'Square Pyramid (Base s & Height)' },
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  role="tab"
+                  id={`geo3d-tab-${item.id}`}
+                  aria-selected={shape3D === item.id}
+                  aria-controls={`geo3d-panel-${item.id}`}
+                  tabIndex={shape3D === item.id ? 0 : -1}
+                  onClick={() => setShape3D(item.id as any)}
+                  className={`bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs font-bold text-slate-200 ${shape3D === item.id ? 'bg-sky-600 text-white border-sky-500' : ''}`}
+                >
+                  {item.label}
+                </button>
               ))}
             </div>
           </div>
 
-        {/* 3D SHAPES */}
-        <div role="tabpanel" id="geo-panel-3d_shapes" aria-labelledby="geo-tab-3d_shapes" hidden={tab !== '3d_shapes'} className="flex flex-col gap-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-base font-bold text-slate-100">3D Solid Geometries</h3>
-                <p className="text-xs text-slate-400">Volume and surface area computations</p>
-              </div>
-              <div
-                className="flex items-center gap-2 overflow-x-auto"
-                role="tablist"
-                aria-label="3D shape selector"
-                onKeyDown={(e) => handleTablistKeydown(e, [...SHAPES_3D], shape3D, setShape3D as (tab: string) => void)}
-              >
-                {[
-                  { id: 'sphere', label: 'Sphere (Radius)' },
-                  { id: 'cylinder', label: 'Cylinder (Radius & Height)' },
-                  { id: 'cone', label: 'Cone (Radius & Height)' },
-                  { id: 'prism', label: 'Rectangular Prism (l, w, h)' },
-                  { id: 'pyramid', label: 'Square Pyramid (Base s & Height)' },
-                ].map((item) => (
-                  <button
-                    key={item.id}
-                    role="tab"
-                    id={`geo3d-tab-${item.id}`}
-                    aria-selected={shape3D === item.id}
-                    aria-controls={`geo3d-panel-${item.id}`}
-                    tabIndex={shape3D === item.id ? 0 : -1}
-                    onClick={() => setShape3D(item.id as any)}
-                    className={`bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs font-bold text-slate-200 ${shape3D === item.id ? 'bg-sky-600 text-white border-sky-500' : ''}`}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </div>
+          {/* Inputs */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div
+              role="tabpanel"
+              id="geo3d-panel-sphere"
+              aria-labelledby="geo3d-tab-sphere"
+              hidden={shape3D !== 'sphere'}
+              className="flex flex-col gap-1"
+            >
+              <label className="text-xs font-bold text-slate-400">Radius (r)</label>
+              <input
+                type="number"
+                value={val3D1}
+                onChange={(e) => setVal3D1(e.target.value)}
+                className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+              />
             </div>
 
-            {/* Inputs */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div role="tabpanel" id="geo3d-panel-sphere" aria-labelledby="geo3d-tab-sphere" hidden={shape3D !== 'sphere'} className="flex flex-col gap-1">
+            <div
+              role="tabpanel"
+              id="geo3d-panel-cylinder"
+              aria-labelledby="geo3d-tab-cylinder"
+              hidden={shape3D !== 'cylinder'}
+              className="flex flex-col gap-1"
+            >
+              <div className="flex flex-col gap-1">
                 <label className="text-xs font-bold text-slate-400">Radius (r)</label>
                 <input
                   type="number"
@@ -658,119 +755,133 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
                   className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
                 />
               </div>
-
-              <div role="tabpanel" id="geo3d-panel-cylinder" aria-labelledby="geo3d-tab-cylinder" hidden={shape3D !== 'cylinder'} className="flex flex-col gap-1">
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-slate-400">Radius (r)</label>
-                  <input
-                    type="number"
-                    value={val3D1}
-                    onChange={(e) => setVal3D1(e.target.value)}
-                    className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-slate-400">Height (h)</label>
-                  <input
-                    type="number"
-                    value={val3D2}
-                    onChange={(e) => setVal3D2(e.target.value)}
-                    className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                  />
-                </div>
-              </div>
-
-              <div role="tabpanel" id="geo3d-panel-cone" aria-labelledby="geo3d-tab-cone" hidden={shape3D !== 'cone'} className="flex flex-col gap-1">
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-slate-400">Radius (r)</label>
-                  <input
-                    type="number"
-                    value={val3D1}
-                    onChange={(e) => setVal3D1(e.target.value)}
-                    className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-slate-400">Height (h)</label>
-                  <input
-                    type="number"
-                    value={val3D2}
-                    onChange={(e) => setVal3D2(e.target.value)}
-                    className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                  />
-                </div>
-              </div>
-
-              <div role="tabpanel" id="geo3d-panel-prism" aria-labelledby="geo3d-tab-prism" hidden={shape3D !== 'prism'} className="flex flex-col gap-1">
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-slate-400">Length (l)</label>
-                  <input
-                    type="number"
-                    value={val3D1}
-                    onChange={(e) => setVal3D1(e.target.value)}
-                    className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-slate-400">Width (w)</label>
-                  <input
-                    type="number"
-                    value={val3D2}
-                    onChange={(e) => setVal3D2(e.target.value)}
-                    className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-slate-400">Height (h)</label>
-                  <input
-                    type="number"
-                    value={val3D3}
-                    onChange={(e) => setVal3D3(e.target.value)}
-                    className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                  />
-                </div>
-              </div>
-
-              <div role="tabpanel" id="geo3d-panel-pyramid" aria-labelledby="geo3d-tab-pyramid" hidden={shape3D !== 'pyramid'} className="flex flex-col gap-1">
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-slate-400">Base Side (s)</label>
-                  <input
-                    type="number"
-                    value={val3D1}
-                    onChange={(e) => setVal3D1(e.target.value)}
-                    className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-slate-400">Pyramid Height (h)</label>
-                  <input
-                    type="number"
-                    value={val3D2}
-                    onChange={(e) => setVal3D2(e.target.value)}
-                    className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                  />
-                </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-slate-400">Height (h)</label>
+                <input
+                  type="number"
+                  value={val3D2}
+                  onChange={(e) => setVal3D2(e.target.value)}
+                  className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                />
               </div>
             </div>
 
-            {/* Results */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-950 border border-slate-800 rounded-2xl p-5">
-              {res3D.map((r, i) => (
-                <div key={i} className="p-3.5 bg-slate-900 border border-slate-800 rounded-xl">
-                  <span className="text-xs text-slate-400 block mb-1">{r.label}</span>
-                  <span className="text-xl font-mono font-bold text-sky-400">{r.value}</span>
-                </div>
-              ))}
+            <div
+              role="tabpanel"
+              id="geo3d-panel-cone"
+              aria-labelledby="geo3d-tab-cone"
+              hidden={shape3D !== 'cone'}
+              className="flex flex-col gap-1"
+            >
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-slate-400">Radius (r)</label>
+                <input
+                  type="number"
+                  value={val3D1}
+                  onChange={(e) => setVal3D1(e.target.value)}
+                  className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-slate-400">Height (h)</label>
+                <input
+                  type="number"
+                  value={val3D2}
+                  onChange={(e) => setVal3D2(e.target.value)}
+                  className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                />
+              </div>
+            </div>
+
+            <div
+              role="tabpanel"
+              id="geo3d-panel-prism"
+              aria-labelledby="geo3d-tab-prism"
+              hidden={shape3D !== 'prism'}
+              className="flex flex-col gap-1"
+            >
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-slate-400">Length (l)</label>
+                <input
+                  type="number"
+                  value={val3D1}
+                  onChange={(e) => setVal3D1(e.target.value)}
+                  className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-slate-400">Width (w)</label>
+                <input
+                  type="number"
+                  value={val3D2}
+                  onChange={(e) => setVal3D2(e.target.value)}
+                  className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-slate-400">Height (h)</label>
+                <input
+                  type="number"
+                  value={val3D3}
+                  onChange={(e) => setVal3D3(e.target.value)}
+                  className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                />
+              </div>
+            </div>
+
+            <div
+              role="tabpanel"
+              id="geo3d-panel-pyramid"
+              aria-labelledby="geo3d-tab-pyramid"
+              hidden={shape3D !== 'pyramid'}
+              className="flex flex-col gap-1"
+            >
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-slate-400">Base Side (s)</label>
+                <input
+                  type="number"
+                  value={val3D1}
+                  onChange={(e) => setVal3D1(e.target.value)}
+                  className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-slate-400">Pyramid Height (h)</label>
+                <input
+                  type="number"
+                  value={val3D2}
+                  onChange={(e) => setVal3D2(e.target.value)}
+                  className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                />
+              </div>
             </div>
           </div>
 
+          {/* Results */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-950 border border-slate-800 rounded-2xl p-5">
+            {res3D.map((r, i) => (
+              <div key={i} className="p-3.5 bg-slate-900 border border-slate-800 rounded-xl">
+                <span className="text-xs text-slate-400 block mb-1">{r.label}</span>
+                <span className="text-xl font-mono font-bold text-sky-400">{r.value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* COORDINATE & VECTORS */}
-        <div role="tabpanel" id="geo-panel-coordinate" aria-labelledby="geo-tab-coordinate" hidden={tab !== 'coordinate'} className="flex flex-col gap-6">
+        <div
+          role="tabpanel"
+          id="geo-panel-coordinate"
+          aria-labelledby="geo-tab-coordinate"
+          hidden={tab !== 'coordinate'}
+          className="flex flex-col gap-6"
+        >
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
             <div>
               <h3 className="text-base font-bold text-slate-100">2D Lines & 3D Vectors Analysis</h3>
               <p className="text-xs text-slate-400">
-                Calculates distance, midpoint, slope, perpendicular bisector, dot/cross products, and angles
+                Calculates distance, midpoint, slope, perpendicular bisector, dot/cross products,
+                and angles
               </p>
             </div>
             {onNavigateToGraph && (
@@ -785,7 +896,9 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
 
           {/* 2D Line Section */}
           <div className="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 flex flex-col gap-4">
-            <h4 className="text-sm font-bold text-sky-400 uppercase tracking-wider">2D Line Between Points P₁ and P₂</h4>
+            <h4 className="text-sm font-bold text-sky-400 uppercase tracking-wider">
+              2D Line Between Points P₁ and P₂
+            </h4>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div className="flex flex-col gap-1">
                 <label className="text-xs font-bold text-slate-400">P₁ X</label>
@@ -833,19 +946,27 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-1">
                   <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
                     <span className="text-xs text-slate-400 block mb-0.5">Euclidean Distance</span>
-                    <span className="font-mono text-sm font-bold text-emerald-400">{formatNum(lineRes.distance)}</span>
+                    <span className="font-mono text-sm font-bold text-emerald-400">
+                      {formatNum(lineRes.distance)}
+                    </span>
                   </div>
                   <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
                     <span className="text-xs text-slate-400 block mb-0.5">Midpoint (x, y)</span>
-                    <span className="font-mono text-sm font-bold text-sky-400">({formatNum(lineRes.midpoint.x)}, {formatNum(lineRes.midpoint.y)})</span>
+                    <span className="font-mono text-sm font-bold text-sky-400">
+                      ({formatNum(lineRes.midpoint.x)}, {formatNum(lineRes.midpoint.y)})
+                    </span>
                   </div>
                   <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
                     <span className="text-xs text-slate-400 block mb-0.5">Slope (m)</span>
-                    <span className="font-mono text-sm font-bold text-amber-400">{isFinite(lineRes.slope) ? formatNum(lineRes.slope) : 'Undefined (Vertical)'}</span>
+                    <span className="font-mono text-sm font-bold text-amber-400">
+                      {isFinite(lineRes.slope) ? formatNum(lineRes.slope) : 'Undefined (Vertical)'}
+                    </span>
                   </div>
                   <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
                     <span className="text-xs text-slate-400 block mb-0.5">Line Equation</span>
-                    <span className="font-mono text-sm font-bold text-cyan-400">{lineRes.equation}</span>
+                    <span className="font-mono text-sm font-bold text-cyan-400">
+                      {lineRes.equation}
+                    </span>
                   </div>
                 </div>
               );
@@ -854,7 +975,9 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
 
           {/* 3D Vector Operations */}
           <div className="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 flex flex-col gap-4">
-            <h4 className="text-sm font-bold text-amber-400 uppercase tracking-wider">3D Vector Operations (u × v, u · v)</h4>
+            <h4 className="text-sm font-bold text-amber-400 uppercase tracking-wider">
+              3D Vector Operations (u × v, u · v)
+            </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex flex-col gap-2">
                 <span className="text-xs font-bold text-slate-300">Vector u = (ux, uy, uz)</span>
@@ -912,26 +1035,45 @@ export const GeometryCalculator: React.FC<GeometryCalculatorProps> = ({ settings
             </div>
 
             {(() => {
-              const u = { x: parseFloat(u3x) || 0, y: parseFloat(u3y) || 0, z: parseFloat(u3z) || 0 };
-              const v = { x: parseFloat(v3x) || 0, y: parseFloat(v3y) || 0, z: parseFloat(v3z) || 0 };
+              const u = {
+                x: parseFloat(u3x) || 0,
+                y: parseFloat(u3y) || 0,
+                z: parseFloat(u3z) || 0,
+              };
+              const v = {
+                x: parseFloat(v3x) || 0,
+                y: parseFloat(v3y) || 0,
+                z: parseFloat(v3z) || 0,
+              };
               const vRes = analyze3DVectors(u, v);
               return (
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-1">
                   <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
                     <span className="text-xs text-slate-400 block mb-0.5">|u|, |v|</span>
-                    <span className="font-mono text-sm font-bold text-slate-200">{formatNum(vRes.magnitudeU)}, {formatNum(vRes.magnitudeV)}</span>
+                    <span className="font-mono text-sm font-bold text-slate-200">
+                      {formatNum(vRes.magnitudeU)}, {formatNum(vRes.magnitudeV)}
+                    </span>
                   </div>
                   <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
                     <span className="text-xs text-slate-400 block mb-0.5">Dot Product (u · v)</span>
-                    <span className="font-mono text-sm font-bold text-emerald-400">{formatNum(vRes.dotProduct)}</span>
+                    <span className="font-mono text-sm font-bold text-emerald-400">
+                      {formatNum(vRes.dotProduct)}
+                    </span>
                   </div>
                   <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
-                    <span className="text-xs text-slate-400 block mb-0.5">Cross Product (u × v)</span>
-                    <span className="font-mono text-sm font-bold text-sky-400">({formatNum(vRes.crossProduct.x)}, {formatNum(vRes.crossProduct.y)}, {formatNum(vRes.crossProduct.z)})</span>
+                    <span className="text-xs text-slate-400 block mb-0.5">
+                      Cross Product (u × v)
+                    </span>
+                    <span className="font-mono text-sm font-bold text-sky-400">
+                      ({formatNum(vRes.crossProduct.x)}, {formatNum(vRes.crossProduct.y)},{' '}
+                      {formatNum(vRes.crossProduct.z)})
+                    </span>
                   </div>
                   <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
                     <span className="text-xs text-slate-400 block mb-0.5">Enclosed Angle</span>
-                    <span className="font-mono text-sm font-bold text-amber-400">{formatNum(vRes.angleDeg)}°</span>
+                    <span className="font-mono text-sm font-bold text-amber-400">
+                      {formatNum(vRes.angleDeg)}°
+                    </span>
                   </div>
                 </div>
               );

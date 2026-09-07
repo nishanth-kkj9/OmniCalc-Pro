@@ -96,7 +96,9 @@ export const HistoryPanel: React.FC<HistoryPanelProps> = ({ onSelectExpr, settin
   };
 
   return (
-    <div className={`max-w-4xl mx-auto w-full p-4 sm:p-6 rounded-3xl border shadow-xl ${panelBg} flex flex-col gap-6`}>
+    <div
+      className={`max-w-4xl mx-auto w-full p-4 sm:p-6 rounded-3xl border shadow-xl ${panelBg} flex flex-col gap-6`}
+    >
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
         <div className="flex items-center gap-3">

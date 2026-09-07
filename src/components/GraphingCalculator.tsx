@@ -1,6 +1,21 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { AppSettings, GraphExpression, GraphViewport, GraphSettings as IGraphSettings, GraphSlider, GraphSession, Point2D, CurveSegment, CalcMode } from '../types';
-import { DEFAULT_VIEWPORT, GRAPH_PALETTE, getOrCompileGraphExpression, zoomViewportAroundPoint } from '../utils/graph';
+import {
+  AppSettings,
+  GraphExpression,
+  GraphViewport,
+  GraphSettings as IGraphSettings,
+  GraphSlider,
+  GraphSession,
+  Point2D,
+  CurveSegment,
+  CalcMode,
+} from '../types';
+import {
+  DEFAULT_VIEWPORT,
+  GRAPH_PALETTE,
+  getOrCompileGraphExpression,
+  zoomViewportAroundPoint,
+} from '../utils/graph';
 import {
   sampleGraphCurve,
   sampleParametricCurve,
@@ -40,10 +55,7 @@ export interface GraphingCalculatorProps {
   onNavigate?: (mode: CalcMode) => void;
 }
 
-export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({
-  settings,
-  onNavigate,
-}) => {
+export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings, onNavigate }) => {
   const [expressions, setExpressions] = useState<GraphExpression[]>(() => {
     // Start with a clean default quadratic parabola
     return [
@@ -63,7 +75,9 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({
   const [viewport, setViewport] = useState<GraphViewport>({ ...DEFAULT_VIEWPORT });
   const [graphSettings, setGraphSettings] = useState<IGraphSettings>({ ...DEFAULT_GRAPH_SETTINGS });
   const [sliders, setSliders] = useState<GraphSlider[]>([]);
-  const [activeTab, setActiveTab] = useState<'expressions' | 'table' | 'analysis' | 'sliders' | 'sessions'>('expressions');
+  const [activeTab, setActiveTab] = useState<
+    'expressions' | 'table' | 'analysis' | 'sliders' | 'sessions'
+  >('expressions');
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   // Trace mode
@@ -78,8 +92,15 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({
   const [userSessions, setUserSessions] = useState<GraphSession[]>([]);
 
   // Analysis markers on canvas
-  const [tangentLine, setTangentLine] = useState<{ x0: number; y0: number; slope: number } | null>(null);
-  const [normalLine, setNormalLine] = useState<{ x0: number; y0: number; slope: number | null; isVertical: boolean } | null>(null);
+  const [tangentLine, setTangentLine] = useState<{ x0: number; y0: number; slope: number } | null>(
+    null
+  );
+  const [normalLine, setNormalLine] = useState<{
+    x0: number;
+    y0: number;
+    slope: number | null;
+    isVertical: boolean;
+  } | null>(null);
   const [integralPolygon, setIntegralPolygon] = useState<Point2D[] | null>(null);
   const [integralLabel, setIntegralLabel] = useState<string | null>(null);
 
@@ -91,11 +112,14 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({
   }, []);
 
   // Update viewport with history push
-  const handleUpdateViewport = useCallback((newVp: GraphViewport) => {
-    setUndoStack((prev) => [...prev.slice(-20), viewport]);
-    setRedoStack([]);
-    setViewport(newVp);
-  }, [viewport]);
+  const handleUpdateViewport = useCallback(
+    (newVp: GraphViewport) => {
+      setUndoStack((prev) => [...prev.slice(-20), viewport]);
+      setRedoStack([]);
+      setViewport(newVp);
+    },
+    [viewport]
+  );
 
   // Undo / Redo handlers
   const handleUndo = useCallback(() => {
@@ -132,14 +156,22 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({
     const validIds = new Set<string>();
 
     for (const expr of expressions) {
-      const compiled = getOrCompileGraphExpression(expr.expression, settings.angleMode, sliderNames);
+      const compiled = getOrCompileGraphExpression(
+        expr.expression,
+        settings.angleMode,
+        sliderNames
+      );
       if (compiled) {
         map.set(expr.id, compiled);
         validIds.add(expr.id);
       }
 
       if (expr.type === 'parametric' && expr.parametricY) {
-        const compY = getOrCompileGraphExpression(expr.parametricY, settings.angleMode, sliderNames);
+        const compY = getOrCompileGraphExpression(
+          expr.parametricY,
+          settings.angleMode,
+          sliderNames
+        );
         if (compY) {
           yMap.set(expr.id, compY);
         }
@@ -150,79 +182,105 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({
   }, [expressions, settings.angleMode, sliderNames]);
 
   // Curve sampling with adaptive subdivision, parametric, polar, and asymptote detection
-  const { segmentsMap, inequalityPolygonsMap, derivativeSegmentsMap, detectedAsymptotes } = useMemo(() => {
-    const segMap = new Map<string, CurveSegment[]>();
-    const ineqMap = new Map<string, Point2D[][]>();
-    const derivMap = new Map<string, { d1?: CurveSegment[]; d2?: CurveSegment[] }>();
-    const allAsymptotes: number[] = [];
+  const { segmentsMap, inequalityPolygonsMap, derivativeSegmentsMap, detectedAsymptotes } =
+    useMemo(() => {
+      const segMap = new Map<string, CurveSegment[]>();
+      const ineqMap = new Map<string, Point2D[][]>();
+      const derivMap = new Map<string, { d1?: CurveSegment[]; d2?: CurveSegment[] }>();
+      const allAsymptotes: number[] = [];
 
-    for (const expr of expressions) {
-      if (!expr.visible) continue;
-      const compiled = compiledMap.get(expr.id);
-      if (!compiled) continue;
+      for (const expr of expressions) {
+        if (!expr.visible) continue;
+        const compiled = compiledMap.get(expr.id);
+        if (!compiled) continue;
 
-      let segments: CurveSegment[] = [];
+        let segments: CurveSegment[] = [];
 
-      if (expr.type === 'parametric') {
-        const compY = compiledParametricYMap.get(expr.id);
-        if (compY) {
-          segments = sampleParametricCurve(compiled, compY, {
-            tMin: expr.tMin ?? 0,
-            tMax: expr.tMax ?? 2 * Math.PI,
+        if (expr.type === 'parametric') {
+          const compY = compiledParametricYMap.get(expr.id);
+          if (compY) {
+            segments = sampleParametricCurve(compiled, compY, {
+              tMin: expr.tMin ?? 0,
+              tMax: expr.tMax ?? 2 * Math.PI,
+              viewport,
+              scope: sliderScope,
+            });
+          }
+        } else if (expr.type === 'polar') {
+          segments = samplePolarCurve(compiled, {
+            thetaMin: expr.thetaMin ?? 0,
+            thetaMax: expr.thetaMax ?? 2 * Math.PI,
             viewport,
             scope: sliderScope,
           });
-        }
-      } else if (expr.type === 'polar') {
-        segments = samplePolarCurve(compiled, {
-          thetaMin: expr.thetaMin ?? 0,
-          thetaMax: expr.thetaMax ?? 2 * Math.PI,
-          viewport,
-          scope: sliderScope,
-        });
-      } else {
-        // Cartesian Function or Inequality
-        segments = sampleGraphCurve(compiled, {
-          viewport,
-          domainMin: expr.domainMin,
-          domainMax: expr.domainMax,
-          scope: sliderScope,
-          pixelWidth: 900,
-        });
+        } else {
+          // Cartesian Function or Inequality
+          segments = sampleGraphCurve(compiled, {
+            viewport,
+            domainMin: expr.domainMin,
+            domainMax: expr.domainMax,
+            scope: sliderScope,
+            pixelWidth: 900,
+          });
 
-        if (expr.type === 'inequality') {
-          const polys = generateInequalitySegments(segments, expr.inequalityOp || '<=', viewport);
-          ineqMap.set(expr.id, polys);
+          if (expr.type === 'inequality') {
+            const polys = generateInequalitySegments(segments, expr.inequalityOp || '<=', viewport);
+            ineqMap.set(expr.id, polys);
+          }
+
+          // Derivative curves if toggled
+          if (expr.showDerivative || expr.showSecondDerivative) {
+            const d1 = expr.showDerivative
+              ? sampleDerivativeCurve(
+                  compiled,
+                  {
+                    viewport,
+                    domainMin: expr.domainMin,
+                    domainMax: expr.domainMax,
+                    scope: sliderScope,
+                  },
+                  1
+                )
+              : undefined;
+            const d2 = expr.showSecondDerivative
+              ? sampleDerivativeCurve(
+                  compiled,
+                  {
+                    viewport,
+                    domainMin: expr.domainMin,
+                    domainMax: expr.domainMax,
+                    scope: sliderScope,
+                  },
+                  2
+                )
+              : undefined;
+            derivMap.set(expr.id, { d1, d2 });
+          }
+
+          // Detect vertical asymptotes for active or function curves
+          if (expr.id === activeExpressionId || expressions.length <= 2) {
+            const asyms = detectVerticalAsymptotes(compiled, viewport, sliderScope);
+            allAsymptotes.push(...asyms);
+          }
         }
 
-        // Derivative curves if toggled
-        if (expr.showDerivative || expr.showSecondDerivative) {
-          const d1 = expr.showDerivative
-            ? sampleDerivativeCurve(compiled, { viewport, domainMin: expr.domainMin, domainMax: expr.domainMax, scope: sliderScope }, 1)
-            : undefined;
-          const d2 = expr.showSecondDerivative
-            ? sampleDerivativeCurve(compiled, { viewport, domainMin: expr.domainMin, domainMax: expr.domainMax, scope: sliderScope }, 2)
-            : undefined;
-          derivMap.set(expr.id, { d1, d2 });
-        }
-
-        // Detect vertical asymptotes for active or function curves
-        if (expr.id === activeExpressionId || expressions.length <= 2) {
-          const asyms = detectVerticalAsymptotes(compiled, viewport, sliderScope);
-          allAsymptotes.push(...asyms);
-        }
+        segMap.set(expr.id, segments);
       }
 
-      segMap.set(expr.id, segments);
-    }
-
-    return {
-      segmentsMap: segMap,
-      inequalityPolygonsMap: ineqMap,
-      derivativeSegmentsMap: derivMap,
-      detectedAsymptotes: allAsymptotes,
-    };
-  }, [expressions, compiledMap, compiledParametricYMap, viewport, sliderScope, activeExpressionId]);
+      return {
+        segmentsMap: segMap,
+        inequalityPolygonsMap: ineqMap,
+        derivativeSegmentsMap: derivMap,
+        detectedAsymptotes: allAsymptotes,
+      };
+    }, [
+      expressions,
+      compiledMap,
+      compiledParametricYMap,
+      viewport,
+      sliderScope,
+      activeExpressionId,
+    ]);
 
   // Toolbar Actions
   const handleZoomIn = useCallback(() => {
@@ -307,9 +365,7 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({
   };
 
   const handleUpdateExpression = (id: string, updated: Partial<GraphExpression>) => {
-    setExpressions((prev) =>
-      prev.map((e) => (e.id === id ? { ...e, ...updated } : e))
-    );
+    setExpressions((prev) => prev.map((e) => (e.id === id ? { ...e, ...updated } : e)));
   };
 
   const handleDuplicateExpression = (id: string) => {
@@ -354,9 +410,7 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({
   };
 
   const handleUpdateSlider = (id: string, updated: Partial<GraphSlider>) => {
-    setSliders((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, ...updated } : s))
-    );
+    setSliders((prev) => prev.map((s) => (s.id === id ? { ...s, ...updated } : s)));
   };
 
   const handleDeleteSlider = (id: string) => {
@@ -517,7 +571,10 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({
             viewport={viewport}
             tracePoint={tracePoint}
             isTraceActive={isTraceActive}
-            activeExprLabel={activeExpression?.label || (activeExpression ? `y = ${activeExpression.expression}` : undefined)}
+            activeExprLabel={
+              activeExpression?.label ||
+              (activeExpression ? `y = ${activeExpression.expression}` : undefined)
+            }
             angleMode={settings.angleMode}
             theme={settings.theme}
           />
@@ -618,9 +675,7 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({
       {settingsOpen && (
         <GraphSettings
           settings={graphSettings}
-          onUpdateSettings={(updated) =>
-            setGraphSettings((prev) => ({ ...prev, ...updated }))
-          }
+          onUpdateSettings={(updated) => setGraphSettings((prev) => ({ ...prev, ...updated }))}
           viewport={viewport}
           onUpdateViewport={handleUpdateViewport}
           onClose={() => setSettingsOpen(false)}

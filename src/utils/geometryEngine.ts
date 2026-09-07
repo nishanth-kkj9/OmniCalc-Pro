@@ -55,7 +55,8 @@ export function analyze2DLine(p1: Point2D, p2: Point2D): Line2DResult {
 
   const slope = dx !== 0 ? dy / dx : Infinity;
   const intercept = isFinite(slope) ? p1.y - slope * p1.x : NaN;
-  const perpendicularSlope = isFinite(slope) && slope !== 0 ? -1 / slope : slope === 0 ? Infinity : 0;
+  const perpendicularSlope =
+    isFinite(slope) && slope !== 0 ? -1 / slope : slope === 0 ? Infinity : 0;
   const angleDeg = (Math.atan2(dy, dx) * 180) / Math.PI;
 
   let equation = '';

@@ -25,14 +25,8 @@ export function factorial(n: number): number {
 export function logGamma(x: number): number {
   if (x <= 0) return NaN;
   const p = [
-    0.99999999999980993,
-    676.5203681218851,
-    -1259.1392167224028,
-    771.32342877765313,
-    -176.61502916214059,
-    12.507343278686905,
-    -0.138571095856205,
-    9.9843695780195716e-6,
+    0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313,
+    -176.61502916214059, 12.507343278686905, -0.138571095856205, 9.9843695780195716e-6,
     1.5056327351493116e-7,
   ];
   const g = 7;
@@ -159,9 +153,7 @@ export function erf(x: number): number {
   const p = 0.3275911;
 
   const t = 1.0 / (1.0 + p * absX);
-  const y =
-    1.0 -
-    ((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t * Math.exp(-absX * absX);
+  const y = 1.0 - ((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t * Math.exp(-absX * absX);
   return sign * y;
 }
 
@@ -316,7 +308,10 @@ export const BinomialDist: DistributionDefinition = {
   suggestedDomain: ({ n = 10, p = 0.5 }) => {
     const mean = n * p;
     const sd = Math.sqrt(n * p * (1 - p));
-    return { min: Math.max(0, Math.floor(mean - 3.5 * sd)), max: Math.min(n, Math.ceil(mean + 3.5 * sd)) };
+    return {
+      min: Math.max(0, Math.floor(mean - 3.5 * sd)),
+      max: Math.min(n, Math.ceil(mean + 3.5 * sd)),
+    };
   },
 };
 
@@ -511,8 +506,7 @@ export const StudentTDist: DistributionDefinition = {
   paramNames: ['df'],
   pdfOrPmf: (x, { df = 10 }) => {
     if (df <= 0) return NaN;
-    const factor =
-      Math.exp(logGamma((df + 1) / 2) - logGamma(df / 2)) / Math.sqrt(df * Math.PI);
+    const factor = Math.exp(logGamma((df + 1) / 2) - logGamma(df / 2)) / Math.sqrt(df * Math.PI);
     return factor * Math.pow(1 + (x * x) / df, -(df + 1) / 2);
   },
   cdf: (t, { df = 10 }) => {
@@ -550,8 +544,7 @@ export const ChiSquareDist: DistributionDefinition = {
     if (x <= 0 || df <= 0) return 0;
     const k = df;
     return (
-      (Math.pow(x, k / 2 - 1) * Math.exp(-x / 2)) /
-      (Math.pow(2, k / 2) * Math.exp(logGamma(k / 2)))
+      (Math.pow(x, k / 2 - 1) * Math.exp(-x / 2)) / (Math.pow(2, k / 2) * Math.exp(logGamma(k / 2)))
     );
   },
   cdf: (x, { df = 5 }) => {

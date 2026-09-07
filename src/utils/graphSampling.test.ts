@@ -12,7 +12,10 @@ import {
 import { compileSafeExpression, CompiledSafeExpression } from './calculator';
 import { GraphViewport } from '../types';
 
-function safeCompile(expr: string, vars: string[] = ['x', 't', 'theta', 'θ']): CompiledSafeExpression | null {
+function safeCompile(
+  expr: string,
+  vars: string[] = ['x', 't', 'theta', 'θ']
+): CompiledSafeExpression | null {
   const res = compileSafeExpression(expr, 'RAD', vars);
   return res.ok ? res.compiled : null;
 }
@@ -113,20 +116,28 @@ describe('graphSampling Engine', () => {
     const compiled = safeCompile('x^2');
     expect(compiled).not.toBeNull();
 
-    const d1Segs = sampleDerivativeCurve(compiled!, {
-      viewport: { xMin: -5, xMax: 5, yMin: -10, yMax: 10 },
-      pixelWidth: 200,
-    }, 1);
+    const d1Segs = sampleDerivativeCurve(
+      compiled!,
+      {
+        viewport: { xMin: -5, xMax: 5, yMin: -10, yMax: 10 },
+        pixelWidth: 200,
+      },
+      1
+    );
     expect(d1Segs.length).toBe(1);
     // Test a point near x=3 -> f'(x) should equal 2*x
     const ptAt3 = d1Segs[0].points.find((p) => Math.abs(p.x - 3) < 0.1);
     expect(ptAt3).toBeDefined();
     expect(ptAt3!.y).toBeCloseTo(2 * ptAt3!.x, 1);
 
-    const d2Segs = sampleDerivativeCurve(compiled!, {
-      viewport: { xMin: -5, xMax: 5, yMin: -10, yMax: 10 },
-      pixelWidth: 200,
-    }, 2);
+    const d2Segs = sampleDerivativeCurve(
+      compiled!,
+      {
+        viewport: { xMin: -5, xMax: 5, yMin: -10, yMax: 10 },
+        pixelWidth: 200,
+      },
+      2
+    );
     expect(d2Segs.length).toBe(1);
     const pt2At0 = d2Segs[0].points.find((p) => Math.abs(p.x) < 0.1);
     expect(pt2At0).toBeDefined();

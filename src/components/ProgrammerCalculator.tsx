@@ -91,10 +91,7 @@ export const ProgrammerCalculator: React.FC<ProgrammerCalculatorProps> = ({ sett
   const binRaw = valBig.toString(2).padStart(wordSize, '0');
 
   // Format binary into 4-bit nibble chunks
-  const formattedBin =
-    binRaw
-      .match(/.{1,4}/g)
-      ?.join(' ') || binRaw;
+  const formattedBin = binRaw.match(/.{1,4}/g)?.join(' ') || binRaw;
 
   // Keyboard shortcut listener
   useEffect(() => {
@@ -159,7 +156,9 @@ export const ProgrammerCalculator: React.FC<ProgrammerCalculatorProps> = ({ sett
                   setValBig((prev) => prev & mask);
                 }}
                 className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all ${
-                  wordSize === w ? 'bg-sky-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'
+                  wordSize === w
+                    ? 'bg-sky-600 text-white shadow-md'
+                    : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
                 {w}-bit

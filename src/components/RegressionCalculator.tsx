@@ -293,7 +293,10 @@ export const RegressionCalculator: React.FC<RegressionCalculatorProps> = ({
   };
 
   return (
-    <div id="regression-calculator-root" className="flex flex-col h-full bg-slate-50 dark:bg-zinc-950 p-4 lg:p-6 overflow-y-auto">
+    <div
+      id="regression-calculator-root"
+      className="flex flex-col h-full bg-slate-50 dark:bg-zinc-950 p-4 lg:p-6 overflow-y-auto"
+    >
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-800 dark:text-zinc-100 flex items-center gap-2">
@@ -301,7 +304,8 @@ export const RegressionCalculator: React.FC<RegressionCalculatorProps> = ({
             Regression & Curve Fitting
           </h1>
           <p className="text-sm text-slate-500 dark:text-zinc-400">
-            High-precision least-squares regression, ANOVA statistics, residuals & inverse prediction
+            High-precision least-squares regression, ANOVA statistics, residuals & inverse
+            prediction
           </p>
         </div>
 
@@ -404,13 +408,17 @@ export const RegressionCalculator: React.FC<RegressionCalculatorProps> = ({
                     <th className="py-2 px-3 text-slate-500 dark:text-zinc-400 font-medium">#</th>
                     <th className="py-2 px-3 text-slate-500 dark:text-zinc-400 font-medium">X</th>
                     <th className="py-2 px-3 text-slate-500 dark:text-zinc-400 font-medium">Y</th>
-                    <th className="py-2 px-3 text-right text-slate-500 dark:text-zinc-400 font-medium">Action</th>
+                    <th className="py-2 px-3 text-right text-slate-500 dark:text-zinc-400 font-medium">
+                      Action
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-zinc-800">
                   {dataPoints.map((pt, idx) => (
                     <tr key={idx} className="hover:bg-slate-50 dark:hover:bg-zinc-800/30">
-                      <td className="py-1.5 px-3 text-slate-400 dark:text-zinc-500 font-mono">{idx + 1}</td>
+                      <td className="py-1.5 px-3 text-slate-400 dark:text-zinc-500 font-mono">
+                        {idx + 1}
+                      </td>
                       <td className="py-1.5 px-3">
                         <input
                           id={`pt-x-${idx}`}
@@ -491,7 +499,9 @@ export const RegressionCalculator: React.FC<RegressionCalculatorProps> = ({
                   </div>
                   <div className="text-right">
                     <span className="font-mono font-bold">R² = {m.rSquared.toFixed(4)}</span>
-                    <span className="block text-[10px] text-slate-400">RMSE: {m.rmse.toFixed(3)}</span>
+                    <span className="block text-[10px] text-slate-400">
+                      RMSE: {m.rmse.toFixed(3)}
+                    </span>
                   </div>
                 </div>
               ))}
@@ -555,28 +565,36 @@ export const RegressionCalculator: React.FC<RegressionCalculatorProps> = ({
           {activeResult && (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div className="bg-white dark:bg-zinc-900 p-3 rounded-xl border border-slate-200 dark:border-zinc-800 shadow-sm">
-                <span className="text-[11px] text-slate-500 dark:text-zinc-400 font-medium">R² (Coeff of Det)</span>
+                <span className="text-[11px] text-slate-500 dark:text-zinc-400 font-medium">
+                  R² (Coeff of Det)
+                </span>
                 <p className="text-lg font-bold font-mono text-slate-800 dark:text-zinc-100">
                   {activeResult.rSquared.toFixed(5)}
                 </p>
               </div>
 
               <div className="bg-white dark:bg-zinc-900 p-3 rounded-xl border border-slate-200 dark:border-zinc-800 shadow-sm">
-                <span className="text-[11px] text-slate-500 dark:text-zinc-400 font-medium">Adjusted R²</span>
+                <span className="text-[11px] text-slate-500 dark:text-zinc-400 font-medium">
+                  Adjusted R²
+                </span>
                 <p className="text-lg font-bold font-mono text-slate-800 dark:text-zinc-100">
                   {activeResult.adjustedRSquared?.toFixed(5) ?? 'N/A'}
                 </p>
               </div>
 
               <div className="bg-white dark:bg-zinc-900 p-3 rounded-xl border border-slate-200 dark:border-zinc-800 shadow-sm">
-                <span className="text-[11px] text-slate-500 dark:text-zinc-400 font-medium">RMSE</span>
+                <span className="text-[11px] text-slate-500 dark:text-zinc-400 font-medium">
+                  RMSE
+                </span>
                 <p className="text-lg font-bold font-mono text-slate-800 dark:text-zinc-100">
                   {activeResult.rmse.toFixed(4)}
                 </p>
               </div>
 
               <div className="bg-white dark:bg-zinc-900 p-3 rounded-xl border border-slate-200 dark:border-zinc-800 shadow-sm">
-                <span className="text-[11px] text-slate-500 dark:text-zinc-400 font-medium">MAE</span>
+                <span className="text-[11px] text-slate-500 dark:text-zinc-400 font-medium">
+                  MAE
+                </span>
                 <p className="text-lg font-bold font-mono text-slate-800 dark:text-zinc-100">
                   {activeResult.mae.toFixed(4)}
                 </p>

@@ -33,7 +33,14 @@ export const GraphSettings: React.FC<GraphSettingsProps> = ({
     const yMin = parseFloat(localYMin);
     const yMax = parseFloat(localYMax);
 
-    if (!isNaN(xMin) && !isNaN(xMax) && !isNaN(yMin) && !isNaN(yMax) && xMin < xMax && yMin < yMax) {
+    if (
+      !isNaN(xMin) &&
+      !isNaN(xMax) &&
+      !isNaN(yMin) &&
+      !isNaN(yMax) &&
+      xMin < xMax &&
+      yMin < yMax
+    ) {
       onUpdateViewport({ xMin, xMax, yMin, yMax });
     }
   };
@@ -55,7 +62,11 @@ export const GraphSettings: React.FC<GraphSettingsProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
       <div
         className={`w-full max-w-md rounded-3xl border p-5 shadow-2xl space-y-4 ${
-          isLight ? 'bg-white border-slate-200 text-slate-900' : isOled ? 'bg-zinc-950 border-zinc-800 text-white' : 'bg-slate-900 border-slate-800 text-slate-100'
+          isLight
+            ? 'bg-white border-slate-200 text-slate-900'
+            : isOled
+              ? 'bg-zinc-950 border-zinc-800 text-white'
+              : 'bg-slate-900 border-slate-800 text-slate-100'
         }`}
       >
         {/* Header */}

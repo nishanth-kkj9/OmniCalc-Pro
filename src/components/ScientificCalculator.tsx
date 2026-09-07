@@ -322,14 +322,14 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({ sett
         {/* Row 1 */}
         <button
           onClick={() => setIs2nd(!is2nd)}
-          aria-label={is2nd ? "Primary scientific functions" : "Secondary scientific functions"}
+          aria-label={is2nd ? 'Primary scientific functions' : 'Secondary scientific functions'}
           className={`${fnBtnClass} ${is2nd ? 'bg-amber-500/20 text-amber-400 border-amber-500/40 font-bold' : ''}`}
         >
           2nd
         </button>
         <button
           onClick={() => handleInput(is2nd ? 'asin(' : 'sin(')}
-          aria-label={is2nd ? "Arcsine" : "Sine"}
+          aria-label={is2nd ? 'Arcsine' : 'Sine'}
           className={fnBtnClass}
           style={{ color: 'var(--accent)' }}
         >
@@ -337,7 +337,7 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({ sett
         </button>
         <button
           onClick={() => handleInput(is2nd ? 'acos(' : 'cos(')}
-          aria-label={is2nd ? "Arccosine" : "Cosine"}
+          aria-label={is2nd ? 'Arccosine' : 'Cosine'}
           className={fnBtnClass}
           style={{ color: 'var(--accent)' }}
         >
@@ -345,7 +345,7 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({ sett
         </button>
         <button
           onClick={() => handleInput(is2nd ? 'atan(' : 'tan(')}
-          aria-label={is2nd ? "Arctangent" : "Tangent"}
+          aria-label={is2nd ? 'Arctangent' : 'Tangent'}
           className={fnBtnClass}
           style={{ color: 'var(--accent)' }}
         >
@@ -366,22 +366,30 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({ sett
         </button>
         <button
           onClick={() => handleInput(is2nd ? '10^(' : 'log(')}
-          aria-label={is2nd ? "10 to power of x" : "Logarithm base 10"}
+          aria-label={is2nd ? '10 to power of x' : 'Logarithm base 10'}
           className={fnBtnClass}
         >
           {is2nd ? '10ˣ' : 'log'}
         </button>
         <button
           onClick={() => handleInput(is2nd ? 'e^(' : 'ln(')}
-          aria-label={is2nd ? "e to power of x" : "Natural logarithm"}
+          aria-label={is2nd ? 'e to power of x' : 'Natural logarithm'}
           className={fnBtnClass}
         >
           {is2nd ? 'eˣ' : 'ln'}
         </button>
-        <button onClick={() => handleInput('(')} aria-label="Open parenthesis" className={fnBtnClass}>
+        <button
+          onClick={() => handleInput('(')}
+          aria-label="Open parenthesis"
+          className={fnBtnClass}
+        >
           (
         </button>
-        <button onClick={() => handleInput(')')} aria-label="Close parenthesis" className={fnBtnClass}>
+        <button
+          onClick={() => handleInput(')')}
+          aria-label="Close parenthesis"
+          className={fnBtnClass}
+        >
           )
         </button>
 

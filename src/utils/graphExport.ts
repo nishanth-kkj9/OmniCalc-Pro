@@ -1,11 +1,20 @@
-import { GraphSession, GraphViewport, GraphSettings, CurveSegment, GraphExpression } from '../types';
+import {
+  GraphSession,
+  GraphViewport,
+  GraphSettings,
+  CurveSegment,
+  GraphExpression,
+} from '../types';
 import { generateCSV, downloadTextFile } from './exportEngine';
 import { generateAxisTicks } from './graph';
 
 /**
  * Exports an HTML Canvas directly as a PNG image download.
  */
-export function exportCanvasAsPng(canvas: HTMLCanvasElement, filename: string = 'omnicalc-graph.png'): void {
+export function exportCanvasAsPng(
+  canvas: HTMLCanvasElement,
+  filename: string = 'omnicalc-graph.png'
+): void {
   try {
     const dataUrl = canvas.toDataURL('image/png', 1.0);
     const link = document.createElement('a');
@@ -65,8 +74,14 @@ export function exportGraphAsSvg(options: SvgExportOptions): string {
   // Grid
   if (settings.showGrid) {
     svg += `  <!-- Grid Lines -->\n`;
-    const xTicks = generateAxisTicks(viewport.xMin, viewport.xMax, width, true, viewport, { width, height });
-    const yTicks = generateAxisTicks(viewport.yMin, viewport.yMax, height, false, viewport, { width, height });
+    const xTicks = generateAxisTicks(viewport.xMin, viewport.xMax, width, true, viewport, {
+      width,
+      height,
+    });
+    const yTicks = generateAxisTicks(viewport.yMin, viewport.yMax, height, false, viewport, {
+      width,
+      height,
+    });
 
     svg += `  <g stroke="${gridColor}" stroke-width="1">\n`;
     for (const xt of xTicks) {
@@ -99,8 +114,14 @@ export function exportGraphAsSvg(options: SvgExportOptions): string {
     if (settings.showAxisLabels) {
       svg += `  <!-- Axis Labels -->\n`;
       svg += `  <g fill="${textColor}">\n`;
-      const xTicks = generateAxisTicks(viewport.xMin, viewport.xMax, width, true, viewport, { width, height });
-      const yTicks = generateAxisTicks(viewport.yMin, viewport.yMax, height, false, viewport, { width, height });
+      const xTicks = generateAxisTicks(viewport.xMin, viewport.xMax, width, true, viewport, {
+        width,
+        height,
+      });
+      const yTicks = generateAxisTicks(viewport.yMin, viewport.yMax, height, false, viewport, {
+        width,
+        height,
+      });
 
       const labelY = Math.max(16, Math.min(height - 6, originY + 14));
       for (const xt of xTicks) {
@@ -124,7 +145,12 @@ export function exportGraphAsSvg(options: SvgExportOptions): string {
   for (const expr of expressions) {
     if (!expr.visible) continue;
     const segments = segmentsMap.get(expr.id) || [];
-    const strokeDash = expr.lineStyle === 'dashed' ? ' stroke-dasharray="6,4"' : expr.lineStyle === 'dotted' ? ' stroke-dasharray="2,3"' : '';
+    const strokeDash =
+      expr.lineStyle === 'dashed'
+        ? ' stroke-dasharray="6,4"'
+        : expr.lineStyle === 'dotted'
+          ? ' stroke-dasharray="2,3"'
+          : '';
 
     for (const seg of segments) {
       if (seg.points.length < 2) continue;
@@ -132,7 +158,8 @@ export function exportGraphAsSvg(options: SvgExportOptions): string {
       for (let i = 0; i < seg.points.length; i++) {
         const sx = toSvgX(seg.points[i].x);
         const sy = toSvgY(seg.points[i].y);
-        d += i === 0 ? `M ${sx.toFixed(1)} ${sy.toFixed(1)}` : ` L ${sx.toFixed(1)} ${sy.toFixed(1)}`;
+        d +=
+          i === 0 ? `M ${sx.toFixed(1)} ${sy.toFixed(1)}` : ` L ${sx.toFixed(1)} ${sy.toFixed(1)}`;
       }
       svg += `  <path d="${d}" fill="none" stroke="${expr.color}" stroke-width="${expr.lineWidth}" stroke-linecap="round" stroke-linejoin="round"${strokeDash} />\n`;
     }
@@ -145,7 +172,10 @@ export function exportGraphAsSvg(options: SvgExportOptions): string {
 /**
  * Downloads a generated SVG file.
  */
-export function downloadSvgGraph(options: SvgExportOptions, filename: string = 'omnicalc-graph.svg'): void {
+export function downloadSvgGraph(
+  options: SvgExportOptions,
+  filename: string = 'omnicalc-graph.svg'
+): void {
   const svgContent = exportGraphAsSvg(options);
   downloadTextFile(filename, svgContent, 'image/svg+xml');
 }
@@ -154,7 +184,8 @@ export function downloadSvgGraph(options: SvgExportOptions, filename: string = '
  * Exports a GraphSession as a validated JSON file.
  */
 export function downloadSessionJson(session: GraphSession, filename?: string): void {
-  const name = filename || `${session.title.toLowerCase().replace(/\s+/g, '-') || 'graph-session'}.json`;
+  const name =
+    filename || `${session.title.toLowerCase().replace(/\s+/g, '-') || 'graph-session'}.json`;
   const json = JSON.stringify(session, null, 2);
   downloadTextFile(name, json, 'application/json');
 }

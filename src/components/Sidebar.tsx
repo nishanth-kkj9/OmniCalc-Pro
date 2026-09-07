@@ -125,14 +125,16 @@ const MENU_ITEMS: MenuItem[] = [
     label: 'Regression & Fitting',
     icon: <Layers className="w-4 h-4 text-blue-400" />,
     group: 'Advanced & Science',
-    keywords: 'regression linear polynomial exponential logarithmic power fit least squares curve r2',
+    keywords:
+      'regression linear polynomial exponential logarithmic power fit least squares curve r2',
   },
   {
     mode: 'probability',
     label: 'Probability & Distributions',
     icon: <Activity className="w-4 h-4 text-emerald-400" />,
     group: 'Advanced & Science',
-    keywords: 'probability distribution normal binomial poisson uniform exponential student t chi square cdf pdf',
+    keywords:
+      'probability distribution normal binomial poisson uniform exponential student t chi square cdf pdf',
   },
   {
     mode: 'inference',
@@ -140,14 +142,16 @@ const MENU_ITEMS: MenuItem[] = [
     icon: <Layers className="w-4 h-4 text-indigo-400" />,
     group: 'Advanced & Science',
     badge: 'NEW',
-    keywords: 'inference hypothesis test z-test t-test anova chi-square confidence interval effect size welch',
+    keywords:
+      'inference hypothesis test z-test t-test anova chi-square confidence interval effect size welch',
   },
   {
     mode: 'sequences',
     label: 'Sequences & Series',
     icon: <ListOrdered className="w-4 h-4 text-amber-400" />,
     group: 'Core & Math',
-    keywords: 'sequence series arithmetic geometric fibonacci progression sum partial convergence limit',
+    keywords:
+      'sequence series arithmetic geometric fibonacci progression sum partial convergence limit',
   },
   {
     mode: 'complex',
@@ -368,7 +372,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <button
               onClick={onToggleRailCollapse}
               className={`hidden lg:flex p-1.5 rounded-xl transition-colors ${idleBtnClass}`}
-              title={isRailCollapsed ? 'Expand Navigation Sidebar' : 'Collapse Sidebar to Icon Rail'}
+              title={
+                isRailCollapsed ? 'Expand Navigation Sidebar' : 'Collapse Sidebar to Icon Rail'
+              }
             >
               {isRailCollapsed ? (
                 <PanelLeftOpen className="w-4 h-4 text-sky-400" />
@@ -566,7 +572,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                     ? 'text-amber-400 opacity-80 hover:opacity-100 focus:opacity-100'
                                     : 'opacity-0 group-hover:opacity-80 group-focus-within:opacity-100 hover:opacity-100 focus:opacity-100 text-slate-400 hover:text-amber-400'
                                 }`}
-                                aria-label={isPinned ? `Unpin ${item.label}` : `Pin ${item.label} to quick favorites`}
+                                aria-label={
+                                  isPinned
+                                    ? `Unpin ${item.label}`
+                                    : `Pin ${item.label} to quick favorites`
+                                }
                                 title={isPinned ? 'Unpin' : 'Pin to quick favorites'}
                               >
                                 <Pin

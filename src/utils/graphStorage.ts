@@ -291,13 +291,30 @@ export function sanitizeGraphSession(raw: unknown): GraphSession | null {
 
   // Settings validation
   const settings: GraphSettings = {
-    showGrid: typeof (obj.settings as any)?.showGrid === 'boolean' ? (obj.settings as any).showGrid : true,
-    showMinorGrid: typeof (obj.settings as any)?.showMinorGrid === 'boolean' ? (obj.settings as any).showMinorGrid : true,
-    showAxes: typeof (obj.settings as any)?.showAxes === 'boolean' ? (obj.settings as any).showAxes : true,
-    showAxisLabels: typeof (obj.settings as any)?.showAxisLabels === 'boolean' ? (obj.settings as any).showAxisLabels : true,
-    showCoordinates: typeof (obj.settings as any)?.showCoordinates === 'boolean' ? (obj.settings as any).showCoordinates : true,
-    showCurveLabels: typeof (obj.settings as any)?.showCurveLabels === 'boolean' ? (obj.settings as any).showCurveLabels : false,
-    lockAspectRatio: typeof (obj.settings as any)?.lockAspectRatio === 'boolean' ? (obj.settings as any).lockAspectRatio : false,
+    showGrid:
+      typeof (obj.settings as any)?.showGrid === 'boolean' ? (obj.settings as any).showGrid : true,
+    showMinorGrid:
+      typeof (obj.settings as any)?.showMinorGrid === 'boolean'
+        ? (obj.settings as any).showMinorGrid
+        : true,
+    showAxes:
+      typeof (obj.settings as any)?.showAxes === 'boolean' ? (obj.settings as any).showAxes : true,
+    showAxisLabels:
+      typeof (obj.settings as any)?.showAxisLabels === 'boolean'
+        ? (obj.settings as any).showAxisLabels
+        : true,
+    showCoordinates:
+      typeof (obj.settings as any)?.showCoordinates === 'boolean'
+        ? (obj.settings as any).showCoordinates
+        : true,
+    showCurveLabels:
+      typeof (obj.settings as any)?.showCurveLabels === 'boolean'
+        ? (obj.settings as any).showCurveLabels
+        : false,
+    lockAspectRatio:
+      typeof (obj.settings as any)?.lockAspectRatio === 'boolean'
+        ? (obj.settings as any).lockAspectRatio
+        : false,
   };
 
   // Expressions validation
@@ -308,17 +325,38 @@ export function sanitizeGraphSession(raw: unknown): GraphSession | null {
     if (!rawExpr || typeof rawExpr !== 'object') continue;
     const exprObj = rawExpr as Record<string, unknown>;
 
-    const exprText = typeof exprObj.expression === 'string' ? exprObj.expression.slice(0, MAX_EXPRESSION_LENGTH) : '';
+    const exprText =
+      typeof exprObj.expression === 'string'
+        ? exprObj.expression.slice(0, MAX_EXPRESSION_LENGTH)
+        : '';
     if (!exprText.trim()) continue;
 
-    const exprId = typeof exprObj.id === 'string' ? exprObj.id.slice(0, 32) : `expr_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
+    const exprId =
+      typeof exprObj.id === 'string'
+        ? exprObj.id.slice(0, 32)
+        : `expr_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
     const visible = typeof exprObj.visible === 'boolean' ? exprObj.visible : true;
-    const color = typeof exprObj.color === 'string' && /^#[0-9a-fA-F]{6}$/.test(exprObj.color) ? exprObj.color : GRAPH_PALETTE[expressions.length % GRAPH_PALETTE.length];
-    const lineWidth = typeof exprObj.lineWidth === 'number' && exprObj.lineWidth >= 1 && exprObj.lineWidth <= 8 ? exprObj.lineWidth : 2.5;
-    const lineStyle = exprObj.lineStyle === 'dashed' || exprObj.lineStyle === 'dotted' ? exprObj.lineStyle : 'solid';
+    const color =
+      typeof exprObj.color === 'string' && /^#[0-9a-fA-F]{6}$/.test(exprObj.color)
+        ? exprObj.color
+        : GRAPH_PALETTE[expressions.length % GRAPH_PALETTE.length];
+    const lineWidth =
+      typeof exprObj.lineWidth === 'number' && exprObj.lineWidth >= 1 && exprObj.lineWidth <= 8
+        ? exprObj.lineWidth
+        : 2.5;
+    const lineStyle =
+      exprObj.lineStyle === 'dashed' || exprObj.lineStyle === 'dotted'
+        ? exprObj.lineStyle
+        : 'solid';
     const label = typeof exprObj.label === 'string' ? exprObj.label.slice(0, 40) : undefined;
-    const domainMin = typeof exprObj.domainMin === 'number' && Number.isFinite(exprObj.domainMin) ? exprObj.domainMin : undefined;
-    const domainMax = typeof exprObj.domainMax === 'number' && Number.isFinite(exprObj.domainMax) ? exprObj.domainMax : undefined;
+    const domainMin =
+      typeof exprObj.domainMin === 'number' && Number.isFinite(exprObj.domainMin)
+        ? exprObj.domainMin
+        : undefined;
+    const domainMax =
+      typeof exprObj.domainMax === 'number' && Number.isFinite(exprObj.domainMax)
+        ? exprObj.domainMax
+        : undefined;
 
     expressions.push({
       id: exprId,
@@ -340,7 +378,10 @@ export function sanitizeGraphSession(raw: unknown): GraphSession | null {
   for (const rawSlider of rawSliders.slice(0, 6)) {
     if (!rawSlider || typeof rawSlider !== 'object') continue;
     const sObj = rawSlider as Record<string, unknown>;
-    const sName = typeof sObj.name === 'string' && /^[a-zA-Z]$/.test(sObj.name) ? sObj.name.toLowerCase() : null;
+    const sName =
+      typeof sObj.name === 'string' && /^[a-zA-Z]$/.test(sObj.name)
+        ? sObj.name.toLowerCase()
+        : null;
     if (!sName || sName === 'x') continue; // cannot use x as slider
 
     const sVal = typeof sObj.value === 'number' && Number.isFinite(sObj.value) ? sObj.value : 1;
@@ -362,16 +403,19 @@ export function sanitizeGraphSession(raw: unknown): GraphSession | null {
     id,
     title,
     version,
-    expressions: expressions.length > 0 ? expressions : [
-      {
-        id: 'default_1',
-        expression: 'x^2',
-        visible: true,
-        color: '#38bdf8',
-        lineWidth: 2.5,
-        lineStyle: 'solid',
-      }
-    ],
+    expressions:
+      expressions.length > 0
+        ? expressions
+        : [
+            {
+              id: 'default_1',
+              expression: 'x^2',
+              visible: true,
+              color: '#38bdf8',
+              lineWidth: 2.5,
+              lineStyle: 'solid',
+            },
+          ],
     sliders,
     viewport,
     settings,

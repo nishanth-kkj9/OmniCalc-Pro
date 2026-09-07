@@ -34,9 +34,11 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, data,
 
   // Close on Escape key (F-150)
   useEffect(() => {
-    const h = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
-    window.addEventListener("keydown", h);
-    return () => window.removeEventListener("keydown", h);
+    const h = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
   }, [onClose]);
 
   if (!isOpen) return null;
@@ -77,8 +79,16 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, data,
   };
 
   return (
-    <div role="dialog" aria-modal="true" aria-label="Export report" className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
-      <div ref={trapRef} className={`w-full max-w-2xl border rounded-3xl p-6 flex flex-col gap-5 ${modalBg}`}>
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Export report"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs"
+    >
+      <div
+        ref={trapRef}
+        className={`w-full max-w-2xl border rounded-3xl p-6 flex flex-col gap-5 ${modalBg}`}
+      >
         {/* Header */}
         <div className="flex items-center justify-between border-b pb-3 border-slate-800/80">
           <div>

@@ -1,5 +1,14 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Delete, Copy, Check, History, ChevronUp, ChevronDown, Keyboard, Undo2 } from 'lucide-react';
+import {
+  Delete,
+  Copy,
+  Check,
+  History,
+  ChevronUp,
+  ChevronDown,
+  Keyboard,
+  Undo2,
+} from 'lucide-react';
 import { evaluateExpression } from '../utils/calculator';
 import { addHistory, getHistory } from '../utils/history';
 import { formatNumberWithSettings } from '../utils/formatting';
@@ -25,7 +34,10 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
   const [historyCursor, setHistoryCursor] = useState<number>(-1);
 
   const pushUndo = useCallback((prevExpr: string) => {
-    if (undoStackRef.current.length === 0 || undoStackRef.current[undoStackRef.current.length - 1] !== prevExpr) {
+    if (
+      undoStackRef.current.length === 0 ||
+      undoStackRef.current[undoStackRef.current.length - 1] !== prevExpr
+    ) {
       undoStackRef.current.push(prevExpr);
       if (undoStackRef.current.length > 50) {
         undoStackRef.current.shift();
@@ -223,7 +235,15 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleInput, handleEquals, handleBackspace, handleClear, handleUndo, recentHistory, historyCursor]);
+  }, [
+    handleInput,
+    handleEquals,
+    handleBackspace,
+    handleClear,
+    handleUndo,
+    recentHistory,
+    historyCursor,
+  ]);
 
   const isLight = settings.theme === 'light';
   const isOled = settings.theme === 'oled';
@@ -339,7 +359,10 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
             >
               {copied ? (
                 <>
-                  <Check className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" aria-hidden="true" />
+                  <Check
+                    className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0"
+                    aria-hidden="true"
+                  />
                   <span className="text-[11px] text-emerald-500 font-bold">Copied</span>
                 </>
               ) : (
@@ -421,7 +444,12 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
       {/* Memory Bar */}
       <div className="grid grid-cols-4 gap-2">
         {['MC', 'MR', 'M+', 'M-'].map((m) => (
-          <button key={m} onClick={() => handleMemory(m as any)} className={memBtnClass} aria-label={`Memory ${m === "MC" ? "Clear" : m === "MR" ? "Recall" : m === "M+" ? "Add" : "Subtract"}`}>
+          <button
+            key={m}
+            onClick={() => handleMemory(m as any)}
+            className={memBtnClass}
+            aria-label={`Memory ${m === 'MC' ? 'Clear' : m === 'MR' ? 'Recall' : m === 'M+' ? 'Add' : 'Subtract'}`}
+          >
             {m}
           </button>
         ))}
@@ -436,10 +464,18 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
         >
           {expression ? 'C' : 'AC'}
         </button>
-        <button onClick={() => handleInput('(')} aria-label="Open parenthesis" className={fnBtnClass}>
+        <button
+          onClick={() => handleInput('(')}
+          aria-label="Open parenthesis"
+          className={fnBtnClass}
+        >
           (
         </button>
-        <button onClick={() => handleInput(')')} aria-label="Close parenthesis" className={fnBtnClass}>
+        <button
+          onClick={() => handleInput(')')}
+          aria-label="Close parenthesis"
+          className={fnBtnClass}
+        >
           )
         </button>
         <button onClick={handleBackspace} aria-label="Backspace" className={fnBtnClass}>

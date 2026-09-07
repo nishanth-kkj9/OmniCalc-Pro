@@ -78,4 +78,3 @@ describe('BasicCalculator Component', () => {
     expect(screen.getAllByText('5').length).toBeGreaterThan(0);
   });
 });
-

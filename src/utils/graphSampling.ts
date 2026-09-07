@@ -72,13 +72,7 @@ export function sampleGraphCurve(
   /**
    * Adaptive recursive subdivision between x0 and x1
    */
-  const sampleInterval = (
-    x0: number,
-    y0: number,
-    x1: number,
-    y1: number,
-    depth: number
-  ) => {
+  const sampleInterval = (x0: number, y0: number, x1: number, y1: number, depth: number) => {
     if (totalSampleCount >= maxSamples || depth > MAX_ADAPTIVE_DEPTH) {
       currentSegment.push({ x: x1, y: y1 });
       totalSampleCount++;
@@ -102,7 +96,12 @@ export function sampleGraphCurve(
     const jumpRight = Math.abs(y1 - yMid);
     if (jumpLeft > jumpThreshold || jumpRight > jumpThreshold) {
       // Sign flip with large jump strongly implies an asymptote (e.g. 1/x, tan(x))
-      if ((y0 > 0 && yMid < 0) || (y0 < 0 && yMid > 0) || (yMid > 0 && y1 < 0) || (yMid < 0 && y1 > 0)) {
+      if (
+        (y0 > 0 && yMid < 0) ||
+        (y0 < 0 && yMid > 0) ||
+        (yMid > 0 && y1 < 0) ||
+        (yMid < 0 && y1 > 0)
+      ) {
         if (currentSegment.length > 0) {
           segments.push({ points: currentSegment });
           currentSegment = [];
@@ -115,7 +114,7 @@ export function sampleGraphCurve(
     const yLinear = (y0 + y1) / 2;
     const tolerance = Math.max(1e-4, ySpan / 500); // fraction of viewport height
 
-    if (Math.abs(yMid - yLinear) > tolerance && (x1 - x0) > 1e-6) {
+    if (Math.abs(yMid - yLinear) > tolerance && x1 - x0 > 1e-6) {
       // Subdivide both halves
       sampleInterval(x0, y0, xMid, yMid, depth + 1);
       sampleInterval(xMid, yMid, x1, y1, depth + 1);
@@ -203,13 +202,7 @@ export function sampleParametricCurve(
   compiledY: CompiledSafeExpression,
   options: SampleParametricOptions = {}
 ): CurveSegment[] {
-  const {
-    tMin = 0,
-    tMax = 2 * Math.PI,
-    steps = 600,
-    scope = {},
-    viewport,
-  } = options;
+  const { tMin = 0, tMax = 2 * Math.PI, steps = 600, scope = {}, viewport } = options;
 
   if (tMin >= tMax || !Number.isFinite(tMin) || !Number.isFinite(tMax)) return [];
 
@@ -271,13 +264,7 @@ export function samplePolarCurve(
   compiledR: CompiledSafeExpression,
   options: SamplePolarOptions = {}
 ): CurveSegment[] {
-  const {
-    thetaMin = 0,
-    thetaMax = 2 * Math.PI,
-    steps = 800,
-    scope = {},
-    viewport,
-  } = options;
+  const { thetaMin = 0, thetaMax = 2 * Math.PI, steps = 800, scope = {}, viewport } = options;
 
   if (thetaMin >= thetaMax || !Number.isFinite(thetaMin) || !Number.isFinite(thetaMax)) return [];
 
@@ -285,12 +272,14 @@ export function samplePolarCurve(
   const segments: CurveSegment[] = [];
   let currentSegment: Point2D[] = [];
 
-  const bound = viewport ? Math.max(Math.abs(viewport.xMax - viewport.xMin), Math.abs(viewport.yMax - viewport.yMin)) * 4 : 1e4;
+  const bound = viewport
+    ? Math.max(Math.abs(viewport.xMax - viewport.xMin), Math.abs(viewport.yMax - viewport.yMin)) * 4
+    : 1e4;
 
   for (let i = 0; i <= steps; i++) {
     const theta = thetaMin + i * dTheta;
     try {
-      const r = compiledR.evaluate({ ...scope, theta, 'θ': theta, t: theta, x: theta });
+      const r = compiledR.evaluate({ ...scope, theta, θ: theta, t: theta, x: theta });
       if (r !== null && Number.isFinite(r) && Math.abs(r) < bound) {
         const x = r * Math.cos(theta);
         const y = r * Math.sin(theta);
@@ -379,13 +368,7 @@ export function sampleDerivativeCurve(
   options: SampleCurveOptions,
   order: 1 | 2 = 1
 ): CurveSegment[] {
-  const {
-    viewport,
-    domainMin,
-    domainMax,
-    scope = {},
-    pixelWidth = 800,
-  } = options;
+  const { viewport, domainMin, domainMax, scope = {}, pixelWidth = 800 } = options;
 
   const rawXMin = viewport.xMin;
   const rawXMax = viewport.xMax;
@@ -554,12 +537,7 @@ export function sampleAreaBetweenCurves(
     try {
       const y1 = compiled1.evaluate({ ...scope, x });
       const y2 = compiled2.evaluate({ ...scope, x });
-      if (
-        y1 !== null &&
-        y2 !== null &&
-        Number.isFinite(y1) &&
-        Number.isFinite(y2)
-      ) {
+      if (y1 !== null && y2 !== null && Number.isFinite(y1) && Number.isFinite(y2)) {
         currentUpper.push({ x, y: Math.max(y1, y2) });
         currentLower.push({ x, y: Math.min(y1, y2) });
       } else {

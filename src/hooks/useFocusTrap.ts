@@ -25,9 +25,7 @@ export function useFocusTrap<T extends HTMLElement = HTMLDivElement>(isActive: b
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key !== 'Tab') return;
 
-      const focusableEls = Array.from(
-        container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)
-      );
+      const focusableEls = Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR));
       if (focusableEls.length === 0) return;
 
       const first = focusableEls[0];

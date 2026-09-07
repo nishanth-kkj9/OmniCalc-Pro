@@ -68,22 +68,13 @@ export const MatrixCalculator: React.FC<MatrixCalculatorProps> = ({ settings }) 
 
   const dim = size === '2x2' ? 2 : 3;
 
-  const handleCellChange = (
-    matrix: 'A' | 'B',
-    r: number,
-    c: number,
-    valStr: string
-  ) => {
+  const handleCellChange = (matrix: 'A' | 'B', r: number, c: number, valStr: string) => {
     const val = parseFloat(valStr) || 0;
     if (matrix === 'A') {
-      const next = mA.map((row, ri) =>
-        row.map((col, ci) => (ri === r && ci === c ? val : col))
-      );
+      const next = mA.map((row, ri) => row.map((col, ci) => (ri === r && ci === c ? val : col)));
       setMA(next);
     } else {
-      const next = mB.map((row, ri) =>
-        row.map((col, ci) => (ri === r && ci === c ? val : col))
-      );
+      const next = mB.map((row, ri) => row.map((col, ci) => (ri === r && ci === c ? val : col)));
       setMB(next);
     }
   };
@@ -202,9 +193,7 @@ export const MatrixCalculator: React.FC<MatrixCalculatorProps> = ({ settings }) 
                 .join(', ')
             : resObj.msg,
     tableHeaders:
-      resObj.type === 'matrix'
-        ? Array.from({ length: dim }, (_, i) => `Col ${i + 1}`)
-        : undefined,
+      resObj.type === 'matrix' ? Array.from({ length: dim }, (_, i) => `Col ${i + 1}`) : undefined,
     tableRows:
       resObj.type === 'matrix'
         ? resObj.data.map((r) => r.map((n) => (Math.round(n * 1000) / 1000).toString()))
@@ -218,7 +207,8 @@ export const MatrixCalculator: React.FC<MatrixCalculatorProps> = ({ settings }) 
         <div>
           <h2 className="text-base font-bold text-slate-100">Linear Algebra & Matrix Suite</h2>
           <p className="text-xs text-slate-400">
-            2×2 and 3×3 real matrices: arithmetic, determinant, inverse, eigenvalues, rank, RREF, power
+            2×2 and 3×3 real matrices: arithmetic, determinant, inverse, eigenvalues, rank, RREF,
+            power
           </p>
         </div>
 
@@ -374,7 +364,10 @@ export const MatrixCalculator: React.FC<MatrixCalculatorProps> = ({ settings }) 
         </span>
 
         {resObj.type === 'error' && (
-          <div role="alert" className="p-4 bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-semibold rounded-2xl">
+          <div
+            role="alert"
+            className="p-4 bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-semibold rounded-2xl"
+          >
             {resObj.msg}
           </div>
         )}

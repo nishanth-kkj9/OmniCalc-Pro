@@ -123,7 +123,11 @@ export function calculateDefiniteIntegral(
   scope: Record<string, number> = {},
   nSubintervals: number = 200
 ): { value: number; formatted: string } | null {
-  const res = numIntegrateDefinite(compiled, a, b, { scope, subdivisions: nSubintervals, method: 'simpson' });
+  const res = numIntegrateDefinite(compiled, a, b, {
+    scope,
+    subdivisions: nSubintervals,
+    method: 'simpson',
+  });
   if (!res) return null;
   return {
     value: res.value,

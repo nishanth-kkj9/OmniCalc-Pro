@@ -70,7 +70,9 @@ export const ExpressionList: React.FC<ExpressionListProps> = ({
 
       {/* Quick Starter Templates */}
       <div className="px-3 py-2 border-b border-slate-700/40 flex items-center gap-1.5 overflow-x-auto select-none flex-shrink-0">
-        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex-shrink-0">Quick:</span>
+        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex-shrink-0">
+          Quick:
+        </span>
         {QUICK_TEMPLATES.map((tmpl) => (
           <button
             key={tmpl.expr}
@@ -94,7 +96,8 @@ export const ExpressionList: React.FC<ExpressionListProps> = ({
             <Sparkles className="w-8 h-8 text-sky-400 mb-2 opacity-60" />
             <p className="text-xs font-semibold text-slate-300 mb-1">No expressions plotted</p>
             <p className="text-[11px] text-slate-400 max-w-xs mb-3">
-              Add a function like <code className="text-sky-400 font-mono">y = x^2 - 4</code> or click a quick template above.
+              Add a function like <code className="text-sky-400 font-mono">y = x^2 - 4</code> or
+              click a quick template above.
             </p>
             <button
               onClick={() => onAddExpression('x^2 - 4')}
@@ -125,7 +128,10 @@ export const ExpressionList: React.FC<ExpressionListProps> = ({
       <div className="p-2.5 border-t border-slate-700/40 text-[10px] text-slate-400 flex items-center justify-between flex-shrink-0 bg-slate-900/30">
         <div className="flex items-center gap-1.5 truncate">
           <HelpCircle className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-          <span className="truncate">Supports <code className="font-mono text-sky-400">sin, cos, tan, sqrt, ln, e^x, abs, pi</code></span>
+          <span className="truncate">
+            Supports{' '}
+            <code className="font-mono text-sky-400">sin, cos, tan, sqrt, ln, e^x, abs, pi</code>
+          </span>
         </div>
       </div>
     </div>

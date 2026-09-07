@@ -1,12 +1,5 @@
 import React, { useRef } from 'react';
-import {
-  FolderOpen,
-  Save,
-  Trash2,
-  Download,
-  Upload,
-  BookOpen,
-} from 'lucide-react';
+import { FolderOpen, Save, Trash2, Download, Upload, BookOpen } from 'lucide-react';
 import { GraphSession } from '../../types';
 import { PRESET_SESSIONS, sanitizeGraphSession } from '../../utils/graphStorage';
 import { downloadSessionJson } from '../../utils/graphExport';
@@ -151,10 +144,14 @@ export const GraphSessionsPanel: React.FC<GraphSessionsPanelProps> = ({
                 key={sess.id}
                 className="p-2.5 rounded-xl border border-slate-700/50 bg-slate-900/40 hover:bg-slate-800/60 flex items-center justify-between transition-colors"
               >
-                <div onClick={() => onLoadSession(sess)} className="cursor-pointer flex-1 min-w-0 pr-2">
+                <div
+                  onClick={() => onLoadSession(sess)}
+                  className="cursor-pointer flex-1 min-w-0 pr-2"
+                >
                   <h4 className="text-xs font-bold text-slate-200 truncate">{sess.title}</h4>
                   <div className="text-[10px] text-slate-400">
-                    {sess.expressions.length} functions • {new Date(sess.timestamp).toLocaleDateString()}
+                    {sess.expressions.length} functions •{' '}
+                    {new Date(sess.timestamp).toLocaleDateString()}
                   </div>
                 </div>
 

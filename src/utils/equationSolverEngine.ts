@@ -35,7 +35,9 @@ export function solveQuadratic(a: number, b: number, c: number): QuadraticSoluti
   if (Math.abs(a) < 1e-12) {
     if (Math.abs(b) < 1e-12) {
       return {
-        a, b, c,
+        a,
+        b,
+        c,
         discriminant: 0,
         nature: 'degenerate',
         roots: [],
@@ -45,7 +47,9 @@ export function solveQuadratic(a: number, b: number, c: number): QuadraticSoluti
     }
     const root = -c / b;
     return {
-      a, b, c,
+      a,
+      b,
+      c,
       discriminant: 0,
       nature: 'linear',
       roots: [{ re: root, im: 0 }],
@@ -64,7 +68,9 @@ export function solveQuadratic(a: number, b: number, c: number): QuadraticSoluti
   if (Math.abs(d) < 1e-12) {
     const root = -b / (2 * a);
     return {
-      a, b, c,
+      a,
+      b,
+      c,
       discriminant: 0,
       nature: 'one-real',
       roots: [{ re: root, im: 0 }],
@@ -82,7 +88,9 @@ export function solveQuadratic(a: number, b: number, c: number): QuadraticSoluti
     const r1 = (-b + sqrtD) / (2 * a);
     const r2 = (-b - sqrtD) / (2 * a);
     return {
-      a, b, c,
+      a,
+      b,
+      c,
       discriminant: d,
       nature: 'two-real',
       roots: [
@@ -106,7 +114,9 @@ export function solveQuadratic(a: number, b: number, c: number): QuadraticSoluti
   const im = sqrtAbsD / (2 * Math.abs(a));
 
   return {
-    a, b, c,
+    a,
+    b,
+    c,
     discriminant: d,
     nature: 'two-complex',
     roots: [
@@ -140,7 +150,10 @@ export function solveCubic(a: number, b: number, c: number, d: number): CubicSol
   if (Math.abs(a) < 1e-12) {
     const q = solveQuadratic(b, c, d);
     return {
-      a, b, c, d,
+      a,
+      b,
+      c,
+      d,
       roots: q.roots,
       steps: ['Leading coefficient a = 0. Reduced to quadratic equation.', ...q.steps],
     };
@@ -204,7 +217,9 @@ export function solveCubic(a: number, b: number, c: number, d: number): CubicSol
     for (const r of rList) {
       roots.push({ re: r, im: 0 });
     }
-    steps.push('Casus irreducibilis: three distinct real roots resolved via trigonometric identity.');
+    steps.push(
+      'Casus irreducibilis: three distinct real roots resolved via trigonometric identity.'
+    );
   }
 
   return { a, b, c, d, roots, steps };
@@ -225,8 +240,12 @@ export interface LinearSystem2x2Solution {
  * a2*x + b2*y = c2
  */
 export function solveLinearSystem2x2(
-  a1: number, b1: number, c1: number,
-  a2: number, b2: number, c2: number
+  a1: number,
+  b1: number,
+  c1: number,
+  a2: number,
+  b2: number,
+  c2: number
 ): LinearSystem2x2Solution {
   const det = a1 * b2 - a2 * b1;
   const detX = c1 * b2 - c2 * b1;
@@ -281,18 +300,31 @@ export interface LinearSystem3x3Solution {
  * Solves 3x3 linear system via Cramer's Rule.
  */
 export function solveLinearSystem3x3(
-  a1: number, b1: number, c1: number, d1: number,
-  a2: number, b2: number, c2: number, d2: number,
-  a3: number, b3: number, c3: number, d3: number
+  a1: number,
+  b1: number,
+  c1: number,
+  d1: number,
+  a2: number,
+  b2: number,
+  c2: number,
+  d2: number,
+  a3: number,
+  b3: number,
+  c3: number,
+  d3: number
 ): LinearSystem3x3Solution {
   const det3 = (
-    m11: number, m12: number, m13: number,
-    m21: number, m22: number, m23: number,
-    m31: number, m32: number, m33: number
+    m11: number,
+    m12: number,
+    m13: number,
+    m21: number,
+    m22: number,
+    m23: number,
+    m31: number,
+    m32: number,
+    m33: number
   ) =>
-    m11 * (m22 * m33 - m23 * m32) -
-    m12 * (m21 * m33 - m23 * m31) +
-    m13 * (m21 * m32 - m22 * m31);
+    m11 * (m22 * m33 - m23 * m32) - m12 * (m21 * m33 - m23 * m31) + m13 * (m21 * m32 - m22 * m31);
 
   const D = det3(a1, b1, c1, a2, b2, c2, a3, b3, c3);
   const Dx = det3(d1, b1, c1, d2, b2, c2, d3, b3, c3);
@@ -303,7 +335,8 @@ export function solveLinearSystem3x3(
     return {
       det: 0,
       isSolvable: false,
-      message: 'Determinant is 0: system has no unique solution (either inconsistent or dependent planes).',
+      message:
+        'Determinant is 0: system has no unique solution (either inconsistent or dependent planes).',
       steps: ['Main determinant D = 0. No unique solution exists.'],
     };
   }
@@ -460,15 +493,35 @@ export function solveQuadraticInequality(
     const r2 = quad.roots[1].re;
 
     if (a > 0) {
-      if (op === '<') return { intervals: `(${r1.toFixed(4)}, ${r2.toFixed(4)})`, graphExpression: expr };
-      if (op === '<=') return { intervals: `[${r1.toFixed(4)}, ${r2.toFixed(4)}]`, graphExpression: expr };
-      if (op === '>') return { intervals: `(-∞, ${r1.toFixed(4)}) ∪ (${r2.toFixed(4)}, ∞)`, graphExpression: expr };
-      if (op === '>=') return { intervals: `(-∞, ${r1.toFixed(4)}] ∪ [${r2.toFixed(4)}, ∞)`, graphExpression: expr };
+      if (op === '<')
+        return { intervals: `(${r1.toFixed(4)}, ${r2.toFixed(4)})`, graphExpression: expr };
+      if (op === '<=')
+        return { intervals: `[${r1.toFixed(4)}, ${r2.toFixed(4)}]`, graphExpression: expr };
+      if (op === '>')
+        return {
+          intervals: `(-∞, ${r1.toFixed(4)}) ∪ (${r2.toFixed(4)}, ∞)`,
+          graphExpression: expr,
+        };
+      if (op === '>=')
+        return {
+          intervals: `(-∞, ${r1.toFixed(4)}] ∪ [${r2.toFixed(4)}, ∞)`,
+          graphExpression: expr,
+        };
     } else {
-      if (op === '<') return { intervals: `(-∞, ${r1.toFixed(4)}) ∪ (${r2.toFixed(4)}, ∞)`, graphExpression: expr };
-      if (op === '<=') return { intervals: `(-∞, ${r1.toFixed(4)}] ∪ [${r2.toFixed(4)}, ∞)`, graphExpression: expr };
-      if (op === '>') return { intervals: `(${r1.toFixed(4)}, ${r2.toFixed(4)})`, graphExpression: expr };
-      if (op === '>=') return { intervals: `[${r1.toFixed(4)}, ${r2.toFixed(4)}]`, graphExpression: expr };
+      if (op === '<')
+        return {
+          intervals: `(-∞, ${r1.toFixed(4)}) ∪ (${r2.toFixed(4)}, ∞)`,
+          graphExpression: expr,
+        };
+      if (op === '<=')
+        return {
+          intervals: `(-∞, ${r1.toFixed(4)}] ∪ [${r2.toFixed(4)}, ∞)`,
+          graphExpression: expr,
+        };
+      if (op === '>')
+        return { intervals: `(${r1.toFixed(4)}, ${r2.toFixed(4)})`, graphExpression: expr };
+      if (op === '>=')
+        return { intervals: `[${r1.toFixed(4)}, ${r2.toFixed(4)}]`, graphExpression: expr };
     }
   }
 
@@ -477,7 +530,8 @@ export function solveQuadraticInequality(
     if (a > 0) {
       if (op === '<') return { intervals: 'No real solutions (∅)', graphExpression: expr };
       if (op === '<=') return { intervals: `{${r.toFixed(4)}}`, graphExpression: expr };
-      if (op === '>') return { intervals: `(-∞, ${r.toFixed(4)}) ∪ (${r.toFixed(4)}, ∞)`, graphExpression: expr };
+      if (op === '>')
+        return { intervals: `(-∞, ${r.toFixed(4)}) ∪ (${r.toFixed(4)}, ∞)`, graphExpression: expr };
       if (op === '>=') return { intervals: 'All real numbers (-∞, ∞)', graphExpression: expr };
     }
   }
@@ -496,4 +550,3 @@ export function solveQuadraticInequality(
 
   return { intervals: 'Evaluated analytically', graphExpression: expr };
 }
-

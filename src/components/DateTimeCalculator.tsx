@@ -224,9 +224,9 @@ export const DateTimeCalculator: React.FC<DateTimeCalculatorProps> = ({ settings
           <button
             key={item.id}
             role="tab"
-            id={"dt-tab-" + item.id}
+            id={'dt-tab-' + item.id}
             aria-selected={tab === item.id}
-            aria-controls={"dt-panel-" + item.id}
+            aria-controls={'dt-panel-' + item.id}
             tabIndex={tab === item.id ? 0 : -1}
             onClick={() => setTab(item.id as any)}
             className={`
@@ -246,294 +246,316 @@ export const DateTimeCalculator: React.FC<DateTimeCalculatorProps> = ({ settings
       {/* Main Container */}
       <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col gap-6">
         {/* DATE DIFFERENCE */}
-        <div role="tabpanel" id="dt-panel-diff" aria-labelledby="dt-tab-diff" tabIndex={0} hidden={tab !== 'diff'} className={tab !== 'diff' ? 'hidden' : 'flex flex-col gap-6'}>
-            <div>
-              <h3 className="text-base font-bold text-slate-100">Date Difference Calculator</h3>
-              <p className="text-xs text-slate-400">
-                Calculates precise calendar duration, working business days, and total hours
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-slate-400">Start Date</label>
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  className="bg-slate-800 border border-slate-700 rounded-2xl p-3.5 text-base font-semibold text-slate-100 focus:outline-none focus:border-sky-500"
-                />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-slate-400">End Date</label>
-                <input
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  className="bg-slate-800 border border-slate-700 rounded-2xl p-3.5 text-base font-semibold text-slate-100 focus:outline-none focus:border-sky-500"
-                />
-              </div>
-            </div>
-
-            {diffRes && (
-              <div className="flex flex-col gap-4 bg-slate-950 border border-slate-800 rounded-2xl p-5">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl">
-                    <span className="text-xs text-slate-400 block mb-1">Total Calendar Days</span>
-                    <span className="text-3xl font-mono font-bold text-emerald-400">
-                      {diffRes.totalDays} Days
-                    </span>
-                    <span className="text-xs text-slate-400 block mt-1">{diffRes.weeksFormat}</span>
-                  </div>
-                  <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl">
-                    <span className="text-xs text-slate-400 block mb-1">
-                      Business / Working Days
-                    </span>
-                    <span className="text-3xl font-mono font-bold text-sky-400">
-                      {diffRes.workDays} Work Days
-                    </span>
-                    <span className="text-xs text-slate-400 block mt-1">
-                      Excludes Saturdays & Sundays
-                    </span>
-                  </div>
-                </div>
-
-                <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl">
-                  <span className="text-xs text-slate-400 block mb-1">
-                    Exact Age / Span Breakdown:
-                  </span>
-                  <span className="text-lg font-bold text-slate-100">{diffRes.breakdown}</span>
-                </div>
-
-                <div className="grid grid-cols-3 gap-2 text-center border-t border-slate-800 pt-3">
-                  <div className="p-2 bg-slate-900/60 rounded-xl">
-                    <span className="text-[10px] text-slate-400 block">Total Hours</span>
-                    <span className="text-xs font-mono font-bold text-slate-200">
-                      {diffRes.totalHours} hrs
-                    </span>
-                  </div>
-                  <div className="p-2 bg-slate-900/60 rounded-xl">
-                    <span className="text-[10px] text-slate-400 block">Total Minutes</span>
-                    <span className="text-xs font-mono font-bold text-slate-200">
-                      {diffRes.totalMinutes} min
-                    </span>
-                  </div>
-                  <div className="p-2 bg-slate-900/60 rounded-xl">
-                    <span className="text-[10px] text-slate-400 block">Total Seconds</span>
-                    <span className="text-xs font-mono font-bold text-slate-200">
-                      {diffRes.totalSeconds} s
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
+        <div
+          role="tabpanel"
+          id="dt-panel-diff"
+          aria-labelledby="dt-tab-diff"
+          tabIndex={0}
+          hidden={tab !== 'diff'}
+          className={tab !== 'diff' ? 'hidden' : 'flex flex-col gap-6'}
+        >
+          <div>
+            <h3 className="text-base font-bold text-slate-100">Date Difference Calculator</h3>
+            <p className="text-xs text-slate-400">
+              Calculates precise calendar duration, working business days, and total hours
+            </p>
           </div>
 
-        {/* ADD / SUBTRACT TIME */}
-        <div role="tabpanel" id="dt-panel-addsub" aria-labelledby="dt-tab-addsub" tabIndex={0} hidden={tab !== 'addsub'} className={tab !== 'addsub' ? 'hidden' : 'flex flex-col gap-6'}>
-            <div>
-              <h3 className="text-base font-bold text-slate-100">Add or Subtract from Date</h3>
-              <p className="text-xs text-slate-400">
-                Calculate future or past deadlines with days, weeks, months, or years offset
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-slate-400">Starting Date</label>
-                <input
-                  type="date"
-                  value={baseDate}
-                  onChange={(e) => setBaseDate(e.target.value)}
-                  className="bg-slate-800 border border-slate-700 rounded-2xl p-3.5 text-base font-semibold text-slate-100 focus:outline-none focus:border-sky-500"
-                />
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-slate-400">Operation</label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() => setOpType('add')}
-                    className={`p-3 rounded-2xl font-bold text-sm transition-all border ${
-                      opType === 'add'
-                        ? 'bg-emerald-600 text-white border-emerald-500 shadow-md'
-                        : 'bg-slate-800 text-slate-300 border-slate-700'
-                    }`}
-                  >
-                    + Add Time
-                  </button>
-                  <button
-                    onClick={() => setOpType('sub')}
-                    className={`p-3 rounded-2xl font-bold text-sm transition-all border ${
-                      opType === 'sub'
-                        ? 'bg-rose-600 text-white border-rose-500 shadow-md'
-                        : 'bg-slate-800 text-slate-300 border-slate-700'
-                    }`}
-                  >
-                    − Subtract Time
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Offset inputs */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {[
-                { label: 'Years', val: addYears, set: setAddYears },
-                { label: 'Months', val: addMonths, set: setAddMonths },
-                { label: 'Weeks', val: addWeeks, set: setAddWeeks },
-                { label: 'Days', val: addDays, set: setAddDays },
-              ].map((item, i) => (
-                <div key={i} className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-slate-400">{item.label}</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={item.val}
-                    onChange={(e) => item.set(Math.max(0, parseInt(e.target.value) || 0))}
-                    className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                  />
-                </div>
-              ))}
-            </div>
-
-            {addSubRes && (
-              <div className="p-5 bg-slate-950 border border-slate-800 rounded-2xl flex flex-col gap-2">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                  Target Calculated Date
-                </span>
-                <div className="text-2xl sm:text-3xl font-bold text-sky-400">
-                  {addSubRes.formatted}
-                </div>
-                <span className="text-xs font-mono text-slate-400">
-                  ISO Format: {addSubRes.iso}
-                </span>
-              </div>
-            )}
-          </div>
-
-        {/* AGE CALCULATOR */}
-        <div role="tabpanel" id="dt-panel-age" aria-labelledby="dt-tab-age" tabIndex={0} hidden={tab !== 'age'} className={tab !== 'age' ? 'hidden' : 'flex flex-col gap-6'}>
-            <div>
-              <h3 className="text-base font-bold text-slate-100">
-                Chronological Age & Birthday Countdown
-              </h3>
-              <p className="text-xs text-slate-400">
-                Calculates exact life milestones and days until next celebration
-              </p>
-            </div>
-
-            <div className="flex flex-col gap-1.5 max-w-sm">
-              <label className="text-xs font-bold text-slate-400">Date of Birth</label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold text-slate-400">Start Date</label>
               <input
                 type="date"
-                value={birthDate}
-                onChange={(e) => setBirthDate(e.target.value)}
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="bg-slate-800 border border-slate-700 rounded-2xl p-3.5 text-base font-semibold text-slate-100 focus:outline-none focus:border-sky-500"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold text-slate-400">End Date</label>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="bg-slate-800 border border-slate-700 rounded-2xl p-3.5 text-base font-semibold text-slate-100 focus:outline-none focus:border-sky-500"
+              />
+            </div>
+          </div>
+
+          {diffRes && (
+            <div className="flex flex-col gap-4 bg-slate-950 border border-slate-800 rounded-2xl p-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl">
+                  <span className="text-xs text-slate-400 block mb-1">Total Calendar Days</span>
+                  <span className="text-3xl font-mono font-bold text-emerald-400">
+                    {diffRes.totalDays} Days
+                  </span>
+                  <span className="text-xs text-slate-400 block mt-1">{diffRes.weeksFormat}</span>
+                </div>
+                <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl">
+                  <span className="text-xs text-slate-400 block mb-1">Business / Working Days</span>
+                  <span className="text-3xl font-mono font-bold text-sky-400">
+                    {diffRes.workDays} Work Days
+                  </span>
+                  <span className="text-xs text-slate-400 block mt-1">
+                    Excludes Saturdays & Sundays
+                  </span>
+                </div>
+              </div>
+
+              <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl">
+                <span className="text-xs text-slate-400 block mb-1">
+                  Exact Age / Span Breakdown:
+                </span>
+                <span className="text-lg font-bold text-slate-100">{diffRes.breakdown}</span>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2 text-center border-t border-slate-800 pt-3">
+                <div className="p-2 bg-slate-900/60 rounded-xl">
+                  <span className="text-[10px] text-slate-400 block">Total Hours</span>
+                  <span className="text-xs font-mono font-bold text-slate-200">
+                    {diffRes.totalHours} hrs
+                  </span>
+                </div>
+                <div className="p-2 bg-slate-900/60 rounded-xl">
+                  <span className="text-[10px] text-slate-400 block">Total Minutes</span>
+                  <span className="text-xs font-mono font-bold text-slate-200">
+                    {diffRes.totalMinutes} min
+                  </span>
+                </div>
+                <div className="p-2 bg-slate-900/60 rounded-xl">
+                  <span className="text-[10px] text-slate-400 block">Total Seconds</span>
+                  <span className="text-xs font-mono font-bold text-slate-200">
+                    {diffRes.totalSeconds} s
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ADD / SUBTRACT TIME */}
+        <div
+          role="tabpanel"
+          id="dt-panel-addsub"
+          aria-labelledby="dt-tab-addsub"
+          tabIndex={0}
+          hidden={tab !== 'addsub'}
+          className={tab !== 'addsub' ? 'hidden' : 'flex flex-col gap-6'}
+        >
+          <div>
+            <h3 className="text-base font-bold text-slate-100">Add or Subtract from Date</h3>
+            <p className="text-xs text-slate-400">
+              Calculate future or past deadlines with days, weeks, months, or years offset
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold text-slate-400">Starting Date</label>
+              <input
+                type="date"
+                value={baseDate}
+                onChange={(e) => setBaseDate(e.target.value)}
                 className="bg-slate-800 border border-slate-700 rounded-2xl p-3.5 text-base font-semibold text-slate-100 focus:outline-none focus:border-sky-500"
               />
             </div>
 
-            {ageRes && (
-              <div className="flex flex-col gap-4 bg-slate-950 border border-slate-800 rounded-2xl p-5">
-                <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl">
-                  <span className="text-xs text-slate-400 block mb-1">Exact Age</span>
-                  <span className="text-3xl font-bold text-emerald-400">{ageRes.ageStr}</span>
-                </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold text-slate-400">Operation</label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => setOpType('add')}
+                  className={`p-3 rounded-2xl font-bold text-sm transition-all border ${
+                    opType === 'add'
+                      ? 'bg-emerald-600 text-white border-emerald-500 shadow-md'
+                      : 'bg-slate-800 text-slate-300 border-slate-700'
+                  }`}
+                >
+                  + Add Time
+                </button>
+                <button
+                  onClick={() => setOpType('sub')}
+                  className={`p-3 rounded-2xl font-bold text-sm transition-all border ${
+                    opType === 'sub'
+                      ? 'bg-rose-600 text-white border-rose-500 shadow-md'
+                      : 'bg-slate-800 text-slate-300 border-slate-700'
+                  }`}
+                >
+                  − Subtract Time
+                </button>
+              </div>
+            </div>
+          </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl">
-                    <span className="text-xs text-slate-400 block mb-1">Total Days Lived</span>
-                    <span className="text-2xl font-mono font-bold text-sky-400">
-                      {ageRes.totalDaysLived} Days
-                    </span>
-                  </div>
-                  <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl">
-                    <span className="text-xs text-slate-400 block mb-1">
-                      Next Birthday Countdown
-                    </span>
-                    <span className="text-2xl font-bold text-amber-400">
-                      {ageRes.daysUntilBday} Days Left
-                    </span>
-                    <span className="text-xs text-slate-400 block mt-1">
-                      {ageRes.nextBdayFormatted}
-                    </span>
-                  </div>
+          {/* Offset inputs */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[
+              { label: 'Years', val: addYears, set: setAddYears },
+              { label: 'Months', val: addMonths, set: setAddMonths },
+              { label: 'Weeks', val: addWeeks, set: setAddWeeks },
+              { label: 'Days', val: addDays, set: setAddDays },
+            ].map((item, i) => (
+              <div key={i} className="flex flex-col gap-1.5">
+                <label className="text-xs font-bold text-slate-400">{item.label}</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={item.val}
+                  onChange={(e) => item.set(Math.max(0, parseInt(e.target.value) || 0))}
+                  className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+                />
+              </div>
+            ))}
+          </div>
+
+          {addSubRes && (
+            <div className="p-5 bg-slate-950 border border-slate-800 rounded-2xl flex flex-col gap-2">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                Target Calculated Date
+              </span>
+              <div className="text-2xl sm:text-3xl font-bold text-sky-400">
+                {addSubRes.formatted}
+              </div>
+              <span className="text-xs font-mono text-slate-400">ISO Format: {addSubRes.iso}</span>
+            </div>
+          )}
+        </div>
+
+        {/* AGE CALCULATOR */}
+        <div
+          role="tabpanel"
+          id="dt-panel-age"
+          aria-labelledby="dt-tab-age"
+          tabIndex={0}
+          hidden={tab !== 'age'}
+          className={tab !== 'age' ? 'hidden' : 'flex flex-col gap-6'}
+        >
+          <div>
+            <h3 className="text-base font-bold text-slate-100">
+              Chronological Age & Birthday Countdown
+            </h3>
+            <p className="text-xs text-slate-400">
+              Calculates exact life milestones and days until next celebration
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-1.5 max-w-sm">
+            <label className="text-xs font-bold text-slate-400">Date of Birth</label>
+            <input
+              type="date"
+              value={birthDate}
+              onChange={(e) => setBirthDate(e.target.value)}
+              className="bg-slate-800 border border-slate-700 rounded-2xl p-3.5 text-base font-semibold text-slate-100 focus:outline-none focus:border-sky-500"
+            />
+          </div>
+
+          {ageRes && (
+            <div className="flex flex-col gap-4 bg-slate-950 border border-slate-800 rounded-2xl p-5">
+              <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl">
+                <span className="text-xs text-slate-400 block mb-1">Exact Age</span>
+                <span className="text-3xl font-bold text-emerald-400">{ageRes.ageStr}</span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl">
+                  <span className="text-xs text-slate-400 block mb-1">Total Days Lived</span>
+                  <span className="text-2xl font-mono font-bold text-sky-400">
+                    {ageRes.totalDaysLived} Days
+                  </span>
+                </div>
+                <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl">
+                  <span className="text-xs text-slate-400 block mb-1">Next Birthday Countdown</span>
+                  <span className="text-2xl font-bold text-amber-400">
+                    {ageRes.daysUntilBday} Days Left
+                  </span>
+                  <span className="text-xs text-slate-400 block mt-1">
+                    {ageRes.nextBdayFormatted}
+                  </span>
                 </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
+        </div>
 
         {/* WORK HOURS */}
-        <div role="tabpanel" id="dt-panel-worktime" aria-labelledby="dt-tab-worktime" tabIndex={0} hidden={tab !== 'worktime'} className={tab !== 'worktime' ? 'hidden' : 'flex flex-col gap-6'}>
-            <div>
-              <h3 className="text-base font-bold text-slate-100">Work Hours & Wage Calculator</h3>
-              <p className="text-xs text-slate-400">
-                Calculate net billable hours, lunch break deductions, and estimated shift pay
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-slate-400">Start Shift</label>
-                <input
-                  type="time"
-                  value={workStart}
-                  onChange={(e) => setWorkStart(e.target.value)}
-                  className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-slate-400">End Shift</label>
-                <input
-                  type="time"
-                  value={workEnd}
-                  onChange={(e) => setWorkEnd(e.target.value)}
-                  className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-slate-400">Break (Mins)</label>
-                <input
-                  type="number"
-                  min="0"
-                  value={breakMins}
-                  onChange={(e) => setBreakMins(Math.max(0, parseInt(e.target.value) || 0))}
-                  className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-slate-400">Hourly Rate ($)</label>
-                <input
-                  type="number"
-                  min="0"
-                  value={hourlyRate}
-                  onChange={(e) => setHourlyRate(Math.max(0, parseFloat(e.target.value) || 0))}
-                  className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
-                />
-              </div>
-            </div>
-
-            {workRes && (
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-950 border border-slate-800 rounded-2xl p-5">
-                <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
-                  <span className="text-xs text-slate-400 block mb-1">Net Work Time</span>
-                  <span className="text-2xl font-bold text-slate-100">{workRes.netTimeStr}</span>
-                </div>
-                <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
-                  <span className="text-xs text-slate-400 block mb-1">Decimal Hours</span>
-                  <span className="text-2xl font-mono font-bold text-sky-400">
-                    {workRes.decimalHours} hrs
-                  </span>
-                </div>
-                <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
-                  <span className="text-xs text-slate-400 block mb-1">Estimated Earnings</span>
-                  <span className="text-2xl font-mono font-bold text-emerald-400">
-                    ${workRes.earnings}
-                  </span>
-                </div>
-              </div>
-            )}
+        <div
+          role="tabpanel"
+          id="dt-panel-worktime"
+          aria-labelledby="dt-tab-worktime"
+          tabIndex={0}
+          hidden={tab !== 'worktime'}
+          className={tab !== 'worktime' ? 'hidden' : 'flex flex-col gap-6'}
+        >
+          <div>
+            <h3 className="text-base font-bold text-slate-100">Work Hours & Wage Calculator</h3>
+            <p className="text-xs text-slate-400">
+              Calculate net billable hours, lunch break deductions, and estimated shift pay
+            </p>
           </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold text-slate-400">Start Shift</label>
+              <input
+                type="time"
+                value={workStart}
+                onChange={(e) => setWorkStart(e.target.value)}
+                className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold text-slate-400">End Shift</label>
+              <input
+                type="time"
+                value={workEnd}
+                onChange={(e) => setWorkEnd(e.target.value)}
+                className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold text-slate-400">Break (Mins)</label>
+              <input
+                type="number"
+                min="0"
+                value={breakMins}
+                onChange={(e) => setBreakMins(Math.max(0, parseInt(e.target.value) || 0))}
+                className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold text-slate-400">Hourly Rate ($)</label>
+              <input
+                type="number"
+                min="0"
+                value={hourlyRate}
+                onChange={(e) => setHourlyRate(Math.max(0, parseFloat(e.target.value) || 0))}
+                className="bg-slate-800 border border-slate-700 rounded-2xl p-3 font-mono text-base font-bold text-slate-100"
+              />
+            </div>
+          </div>
+
+          {workRes && (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-950 border border-slate-800 rounded-2xl p-5">
+              <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                <span className="text-xs text-slate-400 block mb-1">Net Work Time</span>
+                <span className="text-2xl font-bold text-slate-100">{workRes.netTimeStr}</span>
+              </div>
+              <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                <span className="text-xs text-slate-400 block mb-1">Decimal Hours</span>
+                <span className="text-2xl font-mono font-bold text-sky-400">
+                  {workRes.decimalHours} hrs
+                </span>
+              </div>
+              <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                <span className="text-xs text-slate-400 block mb-1">Estimated Earnings</span>
+                <span className="text-2xl font-mono font-bold text-emerald-400">
+                  ${workRes.earnings}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

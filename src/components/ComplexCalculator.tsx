@@ -160,12 +160,7 @@ export const ComplexCalculator: React.FC<ComplexCalculatorProps> = ({ settings: 
     ctx.fillText('Im', cx + 8, 25);
 
     // Draw Vector Helper
-    const drawVector = (
-      c: Complex,
-      color: string,
-      label: string,
-      lineWidth: number = 2.5
-    ) => {
+    const drawVector = (c: Complex, color: string, label: string, lineWidth: number = 2.5) => {
       const p = toScreen(c.re, c.im);
       ctx.strokeStyle = color;
       ctx.lineWidth = lineWidth;
@@ -247,7 +242,10 @@ export const ComplexCalculator: React.FC<ComplexCalculatorProps> = ({ settings: 
   };
 
   return (
-    <div id="complex-calculator-root" className="flex flex-col h-full bg-slate-50 dark:bg-zinc-950 p-4 lg:p-6 overflow-y-auto">
+    <div
+      id="complex-calculator-root"
+      className="flex flex-col h-full bg-slate-50 dark:bg-zinc-950 p-4 lg:p-6 overflow-y-auto"
+    >
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div>
@@ -308,7 +306,9 @@ export const ComplexCalculator: React.FC<ComplexCalculatorProps> = ({ settings: 
             {/* Z1 */}
             <div>
               <div className="flex justify-between text-xs mb-1">
-                <span className="font-semibold text-blue-600 dark:text-blue-400">Z₁ (First Complex Number)</span>
+                <span className="font-semibold text-blue-600 dark:text-blue-400">
+                  Z₁ (First Complex Number)
+                </span>
                 <span className="font-mono text-slate-400">{z1.toPolar(angleUnit)}</span>
               </div>
               <input
@@ -323,7 +323,9 @@ export const ComplexCalculator: React.FC<ComplexCalculatorProps> = ({ settings: 
             {/* Z2 */}
             <div>
               <div className="flex justify-between text-xs mb-1">
-                <span className="font-semibold text-amber-600 dark:text-amber-400">Z₂ (Second Complex Number)</span>
+                <span className="font-semibold text-amber-600 dark:text-amber-400">
+                  Z₂ (Second Complex Number)
+                </span>
                 <span className="font-mono text-slate-400">{z2.toPolar(angleUnit)}</span>
               </div>
               <input
@@ -383,14 +385,18 @@ export const ComplexCalculator: React.FC<ComplexCalculatorProps> = ({ settings: 
               </div>
 
               <div className="p-3 bg-slate-50 dark:bg-zinc-800/50 rounded-lg border border-slate-200 dark:border-zinc-700">
-                <span className="text-[11px] text-slate-400 block font-sans">Polar Form (r ∠ θ):</span>
+                <span className="text-[11px] text-slate-400 block font-sans">
+                  Polar Form (r ∠ θ):
+                </span>
                 <span className="text-sm font-semibold text-slate-800 dark:text-zinc-100">
                   {binaryResult.toPolar(angleUnit)}
                 </span>
               </div>
 
               <div className="p-3 bg-slate-50 dark:bg-zinc-800/50 rounded-lg border border-slate-200 dark:border-zinc-700">
-                <span className="text-[11px] text-slate-400 block font-sans">Exponential Form (r·e^(iθ)):</span>
+                <span className="text-[11px] text-slate-400 block font-sans">
+                  Exponential Form (r·e^(iθ)):
+                </span>
                 <span className="text-sm font-semibold text-slate-800 dark:text-zinc-100">
                   {binaryResult.toEuler()}
                 </span>
@@ -529,19 +535,25 @@ export const ComplexCalculator: React.FC<ComplexCalculatorProps> = ({ settings: 
             {/* AC Output Metrics */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono">
               <div className="p-2 bg-slate-50 dark:bg-zinc-800/40 rounded border border-slate-200 dark:border-zinc-700">
-                <span className="text-[10px] text-slate-400 block font-sans">Total Impedance Z:</span>
+                <span className="text-[10px] text-slate-400 block font-sans">
+                  Total Impedance Z:
+                </span>
                 <span className="font-semibold text-slate-800 dark:text-zinc-100">
                   {acCircuitResults.Z.toPolar(angleUnit)}
                 </span>
               </div>
               <div className="p-2 bg-slate-50 dark:bg-zinc-800/40 rounded border border-slate-200 dark:border-zinc-700">
-                <span className="text-[10px] text-slate-400 block font-sans">Current Phasor I:</span>
+                <span className="text-[10px] text-slate-400 block font-sans">
+                  Current Phasor I:
+                </span>
                 <span className="font-semibold text-blue-600 dark:text-blue-400">
                   {acCircuitResults.I.toPolar(angleUnit)} A
                 </span>
               </div>
               <div className="p-2 bg-slate-50 dark:bg-zinc-800/40 rounded border border-slate-200 dark:border-zinc-700">
-                <span className="text-[10px] text-slate-400 block font-sans">Power Factor cos(θ):</span>
+                <span className="text-[10px] text-slate-400 block font-sans">
+                  Power Factor cos(θ):
+                </span>
                 <span className="font-semibold text-slate-800 dark:text-zinc-100">
                   {acCircuitResults.powerFactor.toFixed(4)}
                 </span>

@@ -115,7 +115,7 @@ describe('Statistical Inference Engine', () => {
       });
       expect(res.testStatistic).toBeCloseTo(2.0, 2);
       expect(res.confidenceInterval?.lower).toBeGreaterThan(0.49);
-      expect(res.confidenceInterval?.upper).toBeLessThan(0.70);
+      expect(res.confidenceInterval?.upper).toBeLessThan(0.7);
     });
 
     it('computes 2-sample proportions test', () => {

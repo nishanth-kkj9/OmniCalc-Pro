@@ -14,7 +14,9 @@ interface ProbabilityCalculatorProps {
   settings?: AppSettings;
 }
 
-export const ProbabilityCalculator: React.FC<ProbabilityCalculatorProps> = ({ settings: _settings }) => {
+export const ProbabilityCalculator: React.FC<ProbabilityCalculatorProps> = ({
+  settings: _settings,
+}) => {
   const [distType, setDistType] = useState<DistributionType>('normal');
   const [params, setParams] = useState<DistributionParams>({
     mu: 0,
@@ -27,7 +29,9 @@ export const ProbabilityCalculator: React.FC<ProbabilityCalculatorProps> = ({ se
     df: 10,
   });
 
-  const [calcMode, setCalcMode] = useState<'range' | 'lessThan' | 'greaterThan' | 'quantile'>('range');
+  const [calcMode, setCalcMode] = useState<'range' | 'lessThan' | 'greaterThan' | 'quantile'>(
+    'range'
+  );
   const [xMin, setXMin] = useState<string>('-1.96');
   const [xMax, setXMax] = useState<string>('1.96');
   const [quantileP, setQuantileP] = useState<string>('0.95');
@@ -156,7 +160,7 @@ export const ProbabilityCalculator: React.FC<ProbabilityCalculatorProps> = ({ se
         const isShaded = k >= minShade && k <= maxShade;
 
         // Bar / Stem
-        ctx.strokeStyle = isShaded ? '#2563eb' : (isDark ? '#475569' : '#94a3b8');
+        ctx.strokeStyle = isShaded ? '#2563eb' : isDark ? '#475569' : '#94a3b8';
         ctx.lineWidth = 3;
         ctx.beginPath();
         ctx.moveTo(sx, toScreenY(0));
@@ -164,7 +168,7 @@ export const ProbabilityCalculator: React.FC<ProbabilityCalculatorProps> = ({ se
         ctx.stroke();
 
         // Point circle
-        ctx.fillStyle = isShaded ? '#2563eb' : (isDark ? '#64748b' : '#cbd5e1');
+        ctx.fillStyle = isShaded ? '#2563eb' : isDark ? '#64748b' : '#cbd5e1';
         ctx.beginPath();
         ctx.arc(sx, sy, 4, 0, 2 * Math.PI);
         ctx.fill();
@@ -236,7 +240,10 @@ export const ProbabilityCalculator: React.FC<ProbabilityCalculatorProps> = ({ se
   };
 
   return (
-    <div id="probability-calculator-root" className="flex flex-col h-full bg-slate-50 dark:bg-zinc-950 p-4 lg:p-6 overflow-y-auto">
+    <div
+      id="probability-calculator-root"
+      className="flex flex-col h-full bg-slate-50 dark:bg-zinc-950 p-4 lg:p-6 overflow-y-auto"
+    >
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div>
@@ -319,7 +326,9 @@ export const ProbabilityCalculator: React.FC<ProbabilityCalculatorProps> = ({ se
               {dist.paramNames.includes('sigma') && (
                 <div>
                   <div className="flex justify-between text-xs mb-1">
-                    <span className="font-medium text-slate-700 dark:text-zinc-300">Standard Deviation (σ &gt; 0)</span>
+                    <span className="font-medium text-slate-700 dark:text-zinc-300">
+                      Standard Deviation (σ &gt; 0)
+                    </span>
                     <span className="font-mono text-slate-500">{params.sigma}</span>
                   </div>
                   <input
@@ -337,7 +346,9 @@ export const ProbabilityCalculator: React.FC<ProbabilityCalculatorProps> = ({ se
               {dist.paramNames.includes('n') && (
                 <div>
                   <div className="flex justify-between text-xs mb-1">
-                    <span className="font-medium text-slate-700 dark:text-zinc-300">Trials (n)</span>
+                    <span className="font-medium text-slate-700 dark:text-zinc-300">
+                      Trials (n)
+                    </span>
                     <span className="font-mono text-slate-500">{params.n}</span>
                   </div>
                   <input
@@ -355,7 +366,9 @@ export const ProbabilityCalculator: React.FC<ProbabilityCalculatorProps> = ({ se
               {dist.paramNames.includes('p') && (
                 <div>
                   <div className="flex justify-between text-xs mb-1">
-                    <span className="font-medium text-slate-700 dark:text-zinc-300">Success Probability (p ∈ [0, 1])</span>
+                    <span className="font-medium text-slate-700 dark:text-zinc-300">
+                      Success Probability (p ∈ [0, 1])
+                    </span>
                     <span className="font-mono text-slate-500">{params.p}</span>
                   </div>
                   <input
@@ -374,7 +387,9 @@ export const ProbabilityCalculator: React.FC<ProbabilityCalculatorProps> = ({ se
               {dist.paramNames.includes('lambda') && (
                 <div>
                   <div className="flex justify-between text-xs mb-1">
-                    <span className="font-medium text-slate-700 dark:text-zinc-300">Rate (λ &gt; 0)</span>
+                    <span className="font-medium text-slate-700 dark:text-zinc-300">
+                      Rate (λ &gt; 0)
+                    </span>
                     <span className="font-mono text-slate-500">{params.lambda}</span>
                   </div>
                   <input
@@ -392,7 +407,9 @@ export const ProbabilityCalculator: React.FC<ProbabilityCalculatorProps> = ({ se
               {dist.paramNames.includes('df') && (
                 <div>
                   <div className="flex justify-between text-xs mb-1">
-                    <span className="font-medium text-slate-700 dark:text-zinc-300">Degrees of Freedom (ν / df)</span>
+                    <span className="font-medium text-slate-700 dark:text-zinc-300">
+                      Degrees of Freedom (ν / df)
+                    </span>
                     <span className="font-mono text-slate-500">{params.df}</span>
                   </div>
                   <input
@@ -572,28 +589,36 @@ export const ProbabilityCalculator: React.FC<ProbabilityCalculatorProps> = ({ se
           {/* Analytical Moments Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="bg-white dark:bg-zinc-900 p-3 rounded-xl border border-slate-200 dark:border-zinc-800 shadow-sm">
-              <span className="text-[11px] text-slate-500 dark:text-zinc-400 font-medium">Mean (E[X] = μ)</span>
+              <span className="text-[11px] text-slate-500 dark:text-zinc-400 font-medium">
+                Mean (E[X] = μ)
+              </span>
               <p className="text-base font-bold font-mono text-slate-800 dark:text-zinc-100 mt-0.5">
                 {isNaN(moments.mean) ? 'Undefined' : moments.mean.toFixed(4)}
               </p>
             </div>
 
             <div className="bg-white dark:bg-zinc-900 p-3 rounded-xl border border-slate-200 dark:border-zinc-800 shadow-sm">
-              <span className="text-[11px] text-slate-500 dark:text-zinc-400 font-medium">Variance (Var(X) = σ²)</span>
+              <span className="text-[11px] text-slate-500 dark:text-zinc-400 font-medium">
+                Variance (Var(X) = σ²)
+              </span>
               <p className="text-base font-bold font-mono text-slate-800 dark:text-zinc-100 mt-0.5">
                 {isNaN(moments.variance) ? 'Undefined' : moments.variance.toFixed(4)}
               </p>
             </div>
 
             <div className="bg-white dark:bg-zinc-900 p-3 rounded-xl border border-slate-200 dark:border-zinc-800 shadow-sm">
-              <span className="text-[11px] text-slate-500 dark:text-zinc-400 font-medium">Std Deviation (σ)</span>
+              <span className="text-[11px] text-slate-500 dark:text-zinc-400 font-medium">
+                Std Deviation (σ)
+              </span>
               <p className="text-base font-bold font-mono text-slate-800 dark:text-zinc-100 mt-0.5">
                 {isNaN(moments.stdDev) ? 'Undefined' : moments.stdDev.toFixed(4)}
               </p>
             </div>
 
             <div className="bg-white dark:bg-zinc-900 p-3 rounded-xl border border-slate-200 dark:border-zinc-800 shadow-sm">
-              <span className="text-[11px] text-slate-500 dark:text-zinc-400 font-medium">Skewness (γ₁)</span>
+              <span className="text-[11px] text-slate-500 dark:text-zinc-400 font-medium">
+                Skewness (γ₁)
+              </span>
               <p className="text-base font-bold font-mono text-slate-800 dark:text-zinc-100 mt-0.5">
                 {moments.skewness !== undefined && !isNaN(moments.skewness)
                   ? moments.skewness.toFixed(4)

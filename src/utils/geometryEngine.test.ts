@@ -1,9 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  analyze2DLine,
-  analyze2DVectors,
-  analyze3DVectors,
-} from './geometryEngine';
+import { analyze2DLine, analyze2DVectors, analyze3DVectors } from './geometryEngine';
 
 describe('Geometry Engine', () => {
   it('analyzes 2D line segment between (0,0) and (3,4)', () => {

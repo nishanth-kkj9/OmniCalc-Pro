@@ -230,7 +230,9 @@ export const FractionsCalculator: React.FC<FractionsCalculatorProps> = ({
         role="tablist"
         aria-label="Fractions calculator modes"
         className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none"
-        onKeyDown={(e) => handleTablistKeydown(e, [...FRACTIONS_TABS], tab, (t) => setTab(t as any))}
+        onKeyDown={(e) =>
+          handleTablistKeydown(e, [...FRACTIONS_TABS], tab, (t) => setTab(t as any))
+        }
       >
         {[
           { id: 'fractions', label: 'Fraction Arithmetic & Simplifier' },
@@ -270,127 +272,129 @@ export const FractionsCalculator: React.FC<FractionsCalculatorProps> = ({
           hidden={tab !== 'fractions'}
           className={tab !== 'fractions' ? 'hidden' : 'flex flex-col gap-6'}
         >
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div>
-                <h3 className="text-base font-bold text-slate-100">
-                  Fraction Arithmetic & Simplification
-                </h3>
-                <p className="text-xs text-slate-400">
-                  Perform exact fraction operations with mixed numbers and decimal outputs
-                </p>
-              </div>
-              <button
-                onClick={() => {
-                  setF1Num('3');
-                  setF1Den('4');
-                  setOp('+');
-                  setF2Num('2');
-                  setF2Den('5');
-                }}
-                className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs flex items-center gap-1.5 border border-slate-700 flex-shrink-0"
-              >
-                <RefreshCw className="w-3.5 h-3.5" /> Example
-              </button>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h3 className="text-base font-bold text-slate-100">
+                Fraction Arithmetic & Simplification
+              </h3>
+              <p className="text-xs text-slate-400">
+                Perform exact fraction operations with mixed numbers and decimal outputs
+              </p>
             </div>
-
-            {/* Visual Fraction Inputs */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 bg-slate-950 p-6 rounded-2xl border border-slate-800">
-              {/* Fraction 1 */}
-              <div className="flex flex-col items-center gap-1.5 w-24">
-                <input
-                  type="number"
-                  aria-label="Fraction 1 numerator"
-                  value={f1Num}
-                  onChange={(e) => setF1Num(e.target.value)}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2 text-center font-mono text-lg font-bold text-slate-100"
-                />
-                <div className="w-full h-1 bg-slate-600 rounded-full" />
-                <input
-                  type="number"
-                  aria-label="Fraction 1 denominator"
-                  value={f1Den}
-                  onChange={(e) => setF1Den(e.target.value)}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2 text-center font-mono text-lg font-bold text-slate-100"
-                />
-              </div>
-
-              {/* Operator */}
-              <div className="grid grid-cols-2 gap-1 bg-slate-900 p-1 rounded-2xl border border-slate-800">
-                {(['+', '−', '×', '÷'] as const).map((o) => (
-                  <button
-                    key={o}
-                    onClick={() => setOp(o)}
-                    aria-label={`Operator ${o}`}
-                    className={`w-9 h-9 rounded-xl font-bold text-lg transition-all ${
-                      op === o
-                        ? 'bg-sky-600 text-white shadow-md'
-                        : 'text-slate-400 hover:bg-slate-800'
-                    }`}
-                  >
-                    {o}
-                  </button>
-                ))}
-              </div>
-
-              {/* Fraction 2 */}
-              <div className="flex flex-col items-center gap-1.5 w-24">
-                <input
-                  type="number"
-                  aria-label="Fraction 2 numerator"
-                  value={f2Num}
-                  onChange={(e) => setF2Num(e.target.value)}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2 text-center font-mono text-lg font-bold text-slate-100"
-                />
-                <div className="w-full h-1 bg-slate-600 rounded-full" />
-                <input
-                  type="number"
-                  aria-label="Fraction 2 denominator"
-                  value={f2Den}
-                  onChange={(e) => setF2Den(e.target.value)}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2 text-center font-mono text-lg font-bold text-slate-100"
-                />
-              </div>
-            </div>
-
-            {/* Results */}
-            {fracRes && (
-              <div className="flex flex-col gap-4 bg-slate-950 border border-slate-800 rounded-2xl p-5">
-                {fracRes.error ? (
-                  <div role="alert" className="text-rose-400 text-sm font-semibold">{fracRes.error}</div>
-                ) : (
-                  <>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col">
-                        <span className="text-xs text-slate-400 mb-1">Simplified Fraction</span>
-                        <span className="text-3xl font-mono font-bold text-emerald-400">
-                          {fracRes.simplified}
-                        </span>
-                      </div>
-
-                      <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col">
-                        <span className="text-xs text-slate-400 mb-1">Mixed Number</span>
-                        <span className="text-3xl font-mono font-bold text-sky-400">
-                          {fracRes.mixed || 'None (< 1)'}
-                        </span>
-                      </div>
-
-                      <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col">
-                        <span className="text-xs text-slate-400 mb-1">Decimal Form</span>
-                        <span className="text-3xl font-mono font-bold text-amber-400">
-                          {fracRes.decimal}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="border-t border-slate-800 pt-3 text-xs text-slate-400 flex items-center justify-between">
-                      <span>Step Calculation:</span>
-                      <span className="font-mono text-slate-200">{fracRes.step}</span>
-                    </div>
-                  </>
-                )}
-              </div>
-            )}
+            <button
+              onClick={() => {
+                setF1Num('3');
+                setF1Den('4');
+                setOp('+');
+                setF2Num('2');
+                setF2Den('5');
+              }}
+              className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs flex items-center gap-1.5 border border-slate-700 flex-shrink-0"
+            >
+              <RefreshCw className="w-3.5 h-3.5" /> Example
+            </button>
           </div>
+
+          {/* Visual Fraction Inputs */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 bg-slate-950 p-6 rounded-2xl border border-slate-800">
+            {/* Fraction 1 */}
+            <div className="flex flex-col items-center gap-1.5 w-24">
+              <input
+                type="number"
+                aria-label="Fraction 1 numerator"
+                value={f1Num}
+                onChange={(e) => setF1Num(e.target.value)}
+                className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2 text-center font-mono text-lg font-bold text-slate-100"
+              />
+              <div className="w-full h-1 bg-slate-600 rounded-full" />
+              <input
+                type="number"
+                aria-label="Fraction 1 denominator"
+                value={f1Den}
+                onChange={(e) => setF1Den(e.target.value)}
+                className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2 text-center font-mono text-lg font-bold text-slate-100"
+              />
+            </div>
+
+            {/* Operator */}
+            <div className="grid grid-cols-2 gap-1 bg-slate-900 p-1 rounded-2xl border border-slate-800">
+              {(['+', '−', '×', '÷'] as const).map((o) => (
+                <button
+                  key={o}
+                  onClick={() => setOp(o)}
+                  aria-label={`Operator ${o}`}
+                  className={`w-9 h-9 rounded-xl font-bold text-lg transition-all ${
+                    op === o
+                      ? 'bg-sky-600 text-white shadow-md'
+                      : 'text-slate-400 hover:bg-slate-800'
+                  }`}
+                >
+                  {o}
+                </button>
+              ))}
+            </div>
+
+            {/* Fraction 2 */}
+            <div className="flex flex-col items-center gap-1.5 w-24">
+              <input
+                type="number"
+                aria-label="Fraction 2 numerator"
+                value={f2Num}
+                onChange={(e) => setF2Num(e.target.value)}
+                className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2 text-center font-mono text-lg font-bold text-slate-100"
+              />
+              <div className="w-full h-1 bg-slate-600 rounded-full" />
+              <input
+                type="number"
+                aria-label="Fraction 2 denominator"
+                value={f2Den}
+                onChange={(e) => setF2Den(e.target.value)}
+                className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2 text-center font-mono text-lg font-bold text-slate-100"
+              />
+            </div>
+          </div>
+
+          {/* Results */}
+          {fracRes && (
+            <div className="flex flex-col gap-4 bg-slate-950 border border-slate-800 rounded-2xl p-5">
+              {fracRes.error ? (
+                <div role="alert" className="text-rose-400 text-sm font-semibold">
+                  {fracRes.error}
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col">
+                      <span className="text-xs text-slate-400 mb-1">Simplified Fraction</span>
+                      <span className="text-3xl font-mono font-bold text-emerald-400">
+                        {fracRes.simplified}
+                      </span>
+                    </div>
+
+                    <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col">
+                      <span className="text-xs text-slate-400 mb-1">Mixed Number</span>
+                      <span className="text-3xl font-mono font-bold text-sky-400">
+                        {fracRes.mixed || 'None (< 1)'}
+                      </span>
+                    </div>
+
+                    <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col">
+                      <span className="text-xs text-slate-400 mb-1">Decimal Form</span>
+                      <span className="text-3xl font-mono font-bold text-amber-400">
+                        {fracRes.decimal}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-slate-800 pt-3 text-xs text-slate-400 flex items-center justify-between">
+                    <span>Step Calculation:</span>
+                    <span className="font-mono text-slate-200">{fracRes.step}</span>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+        </div>
 
         {/* GCD & LCM */}
         <div
@@ -401,82 +405,82 @@ export const FractionsCalculator: React.FC<FractionsCalculatorProps> = ({
           hidden={tab !== 'gcd_lcm'}
           className={tab !== 'gcd_lcm' ? 'hidden' : 'flex flex-col gap-6'}
         >
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-base font-bold text-slate-100">
-                  Greatest Common Divisor (GCD) & LCM
-                </h3>
-                <p className="text-xs text-slate-400">
-                  Calculates GCD and LCM with prime factorizations
-                </p>
-              </div>
-              <button
-                onClick={() => setGcdInput('48, 180, 24')}
-                className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs flex items-center gap-1.5 border border-slate-700"
-              >
-                <RefreshCw className="w-3.5 h-3.5" /> Example
-              </button>
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-base font-bold text-slate-100">
+                Greatest Common Divisor (GCD) & LCM
+              </h3>
+              <p className="text-xs text-slate-400">
+                Calculates GCD and LCM with prime factorizations
+              </p>
             </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-slate-400">
-                Enter Integers (comma or space separated)
-              </label>
-              <input
-                type="text"
-                value={gcdInput}
-                onChange={(e) => setGcdInput(e.target.value)}
-                placeholder="e.g. 48, 180, 24"
-                className="bg-slate-800 border border-slate-700 rounded-2xl p-3.5 font-mono text-base font-bold text-slate-100 focus:outline-none focus:border-sky-500"
-              />
-            </div>
-
-            {gcdRes && (
-              <div className="flex flex-col gap-4 bg-slate-950 border border-slate-800 rounded-2xl p-5">
-                {gcdRes.error ? (
-                  <div role="alert" className="text-amber-400 text-xs font-semibold">{gcdRes.error}</div>
-                ) : (
-                  <>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl">
-                        <span className="text-xs text-slate-400 block mb-1">
-                          Greatest Common Divisor (GCD / GCF)
-                        </span>
-                        <span className="text-3xl font-mono font-bold text-emerald-400">
-                          {gcdRes.gcd}
-                        </span>
-                      </div>
-                      <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl">
-                        <span className="text-xs text-slate-400 block mb-1">
-                          Least Common Multiple (LCM)
-                        </span>
-                        <span className="text-3xl font-mono font-bold text-sky-400">
-                          {gcdRes.lcm}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Factorizations */}
-                    <div className="border-t border-slate-800 pt-3 flex flex-col gap-2">
-                      <span className="text-xs font-bold text-slate-400">
-                        Prime Factorizations:
-                      </span>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {gcdRes.factorizations?.map((f, idx) => (
-                          <div
-                            key={idx}
-                            className="p-2.5 bg-slate-900 border border-slate-800 rounded-xl font-mono text-xs text-slate-200"
-                          >
-                            <span className="text-sky-400 font-bold">{f.num}</span> = {f.factors}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-            )}
+            <button
+              onClick={() => setGcdInput('48, 180, 24')}
+              className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs flex items-center gap-1.5 border border-slate-700"
+            >
+              <RefreshCw className="w-3.5 h-3.5" /> Example
+            </button>
           </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-bold text-slate-400">
+              Enter Integers (comma or space separated)
+            </label>
+            <input
+              type="text"
+              value={gcdInput}
+              onChange={(e) => setGcdInput(e.target.value)}
+              placeholder="e.g. 48, 180, 24"
+              className="bg-slate-800 border border-slate-700 rounded-2xl p-3.5 font-mono text-base font-bold text-slate-100 focus:outline-none focus:border-sky-500"
+            />
+          </div>
+
+          {gcdRes && (
+            <div className="flex flex-col gap-4 bg-slate-950 border border-slate-800 rounded-2xl p-5">
+              {gcdRes.error ? (
+                <div role="alert" className="text-amber-400 text-xs font-semibold">
+                  {gcdRes.error}
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl">
+                      <span className="text-xs text-slate-400 block mb-1">
+                        Greatest Common Divisor (GCD / GCF)
+                      </span>
+                      <span className="text-3xl font-mono font-bold text-emerald-400">
+                        {gcdRes.gcd}
+                      </span>
+                    </div>
+                    <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl">
+                      <span className="text-xs text-slate-400 block mb-1">
+                        Least Common Multiple (LCM)
+                      </span>
+                      <span className="text-3xl font-mono font-bold text-sky-400">
+                        {gcdRes.lcm}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Factorizations */}
+                  <div className="border-t border-slate-800 pt-3 flex flex-col gap-2">
+                    <span className="text-xs font-bold text-slate-400">Prime Factorizations:</span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {gcdRes.factorizations?.map((f, idx) => (
+                        <div
+                          key={idx}
+                          className="p-2.5 bg-slate-900 border border-slate-800 rounded-xl font-mono text-xs text-slate-200"
+                        >
+                          <span className="text-sky-400 font-bold">{f.num}</span> = {f.factors}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+        </div>
 
         {/* PRIME ANALYZER */}
         <div
@@ -487,109 +491,107 @@ export const FractionsCalculator: React.FC<FractionsCalculatorProps> = ({
           hidden={tab !== 'prime'}
           className={tab !== 'prime' ? 'hidden' : 'flex flex-col gap-6'}
         >
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-base font-bold text-slate-100">
-                  Prime Number Analyzer & Factor Breakdown
-                </h3>
-                <p className="text-xs text-slate-400">
-                  Tests primality, prime decomposition, and enumerates all divisors
-                </p>
-              </div>
-              <button
-                onClick={() => setPrimeInput('360')}
-                className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs flex items-center gap-1.5 border border-slate-700"
-              >
-                <RefreshCw className="w-3.5 h-3.5" /> Example (360)
-              </button>
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-base font-bold text-slate-100">
+                Prime Number Analyzer & Factor Breakdown
+              </h3>
+              <p className="text-xs text-slate-400">
+                Tests primality, prime decomposition, and enumerates all divisors
+              </p>
             </div>
-
-            <div className="flex flex-col gap-1.5 max-w-sm">
-              <label className="text-xs font-bold text-slate-400">Enter Number (N)</label>
-              <input
-                type="number"
-                min="1"
-                value={primeInput}
-                onChange={(e) => setPrimeInput(e.target.value)}
-                className="bg-slate-800 border border-slate-700 rounded-2xl p-3.5 font-mono text-base font-bold text-slate-100 focus:outline-none focus:border-sky-500"
-              />
-            </div>
-
-            {primeRes && (
-              <div className="flex flex-col gap-4 bg-slate-950 border border-slate-800 rounded-2xl p-5">
-                {primeRes.error ? (
-                  <div role="alert" className="text-rose-400 text-sm font-semibold">{primeRes.error}</div>
-                ) : (
-                  <>
-                    <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl flex items-center justify-between">
-                      <div>
-                        <span className="text-xs text-slate-400 block">Primality Status</span>
-                        <span
-                          className={`text-2xl font-bold ${primeRes.isPrime ? 'text-emerald-400' : 'text-amber-400'}`}
-                        >
-                          {primeRes.isPrime ? 'Prime Number' : 'Composite Number'}
-                        </span>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-xs text-slate-400 block">Prime Decomposition</span>
-                        <span className="text-lg font-mono font-bold text-sky-400">
-                          {primeRes.primeFactors}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                      <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
-                        <span className="text-[10px] text-slate-400 block">
-                          Total Divisors d(N)
-                        </span>
-                        <span className="text-lg font-mono font-bold text-slate-100">
-                          {primeRes.numDivisors}
-                        </span>
-                      </div>
-                      <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
-                        <span className="text-[10px] text-slate-400 block">
-                          Sum of Divisors σ(N)
-                        </span>
-                        <span className="text-lg font-mono font-bold text-slate-100">
-                          {primeRes.sumDivisors}
-                        </span>
-                      </div>
-                      <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
-                        <span className="text-[10px] text-slate-400 block">Previous Prime</span>
-                        <span className="text-lg font-mono font-bold text-slate-300">
-                          {primeRes.prevPrime || 'None'}
-                        </span>
-                      </div>
-                      <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
-                        <span className="text-[10px] text-slate-400 block">Next Prime</span>
-                        <span className="text-lg font-mono font-bold text-emerald-400">
-                          {primeRes.nextPrime}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* All Divisors */}
-                    <div className="border-t border-slate-800 pt-3 flex flex-col gap-1.5">
-                      <span className="text-xs font-bold text-slate-400">
-                        All Positive Divisors of {primeInput}:
-                      </span>
-                      <div className="flex flex-wrap gap-1.5">
-                        {primeRes.divisors?.map((d) => (
-                          <span
-                            key={d}
-                            className="px-2 py-0.5 bg-slate-900 border border-slate-800 text-slate-300 font-mono text-xs rounded-md"
-                          >
-                            {d}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-            )}
+            <button
+              onClick={() => setPrimeInput('360')}
+              className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs flex items-center gap-1.5 border border-slate-700"
+            >
+              <RefreshCw className="w-3.5 h-3.5" /> Example (360)
+            </button>
           </div>
+
+          <div className="flex flex-col gap-1.5 max-w-sm">
+            <label className="text-xs font-bold text-slate-400">Enter Number (N)</label>
+            <input
+              type="number"
+              min="1"
+              value={primeInput}
+              onChange={(e) => setPrimeInput(e.target.value)}
+              className="bg-slate-800 border border-slate-700 rounded-2xl p-3.5 font-mono text-base font-bold text-slate-100 focus:outline-none focus:border-sky-500"
+            />
+          </div>
+
+          {primeRes && (
+            <div className="flex flex-col gap-4 bg-slate-950 border border-slate-800 rounded-2xl p-5">
+              {primeRes.error ? (
+                <div role="alert" className="text-rose-400 text-sm font-semibold">
+                  {primeRes.error}
+                </div>
+              ) : (
+                <>
+                  <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl flex items-center justify-between">
+                    <div>
+                      <span className="text-xs text-slate-400 block">Primality Status</span>
+                      <span
+                        className={`text-2xl font-bold ${primeRes.isPrime ? 'text-emerald-400' : 'text-amber-400'}`}
+                      >
+                        {primeRes.isPrime ? 'Prime Number' : 'Composite Number'}
+                      </span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-xs text-slate-400 block">Prime Decomposition</span>
+                      <span className="text-lg font-mono font-bold text-sky-400">
+                        {primeRes.primeFactors}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                    <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                      <span className="text-[10px] text-slate-400 block">Total Divisors d(N)</span>
+                      <span className="text-lg font-mono font-bold text-slate-100">
+                        {primeRes.numDivisors}
+                      </span>
+                    </div>
+                    <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                      <span className="text-[10px] text-slate-400 block">Sum of Divisors σ(N)</span>
+                      <span className="text-lg font-mono font-bold text-slate-100">
+                        {primeRes.sumDivisors}
+                      </span>
+                    </div>
+                    <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                      <span className="text-[10px] text-slate-400 block">Previous Prime</span>
+                      <span className="text-lg font-mono font-bold text-slate-300">
+                        {primeRes.prevPrime || 'None'}
+                      </span>
+                    </div>
+                    <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                      <span className="text-[10px] text-slate-400 block">Next Prime</span>
+                      <span className="text-lg font-mono font-bold text-emerald-400">
+                        {primeRes.nextPrime}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* All Divisors */}
+                  <div className="border-t border-slate-800 pt-3 flex flex-col gap-1.5">
+                    <span className="text-xs font-bold text-slate-400">
+                      All Positive Divisors of {primeInput}:
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {primeRes.divisors?.map((d) => (
+                        <span
+                          key={d}
+                          className="px-2 py-0.5 bg-slate-900 border border-slate-800 text-slate-300 font-mono text-xs rounded-md"
+                        >
+                          {d}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

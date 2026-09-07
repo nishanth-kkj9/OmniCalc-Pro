@@ -316,12 +316,7 @@ export function findRoots(
   const { min, max } = range;
   if (!Number.isFinite(min) || !Number.isFinite(max) || min >= max) return [];
 
-  const {
-    scope = {},
-    samples = 120,
-    tolerance = 1e-6,
-    detectTangentRoots = true,
-  } = options;
+  const { scope = {}, samples = 120, tolerance = 1e-6, detectTangentRoots = true } = options;
 
   const evalAt = toEvaluator(fn, scope);
   const step = (max - min) / samples;
@@ -528,12 +523,7 @@ export function integrateDefinite(
     return { value: 0, method: 'exact', subdivisions: 0, converged: true };
   }
 
-  const {
-    scope = {},
-    subdivisions = 100,
-    method = 'simpson',
-    tolerance = 1e-8,
-  } = options;
+  const { scope = {}, subdivisions = 100, method = 'simpson', tolerance = 1e-8 } = options;
 
   const evalAt = toEvaluator(fn, scope);
   const sign = b >= a ? 1 : -1;

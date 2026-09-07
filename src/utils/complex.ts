@@ -204,8 +204,7 @@ export function parseComplex(str: string): Complex | null {
   if (polarMatch) {
     const r = parseFloat(polarMatch[1]);
     const theta = parseFloat(polarMatch[2]);
-    const unit: ComplexAngleUnit =
-      polarMatch[3]?.toLowerCase() === 'rad' ? 'RAD' : 'DEG';
+    const unit: ComplexAngleUnit = polarMatch[3]?.toLowerCase() === 'rad' ? 'RAD' : 'DEG';
     return Complex.fromPolar(r, theta, unit);
   }
 

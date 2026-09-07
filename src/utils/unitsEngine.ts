@@ -927,11 +927,7 @@ export function evaluateDimensionalExpression(expr: string): PhysicalQuantity {
   };
 }
 
-function processUnitToken(
-  unitToken: string,
-  op: '*' | '/',
-  targetDim: DimensionVector
-) {
+function processUnitToken(unitToken: string, op: '*' | '/', targetDim: DimensionVector) {
   // Support compound unit formats like "m/s^2" or "kg" or "m/s"
   if (unitToken.includes('/')) {
     const parts = unitToken.split('/');
@@ -960,4 +956,3 @@ function processUnitToken(
     }
   }
 }
-

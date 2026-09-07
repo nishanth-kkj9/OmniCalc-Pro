@@ -174,10 +174,7 @@ export function printCalculationSheet(data: ExportReportData) {
           </thead>
           <tbody>
             ${data.tableRows
-              .map(
-                (r) =>
-                  `<tr>${r.map((c) => `<td>${escapeHtml(c)}</td>`).join('')}</tr>`
-              )
+              .map((r) => `<tr>${r.map((c) => `<td>${escapeHtml(c)}</td>`).join('')}</tr>`)
               .join('')}
           </tbody>
         </table>

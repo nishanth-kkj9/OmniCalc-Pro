@@ -37,7 +37,9 @@ describe('Calculator Registry Source of Truth (Phase 2)', () => {
     expect(webCount).toBe(22);
     expect(desktopCount).toBe(19);
 
-    const unsupportedDesktop = CALCULATOR_REGISTRY.filter((entry) => !entry.desktopSupported).map((entry) => entry.id);
+    const unsupportedDesktop = CALCULATOR_REGISTRY.filter((entry) => !entry.desktopSupported).map(
+      (entry) => entry.id
+    );
     expect(unsupportedDesktop).toEqual(['datetime', 'health', 'formulas']);
   });
 });

@@ -1,13 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import {
-  Layers,
-  Sparkles,
-  Copy,
-  Check,
-  Download,
-  AlertTriangle,
-  TrendingUp,
-} from 'lucide-react';
+import { Layers, Sparkles, Copy, Check, Download, AlertTriangle, TrendingUp } from 'lucide-react';
 import { AppSettings } from '../types';
 import { handleTablistKeydown } from '../utils/ariaTabs';
 import {
@@ -32,10 +24,10 @@ interface InferenceCalculatorProps {
   onNavigateToGraph?: () => void;
 }
 
-export const InferenceCalculator: React.FC<InferenceCalculatorProps> = ({
-  onNavigateToStats,
-}) => {
-  const [activeTab, setActiveTab] = useState<'1sample' | '2sample' | 'chisquare' | 'anova'>('1sample');
+export const InferenceCalculator: React.FC<InferenceCalculatorProps> = ({ onNavigateToStats }) => {
+  const [activeTab, setActiveTab] = useState<'1sample' | '2sample' | 'chisquare' | 'anova'>(
+    '1sample'
+  );
   const [copied, setCopied] = useState<boolean>(false);
   const [exportData, setExportData] = useState<ExportReportData | null>(null);
 
@@ -55,7 +47,9 @@ export const InferenceCalculator: React.FC<InferenceCalculatorProps> = ({
   const [hypoP1, setHypoP1] = useState<string>('0.5');
 
   // 2-Sample State
-  const [twoSampleType, setTwoSampleType] = useState<'2t_indep' | 'paired_t' | '2prop_z'>('2t_indep');
+  const [twoSampleType, setTwoSampleType] = useState<'2t_indep' | 'paired_t' | '2prop_z'>(
+    '2t_indep'
+  );
   const [meanA, setMeanA] = useState<string>('78.5');
   const [sdA, setSdA] = useState<string>('8.4');
   const [nA, setNA] = useState<string>('25');
@@ -156,8 +150,14 @@ export const InferenceCalculator: React.FC<InferenceCalculatorProps> = ({
         }
       } else if (activeTab === 'chisquare') {
         if (chiType === 'gof') {
-          const obs = gofObserved.split(',').map((s) => parseFloat(s.trim())).filter((n) => !isNaN(n));
-          const exp = gofExpected.split(',').map((s) => parseFloat(s.trim())).filter((n) => !isNaN(n));
+          const obs = gofObserved
+            .split(',')
+            .map((s) => parseFloat(s.trim()))
+            .filter((n) => !isNaN(n));
+          const exp = gofExpected
+            .split(',')
+            .map((s) => parseFloat(s.trim()))
+            .filter((n) => !isNaN(n));
           return chiSquareGoodnessOfFitTest({
             observed: obs,
             expected: exp.length === obs.length ? exp : undefined,
@@ -167,7 +167,12 @@ export const InferenceCalculator: React.FC<InferenceCalculatorProps> = ({
           const rows = contingencyText
             .trim()
             .split('\n')
-            .map((r) => r.split(',').map((c) => parseFloat(c.trim())).filter((n) => !isNaN(n)))
+            .map((r) =>
+              r
+                .split(',')
+                .map((c) => parseFloat(c.trim()))
+                .filter((n) => !isNaN(n))
+            )
             .filter((r) => r.length > 0);
           return chiSquareIndependenceTest({
             contingencyMatrix: rows,
@@ -177,7 +182,10 @@ export const InferenceCalculator: React.FC<InferenceCalculatorProps> = ({
       } else {
         // ANOVA
         const parseNums = (str: string) =>
-          str.split(',').map((s) => parseFloat(s.trim())).filter((n) => !isNaN(n));
+          str
+            .split(',')
+            .map((s) => parseFloat(s.trim()))
+            .filter((n) => !isNaN(n));
         const groups = [
           { name: 'Group 1', data: parseNums(anovaGroup1) },
           { name: 'Group 2', data: parseNums(anovaGroup2) },
@@ -239,7 +247,8 @@ export const InferenceCalculator: React.FC<InferenceCalculatorProps> = ({
             Statistical Inference & Hypothesis Testing
           </h2>
           <p className="text-xs text-slate-400 mt-0.5">
-            Z-tests, Student's t-tests, ANOVA, Chi-Square independence, confidence intervals & effect sizes
+            Z-tests, Student's t-tests, ANOVA, Chi-Square independence, confidence intervals &
+            effect sizes
           </p>
         </div>
 
@@ -274,10 +283,20 @@ export const InferenceCalculator: React.FC<InferenceCalculatorProps> = ({
                     ['Significance (α)', result.alpha.toString()],
                     ['Decision', result.rejectNull ? 'Reject Null (H₀)' : 'Fail to Reject H₀'],
                     ...(result.confidenceInterval
-                      ? [['Confidence Interval', `[${result.confidenceInterval.lower.toFixed(4)}, ${result.confidenceInterval.upper.toFixed(4)}]`]]
+                      ? [
+                          [
+                            'Confidence Interval',
+                            `[${result.confidenceInterval.lower.toFixed(4)}, ${result.confidenceInterval.upper.toFixed(4)}]`,
+                          ],
+                        ]
                       : []),
                     ...(result.effectSize
-                      ? [[`Effect Size (${result.effectSize.name})`, result.effectSize.value.toFixed(4)]]
+                      ? [
+                          [
+                            `Effect Size (${result.effectSize.name})`,
+                            result.effectSize.value.toFixed(4),
+                          ],
+                        ]
                       : []),
                   ],
                 });
@@ -294,7 +313,11 @@ export const InferenceCalculator: React.FC<InferenceCalculatorProps> = ({
       <div
         role="tablist"
         aria-label="Statistical inference test categories"
-        onKeyDown={(e) => handleTablistKeydown(e, INFERENCE_TABS, activeTab, (tab) => setActiveTab(tab as typeof activeTab))}
+        onKeyDown={(e) =>
+          handleTablistKeydown(e, INFERENCE_TABS, activeTab, (tab) =>
+            setActiveTab(tab as typeof activeTab)
+          )
+        }
         className="flex border-b border-slate-800 gap-2 mb-6 overflow-x-auto pb-2"
       >
         {[
@@ -384,7 +407,9 @@ export const InferenceCalculator: React.FC<InferenceCalculatorProps> = ({
               {oneSampleType === 't_mean' && (
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs text-slate-400 font-bold block mb-1">Sample Mean (x̄)</label>
+                    <label className="text-xs text-slate-400 font-bold block mb-1">
+                      Sample Mean (x̄)
+                    </label>
                     <input
                       type="number"
                       value={sampleMean1}
@@ -393,7 +418,9 @@ export const InferenceCalculator: React.FC<InferenceCalculatorProps> = ({
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-slate-400 font-bold block mb-1">Sample Std Dev (s)</label>
+                    <label className="text-xs text-slate-400 font-bold block mb-1">
+                      Sample Std Dev (s)
+                    </label>
                     <input
                       type="number"
                       value={sampleStdDev1}
@@ -402,7 +429,9 @@ export const InferenceCalculator: React.FC<InferenceCalculatorProps> = ({
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-slate-400 font-bold block mb-1">Sample Size (n)</label>
+                    <label className="text-xs text-slate-400 font-bold block mb-1">
+                      Sample Size (n)
+                    </label>
                     <input
                       type="number"
                       value={sampleSize1}
@@ -411,7 +440,9 @@ export const InferenceCalculator: React.FC<InferenceCalculatorProps> = ({
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-slate-400 font-bold block mb-1">Hypothesized (μ₀)</label>
+                    <label className="text-xs text-slate-400 font-bold block mb-1">
+                      Hypothesized (μ₀)
+                    </label>
                     <input
                       type="number"
                       value={hypoMean1}
@@ -425,7 +456,9 @@ export const InferenceCalculator: React.FC<InferenceCalculatorProps> = ({
               {oneSampleType === 'z_mean' && (
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs text-slate-400 font-bold block mb-1">Sample Mean (x̄)</label>
+                    <label className="text-xs text-slate-400 font-bold block mb-1">
+                      Sample Mean (x̄)
+                    </label>
                     <input
                       type="number"
                       value={sampleMean1}
@@ -434,7 +467,9 @@ export const InferenceCalculator: React.FC<InferenceCalculatorProps> = ({
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-slate-400 font-bold block mb-1">Known Pop. σ</label>
+                    <label className="text-xs text-slate-400 font-bold block mb-1">
+                      Known Pop. σ
+                    </label>
                     <input
                       type="number"
                       value={popStdDev1}
@@ -443,7 +478,9 @@ export const InferenceCalculator: React.FC<InferenceCalculatorProps> = ({
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-slate-400 font-bold block mb-1">Sample Size (n)</label>
+                    <label className="text-xs text-slate-400 font-bold block mb-1">
+                      Sample Size (n)
+                    </label>
                     <input
                       type="number"
                       value={sampleSize1}
@@ -452,7 +489,9 @@ export const InferenceCalculator: React.FC<InferenceCalculatorProps> = ({
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-slate-400 font-bold block mb-1">Hypothesized (μ₀)</label>
+                    <label className="text-xs text-slate-400 font-bold block mb-1">
+                      Hypothesized (μ₀)
+                    </label>
                     <input
                       type="number"
                       value={hypoMean1}
@@ -466,7 +505,9 @@ export const InferenceCalculator: React.FC<InferenceCalculatorProps> = ({
               {oneSampleType === 'prop_z' && (
                 <div className="grid grid-cols-3 gap-3">
                   <div>
-                    <label className="text-xs text-slate-400 font-bold block mb-1">Successes (x)</label>
+                    <label className="text-xs text-slate-400 font-bold block mb-1">
+                      Successes (x)
+                    </label>
                     <input
                       type="number"
                       value={successes1}
@@ -475,7 +516,9 @@ export const InferenceCalculator: React.FC<InferenceCalculatorProps> = ({
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-slate-400 font-bold block mb-1">Total Trials (n)</label>
+                    <label className="text-xs text-slate-400 font-bold block mb-1">
+                      Total Trials (n)
+                    </label>
                     <input
                       type="number"
                       value={trials1}
@@ -484,7 +527,9 @@ export const InferenceCalculator: React.FC<InferenceCalculatorProps> = ({
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-slate-400 font-bold block mb-1">Hypothesized (p₀)</label>
+                    <label className="text-xs text-slate-400 font-bold block mb-1">
+                      Hypothesized (p₀)
+                    </label>
                     <input
                       type="number"
                       step="0.05"
@@ -525,7 +570,9 @@ export const InferenceCalculator: React.FC<InferenceCalculatorProps> = ({
               {twoSampleType === '2t_indep' && (
                 <div className="flex flex-col gap-3">
                   <div className="grid grid-cols-3 gap-2 p-3 bg-slate-900 border border-slate-800 rounded-xl">
-                    <span className="col-span-3 text-xs font-bold text-indigo-400">Sample 1 (Group A)</span>
+                    <span className="col-span-3 text-xs font-bold text-indigo-400">
+                      Sample 1 (Group A)
+                    </span>
                     <input
                       type="number"
                       placeholder="Mean x̄₁"
@@ -550,7 +597,9 @@ export const InferenceCalculator: React.FC<InferenceCalculatorProps> = ({
                   </div>
 
                   <div className="grid grid-cols-3 gap-2 p-3 bg-slate-900 border border-slate-800 rounded-xl">
-                    <span className="col-span-3 text-xs font-bold text-emerald-400">Sample 2 (Group B)</span>
+                    <span className="col-span-3 text-xs font-bold text-emerald-400">
+                      Sample 2 (Group B)
+                    </span>
                     <input
                       type="number"
                       placeholder="Mean x̄₂"
@@ -589,7 +638,9 @@ export const InferenceCalculator: React.FC<InferenceCalculatorProps> = ({
               {twoSampleType === 'paired_t' && (
                 <div className="grid grid-cols-3 gap-3">
                   <div>
-                    <label className="text-xs text-slate-400 font-bold block mb-1">Mean Diff (d̄)</label>
+                    <label className="text-xs text-slate-400 font-bold block mb-1">
+                      Mean Diff (d̄)
+                    </label>
                     <input
                       type="number"
                       value={pairedMeanDiff}
@@ -598,7 +649,9 @@ export const InferenceCalculator: React.FC<InferenceCalculatorProps> = ({
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-slate-400 font-bold block mb-1">Std Dev Diff (s_d)</label>
+                    <label className="text-xs text-slate-400 font-bold block mb-1">
+                      Std Dev Diff (s_d)
+                    </label>
                     <input
                       type="number"
                       value={pairedSdDiff}
@@ -607,7 +660,9 @@ export const InferenceCalculator: React.FC<InferenceCalculatorProps> = ({
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-slate-400 font-bold block mb-1">Pairs Count (n)</label>
+                    <label className="text-xs text-slate-400 font-bold block mb-1">
+                      Pairs Count (n)
+                    </label>
                     <input
                       type="number"
                       value={pairedN}
@@ -681,7 +736,9 @@ export const InferenceCalculator: React.FC<InferenceCalculatorProps> = ({
               {chiType === 'gof' ? (
                 <div className="flex flex-col gap-3">
                   <div>
-                    <label className="text-xs text-slate-400 font-bold block mb-1">Observed Frequencies (comma separated)</label>
+                    <label className="text-xs text-slate-400 font-bold block mb-1">
+                      Observed Frequencies (comma separated)
+                    </label>
                     <input
                       type="text"
                       value={gofObserved}
@@ -690,7 +747,9 @@ export const InferenceCalculator: React.FC<InferenceCalculatorProps> = ({
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-slate-400 font-bold block mb-1">Expected Frequencies (optional, comma separated)</label>
+                    <label className="text-xs text-slate-400 font-bold block mb-1">
+                      Expected Frequencies (optional, comma separated)
+                    </label>
                     <input
                       type="text"
                       value={gofExpected}
@@ -702,7 +761,9 @@ export const InferenceCalculator: React.FC<InferenceCalculatorProps> = ({
                 </div>
               ) : (
                 <div className="flex flex-col gap-2">
-                  <label className="text-xs text-slate-400 font-bold block">Contingency Matrix (comma rows, newline separated)</label>
+                  <label className="text-xs text-slate-400 font-bold block">
+                    Contingency Matrix (comma rows, newline separated)
+                  </label>
                   <textarea
                     rows={4}
                     value={contingencyText}
@@ -717,7 +778,9 @@ export const InferenceCalculator: React.FC<InferenceCalculatorProps> = ({
           {/* TAB 4: ANOVA */}
           {activeTab === 'anova' && (
             <div className="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 flex flex-col gap-3">
-              <span className="text-xs font-bold text-slate-300">Enter Sample Observations per Group (comma separated)</span>
+              <span className="text-xs font-bold text-slate-300">
+                Enter Sample Observations per Group (comma separated)
+              </span>
               <div>
                 <label className="text-xs text-indigo-400 font-bold block mb-1">Group 1</label>
                 <input
@@ -755,18 +818,30 @@ export const InferenceCalculator: React.FC<InferenceCalculatorProps> = ({
             <div className="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 flex flex-col gap-4">
               <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
                 <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-bold text-indigo-400 uppercase tracking-wider">{result.testName}</h3>
+                  <h3 className="text-sm font-bold text-indigo-400 uppercase tracking-wider">
+                    {result.testName}
+                  </h3>
                   <button
-                    onClick={() => handleCopy(`${result.testName}: ${result.statisticName}=${result.testStatistic.toFixed(4)}, p=${result.pValue.toFixed(5)}. ${result.interpretation}`)}
+                    onClick={() =>
+                      handleCopy(
+                        `${result.testName}: ${result.statisticName}=${result.testStatistic.toFixed(4)}, p=${result.pValue.toFixed(5)}. ${result.interpretation}`
+                      )
+                    }
                     className="p-1 text-slate-400 hover:text-slate-200 transition-colors"
                     title="Copy result summary"
                   >
-                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    {copied ? (
+                      <Check className="w-3.5 h-3.5 text-emerald-400" />
+                    ) : (
+                      <Copy className="w-3.5 h-3.5" />
+                    )}
                   </button>
                 </div>
                 <span
                   className={`px-2.5 py-1 text-xs font-extrabold rounded-full ${
-                    result.rejectNull ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                    result.rejectNull
+                      ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+                      : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                   }`}
                 >
                   {result.rejectNull ? 'Reject Null (H₀)' : 'Fail to Reject H₀'}
@@ -776,8 +851,12 @@ export const InferenceCalculator: React.FC<InferenceCalculatorProps> = ({
               {/* Primary Key Metrics */}
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
-                  <span className="text-xs text-slate-400 block mb-0.5">Test Statistic ({result.statisticName})</span>
-                  <span className="font-mono text-base font-bold text-indigo-400">{result.testStatistic.toFixed(4)}</span>
+                  <span className="text-xs text-slate-400 block mb-0.5">
+                    Test Statistic ({result.statisticName})
+                  </span>
+                  <span className="font-mono text-base font-bold text-indigo-400">
+                    {result.testStatistic.toFixed(4)}
+                  </span>
                 </div>
 
                 <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
@@ -793,7 +872,9 @@ export const InferenceCalculator: React.FC<InferenceCalculatorProps> = ({
 
                 {result.degreesOfFreedom !== undefined && (
                   <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
-                    <span className="text-xs text-slate-400 block mb-0.5">Deg. of Freedom (df)</span>
+                    <span className="text-xs text-slate-400 block mb-0.5">
+                      Deg. of Freedom (df)
+                    </span>
                     <span className="font-mono text-base font-bold text-slate-200">
                       {Array.isArray(result.degreesOfFreedom)
                         ? `${result.degreesOfFreedom[0]}, ${result.degreesOfFreedom[1]}`
@@ -808,17 +889,21 @@ export const InferenceCalculator: React.FC<InferenceCalculatorProps> = ({
                 {result.confidenceInterval && (
                   <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
                     <span className="text-xs text-slate-400 block mb-0.5">
-                      {(result.confidenceInterval.confidenceLevel * 100).toFixed(0)}% Confidence Interval
+                      {(result.confidenceInterval.confidenceLevel * 100).toFixed(0)}% Confidence
+                      Interval
                     </span>
                     <span className="font-mono text-xs font-bold text-sky-400">
-                      [{result.confidenceInterval.lower.toFixed(4)}, {result.confidenceInterval.upper.toFixed(4)}]
+                      [{result.confidenceInterval.lower.toFixed(4)},{' '}
+                      {result.confidenceInterval.upper.toFixed(4)}]
                     </span>
                   </div>
                 )}
 
                 {result.effectSize && (
                   <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
-                    <span className="text-xs text-slate-400 block mb-0.5">Effect Size ({result.effectSize.name})</span>
+                    <span className="text-xs text-slate-400 block mb-0.5">
+                      Effect Size ({result.effectSize.name})
+                    </span>
                     <span className="font-mono text-xs font-bold text-amber-400">
                       {result.effectSize.value.toFixed(4)}{' '}
                       {result.effectSize.interpretation && (
@@ -834,15 +919,22 @@ export const InferenceCalculator: React.FC<InferenceCalculatorProps> = ({
               {/* Statistical Decision Narrative */}
               <div className="p-3.5 bg-slate-900/80 border border-slate-800 rounded-xl flex items-start gap-2.5">
                 <Sparkles className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
-                <p className="text-xs text-slate-300 leading-relaxed font-medium">{result.interpretation}</p>
+                <p className="text-xs text-slate-300 leading-relaxed font-medium">
+                  {result.interpretation}
+                </p>
               </div>
 
               {/* Detailed Breakdown */}
               <div className="flex flex-col gap-1.5">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Breakdown Details</span>
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  Breakdown Details
+                </span>
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   {Object.entries(result.details).map(([k, v]) => (
-                    <div key={k} className="p-2 bg-slate-900/60 border border-slate-800 rounded-lg flex justify-between">
+                    <div
+                      key={k}
+                      className="p-2 bg-slate-900/60 border border-slate-800 rounded-lg flex justify-between"
+                    >
                       <span className="text-slate-400">{k}:</span>
                       <span className="font-mono font-bold text-slate-200">
                         {typeof v === 'number' ? v.toFixed(4) : v}
@@ -855,18 +947,16 @@ export const InferenceCalculator: React.FC<InferenceCalculatorProps> = ({
           ) : (
             <div className="p-8 bg-slate-950/60 border border-slate-800/80 rounded-2xl flex flex-col items-center justify-center text-slate-500 gap-2">
               <AlertTriangle className="w-6 h-6 text-amber-500/60" />
-              <p className="text-xs">Invalid inputs. Please verify all sample fields are strictly positive.</p>
+              <p className="text-xs">
+                Invalid inputs. Please verify all sample fields are strictly positive.
+              </p>
             </div>
           )}
         </div>
       </div>
 
       {exportData && (
-        <ExportModal
-          isOpen={!!exportData}
-          data={exportData}
-          onClose={() => setExportData(null)}
-        />
+        <ExportModal isOpen={!!exportData} data={exportData} onClose={() => setExportData(null)} />
       )}
     </div>
   );

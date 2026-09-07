@@ -53,7 +53,8 @@ export const GraphStatusBar: React.FC<GraphStatusBarProps> = ({
           <div className="flex items-center gap-1 text-sky-400 font-bold bg-sky-500/10 px-2 py-0.5 rounded-md border border-sky-500/30">
             <Crosshair className="w-3 h-3 animate-pulse" />
             <span>
-              {activeExprLabel ? `${activeExprLabel}: ` : ''}({tracePoint.x.toFixed(4)}, {tracePoint.y.toFixed(4)})
+              {activeExprLabel ? `${activeExprLabel}: ` : ''}({tracePoint.x.toFixed(4)},{' '}
+              {tracePoint.y.toFixed(4)})
             </span>
           </div>
         ) : (

@@ -26,13 +26,7 @@ export {
 };
 
 export type RegressionModelType =
-  | 'linear'
-  | 'quadratic'
-  | 'cubic'
-  | 'polynomial'
-  | 'exponential'
-  | 'logarithmic'
-  | 'power';
+  'linear' | 'quadratic' | 'cubic' | 'polynomial' | 'exponential' | 'logarithmic' | 'power';
 
 export type RegressionType = RegressionModelType;
 
@@ -120,8 +114,7 @@ export function fitModel(
   // F-statistic: [R² / p] / [(1 - R²) / (n - p - 1)]
   let fStatistic: number | undefined = undefined;
   if (p > 0 && n > p + 1 && baseResult.rSquared < 1) {
-    fStatistic =
-      (baseResult.rSquared / p) / ((1 - baseResult.rSquared) / (n - p - 1));
+    fStatistic = baseResult.rSquared / p / ((1 - baseResult.rSquared) / (n - p - 1));
   }
 
   // Inverse prediction using numerical root finding
@@ -137,7 +130,11 @@ export function fitModel(
 
     // Objective: predict(x) - targetY = 0
     const objFunc = (x: number) => baseResult!.predict(x) - targetY;
-    return findRoots(objFunc, { min: searchMin, max: searchMax }, { samples: 100, tolerance: 1e-5 });
+    return findRoots(
+      objFunc,
+      { min: searchMin, max: searchMax },
+      { samples: 100, tolerance: 1e-5 }
+    );
   };
 
   return {
@@ -154,9 +151,7 @@ export function fitModel(
 /**
  * Automatically evaluates all available regression models and returns them sorted by R² descending.
  */
-export function evaluateAllModels(
-  points: DataPoint[]
-): ExtendedRegressionResult[] {
+export function evaluateAllModels(points: DataPoint[]): ExtendedRegressionResult[] {
   const types: RegressionModelType[] = [
     'linear',
     'quadratic',

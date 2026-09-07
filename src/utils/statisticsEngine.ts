@@ -44,10 +44,7 @@ export function computeDescriptiveStats(numbers: number[]): DescriptiveStats | n
   const mean = sum / n;
 
   // Median
-  const median =
-    n % 2 === 0
-      ? (sorted[n / 2 - 1] + sorted[n / 2]) / 2
-      : sorted[Math.floor(n / 2)];
+  const median = n % 2 === 0 ? (sorted[n / 2 - 1] + sorted[n / 2]) / 2 : sorted[Math.floor(n / 2)];
 
   // Mode(s)
   const freqMap = new Map<number, number>();
@@ -437,11 +434,7 @@ export function normalCdf(x: number, mean: number = 0, stdDev: number = 1): numb
 
   const t = 1 / (1 + p * absZ);
   const erfVal =
-    sign *
-    (1 -
-      ((((a5 * t + a4) * t + a3) * t + a2) * t + a1) *
-        t *
-        Math.exp(-absZ * absZ));
+    sign * (1 - ((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t * Math.exp(-absZ * absZ));
 
   return 0.5 * (1 + erfVal);
 }
@@ -482,17 +475,7 @@ export function normalInvCdf(p: number, mean: number = 0, stdDev: number = 1): n
   } else {
     let r = p < 0.5 ? p : 1 - p;
     r = Math.log(-Math.log(r));
-    z =
-      c0 +
-      r *
-        (c1 +
-          r *
-            (c2 +
-              r *
-                (c3 +
-                  r *
-                    (c4 +
-                      r * (c5 + r * (c6 + r * (c7 + r * c8)))))));
+    z = c0 + r * (c1 + r * (c2 + r * (c3 + r * (c4 + r * (c5 + r * (c6 + r * (c7 + r * c8)))))));
     if (p < 0.5) z = -z;
   }
 

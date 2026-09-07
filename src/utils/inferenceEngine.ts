@@ -4,12 +4,7 @@
  * Chi-Square tests, and probability value computations with exact numerical precision.
  */
 
-import {
-  NormalDist,
-  StudentTDist,
-  ChiSquareDist,
-  incompleteBeta,
-} from './distributions';
+import { NormalDist, StudentTDist, ChiSquareDist, incompleteBeta } from './distributions';
 
 export type AlternativeHypothesis = 'two-sided' | 'less' | 'greater';
 
@@ -112,7 +107,8 @@ export function oneSampleZTest({
     effectSize: {
       name: "Cohen's d",
       value: cohensD,
-      interpretation: cohensD < 0.2 ? 'Negligible' : cohensD < 0.5 ? 'Small' : cohensD < 0.8 ? 'Medium' : 'Large',
+      interpretation:
+        cohensD < 0.2 ? 'Negligible' : cohensD < 0.5 ? 'Small' : cohensD < 0.8 ? 'Medium' : 'Large',
     },
     details: {
       'Sample Mean': sampleMean,
@@ -189,7 +185,8 @@ export function oneSampleTTest({
     effectSize: {
       name: "Cohen's d",
       value: cohensD,
-      interpretation: cohensD < 0.2 ? 'Negligible' : cohensD < 0.5 ? 'Small' : cohensD < 0.8 ? 'Medium' : 'Large',
+      interpretation:
+        cohensD < 0.2 ? 'Negligible' : cohensD < 0.5 ? 'Small' : cohensD < 0.8 ? 'Medium' : 'Large',
     },
     details: {
       'Sample Mean': sampleMean,
@@ -295,7 +292,8 @@ export function twoSampleTTest({
     effectSize: {
       name: "Cohen's d",
       value: cohensD,
-      interpretation: cohensD < 0.2 ? 'Negligible' : cohensD < 0.5 ? 'Small' : cohensD < 0.8 ? 'Medium' : 'Large',
+      interpretation:
+        cohensD < 0.2 ? 'Negligible' : cohensD < 0.5 ? 'Small' : cohensD < 0.8 ? 'Medium' : 'Large',
     },
     details: {
       'Mean 1 (x̄₁)': mean1,
@@ -358,8 +356,16 @@ export function oneSampleProportionTest({
   alpha?: number;
   alternative?: AlternativeHypothesis;
 }): HypothesisTestResult {
-  if (trials <= 0 || successes < 0 || successes > trials || hypothesizedP <= 0 || hypothesizedP >= 1) {
-    throw new Error('Successes must be between 0 and total trials (trials > 0). Hypothesized p must be in (0, 1).');
+  if (
+    trials <= 0 ||
+    successes < 0 ||
+    successes > trials ||
+    hypothesizedP <= 0 ||
+    hypothesizedP >= 1
+  ) {
+    throw new Error(
+      'Successes must be between 0 and total trials (trials > 0). Hypothesized p must be in (0, 1).'
+    );
   }
 
   const sampleP = successes / trials;
@@ -381,7 +387,8 @@ export function oneSampleProportionTest({
   const z2 = zCrit ** 2;
   const denom = 1 + z2 / trials;
   const center = (sampleP + z2 / (2 * trials)) / denom;
-  const margin = (zCrit * Math.sqrt((sampleP * (1 - sampleP)) / trials + z2 / (4 * trials ** 2))) / denom;
+  const margin =
+    (zCrit * Math.sqrt((sampleP * (1 - sampleP)) / trials + z2 / (4 * trials ** 2))) / denom;
 
   const ci: ConfidenceInterval = {
     lower: Math.max(0, center - margin),
@@ -404,7 +411,14 @@ export function oneSampleProportionTest({
     effectSize: {
       name: "Cohen's h",
       value: Math.abs(h),
-      interpretation: Math.abs(h) < 0.2 ? 'Negligible' : Math.abs(h) < 0.5 ? 'Small' : Math.abs(h) < 0.8 ? 'Medium' : 'Large',
+      interpretation:
+        Math.abs(h) < 0.2
+          ? 'Negligible'
+          : Math.abs(h) < 0.5
+            ? 'Small'
+            : Math.abs(h) < 0.8
+              ? 'Medium'
+              : 'Large',
     },
     details: {
       'Sample Proportion (p̂)': sampleP,

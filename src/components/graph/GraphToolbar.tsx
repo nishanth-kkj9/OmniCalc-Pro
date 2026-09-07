@@ -183,9 +183,7 @@ export const GraphToolbar: React.FC<GraphToolbarProps> = ({
         <button
           onClick={onToggleTrace}
           className={`px-2 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1.5 transition-colors ${
-            isTraceActive
-              ? 'bg-sky-500 text-white font-semibold shadow-xs'
-              : btnIdle
+            isTraceActive ? 'bg-sky-500 text-white font-semibold shadow-xs' : btnIdle
           }`}
           title="Trace Mode (T) - Inspect coordinates along curves"
           aria-label="Toggle trace mode"
@@ -252,7 +250,11 @@ export const GraphToolbar: React.FC<GraphToolbarProps> = ({
           {exportOpen && (
             <div
               className={`absolute right-0 top-full mt-1.5 w-44 rounded-2xl border p-1 z-50 shadow-xl ${
-                isLight ? 'bg-white border-slate-200 text-slate-900' : isOled ? 'bg-zinc-950 border-zinc-800 text-white' : 'bg-slate-900 border-slate-800 text-slate-100'
+                isLight
+                  ? 'bg-white border-slate-200 text-slate-900'
+                  : isOled
+                    ? 'bg-zinc-950 border-zinc-800 text-white'
+                    : 'bg-slate-900 border-slate-800 text-slate-100'
               }`}
             >
               <button

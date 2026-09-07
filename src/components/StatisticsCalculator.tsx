@@ -25,7 +25,9 @@ interface StatisticsCalculatorProps {
 }
 
 export const StatisticsCalculator: React.FC<StatisticsCalculatorProps> = ({ settings }) => {
-  const [activeTab, setActiveTab] = useState<'descriptive' | 'distributions' | 'regression'>('descriptive');
+  const [activeTab, setActiveTab] = useState<'descriptive' | 'distributions' | 'regression'>(
+    'descriptive'
+  );
   const [dataInput, setDataInput] = useState<string>('12, 15, 18, 22, 25, 28, 30, 35, 40, 42');
   const [exportModalOpen, setExportModalOpen] = useState<boolean>(false);
 
@@ -47,7 +49,9 @@ export const StatisticsCalculator: React.FC<StatisticsCalculatorProps> = ({ sett
   const [regDataInput, setRegDataInput] = useState<string>(
     '1, 2.1\n2, 3.9\n3, 6.2\n4, 8.1\n5, 10.3'
   );
-  const [regModel, setRegModel] = useState<'linear' | 'poly2' | 'poly3' | 'exp' | 'log' | 'power'>('linear');
+  const [regModel, setRegModel] = useState<'linear' | 'poly2' | 'poly3' | 'exp' | 'log' | 'power'>(
+    'linear'
+  );
   const [predictX, setPredictX] = useState<string>('6');
 
   // Parse Numbers for Descriptive Stats
@@ -141,12 +145,7 @@ export const StatisticsCalculator: React.FC<StatisticsCalculatorProps> = ({ sett
     tableRows: stats
       ? nums.map((v, i) => {
           const dev = v - stats.mean;
-          return [
-            String(i + 1),
-            String(v),
-            dev.toFixed(4),
-            (dev * dev).toFixed(4),
-          ];
+          return [String(i + 1), String(v), dev.toFixed(4), (dev * dev).toFixed(4)];
         })
       : [],
   };
@@ -180,9 +179,21 @@ export const StatisticsCalculator: React.FC<StatisticsCalculatorProps> = ({ sett
       {/* Sub-Navigation Tabs */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1">
         {[
-          { id: 'descriptive', label: 'Descriptive Stats & Outliers', icon: <BarChart2 className="w-4 h-4" /> },
-          { id: 'distributions', label: 'Probability Distributions', icon: <Activity className="w-4 h-4" /> },
-          { id: 'regression', label: 'Regression & Curve Fitting', icon: <TrendingUp className="w-4 h-4" /> },
+          {
+            id: 'descriptive',
+            label: 'Descriptive Stats & Outliers',
+            icon: <BarChart2 className="w-4 h-4" />,
+          },
+          {
+            id: 'distributions',
+            label: 'Probability Distributions',
+            icon: <Activity className="w-4 h-4" />,
+          },
+          {
+            id: 'regression',
+            label: 'Regression & Curve Fitting',
+            icon: <TrendingUp className="w-4 h-4" />,
+          },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -232,13 +243,19 @@ export const StatisticsCalculator: React.FC<StatisticsCalculatorProps> = ({ sett
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col gap-1">
                 <span className="text-xs text-slate-400 font-semibold">Mean (Average)</span>
-                <span className="text-2xl font-mono font-bold text-emerald-400">{stats.mean.toFixed(3)}</span>
-                <span className="text-[10px] text-slate-500 font-mono">Sum: {stats.sum.toFixed(2)}</span>
+                <span className="text-2xl font-mono font-bold text-emerald-400">
+                  {stats.mean.toFixed(3)}
+                </span>
+                <span className="text-[10px] text-slate-500 font-mono">
+                  Sum: {stats.sum.toFixed(2)}
+                </span>
               </div>
 
               <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col gap-1">
                 <span className="text-xs text-slate-400 font-semibold">Median</span>
-                <span className="text-2xl font-mono font-bold text-sky-400">{stats.median.toFixed(3)}</span>
+                <span className="text-2xl font-mono font-bold text-sky-400">
+                  {stats.median.toFixed(3)}
+                </span>
                 <span className="text-[10px] text-slate-500 font-mono">
                   Mode: {stats.modes.length > 0 ? stats.modes.join(', ') : 'None'}
                 </span>
@@ -246,14 +263,22 @@ export const StatisticsCalculator: React.FC<StatisticsCalculatorProps> = ({ sett
 
               <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col gap-1">
                 <span className="text-xs text-slate-400 font-semibold">Sample Std Dev (s)</span>
-                <span className="text-2xl font-mono font-bold text-amber-400">{stats.sampleStdDev.toFixed(3)}</span>
-                <span className="text-[10px] text-slate-500 font-mono">SE: {stats.standardError.toFixed(3)}</span>
+                <span className="text-2xl font-mono font-bold text-amber-400">
+                  {stats.sampleStdDev.toFixed(3)}
+                </span>
+                <span className="text-[10px] text-slate-500 font-mono">
+                  SE: {stats.standardError.toFixed(3)}
+                </span>
               </div>
 
               <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col gap-1">
                 <span className="text-xs text-slate-400 font-semibold">Shape & Skewness</span>
-                <span className="text-2xl font-mono font-bold text-rose-400">{stats.skewness.toFixed(3)}</span>
-                <span className="text-[10px] text-slate-500 font-mono">Excess Kurtosis: {stats.kurtosis.toFixed(3)}</span>
+                <span className="text-2xl font-mono font-bold text-rose-400">
+                  {stats.skewness.toFixed(3)}
+                </span>
+                <span className="text-[10px] text-slate-500 font-mono">
+                  Excess Kurtosis: {stats.kurtosis.toFixed(3)}
+                </span>
               </div>
             </div>
           )}
@@ -276,7 +301,9 @@ export const StatisticsCalculator: React.FC<StatisticsCalculatorProps> = ({ sett
                 </div>
                 <div className="p-3 bg-slate-950 border border-slate-800 rounded-xl">
                   <span className="text-[10px] text-slate-500 block uppercase">Q2 (Median)</span>
-                  <span className="text-base font-bold text-emerald-400">{stats.median.toFixed(2)}</span>
+                  <span className="text-base font-bold text-emerald-400">
+                    {stats.median.toFixed(2)}
+                  </span>
                 </div>
                 <div className="p-3 bg-slate-950 border border-slate-800 rounded-xl">
                   <span className="text-[10px] text-slate-500 block uppercase">Q3 (75%)</span>
@@ -359,7 +386,9 @@ export const StatisticsCalculator: React.FC<StatisticsCalculatorProps> = ({ sett
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] text-slate-500 block">Probability p (for Inv CDF)</label>
+                  <label className="text-[10px] text-slate-500 block">
+                    Probability p (for Inv CDF)
+                  </label>
                   <input
                     type="number"
                     step="0.01"
@@ -511,8 +540,12 @@ export const StatisticsCalculator: React.FC<StatisticsCalculatorProps> = ({ sett
           {regressionResult && (
             <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl flex flex-col gap-3 font-mono">
               <div className="flex flex-wrap justify-between items-center gap-2">
-                <span className="text-xs text-slate-400 font-semibold">Best-fit Model Equation:</span>
-                <span className="text-base font-bold text-sky-400">{regressionResult.equation}</span>
+                <span className="text-xs text-slate-400 font-semibold">
+                  Best-fit Model Equation:
+                </span>
+                <span className="text-base font-bold text-sky-400">
+                  {regressionResult.equation}
+                </span>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs border-t border-slate-800 pt-2">
                 <div>
@@ -569,4 +602,3 @@ export const StatisticsCalculator: React.FC<StatisticsCalculatorProps> = ({ sett
     </div>
   );
 };
-

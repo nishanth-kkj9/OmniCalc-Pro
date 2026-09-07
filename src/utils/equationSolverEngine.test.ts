@@ -79,11 +79,7 @@ describe('Equation Solver Engine', () => {
       // 2x - y + z = 3
       // x + 2y - z = 2
       // Solution: x = 1, y = 2, z = 3
-      const res = solveLinearSystem3x3(
-        1, 1, 1, 6,
-        2, -1, 1, 3,
-        1, 2, -1, 2
-      );
+      const res = solveLinearSystem3x3(1, 1, 1, 6, 2, -1, 1, 3, 1, 2, -1, 2);
       expect(res.isSolvable).toBe(true);
       expect(res.x).toBeCloseTo(1, 4);
       expect(res.y).toBeCloseTo(2, 4);

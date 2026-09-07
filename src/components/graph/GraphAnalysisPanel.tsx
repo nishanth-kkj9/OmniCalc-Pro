@@ -1,18 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import {
-  TrendingUp,
-  Target,
-  Maximize,
-  Minimize,
-  Activity,
-  Layers,
-  Calculator,
-} from 'lucide-react';
-import {
-  GraphExpression,
-  GraphViewport,
-  Point2D,
-} from '../../types';
+import { TrendingUp, Target, Maximize, Minimize, Activity, Layers, Calculator } from 'lucide-react';
+import { GraphExpression, GraphViewport, Point2D } from '../../types';
 import { CompiledSafeExpression } from '../../utils/calculator';
 import {
   findRoots,
@@ -33,7 +21,9 @@ export interface GraphAnalysisPanelProps {
   onSelectPoint: (pt: Point2D) => void;
   onSendToCalculus?: (expression: string) => void;
   onSetTangentLine: (line: { x0: number; y0: number; slope: number } | null) => void;
-  onSetNormalLine: (line: { x0: number; y0: number; slope: number | null; isVertical: boolean } | null) => void;
+  onSetNormalLine: (
+    line: { x0: number; y0: number; slope: number | null; isVertical: boolean } | null
+  ) => void;
   onSetIntegralPolygon: (polygon: Point2D[] | null, label?: string | null) => void;
   theme: 'dark' | 'light' | 'oled';
 }
@@ -65,16 +55,28 @@ export const GraphAnalysisPanel: React.FC<GraphAnalysisPanelProps> = ({
   // 1. Calculate Roots
   const roots = useMemo<number[]>(() => {
     if (!compiled || !activeExpression) return [];
-    const min = activeExpression.domainMin !== undefined ? Math.max(viewport.xMin, activeExpression.domainMin) : viewport.xMin;
-    const max = activeExpression.domainMax !== undefined ? Math.min(viewport.xMax, activeExpression.domainMax) : viewport.xMax;
+    const min =
+      activeExpression.domainMin !== undefined
+        ? Math.max(viewport.xMin, activeExpression.domainMin)
+        : viewport.xMin;
+    const max =
+      activeExpression.domainMax !== undefined
+        ? Math.min(viewport.xMax, activeExpression.domainMax)
+        : viewport.xMax;
     return findRoots(compiled, { min, max }, sliderScope, 120);
   }, [compiled, activeExpression, viewport, sliderScope]);
 
   // 2. Calculate Extrema
   const extrema = useMemo<{ x: number; y: number; type: 'min' | 'max' }[]>(() => {
     if (!compiled || !activeExpression) return [];
-    const min = activeExpression.domainMin !== undefined ? Math.max(viewport.xMin, activeExpression.domainMin) : viewport.xMin;
-    const max = activeExpression.domainMax !== undefined ? Math.min(viewport.xMax, activeExpression.domainMax) : viewport.xMax;
+    const min =
+      activeExpression.domainMin !== undefined
+        ? Math.max(viewport.xMin, activeExpression.domainMin)
+        : viewport.xMin;
+    const max =
+      activeExpression.domainMax !== undefined
+        ? Math.min(viewport.xMax, activeExpression.domainMax)
+        : viewport.xMax;
     return findExtrema(compiled, { min, max }, sliderScope, 120);
   }, [compiled, activeExpression, viewport, sliderScope]);
 
@@ -92,12 +94,20 @@ export const GraphAnalysisPanel: React.FC<GraphAnalysisPanelProps> = ({
   }, [compiled, activeExpression, sliderScope]);
 
   // 4. Calculate Intersections with other visible curves
-  const intersections = useMemo<{ otherLabel: string; otherColor: string; points: Point2D[] }[]>(() => {
+  const intersections = useMemo<
+    { otherLabel: string; otherColor: string; points: Point2D[] }[]
+  >(() => {
     if (!compiled || !activeExpression) return [];
     const list: { otherLabel: string; otherColor: string; points: Point2D[] }[] = [];
     const range = {
-      min: activeExpression.domainMin !== undefined ? Math.max(viewport.xMin, activeExpression.domainMin) : viewport.xMin,
-      max: activeExpression.domainMax !== undefined ? Math.min(viewport.xMax, activeExpression.domainMax) : viewport.xMax,
+      min:
+        activeExpression.domainMin !== undefined
+          ? Math.max(viewport.xMin, activeExpression.domainMin)
+          : viewport.xMin,
+      max:
+        activeExpression.domainMax !== undefined
+          ? Math.min(viewport.xMax, activeExpression.domainMax)
+          : viewport.xMax,
     };
 
     for (const other of allExpressions) {
@@ -151,14 +161,24 @@ export const GraphAnalysisPanel: React.FC<GraphAnalysisPanelProps> = ({
     } else {
       onSetIntegralPolygon(null, null);
     }
-  }, [showIntegralShading, compiled, activeExpression, integralA, integralB, sliderScope, onSetIntegralPolygon]);
+  }, [
+    showIntegralShading,
+    compiled,
+    activeExpression,
+    integralA,
+    integralB,
+    sliderScope,
+    onSetIntegralPolygon,
+  ]);
 
   if (!activeExpression) {
     return (
       <div className="p-6 text-center text-slate-400">
         <Activity className="w-8 h-8 text-slate-500 mx-auto mb-2 opacity-50" />
         <p className="text-xs font-semibold text-slate-300">No active function selected</p>
-        <p className="text-[11px] text-slate-400 mt-1">Select an expression from the Functions tab to analyze.</p>
+        <p className="text-[11px] text-slate-400 mt-1">
+          Select an expression from the Functions tab to analyze.
+        </p>
       </div>
     );
   }
@@ -168,9 +188,14 @@ export const GraphAnalysisPanel: React.FC<GraphAnalysisPanelProps> = ({
       {/* Active Function Header */}
       <div className="p-3 rounded-2xl border border-sky-500/30 bg-sky-500/10 flex items-center justify-between">
         <div className="flex items-center gap-2 min-w-0">
-          <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: activeExpression.color }} />
+          <div
+            className="w-3 h-3 rounded-full flex-shrink-0"
+            style={{ backgroundColor: activeExpression.color }}
+          />
           <div className="min-w-0">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-sky-400">Active Curve</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-sky-400">
+              Active Curve
+            </span>
             <div className="text-xs font-mono font-bold text-slate-100 truncate">
               y = {activeExpression.expression}
             </div>
@@ -200,7 +225,9 @@ export const GraphAnalysisPanel: React.FC<GraphAnalysisPanelProps> = ({
         </div>
 
         {roots.length === 0 ? (
-          <p className="text-xs text-slate-400 italic">No real roots found within current viewport.</p>
+          <p className="text-xs text-slate-400 italic">
+            No real roots found within current viewport.
+          </p>
         ) : (
           <div className="flex flex-wrap gap-1.5">
             {roots.map((rx) => (
@@ -228,7 +255,9 @@ export const GraphAnalysisPanel: React.FC<GraphAnalysisPanelProps> = ({
         </div>
 
         {extrema.length === 0 ? (
-          <p className="text-xs text-slate-400 italic">No local extrema found within current viewport.</p>
+          <p className="text-xs text-slate-400 italic">
+            No local extrema found within current viewport.
+          </p>
         ) : (
           <div className="flex flex-wrap gap-1.5">
             {extrema.map((e, idx) => (
@@ -242,7 +271,11 @@ export const GraphAnalysisPanel: React.FC<GraphAnalysisPanelProps> = ({
                 }`}
                 title={`Local ${e.type} at (${e.x}, ${e.y})`}
               >
-                {e.type === 'max' ? <Maximize className="w-3 h-3" /> : <Minimize className="w-3 h-3" />}
+                {e.type === 'max' ? (
+                  <Maximize className="w-3 h-3" />
+                ) : (
+                  <Minimize className="w-3 h-3" />
+                )}
                 <span>
                   {e.type}: ({e.x}, {e.y})
                 </span>
@@ -283,7 +316,10 @@ export const GraphAnalysisPanel: React.FC<GraphAnalysisPanelProps> = ({
             {intersections.map((item, idx) => (
               <div key={idx} className="text-xs">
                 <div className="flex items-center gap-1.5 font-semibold text-slate-300 mb-1">
-                  <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.otherColor }} />
+                  <div
+                    className="w-2.5 h-2.5 rounded-full"
+                    style={{ backgroundColor: item.otherColor }}
+                  />
                   <span>with {item.otherLabel}:</span>
                 </div>
                 <div className="flex flex-wrap gap-1.5 pl-4">
@@ -351,7 +387,10 @@ export const GraphAnalysisPanel: React.FC<GraphAnalysisPanelProps> = ({
 
         {normalResult && (
           <div className="text-[11px] font-mono text-pink-300 bg-pink-500/10 p-2 rounded-xl border border-pink-500/20">
-            {normalResult.isVertical ? 'Vertical Line' : `Slope m⊥ = ${normalResult.slope?.toFixed(4)}`} | {normalResult.equation}
+            {normalResult.isVertical
+              ? 'Vertical Line'
+              : `Slope m⊥ = ${normalResult.slope?.toFixed(4)}`}{' '}
+            | {normalResult.equation}
           </div>
         )}
       </div>

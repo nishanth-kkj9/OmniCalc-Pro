@@ -3,12 +3,7 @@ import { Download, ListOrdered, CheckCircle, Play } from 'lucide-react';
 import { AppSettings } from '../types';
 import { ExportModal } from './ExportModal';
 import { ExportReportData } from '../utils/exportEngine';
-import {
-  computeSequence,
-  SequenceType,
-  SequenceParams,
-  SequenceResult,
-} from '../utils/sequences';
+import { computeSequence, SequenceType, SequenceParams, SequenceResult } from '../utils/sequences';
 
 interface SequencesCalculatorProps {
   settings?: AppSettings;
@@ -195,7 +190,10 @@ export const SequencesCalculator: React.FC<SequencesCalculatorProps> = ({
   };
 
   return (
-    <div id="sequences-calculator-root" className="flex flex-col h-full bg-slate-50 dark:bg-zinc-950 p-4 lg:p-6 overflow-y-auto">
+    <div
+      id="sequences-calculator-root"
+      className="flex flex-col h-full bg-slate-50 dark:bg-zinc-950 p-4 lg:p-6 overflow-y-auto"
+    >
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div>
@@ -427,7 +425,10 @@ export const SequencesCalculator: React.FC<SequencesCalculatorProps> = ({
             )}
 
             {sequenceResult.convergence.notes.map((note, idx) => (
-              <div key={idx} className="flex items-start gap-2 text-xs text-slate-600 dark:text-zinc-400">
+              <div
+                key={idx}
+                className="flex items-start gap-2 text-xs text-slate-600 dark:text-zinc-400"
+              >
                 <CheckCircle className="w-3.5 h-3.5 text-blue-500 mt-0.5 shrink-0" />
                 <span>{note}</span>
               </div>

@@ -6,12 +6,7 @@
 
 import { compileSafeExpression } from './calculator';
 
-export type SequenceType =
-  | 'arithmetic'
-  | 'geometric'
-  | 'fibonacci'
-  | 'explicit'
-  | 'recursive';
+export type SequenceType = 'arithmetic' | 'geometric' | 'fibonacci' | 'explicit' | 'recursive';
 
 export interface SequenceTerm {
   n: number;
@@ -118,10 +113,7 @@ export function computeSequence(params: SequenceParams): SequenceResult {
 
     if (type === 'geometric') {
       closedFormFormula = `a_n = ${a1} · (${r})^(n - 1)`;
-      sumFormula =
-        r !== 1
-          ? `S_n = ${a1} · (1 - (${r})^n) / (1 - (${r}))`
-          : `S_n = ${a1} · n`;
+      sumFormula = r !== 1 ? `S_n = ${a1} · (1 - (${r})^n) / (1 - (${r}))` : `S_n = ${a1} · n`;
 
       for (let i = 0; i < N; i++) {
         const n = startN + i;
@@ -301,8 +293,7 @@ export function computeSequence(params: SequenceParams): SequenceResult {
         } else {
           const a_prev = historyVals[historyVals.length - 1];
           const a_prev1 = a_prev;
-          const a_prev2 =
-            historyVals.length >= 2 ? historyVals[historyVals.length - 2] : a_prev;
+          const a_prev2 = historyVals.length >= 2 ? historyVals[historyVals.length - 2] : a_prev;
 
           const val = compiled.evaluate({
             n,
