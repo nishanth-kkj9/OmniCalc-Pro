@@ -35,11 +35,11 @@ describe('Calculator Registry Source of Truth (Phase 2)', () => {
     const desktopCount = CALCULATOR_REGISTRY.filter((entry) => entry.desktopSupported).length;
 
     expect(webCount).toBe(22);
-    expect(desktopCount).toBe(19);
+    expect(desktopCount).toBe(20);
 
     const unsupportedDesktop = CALCULATOR_REGISTRY.filter((entry) => !entry.desktopSupported).map(
       (entry) => entry.id
     );
-    expect(unsupportedDesktop).toEqual(['datetime', 'health', 'formulas']);
+    expect(unsupportedDesktop).toEqual(['health', 'formulas']);
   });
 });

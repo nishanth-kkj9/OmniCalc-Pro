@@ -635,7 +635,7 @@ export const CALCULATOR_REGISTRY: CalculatorEntry[] = [
       'Work Shift Wage Tracker',
     ],
     webSupported: true,
-    desktopSupported: false,
+    desktopSupported: true,
     status: 'stable',
     iconName: 'Calendar',
   },

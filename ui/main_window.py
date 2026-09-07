@@ -200,6 +200,7 @@ class MainWindow(QMainWindow):
             ("Fractions", lambda: getattr(importlib.import_module("ui.fractions_page"), "FractionsPage")()),
             ("Geometry", lambda: getattr(importlib.import_module("ui.geometry_page"), "GeometryPage")()),
             ("Finance", lambda: getattr(importlib.import_module("ui.finance_page"), "FinancePage")()),
+            ("DateTime", lambda: getattr(importlib.import_module("ui.datetime_page"), "DateTimePage")()),
             ("History", lambda: getattr(importlib.import_module("ui.history_page"), "HistoryPage")()),
             ("Settings", lambda: getattr(importlib.import_module("ui.settings_page"), "SettingsPage")())
         ]
