@@ -120,6 +120,9 @@ export const ALLOWED_SYMBOLS = new Set([
   'm',
   'u',
   'v',
+  'ans',
+  'Ans',
+  'ANS',
 ]);
 
 /**
@@ -242,11 +245,14 @@ export function sanitizeExpression(expr: string): string {
     .replace(/×/g, '*')
     .replace(/÷/g, '/')
     .replace(/π/g, 'pi')
+    .replace(/τ/g, 'tau')
+    .replace(/ϕ/g, 'phi')
     .replace(/θ/g, 'theta')
     .replace(/−/g, '-');
 
-  // Replace square root symbols like √(4) or √4 or √x
+  // Replace square and cube root symbols
   sanitized = sanitized.replace(/√\(/g, 'sqrt(').replace(/√([0-9a-zA-Z.]+)/g, 'sqrt($1)');
+  sanitized = sanitized.replace(/∛\(/g, 'cbrt(').replace(/∛([0-9a-zA-Z.]+)/g, 'cbrt($1)');
 
   // Percentage conversion: e.g. 50% -> (50 * 0.01) and (20+30)% -> ((20+30) * 0.01)
   sanitized = sanitized.replace(/(\d+(?:\.\d+)?)%/g, '($1 * 0.01)');

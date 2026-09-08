@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Delete, Copy, Check, History, ChevronUp, ChevronDown, Download } from 'lucide-react';
+import { Delete, Copy, Check, History, ChevronUp, ChevronDown, Download, RotateCcw } from 'lucide-react';
 import { evaluateExpression } from '../utils/calculator';
 import { addHistory, getHistory } from '../utils/history';
 import { formatNumberWithSettings } from '../utils/formatting';
@@ -12,13 +12,20 @@ interface ScientificCalculatorProps {
   onUpdateSettings?: (newSettings: Partial<AppSettings>) => void;
 }
 
-export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({ settings }) => {
+export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({
+  settings,
+  onUpdateSettings,
+}) => {
   const [expression, setExpression] = useState<string>('');
   const [rawResult, setRawResult] = useState<string>('0');
   const [displayResult, setDisplayResult] = useState<string>('0');
+  const [lastAnswer, setLastAnswer] = useState<string>('0');
   const [is2nd, setIs2nd] = useState<boolean>(false);
-  const [angleMode, setAngleMode] = useState<AngleMode>(settings.angleMode);
+  const [isHyp, setIsHyp] = useState<boolean>(false);
+  const [angleMode, setAngleMode] = useState<AngleMode>(settings.angleMode || 'DEG');
   const [isEvaluated, setIsEvaluated] = useState<boolean>(false);
+  const [memory, setMemory] = useState<number>(0);
+  const [undoStack, setUndoStack] = useState<string[]>([]);
   const [copied, setCopied] = useState<boolean>(false);
   const [showHistoryTape, setShowHistoryTape] = useState<boolean>(false);
   const [recentHistory, setRecentHistory] = useState<HistoryItem[]>([]);
@@ -35,8 +42,17 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({ sett
 
   // Sync settings angleMode if prop updates
   useEffect(() => {
-    setAngleMode(settings.angleMode);
+    if (settings.angleMode) {
+      setAngleMode(settings.angleMode);
+    }
   }, [settings.angleMode]);
+
+  const handleAngleModeChange = (mode: AngleMode) => {
+    setAngleMode(mode);
+    if (onUpdateSettings) {
+      onUpdateSettings({ angleMode: mode });
+    }
+  };
 
   // Live preview evaluation
   useEffect(() => {
@@ -45,40 +61,149 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({ sett
       setDisplayResult('0');
       return;
     }
-    const evaluated = evaluateExpression(expression, angleMode, settings.precision);
+    const ansNum = parseFloat(lastAnswer) || 0;
+    const evaluated = evaluateExpression(expression, angleMode, settings.precision, {
+      ans: ansNum,
+      Ans: ansNum,
+    });
     setRawResult(evaluated);
     setDisplayResult(formatNumberWithSettings(evaluated, settings));
-  }, [expression, angleMode, settings]);
+  }, [expression, angleMode, settings, lastAnswer]);
 
-  const handleCopy = () => {
+  const pushUndo = useCallback((currentExpr: string) => {
+    setUndoStack((prev) => [...prev.slice(-49), currentExpr]);
+  }, []);
+
+  const handleUndo = useCallback(() => {
+    if (undoStack.length === 0) return;
+    const prev = undoStack[undoStack.length - 1];
+    setUndoStack((stack) => stack.slice(0, -1));
+    setExpression(prev);
+    setIsEvaluated(false);
+  }, [undoStack]);
+
+  const handleCopy = useCallback(() => {
     const valToCopy = displayResult || rawResult || '0';
     navigator.clipboard.writeText(valToCopy);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
-  };
+  }, [displayResult, rawResult]);
 
   const handleInput = useCallback(
     (val: string) => {
+      pushUndo(expression);
+
       if (isEvaluated) {
         if (['+', '−', '×', '÷', '%', '^'].includes(val)) {
+          // Continue expression from previous result
           setExpression(rawResult + val);
+        } else if (val === '.') {
+          setExpression('0.');
         } else {
+          // Fresh start
           setExpression(val);
         }
         setIsEvaluated(false);
       } else {
+        // Prevent consecutive multiple dots in active number token
+        if (val === '.') {
+          const match = expression.match(/(\d+\.?\d*)$/);
+          if (match && match[0].includes('.')) {
+            return;
+          }
+          if (!expression || /[\+\−\-\×\*\÷\/\^\(\,]\s*$/.test(expression)) {
+            setExpression((prev) => prev + '0.');
+            return;
+          }
+        }
+
+        // Replace consecutive binary operators
+        const binaryOps = ['+', '−', '×', '÷', '^'];
+        if (
+          binaryOps.includes(val) &&
+          expression.length > 0 &&
+          binaryOps.includes(expression.slice(-1))
+        ) {
+          setExpression((prev) => prev.slice(0, -1) + val);
+          return;
+        }
+
         setExpression((prev) => prev + val);
       }
     },
-    [isEvaluated, rawResult]
+    [isEvaluated, rawResult, expression, pushUndo]
   );
 
-  const handleClear = () => {
-    setExpression('');
-    setRawResult('0');
-    setDisplayResult('0');
-    setIsEvaluated(false);
-  };
+  const handleToggleSign = useCallback(() => {
+    pushUndo(expression);
+
+    if (isEvaluated) {
+      if (rawResult && rawResult !== '0' && rawResult !== 'Error' && rawResult !== 'NaN') {
+        const toggled = rawResult.startsWith('-') ? rawResult.slice(1) : '-' + rawResult;
+        setExpression(toggled);
+        setIsEvaluated(false);
+      }
+      return;
+    }
+
+    if (!expression) {
+      setExpression('-');
+      return;
+    }
+
+    // Trailing parenthesized negative number e.g. 12+(-5) -> 12+5
+    const parenMatch = expression.match(/\(-(\d+(?:\.\d+)?)\)$/);
+    if (parenMatch) {
+      setExpression(expression.slice(0, parenMatch.index) + parenMatch[1]);
+      return;
+    }
+
+    // Trailing (- e.g. 12+(- -> 12+
+    if (expression.endsWith('(-')) {
+      setExpression(expression.slice(0, -2));
+      return;
+    }
+
+    // Single number
+    if (/^-?\d+(?:\.\d+)?$/.test(expression)) {
+      setExpression(expression.startsWith('-') ? expression.slice(1) : '-' + expression);
+      return;
+    }
+
+    // Number preceded by operator
+    const opNumMatch = expression.match(/([\+\−\-\×\*\÷\/\^\(])(\d+(?:\.\d+)?)$/);
+    if (opNumMatch && opNumMatch.index !== undefined) {
+      const op = opNumMatch[1];
+      const num = opNumMatch[2];
+      setExpression(expression.slice(0, opNumMatch.index) + op + `(-${num})`);
+      return;
+    }
+
+    // Trailing operator
+    if (/[\+\−\-\×\*\÷\/\^\(]$/.test(expression)) {
+      setExpression(expression + '(-');
+      return;
+    }
+
+    setExpression(`-(${expression})`);
+  }, [expression, isEvaluated, rawResult, pushUndo]);
+
+  const handleClear = useCallback(() => {
+    if (expression) {
+      pushUndo(expression);
+      setExpression('');
+      setRawResult('0');
+      setDisplayResult('0');
+      setIsEvaluated(false);
+    } else {
+      setExpression('');
+      setRawResult('0');
+      setDisplayResult('0');
+      setIsEvaluated(false);
+      setIs2nd(false);
+      setIsHyp(false);
+    }
+  }, [expression, pushUndo]);
 
   const handleBackspace = useCallback(() => {
     if (isEvaluated) {
@@ -86,17 +211,33 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({ sett
       setRawResult('0');
       setDisplayResult('0');
       setIsEvaluated(false);
-    } else {
-      setExpression((prev) => prev.slice(0, -1));
+      return;
     }
-  }, [isEvaluated]);
+
+    pushUndo(expression);
+
+    // Multi-char function removal e.g. sinh(, asin(, cbrt(, sqrt(, log(, ln(, etc.
+    const fnMatch = expression.match(/(asinh|acosh|atanh|sinh|cosh|tanh|asin|acos|atan|sqrt|cbrt|log10|log|ln|exp|abs|fact|ncr|npr)\($/);
+    if (fnMatch) {
+      setExpression((prev) => prev.slice(0, -fnMatch[0].length));
+      return;
+    }
+
+    setExpression((prev) => prev.slice(0, -1));
+  }, [isEvaluated, expression, pushUndo]);
 
   const handleEquals = useCallback(() => {
     if (!expression.trim()) return;
-    const finalVal = evaluateExpression(expression, angleMode, settings.precision);
-    if (finalVal !== 'Error') {
+    const ansNum = parseFloat(lastAnswer) || 0;
+    const finalVal = evaluateExpression(expression, angleMode, settings.precision, {
+      ans: ansNum,
+      Ans: ansNum,
+    });
+
+    if (finalVal !== 'Error' && finalVal !== 'NaN') {
       const formatted = formatNumberWithSettings(finalVal, settings);
       addHistory(expression, formatted, 'scientific', settings);
+      setLastAnswer(finalVal);
       setRawResult(finalVal);
       setDisplayResult(formatted);
       setIsEvaluated(true);
@@ -106,12 +247,44 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({ sett
       setDisplayResult('Error');
       setIsEvaluated(true);
     }
-  }, [expression, angleMode, settings, refreshHistory]);
+  }, [expression, angleMode, settings, lastAnswer, refreshHistory]);
+
+  const handleMemory = (action: 'MC' | 'MR' | 'M+' | 'M-') => {
+    const currentVal = parseFloat(rawResult) || 0;
+    switch (action) {
+      case 'MC':
+        setMemory(0);
+        break;
+      case 'MR':
+        handleInput(String(memory));
+        break;
+      case 'M+':
+        setMemory((prev) => prev + currentVal);
+        break;
+      case 'M-':
+        setMemory((prev) => prev - currentVal);
+        break;
+    }
+  };
 
   // Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+
+      // Undo shortcut
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        handleUndo();
+        return;
+      }
+
+      // Copy shortcut
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c' && !window.getSelection()?.toString()) {
+        e.preventDefault();
+        handleCopy();
+        return;
+      }
 
       if (e.key >= '0' && e.key <= '9') handleInput(e.key);
       else if (e.key === '.') handleInput('.');
@@ -122,14 +295,22 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({ sett
       else if (e.key === '%') handleInput('%');
       else if (e.key === '(' || e.key === ')') handleInput(e.key);
       else if (e.key === '^') handleInput('^');
-      else if (e.key === 'Enter' || e.key === '=') handleEquals();
-      else if (e.key === 'Backspace') handleBackspace();
-      else if (e.key === 'Escape') handleClear();
+      else if (e.key === '!') handleInput('!');
+      else if (e.key === 'Enter' || e.key === '=') {
+        e.preventDefault();
+        handleEquals();
+      } else if (e.key === 'Backspace') {
+        e.preventDefault();
+        handleBackspace();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        handleClear();
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleInput, handleEquals, handleBackspace]);
+  }, [handleInput, handleEquals, handleBackspace, handleUndo, handleClear, handleCopy]);
 
   const isLight = settings.theme === 'light';
   const isOled = settings.theme === 'oled';
@@ -150,10 +331,18 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({ sett
       : `${btnClass} bg-sky-600/20 hover:bg-sky-600/30 text-sky-400 border border-sky-500/30 font-bold text-base`;
 
   const fnBtnClass = isLight
-    ? `${btnClass} bg-slate-100/80 hover:bg-slate-200 text-slate-700 border border-slate-300/80 font-mono`
+    ? `${btnClass} bg-slate-100/80 hover:bg-slate-200 text-slate-700 border border-slate-300/80 font-mono text-xs sm:text-sm`
     : isOled
-      ? `${btnClass} bg-zinc-900/80 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 font-mono`
-      : `${btnClass} bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700/60 font-mono`;
+      ? `${btnClass} bg-zinc-900/80 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 font-mono text-xs sm:text-sm`
+      : `${btnClass} bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700/60 font-mono text-xs sm:text-sm`;
+
+  const memBtnClass = `px-2 sm:px-2.5 py-1 rounded-lg border text-[11px] font-semibold transition-all select-none ${
+    isLight
+      ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200'
+      : isOled
+        ? 'bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border-zinc-800'
+        : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700'
+  }`;
 
   const screenBg = isLight
     ? 'bg-white border-slate-200 text-slate-900 shadow-sm'
@@ -170,6 +359,46 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({ sett
     resultSummary: displayResult || '0',
   };
 
+  // Determine Trig Labels based on 2nd and Hyp states
+  const getSinLabel = () => {
+    if (isHyp && is2nd) return 'sinh⁻¹';
+    if (isHyp) return 'sinh';
+    if (is2nd) return 'sin⁻¹';
+    return 'sin';
+  };
+  const getSinInput = () => {
+    if (isHyp && is2nd) return 'asinh(';
+    if (isHyp) return 'sinh(';
+    if (is2nd) return 'asin(';
+    return 'sin(';
+  };
+
+  const getCosLabel = () => {
+    if (isHyp && is2nd) return 'cosh⁻¹';
+    if (isHyp) return 'cosh';
+    if (is2nd) return 'cos⁻¹';
+    return 'cos';
+  };
+  const getCosInput = () => {
+    if (isHyp && is2nd) return 'acosh(';
+    if (isHyp) return 'cosh(';
+    if (is2nd) return 'acos(';
+    return 'cos(';
+  };
+
+  const getTanLabel = () => {
+    if (isHyp && is2nd) return 'tanh⁻¹';
+    if (isHyp) return 'tanh';
+    if (is2nd) return 'tan⁻¹';
+    return 'tan';
+  };
+  const getTanInput = () => {
+    if (isHyp && is2nd) return 'atanh(';
+    if (isHyp) return 'tanh(';
+    if (is2nd) return 'atan(';
+    return 'tan(';
+  };
+
   return (
     <div className="max-w-2xl mx-auto w-full p-2 sm:p-4 flex flex-col gap-3.5">
       {/* Display Screen */}
@@ -179,14 +408,27 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({ sett
         {/* Top Badges and Actions */}
         <div className="flex flex-wrap items-center justify-between gap-2 w-full mb-2">
           <div className="flex flex-wrap items-center gap-1.5">
-            <button
-              onClick={() => setAngleMode(angleMode === 'DEG' ? 'RAD' : 'DEG')}
-              className="px-2.5 py-1 rounded-xl text-[11px] font-bold tracking-wide uppercase transition-all bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/30"
-              title="Toggle Angle Mode (Degrees / Radians)"
-            >
-              {angleMode}
-            </button>
+            {/* 3-Way Segmented Angle Mode Selector */}
+            <div className="flex items-center rounded-xl p-0.5 border border-sky-500/30 bg-sky-500/10">
+              {(['DEG', 'RAD', 'GRAD'] as AngleMode[]).map((mode) => (
+                <button
+                  key={mode}
+                  onClick={() => handleAngleModeChange(mode)}
+                  aria-pressed={angleMode === mode}
+                  aria-label={`Switch to ${mode} mode`}
+                  className={`px-2 py-0.5 rounded-lg text-[10px] sm:text-[11px] font-bold tracking-wide transition-all ${
+                    angleMode === mode
+                      ? 'bg-sky-500 text-white shadow-xs'
+                      : 'text-sky-400/80 hover:text-sky-300'
+                  }`}
+                  title={`Switch to ${mode} mode`}
+                >
+                  {mode}
+                </button>
+              ))}
+            </div>
 
+            {/* Quick History Tape Button */}
             <button
               onClick={() => setShowHistoryTape(!showHistoryTape)}
               className={`px-2 py-1 rounded-lg border text-[11px] font-semibold flex items-center gap-1.5 transition-all ${
@@ -207,9 +449,34 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({ sett
                 <ChevronDown className="w-3 h-3 flex-shrink-0" aria-hidden="true" />
               )}
             </button>
+
+            {/* Memory Active Badge */}
+            {memory !== 0 && (
+              <span
+                className="px-2 py-0.5 rounded-lg text-[10px] sm:text-[11px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 flex items-center gap-1"
+                title={`Memory Register: ${memory}`}
+              >
+                M = {memory}
+              </span>
+            )}
           </div>
 
           <div className="flex items-center gap-1.5 flex-shrink-0">
+            {/* Undo Button */}
+            <button
+              onClick={handleUndo}
+              disabled={undoStack.length === 0}
+              className={`p-1.5 px-2 rounded-xl border text-xs font-medium flex items-center gap-1 transition-all disabled:opacity-40 disabled:pointer-events-none ${
+                isLight
+                  ? 'bg-slate-100 hover:bg-slate-200 text-slate-600 border-slate-200'
+                  : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700/80'
+              }`}
+              title="Undo (Ctrl+Z)"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+            </button>
+
+            {/* Export Button */}
             <button
               onClick={() => setExportModalOpen(true)}
               className={`p-1.5 px-2 rounded-xl border text-xs font-medium flex items-center gap-1 transition-all ${
@@ -222,6 +489,7 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({ sett
               <Download className="w-3.5 h-3.5" />
             </button>
 
+            {/* Copy Button */}
             <button
               onClick={handleCopy}
               className={`p-1.5 px-2 rounded-xl border text-xs font-medium flex items-center gap-1.5 transition-all ${
@@ -229,7 +497,7 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({ sett
                   ? 'bg-slate-100 hover:bg-slate-200 text-slate-600 border-slate-200'
                   : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700/80'
               }`}
-              title="Copy Result to Clipboard"
+              title="Copy Result (Ctrl+C)"
             >
               {copied ? (
                 <>
@@ -248,15 +516,24 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({ sett
 
         {/* Expression Crumb */}
         <div
-          className={`text-sm font-mono h-6 overflow-x-auto whitespace-nowrap scrollbar-none my-1 ${isLight ? 'text-slate-500' : 'text-slate-400'}`}
+          className={`text-sm font-mono h-6 overflow-x-auto whitespace-nowrap scrollbar-none my-1 ${
+            isLight ? 'text-slate-500' : 'text-slate-400'
+          }`}
         >
-          {expression || ' '}
+          {isEvaluated ? `${expression} =` : expression || ' '}
         </div>
 
         {/* Main Display Output */}
         <output
+          id="scientific-calc-output"
           aria-live="polite"
-          className={`text-3xl sm:text-4xl font-bold font-mono tracking-tight overflow-x-auto whitespace-nowrap scrollbar-none py-0.5 tabular-nums ${rawResult === 'Error' ? 'text-rose-400' : isLight ? 'text-slate-900' : 'text-slate-100'}`}
+          className={`text-3xl sm:text-4xl font-bold font-mono tracking-tight overflow-x-auto whitespace-nowrap scrollbar-none py-0.5 tabular-nums ${
+            rawResult === 'Error'
+              ? 'text-rose-400'
+              : isLight
+                ? 'text-slate-900'
+                : 'text-slate-100'
+          }`}
         >
           {displayResult || '0'}
         </output>
@@ -317,67 +594,146 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({ sett
         </div>
       )}
 
-      {/* Scientific Grid (5 Columns) */}
+      {/* Memory Register Action Bar */}
+      <div className="flex items-center justify-between gap-1.5 px-0.5">
+        <div className="flex items-center gap-1 sm:gap-1.5">
+          <button
+            onClick={() => handleMemory('MC')}
+            disabled={memory === 0}
+            aria-label="Memory Clear"
+            className={`${memBtnClass} disabled:opacity-40`}
+            title="Memory Clear"
+          >
+            MC
+          </button>
+          <button
+            onClick={() => handleMemory('MR')}
+            disabled={memory === 0}
+            aria-label="Memory Recall"
+            className={`${memBtnClass} disabled:opacity-40`}
+            title="Memory Recall"
+          >
+            MR
+          </button>
+          <button
+            onClick={() => handleMemory('M+')}
+            aria-label="Memory Add"
+            className={memBtnClass}
+            title="Memory Add"
+          >
+            M+
+          </button>
+          <button
+            onClick={() => handleMemory('M-')}
+            aria-label="Memory Subtract"
+            className={memBtnClass}
+            title="Memory Subtract"
+          >
+            M-
+          </button>
+        </div>
+
+        <div className="flex items-center gap-1 sm:gap-1.5">
+          <button
+            onClick={() => handleInput(lastAnswer || '0')}
+            className={memBtnClass}
+            title="Insert Last Answer (Ans)"
+          >
+            Ans ({lastAnswer})
+          </button>
+        </div>
+      </div>
+
+      {/* Scientific Keypad Grid (5 Columns x 7 Rows) */}
       <div className="grid grid-cols-5 gap-2">
-        {/* Row 1 */}
+        {/* Row 1: Mode Switches & Primary Trig Functions */}
         <button
           onClick={() => setIs2nd(!is2nd)}
-          aria-label={is2nd ? 'Primary scientific functions' : 'Secondary scientific functions'}
-          className={`${fnBtnClass} ${is2nd ? 'bg-amber-500/20 text-amber-400 border-amber-500/40 font-bold' : ''}`}
+          aria-pressed={is2nd}
+          aria-label={is2nd ? 'Primary functions' : 'Secondary functions'}
+          className={`${fnBtnClass} ${
+            is2nd
+              ? 'bg-amber-500/25 text-amber-400 border-amber-500/50 font-bold shadow-xs'
+              : ''
+          }`}
         >
           2nd
         </button>
         <button
-          onClick={() => handleInput(is2nd ? 'asin(' : 'sin(')}
-          aria-label={is2nd ? 'Arcsine' : 'Sine'}
-          className={fnBtnClass}
-          style={{ color: 'var(--accent)' }}
+          onClick={() => setIsHyp(!isHyp)}
+          aria-pressed={isHyp}
+          aria-label={isHyp ? 'Standard trigonometry' : 'Hyperbolic trigonometry'}
+          className={`${fnBtnClass} ${
+            isHyp
+              ? 'bg-cyan-500/25 text-cyan-400 border-cyan-500/50 font-bold shadow-xs'
+              : ''
+          }`}
         >
-          {is2nd ? 'sin⁻¹' : 'sin'}
+          hyp
         </button>
         <button
-          onClick={() => handleInput(is2nd ? 'acos(' : 'cos(')}
-          aria-label={is2nd ? 'Arccosine' : 'Cosine'}
+          onClick={() => handleInput(getSinInput())}
+          aria-label={getSinLabel()}
           className={fnBtnClass}
           style={{ color: 'var(--accent)' }}
         >
-          {is2nd ? 'cos⁻¹' : 'cos'}
+          {getSinLabel()}
         </button>
         <button
-          onClick={() => handleInput(is2nd ? 'atan(' : 'tan(')}
-          aria-label={is2nd ? 'Arctangent' : 'Tangent'}
+          onClick={() => handleInput(getCosInput())}
+          aria-label={getCosLabel()}
           className={fnBtnClass}
           style={{ color: 'var(--accent)' }}
         >
-          {is2nd ? 'tan⁻¹' : 'tan'}
+          {getCosLabel()}
+        </button>
+        <button
+          onClick={() => handleInput(getTanInput())}
+          aria-label={getTanLabel()}
+          className={fnBtnClass}
+          style={{ color: 'var(--accent)' }}
+        >
+          {getTanLabel()}
         </button>
 
+        {/* Row 2: Logs, Exponents, Roots & Clear */}
         <button
-          onClick={handleClear}
-          aria-label={expression ? 'Clear current input' : 'Clear all'}
-          className={`${btnClass} bg-rose-500/15 hover:bg-rose-500/25 text-rose-500 border border-rose-500/30`}
+          onClick={() => handleInput(is2nd ? 'e^(' : 'ln(')}
+          aria-label={is2nd ? 'e to the power of x' : 'Natural logarithm'}
+          className={fnBtnClass}
         >
-          {expression ? 'C' : 'AC'}
-        </button>
-
-        {/* Row 2 */}
-        <button onClick={() => handleInput('^')} aria-label="Exponent" className={fnBtnClass}>
-          xʸ
+          {is2nd ? 'eˣ' : 'ln'}
         </button>
         <button
           onClick={() => handleInput(is2nd ? '10^(' : 'log(')}
-          aria-label={is2nd ? '10 to power of x' : 'Logarithm base 10'}
+          aria-label={is2nd ? '10 to the power of x' : 'Base 10 logarithm'}
           className={fnBtnClass}
         >
           {is2nd ? '10ˣ' : 'log'}
         </button>
         <button
-          onClick={() => handleInput(is2nd ? 'e^(' : 'ln(')}
-          aria-label={is2nd ? 'e to power of x' : 'Natural logarithm'}
+          onClick={() => handleInput(is2nd ? '^2' : '^')}
+          aria-label={is2nd ? 'x squared' : 'x to the power of y'}
           className={fnBtnClass}
         >
-          {is2nd ? 'eˣ' : 'ln'}
+          {is2nd ? 'x²' : 'xʸ'}
         </button>
+        <button
+          onClick={() => handleInput(is2nd ? 'cbrt(' : 'sqrt(')}
+          aria-label={is2nd ? 'Cube root' : 'Square root'}
+          className={fnBtnClass}
+        >
+          {is2nd ? '∛x' : '√x'}
+        </button>
+        <button
+          onClick={handleClear}
+          aria-label={expression ? 'Clear input' : 'Clear all'}
+          className={`${btnClass} bg-rose-500/15 hover:bg-rose-500/25 text-rose-500 border border-rose-500/30 font-bold`}
+        >
+          {expression ? 'C' : 'AC'}
+        </button>
+
+        {/* Row 3: Parentheses, Combinatorics, Reciprocal/Abs & Divide */}
         <button
           onClick={() => handleInput('(')}
           aria-label="Open parenthesis"
@@ -392,10 +748,36 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({ sett
         >
           )
         </button>
+        <button
+          onClick={() => handleInput(is2nd ? 'ncr(' : '!')}
+          aria-label={is2nd ? 'Combinations nCr' : 'Factorial'}
+          className={fnBtnClass}
+        >
+          {is2nd ? 'nCr' : 'n!'}
+        </button>
+        <button
+          onClick={() => handleInput(is2nd ? 'abs(' : '^(-1)')}
+          aria-label={is2nd ? 'Absolute value' : 'Reciprocal 1/x'}
+          className={fnBtnClass}
+        >
+          {is2nd ? '|x|' : '1/x'}
+        </button>
+        <button
+          onClick={() => handleInput('÷')}
+          aria-label="Divide"
+          className={opBtnClass}
+          style={!isLight ? { color: 'var(--accent)' } : undefined}
+        >
+          ÷
+        </button>
 
-        {/* Row 3 */}
-        <button onClick={() => handleInput('√(')} aria-label="Square root" className={fnBtnClass}>
-          √x
+        {/* Row 4: Constants, 7, 8, 9, Multiply */}
+        <button
+          onClick={() => handleInput(is2nd ? 'tau' : 'π')}
+          aria-label={is2nd ? 'Tau' : 'Pi'}
+          className={fnBtnClass}
+        >
+          {is2nd ? 'τ' : 'π'}
         </button>
         <button onClick={() => handleInput('7')} aria-label="7" className={numBtnClass}>
           7
@@ -407,17 +789,21 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({ sett
           9
         </button>
         <button
-          onClick={() => handleInput('÷')}
-          aria-label="Divide"
+          onClick={() => handleInput('×')}
+          aria-label="Multiply"
           className={opBtnClass}
           style={!isLight ? { color: 'var(--accent)' } : undefined}
         >
-          ÷
+          ×
         </button>
 
-        {/* Row 4 */}
-        <button onClick={() => handleInput('!')} aria-label="Factorial" className={fnBtnClass}>
-          n!
+        {/* Row 5: Euler/2^x, 4, 5, 6, Subtract */}
+        <button
+          onClick={() => handleInput(is2nd ? '2^(' : 'e')}
+          aria-label={is2nd ? '2 to the power of x' : "Euler's constant e"}
+          className={fnBtnClass}
+        >
+          {is2nd ? '2ˣ' : 'e'}
         </button>
         <button onClick={() => handleInput('4')} aria-label="4" className={numBtnClass}>
           4
@@ -429,17 +815,21 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({ sett
           6
         </button>
         <button
-          onClick={() => handleInput('×')}
-          aria-label="Multiply"
+          onClick={() => handleInput('−')}
+          aria-label="Subtract"
           className={opBtnClass}
           style={!isLight ? { color: 'var(--accent)' } : undefined}
         >
-          ×
+          −
         </button>
 
-        {/* Row 5 */}
-        <button onClick={() => handleInput('π')} aria-label="Pi" className={fnBtnClass}>
-          π
+        {/* Row 6: Modulo/nPr, 1, 2, 3, Add */}
+        <button
+          onClick={() => handleInput(is2nd ? 'npr(' : ' mod ')}
+          aria-label={is2nd ? 'Permutations nPr' : 'Modulo'}
+          className={fnBtnClass}
+        >
+          {is2nd ? 'nPr' : 'mod'}
         </button>
         <button onClick={() => handleInput('1')} aria-label="1" className={numBtnClass}>
           1
@@ -451,17 +841,21 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({ sett
           3
         </button>
         <button
-          onClick={() => handleInput('−')}
-          aria-label="Subtract"
+          onClick={() => handleInput('+')}
+          aria-label="Add"
           className={opBtnClass}
           style={!isLight ? { color: 'var(--accent)' } : undefined}
         >
-          −
+          +
         </button>
 
-        {/* Row 6 */}
-        <button onClick={() => handleInput('e')} aria-label="Euler's number" className={fnBtnClass}>
-          e
+        {/* Row 7: Sign Toggle, 0, Decimal, Backspace, Equals */}
+        <button
+          onClick={handleToggleSign}
+          aria-label="Toggle sign"
+          className={fnBtnClass}
+        >
+          ±
         </button>
         <button onClick={() => handleInput('0')} aria-label="0" className={numBtnClass}>
           0
@@ -473,24 +867,14 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({ sett
           <Delete className="w-5 h-5" />
         </button>
         <button
-          onClick={() => handleInput('+')}
-          aria-label="Add"
-          className={opBtnClass}
-          style={!isLight ? { color: 'var(--accent)' } : undefined}
+          onClick={handleEquals}
+          aria-label="Calculate equals"
+          style={{ backgroundColor: 'var(--accent)' }}
+          className={`${btnClass} text-white font-bold text-xl shadow-md hover:brightness-110 active:brightness-95`}
         >
-          +
+          =
         </button>
       </div>
-
-      {/* Equals Button Full Width Bar */}
-      <button
-        onClick={handleEquals}
-        aria-label="Calculate equals"
-        style={{ backgroundColor: 'var(--accent)' }}
-        className={`${btnClass} h-12 text-white font-bold text-2xl shadow-md hover:brightness-110 active:brightness-95 w-full mt-1`}
-      >
-        =
-      </button>
 
       <ExportModal
         isOpen={exportModalOpen}
