@@ -288,6 +288,7 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({
 
       if (e.key >= '0' && e.key <= '9') handleInput(e.key);
       else if (e.key === '.') handleInput('.');
+      else if (e.key === ',') handleInput(',');
       else if (e.key === '+') handleInput('+');
       else if (e.key === '-') handleInput('−');
       else if (e.key === '*') handleInput('×');

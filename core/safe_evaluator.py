@@ -95,6 +95,33 @@ def _safe_cbrt(x: float) -> float:
         return math.cbrt(x)
     return math.copysign(abs(x) ** (1 / 3), x)
 
+def _safe_comb(n: float, k: float) -> float:
+    try:
+        return float(math.comb(int(n), int(k)))
+    except (ValueError, TypeError, OverflowError):
+        return float("nan")
+
+def _safe_perm(n: float, k: float) -> float:
+    try:
+        return float(math.perm(int(n), int(k)))
+    except (ValueError, TypeError, OverflowError):
+        return float("nan")
+
+def _safe_gcd(a: float, b: float) -> float:
+    try:
+        return float(math.gcd(int(a), int(b)))
+    except (ValueError, TypeError, OverflowError):
+        return float("nan")
+
+def _safe_lcm(a: float, b: float) -> float:
+    try:
+        if hasattr(math, 'lcm'):
+            return float(math.lcm(int(a), int(b)))
+        ia, ib = int(a), int(b)
+        return float(abs(ia * ib) // math.gcd(ia, ib) if ia and ib else 0)
+    except (ValueError, TypeError, OverflowError):
+        return float("nan")
+
 SAFE_FUNCTIONS = {
     "sin", "cos", "tan", "asin", "acos", "atan",
     "sinh", "cosh", "tanh", "asinh", "acosh", "atanh",
@@ -102,6 +129,7 @@ SAFE_FUNCTIONS = {
     "exp", "expm1", "degrees", "radians",
     "floor", "ceil", "trunc", "round",
     "abs", "factorial", "fact", "gamma", "mod", "sign",
+    "ncr", "npr", "comb", "perm", "gcd", "lcm",
     "pi", "e", "tau", "phi", "inf", "nan",
 }
 
@@ -171,6 +199,12 @@ RADIAN_FUNCTIONS = {
     "gamma": math.gamma,
     "mod": lambda a, b: a % b,
     "sign": lambda x: (1.0 if x > 0 else (-1.0 if x < 0 else 0.0)),
+    "ncr": _safe_comb,
+    "npr": _safe_perm,
+    "comb": _safe_comb,
+    "perm": _safe_perm,
+    "gcd": _safe_gcd,
+    "lcm": _safe_lcm,
 }
 
 # Blocked tokens that should never appear in mathematical expressions
@@ -256,6 +290,10 @@ _SYMBOLIC_STRUCTURE_NS: dict[str, Any] = {
     "round": lambda arg: sp.floor(arg + sp.Rational(1, 2)),
     "abs": sp.Abs, "factorial": sp.factorial, "fact": sp.factorial, "gamma": sp.gamma,
     "mod": lambda a, b: a % b, "sign": sp.sign,
+    "ncr": sp.binomial, "comb": sp.binomial,
+    "npr": lambda n, k: sp.factorial(n) / sp.factorial(n - k),
+    "perm": lambda n, k: sp.factorial(n) / sp.factorial(n - k),
+    "gcd": sp.gcd, "lcm": sp.lcm,
 }
 
 

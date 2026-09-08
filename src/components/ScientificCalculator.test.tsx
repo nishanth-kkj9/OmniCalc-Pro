@@ -213,4 +213,62 @@ describe('ScientificCalculator Component', () => {
     fireEvent.click(mcBtn);
     expect(mcBtn.hasAttribute('disabled')).toBe(true);
   });
+
+  it('calculates trigonometry in gradians (GRAD) mode', () => {
+    render(<ScientificCalculator settings={DEFAULT_SETTINGS} />);
+    const gradBtn = screen.getByRole('button', { name: 'Switch to GRAD mode' });
+    fireEvent.click(gradBtn);
+
+    const sinBtn = screen.getByRole('button', { name: 'sin' });
+    const oneBtn = screen.getByRole('button', { name: '1' });
+    const zeroBtn = screen.getByRole('button', { name: '0' });
+    const closeParenBtn = screen.getByRole('button', { name: 'Close parenthesis' });
+    const eqBtn = screen.getByRole('button', { name: 'Calculate equals' });
+
+    // sin(100 grad) = 1
+    fireEvent.click(sinBtn);
+    fireEvent.click(oneBtn);
+    fireEvent.click(zeroBtn);
+    fireEvent.click(zeroBtn);
+    fireEvent.click(closeParenBtn);
+    fireEvent.click(eqBtn);
+
+    const output = screen.getByRole('status');
+    expect(output.textContent).toBe('1');
+  });
+
+  it('calculates combinatorics (nCr and nPr)', () => {
+    render(<ScientificCalculator settings={DEFAULT_SETTINGS} />);
+    const secondBtn = screen.getByRole('button', { name: 'Secondary functions' });
+    fireEvent.click(secondBtn);
+
+    const ncrBtn = screen.getByRole('button', { name: 'Combinations nCr' });
+    const fiveBtn = screen.getByRole('button', { name: '5' });
+    const twoBtn = screen.getByRole('button', { name: '2' });
+    const closeParenBtn = screen.getByRole('button', { name: 'Close parenthesis' });
+    const eqBtn = screen.getByRole('button', { name: 'Calculate equals' });
+
+    // ncr(5, 2)
+    fireEvent.click(ncrBtn);
+    fireEvent.click(fiveBtn);
+    fireEvent.keyDown(window, { key: ',' });
+    fireEvent.click(twoBtn);
+    fireEvent.click(closeParenBtn);
+    fireEvent.click(eqBtn);
+
+    const output = screen.getByRole('status');
+    expect(output.textContent).toBe('10');
+  });
+
+  it('supports keyboard input for digits, operators and equals', () => {
+    render(<ScientificCalculator settings={DEFAULT_SETTINGS} />);
+    
+    fireEvent.keyDown(window, { key: '2' });
+    fireEvent.keyDown(window, { key: '+' });
+    fireEvent.keyDown(window, { key: '3' });
+    fireEvent.keyDown(window, { key: 'Enter' });
+
+    const output = screen.getByRole('status');
+    expect(output.textContent).toBe('5');
+  });
 });
