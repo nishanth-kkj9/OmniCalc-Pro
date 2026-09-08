@@ -55,6 +55,8 @@ class FormulasPage(QWidget):
         self.engine = FormulasEngine()
         self.on_navigate_mode = on_navigate_mode
         self._is_cleaned_up = False
+        self._search_connected = False
+        self._cat_combo_connected = False
 
         self.all_items: List[FormulaConstantItem] = list(FORMULAS_AND_CONSTANTS_DATABASE)
         self.selected_category: str = "All"
@@ -162,6 +164,7 @@ class FormulasPage(QWidget):
             }
         """)
         self.search_input.textChanged.connect(self._on_search_changed)
+        self._search_connected = True
         search_row.addWidget(self.search_input, 1)
 
         self.count_label = QLabel(f"Showing {len(self.all_items)} of {len(self.all_items)}", controls_frame)
@@ -183,6 +186,7 @@ class FormulasPage(QWidget):
             }
         """)
         self.cat_combo.currentTextChanged.connect(self._on_combo_category_changed)
+        self._cat_combo_connected = True
         search_row.addWidget(self.cat_combo)
 
         controls_layout.addLayout(search_row)
@@ -615,20 +619,31 @@ class FormulasPage(QWidget):
 
     def cleanup(self) -> None:
         """Safely disconnect signals to prevent crash during Qt teardown."""
+        if getattr(self, "_is_cleaned_up", False):
+            return
         self._is_cleaned_up = True
+
         try:
             self.search_input.blockSignals(True)
             self.cat_combo.blockSignals(True)
         except Exception:
             pass
-        try:
-            self.search_input.textChanged.disconnect(self._on_search_changed)
-        except Exception:
-            pass
-        try:
-            self.cat_combo.currentTextChanged.disconnect(self._on_combo_category_changed)
-        except Exception:
-            pass
+
+        if getattr(self, "_search_connected", False):
+            try:
+                self.search_input.textChanged.disconnect(self._on_search_changed)
+            except Exception:
+                pass
+            finally:
+                self._search_connected = False
+
+        if getattr(self, "_cat_combo_connected", False):
+            try:
+                self.cat_combo.currentTextChanged.disconnect(self._on_combo_category_changed)
+            except Exception:
+                pass
+            finally:
+                self._cat_combo_connected = False
 
     def closeEvent(self, event) -> None:
         self.cleanup()

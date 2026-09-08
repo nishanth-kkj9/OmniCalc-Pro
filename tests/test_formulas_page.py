@@ -209,7 +209,8 @@ class TestFormulasPageUI(unittest.TestCase):
         self.assertEqual(self.page.selected_category, "All")
         self.assertEqual(self.page.search_text, "")
         self.assertIn("Showing 59 of 59", self.page.count_label.text())
-        self.assertFalse(self.page.no_results_widget.isVisible())
+        self.assertTrue(self.page.no_results_widget.isHidden())
+        self.assertTrue(all(not card.isHidden() for card in self.page.card_widgets.values()))
 
     def test_category_button_filtering(self):
         self.page.set_category("Calculus")
@@ -217,32 +218,51 @@ class TestFormulasPageUI(unittest.TestCase):
         self.assertEqual(self.page.cat_combo.currentText(), "Calculus")
         self.assertIn("Showing 9 of 59", self.page.count_label.text())
 
-        # Check card visibility
-        visible_cards = [card for card in self.page.card_widgets.values() if card.isVisible()]
+        # Check explicit card visibility state
+        visible_cards = [card for card in self.page.card_widgets.values() if not card.isHidden()]
         self.assertEqual(len(visible_cards), 9)
+
+        calc_items = FormulasEngine.filter_items(category="Calculus", search="")
+        self.assertEqual(len(calc_items), 9)
+        for it in calc_items:
+            self.assertFalse(self.page.card_widgets[it.id].isHidden())
 
     def test_category_combo_filtering(self):
         self.page.cat_combo.setCurrentText("Finance")
         self.assertEqual(self.page.selected_category, "Finance")
         self.assertIn("Showing 4 of 59", self.page.count_label.text())
+        visible_cards = [card for card in self.page.card_widgets.values() if not card.isHidden()]
+        self.assertEqual(len(visible_cards), 4)
 
     def test_search_input_filtering(self):
+        # Database contains two Pythagorean entries (geo_pythagoras & geo_trig_identity)
         self.page.search_input.setText("Pythagorean")
+        self.assertIn("Showing 2 of 59", self.page.count_label.text())
+        matching_cards = [card for card in self.page.card_widgets.values() if not card.isHidden()]
+        self.assertEqual(len(matching_cards), 2)
+        self.assertFalse(self.page.card_widgets["geo_pythagoras"].isHidden())
+        self.assertFalse(self.page.card_widgets["geo_trig_identity"].isHidden())
+
+        # Test single unique match
+        self.page.search_input.setText("Archimedes")
         self.assertIn("Showing 1 of 59", self.page.count_label.text())
-        visible_cards = [card for card in self.page.card_widgets.values() if card.isVisible()]
-        self.assertEqual(len(visible_cards), 1)
+        single_match = [card for card in self.page.card_widgets.values() if not card.isHidden()]
+        self.assertEqual(len(single_match), 1)
+        self.assertFalse(self.page.card_widgets["const_pi"].isHidden())
 
     def test_no_results_and_clear_action(self):
         self.page.search_input.setText("unmatched_keyword_999")
-        self.assertTrue(self.page.no_results_widget.isVisible())
+        self.assertFalse(self.page.no_results_widget.isHidden())
         self.assertIn("Showing 0 of 59", self.page.count_label.text())
+        self.assertTrue(all(card.isHidden() for card in self.page.card_widgets.values()))
 
         # Test clear expression
         self.page.clear_expression()
         self.assertEqual(self.page.search_input.text(), "")
         self.assertEqual(self.page.selected_category, "All")
-        self.assertFalse(self.page.no_results_widget.isVisible())
+        self.assertTrue(self.page.no_results_widget.isHidden())
         self.assertIn("Showing 59 of 59", self.page.count_label.text())
+        self.assertTrue(all(not card.isHidden() for card in self.page.card_widgets.values()))
 
     def test_copy_text_helper(self):
         test_btn = self.page.cat_buttons["All"]
