@@ -99,7 +99,12 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
       pushUndo(expression);
       if (isEvaluated) {
         if (['+', '−', '×', '÷', '%', '^'].includes(val)) {
-          if (rawResult && rawResult !== 'Error' && rawResult !== 'NaN' && !rawResult.includes('Infinity')) {
+          if (
+            rawResult &&
+            rawResult !== 'Error' &&
+            rawResult !== 'NaN' &&
+            !rawResult.includes('Infinity')
+          ) {
             setExpression(rawResult + val);
           } else {
             setExpression('0' + val);
@@ -508,7 +513,10 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
             ? lastExpression
               ? `${lastExpression} =`
               : ' '
-            : expression && /[\+\−\×\÷\^]/.test(expression) && rawResult !== 'Error' && rawResult !== '0'
+            : expression &&
+                /[\+\−\×\÷\^]/.test(expression) &&
+                rawResult !== 'Error' &&
+                rawResult !== '0'
               ? `= ${displayResult}`
               : ' '}
         </div>
@@ -520,7 +528,7 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
           aria-live="polite"
           className={`${fontSizeClass} font-bold font-mono tracking-tight overflow-x-auto whitespace-nowrap scrollbar-none py-0.5 tabular-nums ${rawResult === 'Error' ? 'text-rose-400' : isLight ? 'text-slate-900' : 'text-slate-100'}`}
         >
-          {isEvaluated ? displayResult : (expression || '0')}
+          {isEvaluated ? displayResult : expression || '0'}
         </output>
       </div>
 

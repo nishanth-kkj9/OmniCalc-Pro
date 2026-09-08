@@ -53,7 +53,7 @@ class TestBasicPageUI(unittest.TestCase):
         self.assertEqual(self.page.expression, "")
         self.assertFalse(self.page.is_evaluated)
         self.assertEqual(self.page.clear_btn.text(), "AC")
-        self.assertFalse(self.page.mem_label.isVisible())
+        self.assertTrue(self.page.mem_label.isHidden())
         self.assertFalse(self.page.undo_btn.isEnabled())
 
     def test_keypad_input_and_clear_toggle(self):
@@ -144,7 +144,7 @@ class TestBasicPageUI(unittest.TestCase):
         self.page._input("5")
         self.page._input("M+")
         self.assertEqual(self.page.memory, 5.0)
-        self.assertTrue(self.page.mem_label.isVisible())
+        self.assertFalse(self.page.mem_label.isHidden())
         self.assertIn("M = 5", self.page.mem_label.text())
 
         self.page._input("C")
@@ -159,7 +159,7 @@ class TestBasicPageUI(unittest.TestCase):
 
         self.page._input("MC")
         self.assertEqual(self.page.memory, 0.0)
-        self.assertFalse(self.page.mem_label.isVisible())
+        self.assertTrue(self.page.mem_label.isHidden())
 
     def test_operator_replacement(self):
         self.page._input("5")
