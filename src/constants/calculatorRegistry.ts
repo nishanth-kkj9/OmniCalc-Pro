@@ -664,7 +664,7 @@ export const CALCULATOR_REGISTRY: CalculatorEntry[] = [
       'Karvonen Target Heart Rate Training Zones',
     ],
     webSupported: true,
-    desktopSupported: false,
+    desktopSupported: true,
     status: 'stable',
     iconName: 'Heart',
   },

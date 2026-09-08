@@ -11,14 +11,14 @@ PAGE_NAMES = [
     "Dashboard", "Basic", "Scientific", "Graph", "Converter", "Programmer",
     "Matrix", "Statistics", "Regression", "Probability", "Inference",
     "Equation", "Calculus", "Complex", "Sequences", "Units", "Fractions", "Geometry",
-    "Finance", "DateTime", "History", "Settings"
+    "Finance", "DateTime", "Health", "History", "Settings"
 ]
 
 SIDE_ICONS = [
     "\U0001f3e0", "\U0001f522", "\U0001f52c", "\U0001f4c8", "\U0001f504", "\U0001f4bb",
     "\U0001f532", "\U0001f4ca", "\U0001f4c9", "\U0001f3b2", "\U0001f9ea",
     "\U0001f9ee", "\u222b", "\u2102", "\u2211", "\u269b", "\u00bd", "\U0001f4d0",
-    "\U0001f4b0", "\U0001f4c5", "\U0001f552", "\u2699"
+    "\U0001f4b0", "\U0001f4c5", "\u2764\ufe0f", "\U0001f552", "\u2699"
 ]
 
 
