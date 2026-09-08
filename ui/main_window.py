@@ -165,6 +165,7 @@ def get_default_page_factories(config=None):
         ("Finance", lambda: getattr(importlib.import_module("ui.finance_page"), "FinancePage")()),
         ("DateTime", lambda: getattr(importlib.import_module("ui.datetime_page"), "DateTimePage")()),
         ("Health", lambda: getattr(importlib.import_module("ui.health_page"), "HealthPage")()),
+        ("Formulas", lambda: getattr(importlib.import_module("ui.formulas_page"), "FormulasPage")()),
         ("History", lambda: getattr(importlib.import_module("ui.history_page"), "HistoryPage")()),
         ("Settings", lambda: getattr(importlib.import_module("ui.settings_page"), "SettingsPage")())
     ]

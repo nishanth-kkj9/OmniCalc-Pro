@@ -692,7 +692,7 @@ export const CALCULATOR_REGISTRY: CalculatorEntry[] = [
       'One-Click Direct Bridge to Calculator',
     ],
     webSupported: true,
-    desktopSupported: false,
+    desktopSupported: true,
     status: 'stable',
     iconName: 'BookOpen',
   },
