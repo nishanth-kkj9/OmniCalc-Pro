@@ -248,8 +248,9 @@ export function sanitizeExpression(expr: string): string {
   // Replace square root symbols like √(4) or √4 or √x
   sanitized = sanitized.replace(/√\(/g, 'sqrt(').replace(/√([0-9a-zA-Z.]+)/g, 'sqrt($1)');
 
-  // Percentage conversion: e.g. 50% -> (50 * 0.01)
+  // Percentage conversion: e.g. 50% -> (50 * 0.01) and (20+30)% -> ((20+30) * 0.01)
   sanitized = sanitized.replace(/(\d+(?:\.\d+)?)%/g, '($1 * 0.01)');
+  sanitized = sanitized.replace(/\)%/g, ') * 0.01');
 
   return sanitized;
 }

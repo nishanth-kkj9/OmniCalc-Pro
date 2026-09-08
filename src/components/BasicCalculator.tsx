@@ -20,6 +20,7 @@ interface BasicCalculatorProps {
 
 export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) => {
   const [expression, setExpression] = useState<string>('');
+  const [lastExpression, setLastExpression] = useState<string>('');
   const [rawResult, setRawResult] = useState<string>('0');
   const [displayResult, setDisplayResult] = useState<string>('0');
   const [memory, setMemory] = useState<number>(0);
@@ -81,7 +82,7 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
   }, [expression, settings]);
 
   const handleCopy = () => {
-    const valToCopy = displayResult || rawResult || '0';
+    const valToCopy = isEvaluated ? displayResult || '0' : expression || '0';
     navigator.clipboard
       .writeText(valToCopy)
       .then(() => {
@@ -98,13 +99,64 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
       pushUndo(expression);
       if (isEvaluated) {
         if (['+', '−', '×', '÷', '%', '^'].includes(val)) {
-          setExpression(rawResult + val);
+          if (rawResult && rawResult !== 'Error' && rawResult !== 'NaN' && !rawResult.includes('Infinity')) {
+            setExpression(rawResult + val);
+          } else {
+            setExpression('0' + val);
+          }
+        } else if (val === '.') {
+          setExpression('0.');
         } else {
           setExpression(val);
         }
         setIsEvaluated(false);
       } else {
-        setExpression((prev) => prev + val);
+        if (val === '.') {
+          // Prevent multiple decimals in the active numeric token
+          const tokens = expression.split(/[\+\−\×\÷\^\(\)]/);
+          const currentToken = tokens[tokens.length - 1];
+          if (currentToken.includes('.')) {
+            return;
+          }
+          if (!expression || /[\+\−\×\÷\^\(]$/.test(expression)) {
+            setExpression((prev) => prev + '0.');
+            return;
+          }
+          setExpression((prev) => prev + '.');
+        } else if (['+', '−', '×', '÷', '^'].includes(val)) {
+          if (!expression) {
+            if (val === '−') {
+              setExpression('−');
+            } else {
+              setExpression('0' + val);
+            }
+            return;
+          }
+          if (/[\+\−\×\÷\^]$/.test(expression)) {
+            // Replace trailing operator with the new operator
+            setExpression((prev) => prev.slice(0, -1) + val);
+            return;
+          }
+          setExpression((prev) => prev + val);
+        } else if (val === ')') {
+          const openCount = (expression.match(/\(/g) || []).length;
+          const closeCount = (expression.match(/\)/g) || []).length;
+          if (openCount <= closeCount || /[\+\−\×\÷\^\(]$/.test(expression)) {
+            return;
+          }
+          setExpression((prev) => prev + ')');
+        } else if (val === '%') {
+          if (!expression || /[\+\−\×\÷\^\(\%]$/.test(expression)) {
+            return;
+          }
+          setExpression((prev) => prev + '%');
+        } else if (val === '0' && expression === '0') {
+          return;
+        } else if (expression === '0' && val >= '1' && val <= '9') {
+          setExpression(val);
+        } else {
+          setExpression((prev) => prev + val);
+        }
       }
     },
     [expression, isEvaluated, pushUndo, rawResult]
@@ -113,6 +165,7 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
   const handleClear = useCallback(() => {
     pushUndo(expression);
     setExpression('');
+    setLastExpression('');
     setRawResult('0');
     setDisplayResult('0');
     setIsEvaluated(false);
@@ -121,13 +174,20 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
 
   const handleBackspace = useCallback(() => {
     pushUndo(expression);
-    if (isEvaluated) {
+    if (isEvaluated || expression === 'Error') {
       setExpression('');
+      setLastExpression('');
       setRawResult('0');
       setDisplayResult('0');
       setIsEvaluated(false);
     } else {
-      setExpression((prev) => prev.slice(0, -1));
+      if (expression.endsWith('sqrt(')) {
+        setExpression((prev) => prev.slice(0, -5));
+      } else if (expression.endsWith('√(') || expression.endsWith('(-')) {
+        setExpression((prev) => prev.slice(0, -2));
+      } else {
+        setExpression((prev) => prev.slice(0, -1));
+      }
     }
   }, [expression, isEvaluated, pushUndo]);
 
@@ -138,31 +198,92 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
     if (finalVal !== 'Error') {
       const formatted = formatNumberWithSettings(finalVal, settings);
       addHistory(expression, formatted, 'basic', settings);
+      setLastExpression(expression);
       setRawResult(finalVal);
       setDisplayResult(formatted);
       setIsEvaluated(true);
       setHistoryCursor(-1);
       refreshHistory();
     } else {
+      setLastExpression(expression);
       setRawResult('Error');
       setDisplayResult('Error');
       setIsEvaluated(true);
     }
   }, [expression, settings, pushUndo, refreshHistory]);
 
-  const handlePlusMinus = () => {
-    if (!expression) return;
+  const handlePlusMinus = useCallback(() => {
     pushUndo(expression);
-    if (expression.startsWith('-')) {
-      setExpression(expression.substring(1));
-    } else {
-      setExpression('-' + expression);
+    if (isEvaluated) {
+      if (rawResult === '0' || rawResult === '' || rawResult === 'Error') return;
+      const toggled = rawResult.startsWith('-') ? rawResult.substring(1) : '-' + rawResult;
+      setRawResult(toggled);
+      setDisplayResult(formatNumberWithSettings(toggled, settings));
+      setExpression(toggled);
+      setIsEvaluated(false);
+      return;
     }
-  };
+
+    if (!expression) {
+      setExpression('-');
+      return;
+    }
+    if (expression === '-') {
+      setExpression('');
+      return;
+    }
+
+    // Trailing parenthesized negative number e.g. 12+(-5) -> 12+5
+    const trailingParenNeg = /\(-(\d+(?:\.\d+)?)\)$/;
+    const mParen = expression.match(trailingParenNeg);
+    if (mParen && mParen.index !== undefined) {
+      setExpression(expression.substring(0, mParen.index) + mParen[1]);
+      return;
+    }
+
+    // Trailing (- e.g. 12+(- -> 12+
+    if (expression.endsWith('(-')) {
+      setExpression(expression.slice(0, -2));
+      return;
+    }
+
+    // If entire expression is a single number
+    if (/^-?\d+(?:\.\d+)?$/.test(expression)) {
+      if (expression.startsWith('-')) {
+        setExpression(expression.substring(1));
+      } else {
+        setExpression('-' + expression);
+      }
+      return;
+    }
+
+    // Trailing number preceded by operator or open paren e.g. 12+5 -> 12+(-5)
+    const trailingOpNum = /([\+\−\×\÷\^\(])(\d+(?:\.\d+)?)$/;
+    const mOp = expression.match(trailingOpNum);
+    if (mOp && mOp.index !== undefined) {
+      const op = mOp[1];
+      const num = mOp[2];
+      setExpression(expression.substring(0, mOp.index) + op + `(-${num})`);
+      return;
+    }
+
+    // If ending with an operator
+    if (/[\+\−\×\÷\^\(]$/.test(expression)) {
+      setExpression(expression + '(-');
+      return;
+    }
+
+    setExpression(`-(${expression})`);
+  }, [expression, isEvaluated, pushUndo, rawResult, settings]);
 
   // Memory Functions
   const handleMemory = (action: 'MC' | 'MR' | 'M+' | 'M-') => {
-    const currentVal = parseFloat(rawResult) || 0;
+    const currentVal =
+      parseFloat(
+        isEvaluated
+          ? rawResult
+          : evaluateExpression(expression || '0', settings.angleMode, settings.precision)
+      ) || 0;
     if (action === 'MC') setMemory(0);
     else if (action === 'MR') handleInput(String(memory));
     else if (action === 'M+') setMemory((prev) => prev + currentVal);
@@ -171,7 +292,8 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
 
   const handleRecallHistory = (item: HistoryItem) => {
     pushUndo(expression);
-    setExpression(item.expression);
+    setLastExpression(item.expression);
+    setExpression(item.result);
     setRawResult(item.result);
     setDisplayResult(item.result);
     setIsEvaluated(true);
@@ -356,6 +478,7 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
                   : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700/80'
               }`}
               title="Copy Result to Clipboard"
+              aria-label="Copy result"
             >
               {copied ? (
                 <>
@@ -377,17 +500,27 @@ export const BasicCalculator: React.FC<BasicCalculatorProps> = ({ settings }) =>
 
         {/* Expression Crumb */}
         <div
+          id="basic-calc-crumb"
+          data-testid="basic-calc-crumb"
           className={`text-sm font-mono h-6 overflow-x-auto whitespace-nowrap scrollbar-none my-1 ${isLight ? 'text-slate-500' : 'text-slate-400'}`}
         >
-          {expression || ' '}
+          {isEvaluated
+            ? lastExpression
+              ? `${lastExpression} =`
+              : ' '
+            : expression && /[\+\−\×\÷\^]/.test(expression) && rawResult !== 'Error' && rawResult !== '0'
+              ? `= ${displayResult}`
+              : ' '}
         </div>
 
         {/* Main Display Output */}
         <output
+          id="basic-calc-output"
+          data-testid="basic-calc-output"
           aria-live="polite"
           className={`${fontSizeClass} font-bold font-mono tracking-tight overflow-x-auto whitespace-nowrap scrollbar-none py-0.5 tabular-nums ${rawResult === 'Error' ? 'text-rose-400' : isLight ? 'text-slate-900' : 'text-slate-100'}`}
         >
-          {displayResult || '0'}
+          {isEvaluated ? displayResult : (expression || '0')}
         </output>
       </div>
 

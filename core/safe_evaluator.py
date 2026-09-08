@@ -430,6 +430,10 @@ class SafeEvaluator:
                 continue
             expr = expr.replace(k, v)
 
+        # Percentage conversion: e.g. 50% -> (50 * 0.01) and (20+30)% -> ((20+30) * 0.01) without affecting modulo (e.g. 5 % 2)
+        expr = re.sub(r"(\d+(?:\.\d+)?)\s*%(?!\s*[0-9a-zA-Z\(])", r"(\1 * 0.01)", expr)
+        expr = re.sub(r"(\))\s*%(?!\s*[0-9a-zA-Z\(])", r"\1 * 0.01", expr)
+
         # 1. Protect scientific notation (e.g. 1e3) from implicit multiplication
         sci_placeholders: dict[str, str] = {}
         def _protect_sci(m):
