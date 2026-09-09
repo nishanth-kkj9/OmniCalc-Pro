@@ -94,7 +94,7 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({
       pushUndo(expression);
 
       if (isEvaluated) {
-        if (['+', '−', '×', '÷', '%', '^'].includes(val)) {
+        if (['+', '−', '×', '÷', '%', '^', '^2', '^(-1)', '!', ' mod '].includes(val)) {
           // Continue expression from previous result
           setExpression(rawResult + val);
         } else if (val === '.') {
@@ -217,9 +217,16 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({
     pushUndo(expression);
 
     // Multi-char function removal e.g. sinh(, asin(, cbrt(, sqrt(, log(, ln(, etc.
-    const fnMatch = expression.match(/(asinh|acosh|atanh|sinh|cosh|tanh|asin|acos|atan|sqrt|cbrt|log10|log|ln|exp|abs|fact|ncr|npr)\($/);
+    const fnMatch = expression.match(/(asinh|acosh|atanh|sinh|cosh|tanh|asin|acos|atan|sqrt|cbrt|log10|log2|log|ln|exp|expm1|abs|fact|factorial|ncr|npr|gcd|lcm)\($/i);
     if (fnMatch) {
       setExpression((prev) => prev.slice(0, -fnMatch[0].length));
+      return;
+    }
+
+    // Multi-char token removal e.g. " mod ", "^(-1)", "^2", "^3", "2^(", "10^(", "e^(", "tau", "Ans"
+    const tokenMatch = expression.match(/(\s*mod\s*|\^\(-1\)|\^2|\^3|2\^\(|10\^\(|e\^\(|tau|Ans)$/i);
+    if (tokenMatch) {
+      setExpression((prev) => prev.slice(0, -tokenMatch[0].length));
       return;
     }
 
@@ -297,10 +304,12 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({
       else if (e.key === '(' || e.key === ')') handleInput(e.key);
       else if (e.key === '^') handleInput('^');
       else if (e.key === '!') handleInput('!');
+      else if (e.key.toLowerCase() === 'p') handleInput('π');
+      else if (e.key.toLowerCase() === 'e') handleInput('e');
       else if (e.key === 'Enter' || e.key === '=') {
         e.preventDefault();
         handleEquals();
-      } else if (e.key === 'Backspace') {
+      } else if (e.key === 'Backspace' || e.key === 'Delete') {
         e.preventDefault();
         handleBackspace();
       } else if (e.key === 'Escape') {
@@ -636,11 +645,12 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({
 
         <div className="flex items-center gap-1 sm:gap-1.5">
           <button
-            onClick={() => handleInput(lastAnswer || '0')}
+            onClick={() => handleInput('Ans')}
             className={memBtnClass}
-            title="Insert Last Answer (Ans)"
+            title={lastAnswer ? `Insert Last Answer (${lastAnswer})` : 'Insert Last Answer (Ans)'}
+            aria-label={lastAnswer ? `Insert Last Answer (${lastAnswer})` : 'Insert Last Answer (Ans)'}
           >
-            Ans ({lastAnswer})
+            Ans {lastAnswer ? `(${lastAnswer})` : ''}
           </button>
         </div>
       </div>
@@ -850,13 +860,13 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({
           +
         </button>
 
-        {/* Row 7: Sign Toggle, 0, Decimal, Backspace, Equals */}
+        {/* Row 7: Sign Toggle / Comma Delimiter in 2nd mode, 0, Decimal, Backspace, Equals */}
         <button
-          onClick={handleToggleSign}
-          aria-label="Toggle sign"
-          className={fnBtnClass}
+          onClick={is2nd ? () => handleInput(',') : handleToggleSign}
+          aria-label={is2nd ? 'Comma delimiter' : 'Toggle sign'}
+          className={`${fnBtnClass} ${is2nd ? 'text-amber-400 font-bold text-base' : ''}`}
         >
-          ±
+          {is2nd ? ',' : '±'}
         </button>
         <button onClick={() => handleInput('0')} aria-label="0" className={numBtnClass}>
           0

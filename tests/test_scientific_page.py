@@ -50,9 +50,11 @@ class TestScientificPageUI(unittest.TestCase):
         self.page.deleteLater()
 
     def test_initial_state(self):
-        self.assertEqual(self.page.display.text(), "0")
+        self.assertEqual(self.page.display.text(), "")
         self.assertEqual(self.page.expression, "")
         self.assertFalse(self.page.is_evaluated)
+        self.assertFalse(self.page.is_2nd)
+        self.assertFalse(self.page.is_hyp)
         self.assertTrue(self.page.mem_label.isHidden())
         self.assertEqual(self.page.mode_badge.text(), "DEG")
 
@@ -99,6 +101,63 @@ class TestScientificPageUI(unittest.TestCase):
         self.page._input("=")
         self.assertEqual(self.page.display.text(), "1")
 
+    def test_2nd_mode_toggle_and_functions(self):
+        self.page._toggle_2nd()
+        self.assertTrue(self.page.is_2nd)
+        self.assertEqual(self.page.btn_sin.text(), "sin⁻¹")
+        self.assertEqual(self.page.btn_fact.text(), "nCr")
+        self.assertEqual(self.page.btn_ln.text(), "eˣ")
+        self.assertEqual(self.page.btn_log.text(), "10ˣ")
+        self.assertEqual(self.page.btn_pow.text(), "x²")
+        self.assertEqual(self.page.btn_root.text(), "∛")
+        self.assertEqual(self.page.btn_inv.text(), "|x|")
+        self.assertEqual(self.page.btn_pi.text(), "τ")
+        self.assertEqual(self.page.btn_e.text(), "2ˣ")
+        self.assertEqual(self.page.btn_mod.text(), "nPr")
+        self.assertEqual(self.page.btn_sign.text(), ",")
+
+        # Calculate asin(0.5) in DEG = 30
+        self.page._input_sin()
+        self.assertEqual(self.page.expression, "asin(")
+        self.page._input("0")
+        self.page._input(".")
+        self.page._input("5")
+        self.page._input(")")
+        self.page._input("=")
+        self.assertEqual(self.page.display.text(), "30")
+
+    def test_hyp_mode_and_hyperbolics(self):
+        self.page._toggle_hyp()
+        self.assertTrue(self.page.is_hyp)
+        self.assertEqual(self.page.btn_sin.text(), "sinh")
+        self.assertEqual(self.page.btn_cos.text(), "cosh")
+        self.assertEqual(self.page.btn_tan.text(), "tanh")
+
+        # sinh(0) = 0
+        self.page._input_sin()
+        self.assertEqual(self.page.expression, "sinh(")
+        self.page._input("0")
+        self.page._input(")")
+        self.page._input("=")
+        self.assertEqual(self.page.display.text(), "0")
+
+    def test_2nd_and_hyp_combined(self):
+        self.page._toggle_2nd()
+        self.page._toggle_hyp()
+        self.assertTrue(self.page.is_2nd)
+        self.assertTrue(self.page.is_hyp)
+        self.assertEqual(self.page.btn_sin.text(), "sinh⁻¹")
+        self.assertEqual(self.page.btn_cos.text(), "cosh⁻¹")
+        self.assertEqual(self.page.btn_tan.text(), "tanh⁻¹")
+
+        # asinh(0) = 0
+        self.page._input_sin()
+        self.assertEqual(self.page.expression, "asinh(")
+        self.page._input("0")
+        self.page._input(")")
+        self.page._input("=")
+        self.assertEqual(self.page.display.text(), "0")
+
     def test_calculate_log_and_ln(self):
         # log(100) = 2
         self.page._input("log(")
@@ -127,20 +186,24 @@ class TestScientificPageUI(unittest.TestCase):
         self.page._input("=")
         self.assertEqual(self.page.display.text(), "4")
 
-    def test_calculate_factorial_and_powers(self):
+    def test_calculate_factorial_and_combinatorics(self):
         # 5! = 120
         self.page._input("5")
         self.page._input("!")
         self.page._input("=")
         self.assertEqual(self.page.display.text(), "120")
 
-        # 2^5 = 32
+        # ncr(5, 2) = 10
         self.page._input("C")
-        self.page._input("2")
-        self.page._input("^")
+        self.page._toggle_2nd()
+        self.page.btn_fact.click()
+        self.assertEqual(self.page.expression, "ncr(")
         self.page._input("5")
+        self.page._input(",")
+        self.page._input("2")
+        self.page._input(")")
         self.page._input("=")
-        self.assertEqual(self.page.display.text(), "32")
+        self.assertEqual(self.page.display.text(), "10")
 
     def test_memory_operations(self):
         self.page._input("4")
@@ -151,7 +214,7 @@ class TestScientificPageUI(unittest.TestCase):
         self.assertIn("M: 42", self.page.mem_label.text())
 
         self.page._input("C")
-        self.assertEqual(self.page.display.text(), "0")
+        self.assertEqual(self.page.display.text(), "")
 
         self.page._handle_memory("MR")
         self.assertEqual(self.page.display.text(), "42")
@@ -182,7 +245,7 @@ class TestScientificPageUI(unittest.TestCase):
         self.page._input("sin(")
         self.assertEqual(self.page.display.text(), "sin(")
         self.page._input("BACKSPACE")
-        self.assertEqual(self.page.display.text(), "0")
+        self.assertEqual(self.page.display.text(), "")
 
     def test_sign_toggle(self):
         self.page._input("8")
