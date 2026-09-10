@@ -1,12 +1,12 @@
 # OmniCalc Pro 🧮
 
-**An advanced, multi-paradigm calculation suite featuring 17 specialized mathematical engines, interactive visualizations, and modern desktop & web interfaces.**
+**An advanced, multi-paradigm calculation suite featuring 21 specialized mathematical engines, interactive data visualizers, AST-safe symbolic evaluation, and modern dual Web & Desktop interfaces.**
 
 [![CI & Build](https://github.com/nishanth-kkj9/OmniCalc-Pro/actions/workflows/ci.yml/badge.svg)](https://github.com/nishanth-kkj9/OmniCalc-Pro/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/badge/Version-2.1.0-emerald.svg)](VERSION)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue?logo=typescript)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/React-18.3-61dafb?logo=react)](https://react.dev/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38b2ac?logo=tailwind-css)](https://tailwindcss.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-19.2-61dafb?logo=react)](https://react.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.3-38b2ac?logo=tailwind-css)](https://tailwindcss.com/)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python)](https://www.python.org/)
 [![PySide6](https://img.shields.io/badge/PySide6-6.6%2B-41CD52?logo=qt)](https://pypi.org/project/PySide6/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -15,15 +15,16 @@
 
 ## 🌟 Overview
 
-**OmniCalc Pro** bridges the gap between everyday arithmetic, scientific exploration, computational algebra, and practical daily utility tools. It is delivered in two complementary forms:
-1. **Interactive Web Application**: Built with React 18, TypeScript, Tailwind CSS, Lucide icons, and MathJS with dynamic bundle code-splitting, tactile audio synthesis, and dark/light/OLED themes.
-2. **Native Desktop Suite**: Built with Python 3.10+ and PySide6 featuring Windows 11 Mica/Acrylic effects, SQLite history caching, and AST-safe symbolic mathematics.
+**OmniCalc Pro** bridges everyday arithmetic, scientific exploration, computational linear algebra, statistical modeling, engineering analysis, and practical daily utility tools. Delivered as a high-performance dual-target suite:
+
+1. **Interactive Web Application**: Built with React 19, TypeScript 5.8, Tailwind CSS v4, Lucide icons, Recharts, and MathJS with dynamic bundle code-splitting, Web Audio tactile haptic feedback, and Light, Dark Slate, and OLED True Black themes.
+2. **Native Desktop Suite**: Built with Python 3.10+ and PySide6 featuring responsive layouts, SQLite history caching, and AST-safe symbolic mathematics powered by SymPy.
 
 ---
 
 ## 🏛️ Architecture Overview
 
-OmniCalc Pro employs a **parallel dual-UI monorepo architecture**, allowing the application to be deployed either as a native cross-platform desktop application or as a client-side web application containerized with Nginx.
+OmniCalc Pro employs a **parallel dual-UI monorepo architecture**, enabling deployment either as a native cross-platform desktop application or as a client-side web application containerized with Nginx.
 
 ```
                    ┌────────────────────────────────────────┐
@@ -46,9 +47,9 @@ OmniCalc Pro employs a **parallel dual-UI monorepo architecture**, allowing the 
 └─────────────────────────────┘               └─────────────────────────────┘
 ```
 
-- **Shared Domain Capabilities**: Both targets implement identical mathematical domains (Basic, Scientific, Graphing, Matrix, Programmer, Statistics, Finance, etc.).
+- **Shared Domain Capabilities**: Both targets implement identical mathematical domains across all 21 specialized engines.
 - **Independent Runtime Targets**:
-  - The **Desktop suite** is optimized for low-latency desktop workflows, frameless Windows 11 Mica integration, offline local SQLite persistence, and heavy symbolic calculus via SymPy.
+  - The **Desktop suite** is optimized for low-latency native desktop workflows, offline local SQLite persistence, and heavy symbolic calculus via SymPy.
   - The **Web suite** is optimized for instant zero-install browser access, responsive mobile/desktop layouts, procedural Web Audio synthesizer clicks, and static Docker/CDN distribution.
 
 ---
@@ -57,18 +58,19 @@ OmniCalc Pro employs a **parallel dual-UI monorepo architecture**, allowing the 
 
 | Category | Engine | Capabilities |
 |---|---|---|
-| **Core & Math** | **Basic Calculator** | Arithmetic (`+`, `-`, `×`, `÷`), parentheses, percentage conversion, and memory bank (`M+`, `M-`, `MR`, `MC`). |
-| | **Scientific Calculator** | Trigonometry (`sin`, `cos`, `tan`, `asin`, `acos`, `atan`), hyperbolic, logarithms (`ln`, `log10`, `log2`), powers (`xʸ`, `√x`, `³√x`), factorials, and physical constants (`π`, `e`, `φ`). Angle modes: **DEG**, **RAD**, **GRAD**. |
+| **Core & Math** | **Basic Calculator** | Arithmetic (`+`, `-`, `×`, `÷`), parentheses, percentage conversion, sign toggle (`±`), and memory bank (`M+`, `M-`, `MR`, `MC`). |
+| | **Scientific Calculator** | 4-state dynamic trigonometric & hyperbolic system (`sin`, `cos`, `tan`, `sin⁻¹`, `cos⁻¹`, `tan⁻¹`, `sinh`, `cosh`, `tanh`, `sinh⁻¹`, `cosh⁻¹`, `tanh⁻¹`), multi-angle modes (**DEG**, **RAD**, **GRAD**) with asymptotic handling (`tan(90°)` = `NaN`), logarithms (`ln`, `log10`, `log2`), powers (`xʸ`, `x²`, `2ˣ`, `10ˣ`, `eˣ`, `√x`, `∛x`), combinatorics (`nCr`, `nPr`), modular arithmetic (`mod`), constants (`π`, `e`, `τ`, `φ`), comma delimiter (`,`), memory registers, and operator chaining. |
 | | **Fractions & Number Theory** | Exact rational arithmetic (`a/b ± c/d`), auto-simplification, GCD / LCM decomposition tree, prime factorization, and decimal-to-fraction conversions. |
-| | **Geometry & Coordinate Engine** | Complete triangle solver (SSS, SAS, ASA, AAS, SSA), 2D line analyzer (distance, slope, midpoint, line equation), and 2D/3D vector operations (dot/cross products, projections). |
-| | **Complex Numbers & Phasor Engine** | Rectangular, Polar ($r\angle\theta$), Euler ($re^{i\theta}$), $n$-th roots of unity, AC RLC impedance ($\omega L, 1/\omega C$), and phasor addition. |
+| | **Geometry & Coordinate Engine** | Complete triangle solver (SSS, SAS, ASA, AAS, SSA), 2D line analyzer (distance, slope, midpoint, line equation), 2D/3D vector operations (dot/cross products, projections), and polygon geometry. |
+| | **Complex Numbers & Phasor Engine** | Rectangular ($a + bi$), Polar ($r\angle\theta$), Euler ($re^{i\theta}$), $n$-th roots of unity, AC RLC impedance ($\omega L, 1/\omega C$), and phasor addition. |
 | **Advanced & Science** | **Equation & System Solver** | Linear equation solver, Quadratic ($ax^2 + bx + c = 0$) with discriminant breakdown, Cubic solver, and $2\times2$ / $3\times3$ Linear System Solver via Cramer's Rule. |
 | | **Calculus & Numerical Suite** | Numerical integration using Simpson's Composite Rule ($\int_a^b f(x)dx$), tangent line derivative calculator ($f'(x_0)$), and Newton-Raphson root finder. |
 | | **Graphing Calculator** | Multi-function plotting (up to 5 simultaneous functions), adaptive coordinate bounds, dynamic zoom/pan, hover coordinate tracker, table of values, and PNG image export. |
 | | **Matrix Calculator** | Matrix arithmetic, determinant, Gauss-Jordan inverse, transpose, trace, rank, nullity, RREF, matrix powers $A^n$, scalar multiplication, and exact eigenvalues. |
 | | **Statistics & Data Analysis** | Descriptive stats: Mean, Median, Mode, Sample/Population Variance, Standard Deviation, IQR, Range, Sum, Min/Max, and single-value Z-Score computation. |
-| | **Regression & Curve Fitting** | Linear, Polynomial (degree 2–5), Exponential, Power, and Logarithmic regression with ANOVA ($R^2$, RMSE, $F$-statistic), residuals table, and inverse prediction. |
+| | **Regression & Curve Fitting** | Linear, Polynomial (degree 2–5), Exponential, Power, and Logarithmic regression with ANOVA ($R^2$, Adjusted $R^2$, RMSE, $F$-statistic), residuals table, and inverse prediction. |
 | | **Probability Distributions** | Continuous and discrete distributions: Normal, Binomial, Poisson, Student's $t$, Chi-Square, and Exponential with PDF/PMF, CDF, quantiles, and moments. |
+| | **Statistical Inference** | Hypothesis testing: 1-Sample Z-Test, 1-Sample T-Test, 2-Sample Independent T-Test, Paired T-Test, 1-Proportion Z-Test, Chi-Square Goodness of Fit, and One-Way ANOVA with $p$-values, test statistics, and rejection decisions. |
 | | **Sequences & Series Analysis** | Arithmetic, Geometric, Fibonacci, and Harmonic series with closed-form $n$-th term formulas, partial sums $S_n$, limit approximations, and ratio convergence tests. |
 | | **Programmer Calculator** | Live radix conversions (**HEX**, **DEC**, **OCT**, **BIN**), bit width toggles (64-bit, 32-bit, 16-bit, 8-bit), Bitwise logic (`AND`, `OR`, `XOR`, `NOT`, `NAND`, `NOR`), bit-shifts (`LSH`, `RSH`), and 2's complement. |
 | **Practical & Life** | **Unit Converter & Physical Units** | 8 standard categories + comprehensive dimensional physical units engine (Length, Mass, Temp, Time, Energy, Force, Power, Pressure, Electricity, etc.). |
@@ -83,7 +85,7 @@ OmniCalc Pro employs a **parallel dual-UI monorepo architecture**, allowing the 
 
 ## 🎨 UI/UX Features
 
-- **Command Palette (`Ctrl+K` / `⌘K`)**: Instant search and navigation across all 17 engines, formula cheat sheets, quick theme switches, and audio controls.
+- **Command Palette (`Ctrl+K` / `⌘K`)**: Instant search and navigation across all 21 engines, formula cheat sheets, quick theme switches, and audio controls.
 - **Dynamic Theming**:
   - **Light Theme**: High-contrast, clean slate aesthetic optimized for daylight visibility.
   - **Dark Slate Theme**: Deep eye-safe twilight navy palette.
@@ -97,7 +99,7 @@ OmniCalc Pro employs a **parallel dual-UI monorepo architecture**, allowing the 
 
 ## 🚀 Quick Start
 
-### 🌐 1. Web Application (React + Vite + TypeScript)
+### 🌐 1. Web Application (React 19 + Vite + TypeScript)
 
 #### Prerequisites
 - Node.js 22.x+ (see `.nvmrc`)
@@ -120,7 +122,7 @@ Visit `http://localhost:3000` to interact with the application.
 
 #### Tests, Linting & Production Build
 ```bash
-# Run Vitest test suite
+# Run full Vitest test suite (274+ tests across 25 test suites)
 npm test
 
 # Run tests with coverage reporting
@@ -150,7 +152,7 @@ docker run -p 3000:3000 omnicalc-pro
 
 #### Prerequisites
 - Python 3.10+ (see `.python-version`)
-- Windows 10/11 (recommended for Fluent / Mica effects), macOS, or Linux
+- Windows 10/11, macOS, or Linux
 
 #### Installation & Launch
 ```bash
@@ -195,13 +197,17 @@ The compiled executable will be written to `dist/`.
 |---|---|---|
 | `Ctrl+K` / `Cmd+K` | Open Command Palette & Quick Jump | Global (Web & Desktop) |
 | `0` – `9`, `.` | Enter Digits and Decimal point | Calculators |
+| `,` | Enter Function Argument Delimiter | Scientific / Multi-arg functions |
 | `+`, `-`, `*`, `/` | Arithmetic Operators (`+`, `−`, `×`, `÷`) | Calculators |
 | `Enter` / `=` | Calculate & Evaluate Expression | Calculators |
-| `Backspace` | Delete last character | Calculators |
+| `Backspace` / `Delete` | Delete last token / character | Calculators |
 | `Escape` / `C` | Clear active expression / Close palette | Calculators / Modals |
 | `(` / `)` | Open / Close Parentheses | Calculators |
 | `^` | Exponentiation ($x^y$) | Scientific & Calculus |
+| `p` / `P` | Insert Pi constant ($\pi$) | Scientific Calculator |
+| `e` / `E` | Insert Euler's constant ($e$) | Scientific Calculator |
 | `Ctrl+T` | Toggle Color Theme | Global |
+| `Ctrl+Z` | Undo last edit action | Scientific / Inputs |
 | `Ctrl+C` | Copy Active Result to Clipboard | Global |
 
 ---
@@ -217,19 +223,25 @@ OmniCalc-Pro/
 │   │   └── release.yml         # GitHub automated release on tag
 │   ├── ISSUE_TEMPLATE/         # GitHub issue templates (bug report, feature request)
 │   └── PULL_REQUEST_TEMPLATE.md# Pull request template
-├── src/                        # Web Application (React 18 + TypeScript + Tailwind)
-│   ├── components/             # 17 Calculation modules & UI components (Code-split)
+├── src/                        # Web Application (React 19 + TypeScript + Tailwind v4)
+│   ├── components/             # 21 Calculation modules & UI components (Code-split)
 │   │   ├── BasicCalculator.tsx
 │   │   ├── ScientificCalculator.tsx
 │   │   ├── FractionsCalculator.tsx
 │   │   ├── GeometryCalculator.tsx
+│   │   ├── ComplexCalculator.tsx
 │   │   ├── EquationSolver.tsx
 │   │   ├── CalculusCalculator.tsx
 │   │   ├── GraphingCalculator.tsx
 │   │   ├── MatrixCalculator.tsx
 │   │   ├── StatisticsCalculator.tsx
+│   │   ├── RegressionCalculator.tsx
+│   │   ├── DistributionsCalculator.tsx
+│   │   ├── InferenceCalculator.tsx
+│   │   ├── SequencesCalculator.tsx
 │   │   ├── ProgrammerCalculator.tsx
 │   │   ├── ConverterCalculator.tsx
+│   │   ├── PhysicalUnitsCalculator.tsx
 │   │   ├── FinanceCalculator.tsx
 │   │   ├── DateTimeCalculator.tsx
 │   │   ├── HealthCalculator.tsx
