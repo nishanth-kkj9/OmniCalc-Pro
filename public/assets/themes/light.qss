@@ -1,0 +1,15 @@
+QWidget#main_bg { background-color: #f4f6f9; }
+QWidget { color: #2c3e50; font-family: "Segoe UI", sans-serif; }
+QPushButton { background-color: #ffffff; color: #2c3e50; border: 1px solid #d0d5e0; border-radius: 12px; padding: 8px; font-weight: 600; }
+QPushButton:hover { background-color: #eef1f5; border-color: #3b82f6; }
+QPushButton:pressed { background-color: #e0e5ec; }
+QPushButton[class="Op"] { background-color: #3b82f6; color: white; border: 1px solid #2563eb; }
+QPushButton[class="Op"]:hover { background-color: #2563eb; }
+QPushButton[class="Func"] { background-color: #d1fae5; color: #059669; border: 1px solid #a7f3d0; }
+QPushButton[class="DangerBtn"] { background-color: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
+QLineEdit, QComboBox, QTextEdit, QTableWidget { background-color: #ffffff; border: 1px solid #cbd5e1; border-radius: 10px; color: #0f172a; padding: 8px; }
+QComboBox::drop-down { background: #e2e8f0; width: 25px; border-radius: 0 10px 10px 0; }
+QLabel#Title { color: #0f172a; font-size: 22px; font-weight: bold; }
+QLabel#Subtitle { color: #64748b; font-size: 14px; }
+QScrollBar:vertical { background: transparent; width: 8px; margin: 4px; }
+QScrollBar::handle:vertical { background: #94a3b8; border-radius: 4px; min-height: 20px; }

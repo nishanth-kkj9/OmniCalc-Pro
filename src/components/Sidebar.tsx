@@ -33,6 +33,7 @@ import {
 import { CalcMode, AppSettings } from '../types';
 import { APP_NAME, APP_VERSION } from '../constants/version';
 import { CALCULATOR_REGISTRY } from '../constants/calculatorRegistry';
+import omniCalcLogo from '../assets/logo.png';
 
 interface SidebarProps {
   currentMode: CalcMode;
@@ -346,8 +347,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* App Title Header */}
         <div className={`p-3 sm:p-4 border-b ${headerBorder} flex items-center justify-between`}>
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-500 via-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-md shadow-sky-500/25 flex-shrink-0">
-              <Calculator className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-xl overflow-hidden border border-sky-500/30 shadow-md shadow-sky-500/20 flex-shrink-0 bg-slate-900 flex items-center justify-center ring-1 ring-white/10">
+              <img
+                src={omniCalcLogo}
+                alt="OmniCalc Pro Logo"
+                className="w-full h-full object-cover"
+                referrerPolicy="no-referrer"
+              />
             </div>
             {!isRailCollapsed && (
               <div className="min-w-0">

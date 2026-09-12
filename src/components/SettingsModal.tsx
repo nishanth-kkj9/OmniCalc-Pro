@@ -1,6 +1,8 @@
 import React, { useState, useRef, useMemo } from 'react';
 import { AppSettings, AngleMode, CalcMode, HistoryItem } from '../types';
 import { APP_NAME, APP_VERSION } from '../constants/version';
+import { CALCULATOR_REGISTRY } from '../constants/calculatorRegistry';
+import omniCalcLogo from '../assets/logo.png';
 import {
   Moon,
   Sun,
@@ -19,7 +21,6 @@ import {
   Volume1,
   Vibrate,
   Eye,
-  Info,
 } from 'lucide-react';
 import { playClickSound } from '../utils/sound';
 import { getHistory, clearHistory, sanitizeHistoryItem } from '../utils/history';
@@ -1102,19 +1103,31 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ settings, onUpdate
 
       {/* About Applet Info Footer */}
       <div
-        className={`p-4 border rounded-2xl flex flex-col sm:flex-row items-center justify-between text-xs gap-2 ${
+        className={`p-4 border rounded-2xl flex flex-col sm:flex-row items-center justify-between text-xs gap-3 ${
           isLight
             ? 'bg-white border-slate-200 text-slate-600'
             : 'bg-slate-900/60 border-slate-800/80 text-slate-400'
         }`}
       >
-        <div className="flex items-center gap-2">
-          <Info className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--accent)' }} />
-          <span>
-            {APP_NAME} v{APP_VERSION} • 17 Integrated Mathematical Engines
-          </span>
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg overflow-hidden border border-sky-500/30 flex-shrink-0 bg-slate-900">
+            <img
+              src={omniCalcLogo}
+              alt="OmniCalc Pro Logo"
+              className="w-full h-full object-cover"
+              referrerPolicy="no-referrer"
+            />
+          </div>
+          <div>
+            <div className={`font-semibold text-sm ${isLight ? 'text-slate-900' : 'text-slate-200'}`}>
+              {APP_NAME} <span className="text-xs font-normal text-slate-400">v{APP_VERSION}</span>
+            </div>
+            <div className="text-[11px] text-slate-500 dark:text-slate-400">
+              {CALCULATOR_REGISTRY.length} Integrated Mathematical Engines • Zero-Latency Client Architecture
+            </div>
+          </div>
         </div>
-        <div className="text-[11px]">Client-Side Zero-Latency Computation</div>
+        <div className="text-[11px] text-slate-400">Enterprise Mathematical Suite</div>
       </div>
     </div>
   );

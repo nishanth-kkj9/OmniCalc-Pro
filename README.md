@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="./assets/logo.png" alt="OmniCalc Pro Logo" width="120" height="120" style="border-radius: 24px; box-shadow: 0 12px 30px -10px rgba(14, 165, 233, 0.4);" />
+</p>
+
 # OmniCalc Pro 🧮
 
 **An advanced, multi-paradigm calculation suite featuring 21 specialized mathematical engines, interactive data visualizers, AST-safe symbolic evaluation, and modern dual Web & Desktop interfaces.**
@@ -59,7 +63,7 @@ OmniCalc Pro employs a **parallel dual-UI monorepo architecture**, enabling depl
 | Category | Engine | Capabilities |
 |---|---|---|
 | **Core & Math** | **Basic Calculator** | Arithmetic (`+`, `-`, `×`, `÷`), parentheses, percentage conversion, sign toggle (`±`), and memory bank (`M+`, `M-`, `MR`, `MC`). |
-| | **Scientific Calculator** | 4-state dynamic trigonometric & hyperbolic system (`sin`, `cos`, `tan`, `sin⁻¹`, `cos⁻¹`, `tan⁻¹`, `sinh`, `cosh`, `tanh`, `sinh⁻¹`, `cosh⁻¹`, `tanh⁻¹`), multi-angle modes (**DEG**, **RAD**, **GRAD**) with asymptotic handling (`tan(90°)` = `NaN`), logarithms (`ln`, `log10`, `log2`), powers (`xʸ`, `x²`, `2ˣ`, `10ˣ`, `eˣ`, `√x`, `∛x`), combinatorics (`nCr`, `nPr`), modular arithmetic (`mod`), constants (`π`, `e`, `τ`, `φ`), comma delimiter (`,`), memory registers, and operator chaining. |
+| | **Scientific Calculator** | 4-state dynamic trigonometric & hyperbolic system (`sin`, `cos`, `tan`, `sin⁻¹`, `cos⁻¹`, `tan⁻¹`, `sinh`, `cosh`, `tanh`, `sinh⁻¹`, `cosh⁻¹`, `tanh⁻¹`), multi-angle modes (**DEG**, **RAD**, **GRAD**) with asymptotic handling and exact zero-crossing stabilization (`cos(90°)` = `0`, `sin(180°)` = `0`), logarithms (`ln`, `log10`, `log2`), powers (`xʸ`, `x²`, `2ˣ`, `10ˣ`, `eˣ`, `√x`, `∛x`), combinatorics (`nCr`, `nPr`) with strict non-negative integer domain validation, modular arithmetic (infix `8 mod 3` and functional `mod(a, b)`), constants (`π`, `e`, `τ`, `φ`), comma delimiter (`,`), parenthesis auto-completion upon evaluation, non-intrusive live preview, memory registers, and operator chaining. |
 | | **Fractions & Number Theory** | Exact rational arithmetic (`a/b ± c/d`), auto-simplification, GCD / LCM decomposition tree, prime factorization, and decimal-to-fraction conversions. |
 | | **Geometry & Coordinate Engine** | Complete triangle solver (SSS, SAS, ASA, AAS, SSA), 2D line analyzer (distance, slope, midpoint, line equation), 2D/3D vector operations (dot/cross products, projections), and polygon geometry. |
 | | **Complex Numbers & Phasor Engine** | Rectangular ($a + bi$), Polar ($r\angle\theta$), Euler ($re^{i\theta}$), $n$-th roots of unity, AC RLC impedance ($\omega L, 1/\omega C$), and phasor addition. |
@@ -122,7 +126,7 @@ Visit `http://localhost:3000` to interact with the application.
 
 #### Tests, Linting & Production Build
 ```bash
-# Run full Vitest test suite (274+ tests across 25 test suites)
+# Run full Vitest test suite (280+ tests across 25 test suites)
 npm test
 
 # Run tests with coverage reporting
@@ -223,7 +227,14 @@ OmniCalc-Pro/
 │   │   └── release.yml         # GitHub automated release on tag
 │   ├── ISSUE_TEMPLATE/         # GitHub issue templates (bug report, feature request)
 │   └── PULL_REQUEST_TEMPLATE.md# Pull request template
+├── assets/                     # Static media & branding assets
+│   ├── logo.png                # OmniCalc Pro high-resolution suite logo
+│   ├── icons/                  # SVG and PNG app icons & category glyphs
+│   └── themes/                 # Visual theme presets
+├── public/                     # Static web assets served at root
+│   └── assets/                 # Icons, logo, and favicon assets
 ├── src/                        # Web Application (React 19 + TypeScript + Tailwind v4)
+│   ├── assets/                 # Bundled visual assets & logo
 │   ├── components/             # 21 Calculation modules & UI components (Code-split)
 │   │   ├── BasicCalculator.tsx
 │   │   ├── ScientificCalculator.tsx
