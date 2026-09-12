@@ -62,12 +62,34 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({
       return;
     }
     const ansNum = parseFloat(lastAnswer) || 0;
-    const evaluated = evaluateExpression(expression, angleMode, settings.precision, {
+    let evaluated = evaluateExpression(expression, angleMode, settings.precision, {
       ans: ansNum,
       Ans: ansNum,
     });
-    setRawResult(evaluated);
-    setDisplayResult(formatNumberWithSettings(evaluated, settings));
+
+    // If syntax error due to unclosed parenthesis, try closing them for live preview
+    if (evaluated === 'Error') {
+      let openCount = 0;
+      for (const ch of expression) {
+        if (ch === '(') openCount++;
+        else if (ch === ')') openCount--;
+      }
+      if (openCount > 0) {
+        const closedExpr = expression + ')'.repeat(openCount);
+        const closedEval = evaluateExpression(closedExpr, angleMode, settings.precision, {
+          ans: ansNum,
+          Ans: ansNum,
+        });
+        if (closedEval !== 'Error' && closedEval !== 'NaN') {
+          evaluated = closedEval;
+        }
+      }
+    }
+
+    if (evaluated !== 'Error' && evaluated !== 'NaN') {
+      setRawResult(evaluated);
+      setDisplayResult(formatNumberWithSettings(evaluated, settings));
+    }
   }, [expression, angleMode, settings, lastAnswer]);
 
   const pushUndo = useCallback((currentExpr: string) => {
@@ -236,14 +258,27 @@ export const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({
   const handleEquals = useCallback(() => {
     if (!expression.trim()) return;
     const ansNum = parseFloat(lastAnswer) || 0;
-    const finalVal = evaluateExpression(expression, angleMode, settings.precision, {
+
+    // Auto-close unclosed parentheses if present
+    let exprToEval = expression;
+    let openCount = 0;
+    for (const ch of exprToEval) {
+      if (ch === '(') openCount++;
+      else if (ch === ')') openCount--;
+    }
+    if (openCount > 0) {
+      exprToEval += ')'.repeat(openCount);
+      setExpression(exprToEval);
+    }
+
+    const finalVal = evaluateExpression(exprToEval, angleMode, settings.precision, {
       ans: ansNum,
       Ans: ansNum,
     });
 
     if (finalVal !== 'Error' && finalVal !== 'NaN') {
       const formatted = formatNumberWithSettings(finalVal, settings);
-      addHistory(expression, formatted, 'scientific', settings);
+      addHistory(exprToEval, formatted, 'scientific', settings);
       setLastAnswer(finalVal);
       setRawResult(finalVal);
       setDisplayResult(formatted);

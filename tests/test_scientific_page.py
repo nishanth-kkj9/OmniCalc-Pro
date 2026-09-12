@@ -269,6 +269,43 @@ class TestScientificPageUI(unittest.TestCase):
         self.page._input("=")
         self.assertEqual(self.page.display.text(), "30")
 
+    def test_calculate_npr_and_modulo(self):
+        # 8 mod 3 = 2
+        self.page._input("8")
+        self.page._input(" mod ")
+        self.page._input("3")
+        self.page._input("=")
+        self.assertEqual(self.page.display.text(), "2")
+
+        # npr(5, 2) = 20
+        self.page._input("C")
+        self.page._toggle_2nd()
+        self.page.btn_mod.click()
+        self.assertEqual(self.page.expression, "npr(")
+        self.page._input("5")
+        self.page._input(",")
+        self.page._input("2")
+        self.page._input(")")
+        self.page._input("=")
+        self.assertEqual(self.page.display.text(), "20")
+
+    def test_auto_close_parentheses(self):
+        # sin(30 without closing paren -> auto-closes to sin(30) = 0.5
+        self.page._input("sin(")
+        self.page._input("3")
+        self.page._input("0")
+        self.page._input("=")
+        self.assertEqual(self.page.display.text(), "0.5")
+
+    def test_trig_zero_crossing_exact(self):
+        # cos(90) = 0 in DEG
+        self.page._input("cos(")
+        self.page._input("9")
+        self.page._input("0")
+        self.page._input(")")
+        self.page._input("=")
+        self.assertEqual(self.page.display.text(), "0")
+
     def test_error_handling(self):
         self.page._input("1")
         self.page._input("/")

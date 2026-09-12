@@ -23,6 +23,11 @@ logger = get_logger()
 
 def format_sci_result(val: Union[float, int, str], precision: int = 10) -> str:
     if isinstance(val, (int, float)):
+        import math
+        if math.isnan(val):
+            return "NaN"
+        if math.isinf(val):
+            return "Infinity" if val > 0 else "-Infinity"
         if float(val) == 0.0:
             return "0"
         if isinstance(val, float) and val.is_integer():
@@ -526,6 +531,11 @@ class ScientificPage(QWidget):
                 return
             mode = self.config.get("angle_mode", "degrees")
             try:
+                # Auto-close unclosed parentheses if present
+                open_parens = self.expression.count("(") - self.expression.count(")")
+                if open_parens > 0:
+                    self.expression += ")" * open_parens
+
                 # Replace visual symbols and ans token before evaluation
                 clean_expr = self.expression.replace("Ans", str(self.last_result))
                 clean_expr = clean_expr.replace("×", "*").replace("÷", "/").replace("−", "-")

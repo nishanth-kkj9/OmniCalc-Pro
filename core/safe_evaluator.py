@@ -97,13 +97,23 @@ def _safe_cbrt(x: float) -> float:
 
 def _safe_comb(n: float, k: float) -> float:
     try:
-        return float(math.comb(int(n), int(k)))
+        fn, fk = float(n), float(k)
+        if not fn.is_integer() or not fk.is_integer() or fn < 0 or fk < 0:
+            return float("nan")
+        if fk > fn:
+            return 0.0
+        return float(math.comb(int(fn), int(fk)))
     except (ValueError, TypeError, OverflowError):
         return float("nan")
 
 def _safe_perm(n: float, k: float) -> float:
     try:
-        return float(math.perm(int(n), int(k)))
+        fn, fk = float(n), float(k)
+        if not fn.is_integer() or not fk.is_integer() or fn < 0 or fk < 0:
+            return float("nan")
+        if fk > fn:
+            return 0.0
+        return float(math.perm(int(fn), int(fk)))
     except (ValueError, TypeError, OverflowError):
         return float("nan")
 
@@ -463,10 +473,18 @@ class SafeEvaluator:
         expr = re.sub(r"√(\d+\.?\d*)", r"sqrt(\1)", expr)
         expr = re.sub(r"√([a-zA-Zα-ωπτ]+)", r"sqrt(\1)", expr)
 
+        # Handle ∛ cube root
+        expr = re.sub(r"∛\(([^()]*(?:\([^()]*\)[^()]*)*)\)", r"cbrt(\1)", expr)
+        expr = re.sub(r"∛(\d+\.?\d*)", r"cbrt(\1)", expr)
+        expr = re.sub(r"∛([a-zA-Zα-ωπτ]+)", r"cbrt(\1)", expr)
+
         for k, v in _UNICODE_MAP.items():
-            if k == "√":
+            if k in ("√", "∛"):
                 continue
             expr = expr.replace(k, v)
+
+        # Infix modulo replacement: e.g. 8 mod 3 -> 8 % 3 (preserve mod(a, b))
+        expr = re.sub(r"\bmod\b(?!\s*\()", "%", expr)
 
         # Percentage conversion: e.g. 50% -> (50 * 0.01) and (20+30)% -> ((20+30) * 0.01) without affecting modulo (e.g. 5 % 2)
         expr = re.sub(r"(\d+(?:\.\d+)?)\s*%(?!\s*[0-9a-zA-Z\(])", r"(\1 * 0.01)", expr)

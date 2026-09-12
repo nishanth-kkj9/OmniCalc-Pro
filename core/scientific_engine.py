@@ -15,6 +15,7 @@ class ScientificEngine:
             "log", "ln", "log10", "log2", "sqrt", "cbrt",
             "exp", "expm1", "abs", "factorial", "fact", "gamma",
             "ncr", "npr", "comb", "perm", "mod", "sign",
+            "gcd", "lcm",
             "floor", "ceil", "round", "trunc",
             "pi", "e", "tau", "phi",
         ]

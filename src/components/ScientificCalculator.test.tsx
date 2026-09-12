@@ -271,4 +271,54 @@ describe('ScientificCalculator Component', () => {
     const output = screen.getByRole('status');
     expect(output.textContent).toBe('5');
   });
+
+  it('auto-closes unclosed parentheses upon pressing equals', () => {
+    render(<ScientificCalculator settings={DEFAULT_SETTINGS} />);
+    const sinBtn = screen.getByRole('button', { name: 'sin' });
+    const threeBtn = screen.getByRole('button', { name: '3' });
+    const zeroBtn = screen.getByRole('button', { name: '0' });
+    const eqBtn = screen.getByRole('button', { name: 'Calculate equals' });
+
+    // sin(30 without close paren
+    fireEvent.click(sinBtn);
+    fireEvent.click(threeBtn);
+    fireEvent.click(zeroBtn);
+    fireEvent.click(eqBtn);
+
+    const output = screen.getByRole('status');
+    expect(output.textContent).toBe('0.5');
+  });
+
+  it('calculates modulo operator', () => {
+    render(<ScientificCalculator settings={DEFAULT_SETTINGS} />);
+    const eightBtn = screen.getByRole('button', { name: '8' });
+    const modBtn = screen.getByRole('button', { name: 'Modulo' });
+    const threeBtn = screen.getByRole('button', { name: '3' });
+    const eqBtn = screen.getByRole('button', { name: 'Calculate equals' });
+
+    fireEvent.click(eightBtn);
+    fireEvent.click(modBtn);
+    fireEvent.click(threeBtn);
+    fireEvent.click(eqBtn);
+
+    const output = screen.getByRole('status');
+    expect(output.textContent).toBe('2');
+  });
+
+  it('ensures exact zero-crossing on trigonometric functions in DEG mode', () => {
+    render(<ScientificCalculator settings={DEFAULT_SETTINGS} />);
+    const cosBtn = screen.getByRole('button', { name: 'cos' });
+    const nineBtn = screen.getByRole('button', { name: '9' });
+    const zeroBtn = screen.getByRole('button', { name: '0' });
+    const eqBtn = screen.getByRole('button', { name: 'Calculate equals' });
+
+    // cos(90) in DEG = 0
+    fireEvent.click(cosBtn);
+    fireEvent.click(nineBtn);
+    fireEvent.click(zeroBtn);
+    fireEvent.click(eqBtn);
+
+    const output = screen.getByRole('status');
+    expect(output.textContent).toBe('0');
+  });
 });

@@ -340,7 +340,8 @@ export function buildMathScope(angleMode: AngleMode = 'DEG'): Record<string, any
       return sign * y;
     },
     ncr: (n: number, r: number) => {
-      if (r < 0 || r > n || !Number.isInteger(n) || !Number.isInteger(r)) return 0;
+      if (!Number.isInteger(n) || !Number.isInteger(r) || n < 0 || r < 0) return NaN;
+      if (r > n) return 0;
       if (r === 0 || r === n) return 1;
       let res = 1;
       const k = Math.min(r, n - r);
@@ -350,7 +351,8 @@ export function buildMathScope(angleMode: AngleMode = 'DEG'): Record<string, any
       return Math.round(res);
     },
     combinations: (n: number, r: number) => {
-      if (r < 0 || r > n || !Number.isInteger(n) || !Number.isInteger(r)) return 0;
+      if (!Number.isInteger(n) || !Number.isInteger(r) || n < 0 || r < 0) return NaN;
+      if (r > n) return 0;
       if (r === 0 || r === n) return 1;
       let res = 1;
       const k = Math.min(r, n - r);
@@ -360,7 +362,8 @@ export function buildMathScope(angleMode: AngleMode = 'DEG'): Record<string, any
       return Math.round(res);
     },
     npr: (n: number, r: number) => {
-      if (r < 0 || r > n || !Number.isInteger(n) || !Number.isInteger(r)) return 0;
+      if (!Number.isInteger(n) || !Number.isInteger(r) || n < 0 || r < 0) return NaN;
+      if (r > n) return 0;
       let res = 1;
       for (let i = 0; i < r; i++) {
         res *= n - i;
@@ -368,7 +371,8 @@ export function buildMathScope(angleMode: AngleMode = 'DEG'): Record<string, any
       return Math.round(res);
     },
     permutations: (n: number, r: number) => {
-      if (r < 0 || r > n || !Number.isInteger(n) || !Number.isInteger(r)) return 0;
+      if (!Number.isInteger(n) || !Number.isInteger(r) || n < 0 || r < 0) return NaN;
+      if (r > n) return 0;
       let res = 1;
       for (let i = 0; i < r; i++) {
         res *= n - i;
@@ -467,8 +471,17 @@ export function buildMathScope(angleMode: AngleMode = 'DEG'): Record<string, any
   // RAD mode
   return {
     ...baseScope,
-    sin: (x: number) => Math.sin(x),
-    cos: (x: number) => Math.cos(x),
+    sin: (x: number) => {
+      const modPi = ((x % Math.PI) + Math.PI) % Math.PI;
+      if (Math.abs(modPi) < 1e-12 || Math.abs(modPi - Math.PI) < 1e-12) return 0;
+      return Math.sin(x);
+    },
+    cos: (x: number) => {
+      const mod2Pi = ((x % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+      const halfPi = Math.PI / 2;
+      if (Math.abs(mod2Pi - halfPi) < 1e-12 || Math.abs(mod2Pi - 3 * halfPi) < 1e-12) return 0;
+      return Math.cos(x);
+    },
     tan: (x: number) => {
       const halfPi = Math.PI / 2;
       const modPi = ((x % Math.PI) + Math.PI) % Math.PI;
