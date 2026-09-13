@@ -4,6 +4,7 @@ Safe Expression Evaluator - AST-based, no eval().
 Uses sympy's parser with restricted transformations for secure mathematical evaluation.
 No code execution possible - only mathematical expressions.
 """
+import ast
 import atexit
 import math
 import re
@@ -11,14 +12,27 @@ import threading
 from typing import Any
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 
-import sympy as sp
-from sympy import SympifyError, Basic
-from sympy.parsing.sympy_parser import (
-    parse_expr,
-    standard_transformations,
-    implicit_multiplication_application,
-    convert_xor,
-)
+try:
+    import sympy as sp
+    from sympy import SympifyError, Basic
+    from sympy.parsing.sympy_parser import (
+        parse_expr,
+        standard_transformations,
+        implicit_multiplication_application,
+        convert_xor,
+    )
+    SYMPY_AVAILABLE = True
+except ImportError:
+    sp = None
+    class SympifyError(Exception):
+        pass
+    class Basic:
+        pass
+    parse_expr = None
+    standard_transformations = ()
+    implicit_multiplication_application = None
+    convert_xor = None
+    SYMPY_AVAILABLE = False
 
 from utils.logger import get_logger
 from utils.constants import MAX_EXPR_LENGTH, MAX_EXECUTION_TIME, MAX_NESTING_DEPTH
@@ -286,29 +300,103 @@ def _validate_parsed_sympy_tree(node: Any) -> None:
                     raise ValueError(f"Exp input {arg} exceeds safe limit ({MAX_EXP_VAL})")
 
 
-_SYMBOLIC_STRUCTURE_NS: dict[str, Any] = {
-    "sin": sp.sin, "cos": sp.cos, "tan": sp.tan,
-    "asin": sp.asin, "acos": sp.acos, "atan": sp.atan,
-    "sinh": sp.sinh, "cosh": sp.cosh, "tanh": sp.tanh,
-    "asinh": sp.asinh, "acosh": sp.acosh, "atanh": sp.atanh,
-    "log": sp.log, "ln": sp.log,
-    "log10": lambda arg: sp.log(arg, 10), "log2": lambda arg: sp.log(arg, 2),
-    "sqrt": sp.sqrt, "cbrt": sp.cbrt,
-    "exp": sp.exp, "expm1": lambda arg: sp.exp(arg) - 1,
-    "degrees": lambda arg: arg * 180 / sp.pi, "radians": lambda arg: arg * sp.pi / 180,
-    "floor": sp.floor, "ceil": sp.ceiling, "trunc": lambda arg: sp.sign(arg) * sp.floor(sp.Abs(arg)),
-    "round": lambda arg: sp.floor(arg + sp.Rational(1, 2)),
-    "abs": sp.Abs, "factorial": sp.factorial, "fact": sp.factorial, "gamma": sp.gamma,
-    "mod": lambda a, b: a % b, "sign": sp.sign,
-    "ncr": sp.binomial, "comb": sp.binomial,
-    "npr": lambda n, k: sp.factorial(n) / sp.factorial(n - k),
-    "perm": lambda n, k: sp.factorial(n) / sp.factorial(n - k),
-    "gcd": sp.gcd, "lcm": sp.lcm,
-}
+if SYMPY_AVAILABLE and sp:
+    _SYMBOLIC_STRUCTURE_NS: dict[str, Any] = {
+        "sin": sp.sin, "cos": sp.cos, "tan": sp.tan,
+        "asin": sp.asin, "acos": sp.acos, "atan": sp.atan,
+        "sinh": sp.sinh, "cosh": sp.cosh, "tanh": sp.tanh,
+        "asinh": sp.asinh, "acosh": sp.acosh, "atanh": sp.atanh,
+        "log": sp.log, "ln": sp.log,
+        "log10": lambda arg: sp.log(arg, 10), "log2": lambda arg: sp.log(arg, 2),
+        "sqrt": sp.sqrt, "cbrt": sp.cbrt,
+        "exp": sp.exp, "expm1": lambda arg: sp.exp(arg) - 1,
+        "degrees": lambda arg: arg * 180 / sp.pi, "radians": lambda arg: arg * sp.pi / 180,
+        "floor": sp.floor, "ceil": sp.ceiling, "trunc": lambda arg: sp.sign(arg) * sp.floor(sp.Abs(arg)),
+        "round": lambda arg: sp.floor(arg + sp.Rational(1, 2)),
+        "abs": sp.Abs, "factorial": sp.factorial, "fact": sp.factorial, "gamma": sp.gamma,
+        "mod": lambda a, b: a % b, "sign": sp.sign,
+        "ncr": sp.binomial, "comb": sp.binomial,
+        "npr": lambda n, k: sp.factorial(n) / sp.factorial(n - k),
+        "perm": lambda n, k: sp.factorial(n) / sp.factorial(n - k),
+        "gcd": sp.gcd, "lcm": sp.lcm,
+    }
+else:
+    _SYMBOLIC_STRUCTURE_NS = {}
+
+
+def _eval_ast_node(node: Any, ns: dict[str, Any]) -> float:
+    if isinstance(node, ast.Expression):
+        return _eval_ast_node(node.body, ns)
+    elif isinstance(node, ast.Constant):
+        if isinstance(node.value, (int, float)):
+            return float(node.value)
+        raise ValueError(f"Disallowed constant: {node.value}")
+    elif hasattr(ast, "Num") and isinstance(node, getattr(ast, "Num")):
+        return float(node.n)
+    elif isinstance(node, ast.UnaryOp):
+        operand = _eval_ast_node(node.operand, ns)
+        if isinstance(node.op, ast.UAdd):
+            return +operand
+        elif isinstance(node.op, ast.USub):
+            return -operand
+        raise ValueError(f"Disallowed unary operator: {type(node.op).__name__}")
+    elif isinstance(node, ast.BinOp):
+        left = _eval_ast_node(node.left, ns)
+        right = _eval_ast_node(node.right, ns)
+        if isinstance(node.op, ast.Add):
+            return left + right
+        elif isinstance(node.op, ast.Sub):
+            return left - right
+        elif isinstance(node.op, ast.Mult):
+            return left * right
+        elif isinstance(node.op, ast.Div):
+            if right == 0:
+                raise ZeroDivisionError("Division by zero")
+            return left / right
+        elif isinstance(node.op, ast.FloorDiv):
+            if right == 0:
+                raise ZeroDivisionError("Division by zero")
+            return left // right
+        elif isinstance(node.op, ast.Mod):
+            if right == 0:
+                raise ZeroDivisionError("Modulo by zero")
+            return left % right
+        elif isinstance(node.op, ast.Pow):
+            if abs(right) > MAX_EXPONENT_VAL:
+                raise ValueError(f"Exponent {right} exceeds safe limit ({MAX_EXPONENT_VAL})")
+            return left ** right
+        raise ValueError(f"Disallowed binary operator: {type(node.op).__name__}")
+    elif isinstance(node, ast.Name):
+        if node.id in ns:
+            val = ns[node.id]
+            if isinstance(val, (int, float)):
+                return float(val)
+            raise ValueError(f"Symbol {node.id} cannot be evaluated as a scalar value")
+        raise ValueError(f"Unknown identifier: {node.id}")
+    elif isinstance(node, ast.Call):
+        if not isinstance(node.func, ast.Name):
+            raise ValueError("Direct function calls only")
+        fn_name = node.func.id
+        if fn_name not in ns:
+            raise ValueError(f"Unknown function: {fn_name}")
+        fn = ns[fn_name]
+        args = [_eval_ast_node(arg, ns) for arg in node.args]
+        if fn_name in ("factorial", "fact") and args and args[0] > MAX_FACTORIAL_VAL:
+            raise ValueError(f"Factorial input {args[0]} exceeds safe limit ({MAX_FACTORIAL_VAL})")
+        if fn_name == "gamma" and args and args[0] > MAX_GAMMA_VAL:
+            raise ValueError(f"Gamma input {args[0]} exceeds safe limit ({MAX_GAMMA_VAL})")
+        if fn_name == "exp" and args and args[0] > MAX_EXP_VAL:
+            raise ValueError(f"Exp input {args[0]} exceeds safe limit ({MAX_EXP_VAL})")
+        res = fn(*args)
+        if isinstance(res, (int, float)):
+            return float(res)
+        raise ValueError(f"Function {fn_name} returned non-scalar result")
+    else:
+        raise ValueError(f"Disallowed syntax element: {type(node).__name__}")
 
 
 def _worker_eval_task(expr: str, namespace_keys: list[str], angle_mode: str, custom_namespace: dict[str, Any] | None = None) -> float:
-    """Isolated evaluation task with strict AST traversal and safe SymPy evaluation."""
+    """Isolated evaluation task with strict AST traversal and safe evaluation."""
     ns: dict[str, Any] = dict(SAFE_CONSTANTS)
     mode = (angle_mode or "").lower()
     if mode in ("degrees", "deg"):
@@ -323,10 +411,17 @@ def _worker_eval_task(expr: str, namespace_keys: list[str], angle_mode: str, cus
     if custom_namespace:
         ns.update(custom_namespace)
 
+    if not SYMPY_AVAILABLE or parse_expr is None:
+        try:
+            tree = ast.parse(expr, mode="eval")
+        except SyntaxError as e:
+            raise ValueError(f"Invalid expression syntax: {e}")
+        val = _eval_ast_node(tree, ns)
+        if math.isinf(val) or math.isnan(val):
+            raise ValueError("Result is infinite or NaN")
+        return val
+
     # 1. Parse into unevaluated AST first to validate complexity without executing computation.
-    # NOTE: sympy's evaluate=False transform appends an `evaluate=False` kwarg to every
-    # resolved function call, so local_dict must map to real sympy Functions here (not the
-    # plain math/lambda callables used for the actual numeric evaluation below).
     structure_ns: dict[str, Any] = dict(SAFE_CONSTANTS)
     structure_ns.update(_SYMBOLIC_STRUCTURE_NS)
     raw_tree = parse_expr(expr, transformations=TRANSFORMATIONS, local_dict=structure_ns, evaluate=False)
@@ -486,6 +581,31 @@ class SafeEvaluator:
         # Infix modulo replacement: e.g. 8 mod 3 -> 8 % 3 (preserve mod(a, b))
         expr = re.sub(r"\bmod\b(?!\s*\()", "%", expr)
 
+        # Convert ^ to ** for python evaluation if not using sympy convert_xor
+        expr = re.sub(r"\^", "**", expr)
+
+        # Convert postfix factorials, e.g. 5! -> factorial(5), (3+2)! -> factorial(3+2)
+        expr = re.sub(r"(\d+(?:\.\d+)?)\s*!", r"factorial(\1)", expr)
+        while re.search(r"\)\s*!", expr):
+            m = re.search(r"\)\s*!", expr)
+            if not m:
+                break
+            close_idx = m.start()
+            depth = 1
+            open_idx = -1
+            for i in range(close_idx - 1, -1, -1):
+                if expr[i] == ")":
+                    depth += 1
+                elif expr[i] == "(":
+                    depth -= 1
+                    if depth == 0:
+                        open_idx = i
+                        break
+            if open_idx != -1:
+                expr = expr[:open_idx] + "factorial(" + expr[open_idx:close_idx + 1] + ")" + expr[m.end():]
+            else:
+                break
+
         # Percentage conversion: e.g. 50% -> (50 * 0.01) and (20+30)% -> ((20+30) * 0.01) without affecting modulo (e.g. 5 % 2)
         expr = re.sub(r"(\d+(?:\.\d+)?)\s*%(?!\s*[0-9a-zA-Z\(])", r"(\1 * 0.01)", expr)
         expr = re.sub(r"(\))\s*%(?!\s*[0-9a-zA-Z\(])", r"\1 * 0.01", expr)
@@ -591,6 +711,8 @@ class SafeEvaluator:
 
     def _build_symbolic_namespace(self) -> dict[str, Any]:
         """Namespace for symbolic expressions and solving containing sympy functions and constants."""
+        if not SYMPY_AVAILABLE or not sp:
+            return {}
         return {
             "sin": sp.sin, "cos": sp.cos, "tan": sp.tan,
             "asin": sp.asin, "acos": sp.acos, "atan": sp.atan,
@@ -605,6 +727,12 @@ class SafeEvaluator:
         }
 
     def parse_expression(self, expr: str):
+        if not SYMPY_AVAILABLE or parse_expr is None:
+            expr = self._prevalidate(expr.replace('^', '**'), allow_vars=True)
+            try:
+                return ast.parse(expr, mode="eval")
+            except SyntaxError as e:
+                raise ValueError(f"Error parsing expression: {e}") from e
         try:
             expr = self._prevalidate(expr.replace('^', '**'), allow_vars=True)
             sym_ns = self._build_symbolic_namespace()
@@ -617,9 +745,13 @@ class SafeEvaluator:
             raise ValueError(f"Error parsing expression: {e}") from e
 
     def to_latex(self, expr) -> str:
-        return str(sp.latex(expr))
+        if SYMPY_AVAILABLE and sp:
+            return str(sp.latex(expr))
+        return str(expr)
 
     def solve(self, expr, variable: str = 'x'):
+        if not SYMPY_AVAILABLE or parse_expr is None:
+            raise ValueError("Solving requires sympy package")
         try:
             expr = self._prevalidate(expr, allow_vars=True)
             x = sp.Symbol(variable)

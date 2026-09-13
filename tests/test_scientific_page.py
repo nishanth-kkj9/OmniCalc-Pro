@@ -5,10 +5,16 @@ import sys
 os.environ["QT_QPA_PLATFORM"] = "offscreen"
 
 try:
+    from ui.scientific_page import format_sci_result, toggle_sign
+    FUNCS_AVAILABLE = True
+except ImportError:
+    FUNCS_AVAILABLE = False
+
+try:
     from PySide6.QtWidgets import QApplication
     from PySide6.QtCore import Qt
     from PySide6.QtGui import QKeyEvent
-    from ui.scientific_page import ScientificPage, format_sci_result, toggle_sign
+    from ui.scientific_page import ScientificPage
     PYSIDE_AVAILABLE = True
 except ImportError:
     PYSIDE_AVAILABLE = False
@@ -17,7 +23,6 @@ if PYSIDE_AVAILABLE:
     app = QApplication.instance() or QApplication([sys.argv[0], "-platform", "offscreen"])
 
 
-@unittest.skipUnless(PYSIDE_AVAILABLE, "PySide6 not available in this environment")
 class TestScientificPageUnit(unittest.TestCase):
     def test_format_sci_result(self):
         self.assertEqual(format_sci_result(5.0), "5")

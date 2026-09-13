@@ -1,19 +1,30 @@
 import re
 from typing import Union
-from PySide6.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QHBoxLayout,
-    QGridLayout,
-    QComboBox,
-    QLabel,
-    QPushButton,
-    QFrame,
-    QSizePolicy,
-)
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QKeyEvent, QGuiApplication
-from ui.widgets import CalcButton, DisplayPanel
+
+try:
+    from PySide6.QtWidgets import (
+        QWidget,
+        QVBoxLayout,
+        QHBoxLayout,
+        QGridLayout,
+        QComboBox,
+        QLabel,
+        QPushButton,
+        QFrame,
+        QSizePolicy,
+    )
+    from PySide6.QtCore import Qt
+    from PySide6.QtGui import QKeyEvent, QGuiApplication
+    from ui.widgets import CalcButton, DisplayPanel
+    PYSIDE_AVAILABLE = True
+except ImportError:
+    QWidget = object
+    QVBoxLayout = QHBoxLayout = QGridLayout = QComboBox = QLabel = QPushButton = QFrame = QSizePolicy = None
+    Qt = None
+    QKeyEvent = QGuiApplication = None
+    CalcButton = DisplayPanel = None
+    PYSIDE_AVAILABLE = False
+
 from utils.helpers import safe_eval, save_config
 from core.history_manager import get_history_manager
 from utils.logger import get_logger
