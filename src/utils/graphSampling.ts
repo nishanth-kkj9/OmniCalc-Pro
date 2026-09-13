@@ -47,6 +47,7 @@ export function sampleGraphCurve(
   const ySpan = Math.abs(viewport.yMax - viewport.yMin);
   // Asymptote jump threshold in mathematical units: values leaping more than 3x the viewport span
   const jumpThreshold = Math.max(10, ySpan * 3);
+  const maxSafeY = Math.max(1e5, ySpan * 100);
 
   // Baseline uniform grid step based on screen pixels (e.g. 1 point every 2-3 pixels)
   const baseSteps = Math.min(1000, Math.max(100, Math.round(pixelWidth / 2.5)));
@@ -74,7 +75,8 @@ export function sampleGraphCurve(
    */
   const sampleInterval = (x0: number, y0: number, x1: number, y1: number, depth: number) => {
     if (totalSampleCount >= maxSamples || depth > MAX_ADAPTIVE_DEPTH) {
-      currentSegment.push({ x: x1, y: y1 });
+      const safeY1 = Math.max(-maxSafeY, Math.min(maxSafeY, y1));
+      currentSegment.push({ x: x1, y: safeY1 });
       totalSampleCount++;
       return;
     }
@@ -95,13 +97,22 @@ export function sampleGraphCurve(
     const jumpLeft = Math.abs(yMid - y0);
     const jumpRight = Math.abs(y1 - yMid);
     if (jumpLeft > jumpThreshold || jumpRight > jumpThreshold) {
-      // Sign flip with large jump strongly implies an asymptote (e.g. 1/x, tan(x))
-      if (
+      // 1. Sign flip with large jump strongly implies an odd asymptote (e.g. 1/x, tan(x))
+      const isOddPole =
         (y0 > 0 && yMid < 0) ||
         (y0 < 0 && yMid > 0) ||
         (yMid > 0 && y1 < 0) ||
-        (yMid < 0 && y1 > 0)
-      ) {
+        (yMid < 0 && y1 > 0);
+
+      // 2. Even pole / spike: same-sign jump shooting towards infinity (e.g. 1/x^2)
+      const isEvenPole =
+        (Math.abs(yMid) > jumpThreshold &&
+          (Math.abs(yMid) > Math.abs(y0) * 2.5 || Math.abs(yMid) > Math.abs(y1) * 2.5)) ||
+        ((yMid - y0) * (y1 - yMid) < 0 && (jumpLeft > jumpThreshold || jumpRight > jumpThreshold));
+
+      const isExtremeJump = Math.abs(y1 - y0) > jumpThreshold * 2;
+
+      if (isOddPole || isEvenPole || isExtremeJump) {
         if (currentSegment.length > 0) {
           segments.push({ points: currentSegment });
           currentSegment = [];
@@ -119,7 +130,8 @@ export function sampleGraphCurve(
       sampleInterval(x0, y0, xMid, yMid, depth + 1);
       sampleInterval(xMid, yMid, x1, y1, depth + 1);
     } else {
-      currentSegment.push({ x: x1, y: y1 });
+      const safeY1 = Math.max(-maxSafeY, Math.min(maxSafeY, y1));
+      currentSegment.push({ x: x1, y: safeY1 });
       totalSampleCount++;
     }
   };
@@ -128,7 +140,8 @@ export function sampleGraphCurve(
   let prevX = effectiveXMin;
   let prevY = evalAt(prevX);
   if (prevY !== null) {
-    currentSegment.push({ x: prevX, y: prevY });
+    const safePrevY = Math.max(-maxSafeY, Math.min(maxSafeY, prevY));
+    currentSegment.push({ x: prevX, y: safePrevY });
     totalSampleCount++;
   }
 
@@ -140,7 +153,8 @@ export function sampleGraphCurve(
 
     if (prevY === null && curY !== null) {
       // Function becomes valid
-      currentSegment = [{ x: curX, y: curY }];
+      const safeCurY = Math.max(-maxSafeY, Math.min(maxSafeY, curY));
+      currentSegment = [{ x: curX, y: safeCurY }];
       totalSampleCount++;
     } else if (prevY !== null && curY === null) {
       // Function becomes undefined
@@ -152,22 +166,28 @@ export function sampleGraphCurve(
       // Both points are valid, check for asymptote jump
       const dy = Math.abs(curY - prevY);
       const signChange = (prevY > 0 && curY < 0) || (prevY < 0 && curY > 0);
+      const midVal = evalAt((prevX + curX) / 2);
 
-      if (dy > jumpThreshold && signChange) {
-        // High steep jump across zero line - test midpoint
-        const midVal = evalAt((prevX + curX) / 2);
-        if (midVal === null || Math.abs(midVal) > jumpThreshold * 0.5) {
-          // Asymptote detected! Cut segment.
-          if (currentSegment.length > 0) {
-            segments.push({ points: currentSegment });
-            currentSegment = [];
-          }
-          currentSegment.push({ x: curX, y: curY });
-          totalSampleCount++;
-          prevX = curX;
-          prevY = curY;
-          continue;
+      const isOddPole = dy > jumpThreshold && signChange;
+      const isMidNull = midVal === null;
+      const isEvenPole =
+        midVal !== null &&
+        (Math.abs(midVal) > jumpThreshold * 0.5 || dy > jumpThreshold) &&
+        (Math.abs(midVal - prevY) > jumpThreshold || Math.abs(curY - midVal) > jumpThreshold);
+      const isExtremeJump = dy > jumpThreshold * 2.5;
+
+      if (isOddPole || isMidNull || isEvenPole || isExtremeJump) {
+        // High steep jump across singularity
+        if (currentSegment.length > 0) {
+          segments.push({ points: currentSegment });
+          currentSegment = [];
         }
+        const safeCurY = Math.max(-maxSafeY, Math.min(maxSafeY, curY));
+        currentSegment.push({ x: curX, y: safeCurY });
+        totalSampleCount++;
+        prevX = curX;
+        prevY = curY;
+        continue;
       }
 
       // Smooth curve or slight variation - adaptive refine
@@ -499,7 +519,7 @@ export function detectVerticalAsymptotes(
       }
     }
 
-    // Case 2: Sign change with steep divergence (pole between x0 and x1)
+    // Case 2: Sign change with steep divergence (odd pole between x0 and x1)
     if (y0 !== null && y1 !== null) {
       if (
         (y0 > threshold && y1 < -threshold) ||
@@ -508,6 +528,17 @@ export function detectVerticalAsymptotes(
       ) {
         if (!asymptotes.some((a) => Math.abs(a - xMid) < dx * 2)) {
           asymptotes.push(xMid);
+        }
+      } else if (yMid !== null) {
+        // Case 3: Even pole (e.g. 1/x^2, 1/(x-2)^2) - spike shooting towards infinity
+        const minEnd = Math.min(Math.abs(y0), Math.abs(y1));
+        if (
+          (Math.abs(yMid) > threshold * 1.5 && Math.abs(yMid) > minEnd * 2.5) ||
+          (Math.abs(yMid) > threshold * 2 && (yMid - y0) * (y1 - yMid) < 0)
+        ) {
+          if (!asymptotes.some((a) => Math.abs(a - xMid) < dx * 2)) {
+            asymptotes.push(xMid);
+          }
         }
       }
     }

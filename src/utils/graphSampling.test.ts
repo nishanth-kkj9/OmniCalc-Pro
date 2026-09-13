@@ -62,6 +62,38 @@ describe('graphSampling Engine', () => {
     }
   });
 
+  it('strictly splits 1 / x^2 across even pole singularity at x = 0', () => {
+    const compiled = safeCompile('1 / (x^2)');
+    expect(compiled).not.toBeNull();
+    const segments = sampleGraphCurve(compiled!, {
+      viewport: defaultViewport,
+      pixelWidth: 600,
+    });
+    // Must be split into at least 2 disconnected segments (left branch x < 0 and right branch x > 0)
+    expect(segments.length).toBeGreaterThanOrEqual(2);
+    for (const seg of segments) {
+      for (let i = 1; i < seg.points.length; i++) {
+        const p0 = seg.points[i - 1];
+        const p1 = seg.points[i];
+        if (p0.x < 0 && p1.x > 0) {
+          throw new Error(`Segment bridged across even pole at x=0: (${p0.x}, ${p0.y}) to (${p1.x}, ${p1.y})`);
+        }
+      }
+    }
+  });
+
+  it('detects vertical asymptotes for 1 / x^2 near x=0', () => {
+    const compiled = safeCompile('1 / (x^2)');
+    const asyms = detectVerticalAsymptotes(compiled!, {
+      xMin: -5,
+      xMax: 5,
+      yMin: -10,
+      yMax: 10,
+    });
+    expect(asyms.length).toBeGreaterThan(0);
+    expect(Math.abs(asyms[0])).toBeLessThan(0.25);
+  });
+
   it('samples parametric curves correctly', () => {
     const compX = safeCompile('5 * cos(t)');
     const compY = safeCompile('5 * sin(t)');

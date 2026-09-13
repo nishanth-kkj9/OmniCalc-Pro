@@ -28,9 +28,11 @@ class GraphPage(QWidget):
         input_layout = QHBoxLayout()
         self.type_combo = QComboBox()
         self.type_combo.addItems(["Cartesian (y=)", "Parametric (x,y)", "Polar (r=)"])
+        self.type_combo.currentIndexChanged.connect(self.on_type_changed)
 
         self.input_eq = QLineEdit()
         self.input_eq.setPlaceholderText("e.g. x**2 - 4, sin(x), 1/x")
+        self.input_eq.returnPressed.connect(self.plot_graph)
 
         self.btn_plot = QPushButton("Plot")
         self.btn_plot.setObjectName("OperatorBtn")
@@ -50,7 +52,37 @@ class GraphPage(QWidget):
         layout.addWidget(ctrl_box)
         layout.addWidget(self.engine, 1)
 
+    def on_type_changed(self, index: int):
+        if index == 0:
+            self.input_eq.setPlaceholderText("e.g. x**2 - 4, sin(x), 1/x")
+        elif index == 1:
+            self.input_eq.setPlaceholderText("e.g. cos(t), sin(t)")
+        elif index == 2:
+            self.input_eq.setPlaceholderText("e.g. 2*cos(theta), 1 - cos(theta)")
+
     def plot_graph(self):
-        raw = self.input_eq.text()
-        eqs = [e.strip() for e in raw.split(",") if e.strip()]
-        self.engine.plot_equations(eqs)
+        raw = self.input_eq.text().strip()
+        if not raw:
+            return
+        curve_type_idx = self.type_combo.currentIndex()
+        models = []
+
+        if curve_type_idx == 1:
+            # Parametric: expect "x(t), y(t)"
+            parts = [p.strip() for p in raw.split(",", 1)]
+            if len(parts) == 2:
+                models.append(GraphModel(expression=parts[0], curve_type="parametric", parametric_y=parts[1]))
+            else:
+                models.append(GraphModel(expression=parts[0], curve_type="parametric", parametric_y="0"))
+        elif curve_type_idx == 2:
+            # Polar
+            for e in raw.split(";"):
+                if e.strip():
+                    models.append(GraphModel(expression=e.strip(), curve_type="polar"))
+        else:
+            # Cartesian
+            for e in raw.split(","):
+                if e.strip():
+                    models.append(GraphModel(expression=e.strip(), curve_type="function"))
+
+        self.engine.plot_equations(models)

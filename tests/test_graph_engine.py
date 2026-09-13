@@ -117,6 +117,40 @@ class TestGraphSamplerAndAnalysis(unittest.TestCase):
         # Should be split into at least 2 segments around the asymptote
         self.assertGreaterEqual(len(segs), 2)
 
+    def test_sampler_even_pole_asymptote(self):
+        from core.graph_engine import GraphSampler
+        import numpy as np
+        # Test f(x) = 1/x^2 with jump across vertical asymptote at x=0
+        def inv_sq(x):
+            return np.where(np.abs(x) < 1e-4, np.nan, 1.0 / (x ** 2))
+
+        segs = GraphSampler.sample_function(inv_sq, -2.0, 2.0, points=101, jump_threshold=10.0)
+        self.assertGreaterEqual(len(segs), 2)
+        # Ensure no segment bridges across negative and positive x
+        for xs, _ in segs:
+            if len(xs) > 1:
+                self.assertFalse(np.any((xs[:-1] < 0) & (xs[1:] > 0)))
+
+    def test_sampler_parametric(self):
+        from core.graph_engine import GraphSampler
+        import numpy as np
+        # Circle x = cos(t), y = sin(t)
+        segs = GraphSampler.sample_parametric(np.cos, np.sin, 0, 2 * np.pi, points=100)
+        self.assertEqual(len(segs), 1)
+        xs, ys = segs[0]
+        self.assertEqual(len(xs), 100)
+        self.assertAlmostEqual(float(xs[0]), 1.0, places=2)
+        self.assertAlmostEqual(float(ys[0]), 0.0, places=2)
+
+    def test_sampler_polar(self):
+        from core.graph_engine import GraphSampler
+        import numpy as np
+        # Cardioid r = 1 - cos(theta)
+        segs = GraphSampler.sample_polar(lambda th: 1 - np.cos(th), 0, 2 * np.pi, points=100)
+        self.assertEqual(len(segs), 1)
+        xs, ys = segs[0]
+        self.assertEqual(len(xs), 100)
+
     def test_analysis_find_roots(self):
         from core.graph_engine import GraphAnalysis
         roots = GraphAnalysis.find_roots(lambda x: x ** 2 - 4, -3.0, 3.0, samples=100)
@@ -124,4 +158,22 @@ class TestGraphSamplerAndAnalysis(unittest.TestCase):
         sorted_roots = sorted(roots)
         self.assertAlmostEqual(sorted_roots[0], -2.0, places=2)
         self.assertAlmostEqual(sorted_roots[1], 2.0, places=2)
+
+    def test_analysis_find_extrema(self):
+        from core.graph_engine import GraphAnalysis
+        # f(x) = x^3 - 3x has max at x=-1, min at x=1
+        extrema = GraphAnalysis.find_extrema(lambda x: x**3 - 3*x, -2.5, 2.5, samples=200)
+        self.assertGreaterEqual(len(extrema), 2)
+        types = [e[2] for e in extrema]
+        self.assertIn("max", types)
+        self.assertIn("min", types)
+
+    def test_analysis_find_intersections(self):
+        from core.graph_engine import GraphAnalysis
+        # Intersect y = x^2 and y = 4
+        intersections = GraphAnalysis.find_intersections(lambda x: x**2, lambda x: 4.0, -3.0, 3.0, samples=100)
+        self.assertEqual(len(intersections), 2)
+        xs = sorted([pt[0] for pt in intersections])
+        self.assertAlmostEqual(xs[0], -2.0, places=2)
+        self.assertAlmostEqual(xs[1], 2.0, places=2)
 
