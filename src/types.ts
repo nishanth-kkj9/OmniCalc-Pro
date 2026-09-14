@@ -53,6 +53,9 @@ export type AngleMode = 'DEG' | 'RAD' | 'GRAD';
 
 export type LineStyle = 'solid' | 'dashed' | 'dotted';
 
+export type CurveType = 'function' | 'parametric' | 'polar' | 'inequality' | 'cartesian';
+export type InequalityOperator = '<' | '<=' | '>' | '>=';
+
 export interface GraphExpression {
   id: string;
   expression: string;
@@ -63,8 +66,9 @@ export interface GraphExpression {
   label?: string;
   domainMin?: number;
   domainMax?: number;
-  type?: 'function' | 'parametric' | 'polar' | 'inequality';
-  inequalityOp?: '<' | '<=' | '>' | '>=';
+  type?: CurveType;
+  inequalityOp?: InequalityOperator;
+  inequalityOperator?: InequalityOperator;
   parametricY?: string;
   tMin?: number;
   tMax?: number;

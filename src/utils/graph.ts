@@ -1,12 +1,85 @@
 import { GraphViewport, Point2D, AngleMode } from '../types';
 import { compileSafeExpression, CompiledSafeExpression } from './calculator';
 
+export const MIN_VIEWPORT_SPAN = 1e-6;
+export const MAX_VIEWPORT_SPAN = 1e8;
+
 export const DEFAULT_VIEWPORT: GraphViewport = {
   xMin: -10,
   xMax: 10,
   yMin: -10,
   yMax: 10,
 };
+
+/**
+ * Validates and normalizes any GraphViewport into a guaranteed mathematically sound state.
+ * Enforces:
+ * 1. All four coordinates are finite real numbers.
+ * 2. xMin < xMax and yMin < yMax.
+ * 3. Spans respect MIN_VIEWPORT_SPAN and MAX_VIEWPORT_SPAN.
+ */
+export function validateAndNormalizeViewport(
+  viewport: unknown,
+  fallback: GraphViewport = DEFAULT_VIEWPORT
+): GraphViewport {
+  if (!viewport || typeof viewport !== 'object') {
+    return { ...fallback };
+  }
+
+  const vp = viewport as Partial<GraphViewport>;
+  let xMin = typeof vp.xMin === 'number' && Number.isFinite(vp.xMin) ? vp.xMin : fallback.xMin;
+  let xMax = typeof vp.xMax === 'number' && Number.isFinite(vp.xMax) ? vp.xMax : fallback.xMax;
+  let yMin = typeof vp.yMin === 'number' && Number.isFinite(vp.yMin) ? vp.yMin : fallback.yMin;
+  let yMax = typeof vp.yMax === 'number' && Number.isFinite(vp.yMax) ? vp.yMax : fallback.yMax;
+
+  // Ensure strict ordering
+  if (xMin > xMax) {
+    const tmp = xMin;
+    xMin = xMax;
+    xMax = tmp;
+  } else if (xMin === xMax) {
+    xMin -= 10;
+    xMax += 10;
+  }
+
+  if (yMin > yMax) {
+    const tmp = yMin;
+    yMin = yMax;
+    yMax = tmp;
+  } else if (yMin === yMax) {
+    yMin -= 10;
+    yMax += 10;
+  }
+
+  // Span clamping
+  let xSpan = xMax - xMin;
+  if (xSpan < MIN_VIEWPORT_SPAN) {
+    const mid = (xMin + xMax) / 2;
+    xMin = mid - MIN_VIEWPORT_SPAN / 2;
+    xMax = mid + MIN_VIEWPORT_SPAN / 2;
+    xSpan = MIN_VIEWPORT_SPAN;
+  } else if (xSpan > MAX_VIEWPORT_SPAN) {
+    const mid = (xMin + xMax) / 2;
+    xMin = mid - MAX_VIEWPORT_SPAN / 2;
+    xMax = mid + MAX_VIEWPORT_SPAN / 2;
+    xSpan = MAX_VIEWPORT_SPAN;
+  }
+
+  let ySpan = yMax - yMin;
+  if (ySpan < MIN_VIEWPORT_SPAN) {
+    const mid = (yMin + yMax) / 2;
+    yMin = mid - MIN_VIEWPORT_SPAN / 2;
+    yMax = mid + MIN_VIEWPORT_SPAN / 2;
+    ySpan = MIN_VIEWPORT_SPAN;
+  } else if (ySpan > MAX_VIEWPORT_SPAN) {
+    const mid = (yMin + yMax) / 2;
+    yMin = mid - MAX_VIEWPORT_SPAN / 2;
+    yMax = mid + MAX_VIEWPORT_SPAN / 2;
+    ySpan = MAX_VIEWPORT_SPAN;
+  }
+
+  return { xMin, xMax, yMin, yMax };
+}
 
 export const GRAPH_PALETTE = [
   '#38bdf8', // Sky 400
@@ -171,26 +244,40 @@ export function zoomViewportAroundPoint(
   centerGy: number,
   factor: number
 ): GraphViewport {
-  // Clamp zoom factor to prevent extreme zoom locks
+  const normVp = validateAndNormalizeViewport(viewport);
+
+  // Validate center point coordinates
+  const safeCenterX = Number.isFinite(centerGx) ? centerGx : (normVp.xMin + normVp.xMax) / 2;
+  const safeCenterY = Number.isFinite(centerGy) ? centerGy : (normVp.yMin + normVp.yMax) / 2;
+
+  // Clamp zoom factor to prevent extreme jumps
   const clampedFactor = Math.max(0.1, Math.min(10, factor));
 
-  const xSpan = (viewport.xMax - viewport.xMin) * clampedFactor;
-  const ySpan = (viewport.yMax - viewport.yMin) * clampedFactor;
+  const origXSpan = normVp.xMax - normVp.xMin;
+  const origYSpan = normVp.yMax - normVp.yMin;
 
-  // Protect against infinite zoom or overflow
-  if (xSpan < 1e-8 || xSpan > 1e12 || ySpan < 1e-8 || ySpan > 1e12) {
-    return viewport;
+  const newXSpan = origXSpan * clampedFactor;
+  const newYSpan = origYSpan * clampedFactor;
+
+  // Guard against exceeding min/max span invariants
+  if (
+    (clampedFactor < 1 && (newXSpan < MIN_VIEWPORT_SPAN || newYSpan < MIN_VIEWPORT_SPAN)) ||
+    (clampedFactor > 1 && (newXSpan > MAX_VIEWPORT_SPAN || newYSpan > MAX_VIEWPORT_SPAN))
+  ) {
+    return normVp;
   }
 
-  const xRatio = (centerGx - viewport.xMin) / (viewport.xMax - viewport.xMin);
-  const yRatio = (centerGy - viewport.yMin) / (viewport.yMax - viewport.yMin);
+  const xRatio = (safeCenterX - normVp.xMin) / origXSpan;
+  const yRatio = (safeCenterY - normVp.yMin) / origYSpan;
 
-  return {
-    xMin: centerGx - xRatio * xSpan,
-    xMax: centerGx + (1 - xRatio) * xSpan,
-    yMin: centerGy - yRatio * ySpan,
-    yMax: centerGy + (1 - yRatio) * ySpan,
+  const newViewport: GraphViewport = {
+    xMin: safeCenterX - xRatio * newXSpan,
+    xMax: safeCenterX + (1 - xRatio) * newXSpan,
+    yMin: safeCenterY - yRatio * newYSpan,
+    yMax: safeCenterY + (1 - yRatio) * newYSpan,
   };
+
+  return validateAndNormalizeViewport(newViewport, normVp);
 }
 
 /**
@@ -202,25 +289,30 @@ export function panViewport(
   deltaScreenY: number,
   dimensions: ScreenDimensions
 ): GraphViewport {
+  const normVp = validateAndNormalizeViewport(viewport);
   const { width, height } = dimensions;
-  if (width <= 0 || height <= 0) return viewport;
+  if (width <= 0 || height <= 0) return normVp;
 
-  const dxGraph = (deltaScreenX / width) * (viewport.xMax - viewport.xMin);
-  const dyGraph = (deltaScreenY / height) * (viewport.yMax - viewport.yMin);
+  if (!Number.isFinite(deltaScreenX) || !Number.isFinite(deltaScreenY)) return normVp;
 
-  return {
-    xMin: viewport.xMin - dxGraph,
-    xMax: viewport.xMax - dxGraph,
-    yMin: viewport.yMin + dyGraph,
-    yMax: viewport.yMax + dyGraph,
+  const dxGraph = (deltaScreenX / width) * (normVp.xMax - normVp.xMin);
+  const dyGraph = (deltaScreenY / height) * (normVp.yMax - normVp.yMin);
+
+  const newViewport: GraphViewport = {
+    xMin: normVp.xMin - dxGraph,
+    xMax: normVp.xMax - dxGraph,
+    yMin: normVp.yMin + dyGraph,
+    yMax: normVp.yMax + dyGraph,
   };
+
+  return validateAndNormalizeViewport(newViewport, normVp);
 }
 
 // In-memory cache for compiled expressions
 const compiledCache = new Map<string, CompiledSafeExpression | null>();
 
 /**
- * Compiles a mathematical expression for repeated evaluations with x and optional sliders.
+ * Compiles a mathematical expression for repeated evaluations with x, t, theta, and optional sliders.
  * Returns null if the expression is invalid or rejected by AST allowlists.
  */
 export function getOrCompileGraphExpression(
@@ -231,17 +323,32 @@ export function getOrCompileGraphExpression(
   const cleanExpr = expression.trim();
   if (!cleanExpr) return null;
 
-  const cacheKey = `${cleanExpr}|${angleMode}|${sliderNames.sort().join(',')}`;
+  // Never mutate the caller's array
+  const sortedSliders = [...sliderNames].sort();
+  const cacheKey = `${cleanExpr}|${angleMode}|${sortedSliders.join(',')}`;
   if (compiledCache.has(cacheKey)) {
     return compiledCache.get(cacheKey) || null;
   }
 
-  const allowedVars = ['x', ...sliderNames];
+  const allowedVars = ['x', 't', 'theta', 'θ', ...sortedSliders];
   const compileResult = compileSafeExpression(cleanExpr, angleMode, allowedVars);
 
   if (compileResult.ok) {
-    compiledCache.set(cacheKey, compileResult.compiled);
-    return compileResult.compiled;
+    const rawCompiled = compileResult.compiled;
+    const normalizedCompiled: CompiledSafeExpression = {
+      evaluate: (scope) => {
+        if (!scope) return rawCompiled.evaluate();
+        let effectiveScope = scope;
+        if (effectiveScope['θ'] !== undefined && effectiveScope['theta'] === undefined) {
+          effectiveScope = { ...effectiveScope, theta: effectiveScope['θ'] };
+        } else if (effectiveScope['theta'] !== undefined && effectiveScope['θ'] === undefined) {
+          effectiveScope = { ...effectiveScope, θ: effectiveScope['theta'] };
+        }
+        return rawCompiled.evaluate(effectiveScope);
+      },
+    };
+    compiledCache.set(cacheKey, normalizedCompiled);
+    return normalizedCompiled;
   }
 
   compiledCache.set(cacheKey, null);
@@ -253,4 +360,17 @@ export function getOrCompileGraphExpression(
  */
 export function clearGraphCompileCache(): void {
   compiledCache.clear();
+}
+
+/**
+ * Returns whether a compiled expression is currently cached (for testing & verification).
+ */
+export function hasGraphCompileCache(
+  expression: string,
+  angleMode: AngleMode = 'DEG',
+  sliderNames: string[] = []
+): boolean {
+  const sortedSliders = [...sliderNames].sort();
+  const cacheKey = `${expression.trim()}|${angleMode}|${sortedSliders.join(',')}`;
+  return compiledCache.has(cacheKey);
 }

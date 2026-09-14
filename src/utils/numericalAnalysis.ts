@@ -324,7 +324,10 @@ export function findRoots(
 
   const addRoot = (val: number) => {
     const rounded = Number(val.toFixed(6));
-    if (Number.isFinite(rounded) && !roots.some((r) => Math.abs(r - rounded) < tolerance * 10)) {
+    if (
+      Number.isFinite(rounded) &&
+      !roots.some((r) => Math.abs(r - rounded) < Math.max(tolerance * 10, step * 0.35))
+    ) {
       roots.push(rounded);
     }
   };
@@ -350,18 +353,23 @@ export function findRoots(
           addRoot(root);
         }
       } else if (detectTangentRoots) {
-        // Check for tangent root: f'(x) changes sign and min |f(x)| is close to 0
+        // Check for tangent root: f'(x) changes sign and local min |f(x)| touches 0
         const d1 = calculateDerivative(evalAt, x1);
         const d2 = calculateDerivative(evalAt, x2);
-        if (d1 !== null && d2 !== null && ((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0))) {
-          const mid = (x1 + x2) / 2;
-          const yMid = evalAt(mid);
-          if (yMid !== null && Math.abs(yMid) < 1e-4) {
-            // Refine local extremum to check if it touches 0
-            const optRoot = refineTangentRoot(evalAt, x1, x2);
-            if (optRoot !== null) {
-              addRoot(optRoot);
-            }
+        const mid = (x1 + x2) / 2;
+        const yMid = evalAt(mid);
+        const minAbs = Math.min(
+          Math.abs(y1),
+          Math.abs(y2),
+          yMid !== null ? Math.abs(yMid) : Infinity
+        );
+
+        const derivSignChange =
+          d1 !== null && d2 !== null && ((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0));
+        if (derivSignChange || minAbs < Math.max(0.2, step * 2)) {
+          const optRoot = refineTangentRoot(evalAt, x1, x2);
+          if (optRoot !== null) {
+            addRoot(optRoot);
           }
         }
       }
@@ -375,6 +383,22 @@ export function findRoots(
 }
 
 function refineTangentRoot(evalAt: EvaluatorFn, a: number, b: number): number | null {
+  const derivAt = (x: number) => calculateDerivative(evalAt, x);
+  const dA = derivAt(a);
+  const dB = derivAt(b);
+
+  // If derivative changes sign, solve for critical point f'(x) = 0 via Brent
+  if (dA !== null && dB !== null && ((dA > 0 && dB < 0) || (dA < 0 && dB > 0))) {
+    const critRoot = brentRoot(derivAt, a, b, dA, dB, 40, 1e-7);
+    if (critRoot !== null) {
+      const yVal = evalAt(critRoot);
+      if (yVal !== null && Math.abs(yVal) < 1e-4) {
+        return critRoot;
+      }
+    }
+  }
+
+  // Golden section / ternary search fallback on |f(x)|
   let left = a;
   let right = b;
   for (let iter = 0; iter < 40; iter++) {
@@ -391,7 +415,7 @@ function refineTangentRoot(evalAt: EvaluatorFn, a: number, b: number): number | 
   }
   const bestX = (left + right) / 2;
   const bestY = evalAt(bestX);
-  if (bestY !== null && Math.abs(bestY) < 1e-5) {
+  if (bestY !== null && Math.abs(bestY) < 1e-4) {
     return bestX;
   }
   return null;
@@ -427,19 +451,77 @@ export function findExtrema(
   for (let i = 1; i <= samples; i++) {
     const x2 = min + i * step;
     const d2 = derivAt(x2);
+    const mid = (x1 + x2) / 2;
+    const y1 = evalAt(x1);
+    const y2 = evalAt(x2);
+    const yMid = evalAt(mid);
+
+    let hasCandidate = false;
+    let candD1 = d1;
+    let candD2 = d2;
 
     if (d1 !== null && d2 !== null) {
       if ((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0)) {
-        // Local max or min
-        const root = brentRoot(derivAt, x1, x2, d1, d2, 60, 1e-7);
-        if (root !== null) {
-          const yVal = evalAt(root);
-          if (yVal !== null && Number.isFinite(yVal)) {
-            const type: 'min' | 'max' = d1 < 0 && d2 > 0 ? 'min' : 'max';
-            const rx = Number(root.toFixed(6));
-            const ry = Number(yVal.toFixed(6));
-            if (!extrema.some((e) => Math.abs(e.x - rx) < 1e-4)) {
-              extrema.push({ x: rx, y: ry, type });
+        hasCandidate = true;
+      }
+    }
+
+    // Check for narrow peak / trough within sample step (e.g. exp(-1000*x^2))
+    if (!hasCandidate && y1 !== null && y2 !== null && yMid !== null) {
+      if (yMid > Math.max(y1, y2) + 1e-4) {
+        // Potential sharp maximum
+        const dMid = derivAt(mid);
+        if (d1 !== null && dMid !== null && d1 > 0 && dMid < 0) {
+          candD1 = d1;
+          candD2 = dMid;
+          hasCandidate = true;
+        } else if (dMid !== null && d2 !== null && dMid > 0 && d2 < 0) {
+          candD1 = dMid;
+          candD2 = d2;
+          hasCandidate = true;
+        }
+      } else if (yMid < Math.min(y1, y2) - 1e-4) {
+        // Potential sharp minimum
+        const dMid = derivAt(mid);
+        if (d1 !== null && dMid !== null && d1 < 0 && dMid > 0) {
+          candD1 = d1;
+          candD2 = dMid;
+          hasCandidate = true;
+        } else if (dMid !== null && d2 !== null && dMid < 0 && d2 > 0) {
+          candD1 = dMid;
+          candD2 = d2;
+          hasCandidate = true;
+        }
+      }
+    }
+
+    if (hasCandidate && candD1 !== null && candD2 !== null) {
+      // Local max or min
+      const root = brentRoot(derivAt, x1, x2, candD1, candD2, 60, 1e-7);
+      if (root !== null && root >= min && root <= max) {
+        const yVal = evalAt(root);
+        if (yVal !== null && Number.isFinite(yVal)) {
+          // Verify with neighbors to reject false extrema at poles/asymptotes (e.g. 1/x^2)
+          const delta = Math.max(1e-5, step * 0.05);
+          const yLeft = evalAt(root - delta);
+          const yRight = evalAt(root + delta);
+
+          if (
+            yLeft !== null &&
+            yRight !== null &&
+            Number.isFinite(yLeft) &&
+            Number.isFinite(yRight)
+          ) {
+            const isMax = yVal >= yLeft - 1e-6 && yVal >= yRight - 1e-6;
+            const isMin = yVal <= yLeft + 1e-6 && yVal <= yRight + 1e-6;
+
+            if (isMax || isMin) {
+              const type: 'min' | 'max' = isMax ? 'max' : 'min';
+              const rx = Number(root.toFixed(6));
+              const ry = Number(yVal.toFixed(6));
+              if (!extrema.some((e) => Math.abs(e.x - rx) < Math.max(step * 0.35, 1e-4))) {
+                extrema.push({ x: rx, y: ry, type });
+              }
             }
           }
         }

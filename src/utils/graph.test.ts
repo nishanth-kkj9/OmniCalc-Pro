@@ -8,6 +8,7 @@ import {
   zoomViewportAroundPoint,
   panViewport,
   getOrCompileGraphExpression,
+  validateAndNormalizeViewport,
 } from './graph';
 import {
   sampleGraphCurve,
@@ -309,5 +310,108 @@ describe('Graph Storage and Export', () => {
     expect(svg).toContain('<svg');
     expect(svg).toContain('</svg>');
     expect(svg).toContain('<path');
+  });
+});
+
+describe('Viewport Normalization & Invariants', () => {
+  it('enforces xMin < xMax and yMin < yMax even if inputs are inverted', () => {
+    const inverted = validateAndNormalizeViewport({
+      xMin: 10,
+      xMax: -5,
+      yMin: 20,
+      yMax: 0,
+    });
+    expect(inverted.xMin).toBe(-5);
+    expect(inverted.xMax).toBe(10);
+    expect(inverted.yMin).toBe(0);
+    expect(inverted.yMax).toBe(20);
+  });
+
+  it('safely recovers from NaN or Infinite values', () => {
+    const recovered = validateAndNormalizeViewport({
+      xMin: NaN,
+      xMax: Infinity,
+      yMin: -Infinity,
+      yMax: 5,
+    });
+    expect(Number.isFinite(recovered.xMin)).toBe(true);
+    expect(Number.isFinite(recovered.xMax)).toBe(true);
+    expect(Number.isFinite(recovered.yMin)).toBe(true);
+    expect(Number.isFinite(recovered.yMax)).toBe(true);
+    expect(recovered.xMin).toBeLessThan(recovered.xMax);
+    expect(recovered.yMin).toBeLessThan(recovered.yMax);
+  });
+
+  it('clamps degenerate zero or near-zero spans to MIN_SPAN', () => {
+    const clamped = validateAndNormalizeViewport({
+      xMin: 2,
+      xMax: 2,
+      yMin: 5,
+      yMax: 5,
+    });
+    expect(clamped.xMax - clamped.xMin).toBeGreaterThanOrEqual(1e-9);
+    expect(clamped.yMax - clamped.yMin).toBeGreaterThanOrEqual(1e-9);
+  });
+});
+
+describe('Cache Key Immutability and Mathematical Variables', () => {
+  it('does not mutate the input sliderVariables array', () => {
+    const sliderVars = ['z_var', 'a_var', 'm_var'];
+    const originalCopy = [...sliderVars];
+    getOrCompileGraphExpression('a_var * x + m_var', 'DEG', sliderVars);
+    expect(sliderVars).toEqual(originalCopy);
+  });
+
+  it('supports t, theta, θ, and slider variables', () => {
+    const compT = getOrCompileGraphExpression('cos(t)', 'RAD', ['t']);
+    expect(compT?.evaluate({ t: Math.PI })).toBeCloseTo(-1, 5);
+
+    const compTheta = getOrCompileGraphExpression('sin(theta)', 'RAD', ['theta']);
+    expect(compTheta?.evaluate({ theta: Math.PI / 2 })).toBeCloseTo(1, 5);
+
+    const compGreekTheta = getOrCompileGraphExpression('cos(θ)', 'RAD', ['θ']);
+    expect(compGreekTheta?.evaluate({ θ: 0 })).toBeCloseTo(1, 5);
+  });
+});
+
+describe('Tangential Roots and Discontinuity Discrimination', () => {
+  it('successfully detects double and higher-order tangential roots', () => {
+    // f(x) = (x - 1)^2 touches zero at x = 1
+    const comp1 = getOrCompileGraphExpression('(x - 1)^2', 'DEG')!;
+    const roots1 = findRoots(comp1, { min: -2, max: 4 }, {}, 120);
+    expect(roots1.length).toBeGreaterThanOrEqual(1);
+    expect(roots1.some((r) => Math.abs(r - 1.0) < 0.05)).toBe(true);
+
+    // f(x) = x^2 touches zero at x = 0
+    const comp2 = getOrCompileGraphExpression('x^2', 'DEG')!;
+    const roots2 = findRoots(comp2, { min: -3, max: 3 }, {}, 120);
+    expect(roots2.some((r) => Math.abs(r) < 0.05)).toBe(true);
+  });
+
+  it('isolates odd and even poles while preserving steep continuous curves', () => {
+    // 1/x has an odd pole at x = 0
+    const compInv = getOrCompileGraphExpression('1 / x', 'DEG')!;
+    const segsInv = sampleGraphCurve(compInv, {
+      viewport: { xMin: -5, xMax: 5, yMin: -10, yMax: 10 },
+      steps: 200,
+    });
+    expect(segsInv.length).toBeGreaterThanOrEqual(2);
+    // Ensure no segment crosses the pole from negative to positive x
+    for (const seg of segsInv) {
+      if (seg.points.length > 1) {
+        for (let i = 0; i < seg.points.length - 1; i++) {
+          const crossZero = seg.points[i].x < -0.01 && seg.points[i + 1].x > 0.01;
+          expect(crossZero).toBe(false);
+        }
+      }
+    }
+
+    // Steep continuous curve: 1000 * x should remain continuous across [0, 1]
+    const compSteep = getOrCompileGraphExpression('1000 * x', 'DEG')!;
+    const segsSteep = sampleGraphCurve(compSteep, {
+      viewport: { xMin: 0, xMax: 1, yMin: 0, yMax: 1000 },
+      steps: 50,
+    });
+    expect(segsSteep.length).toBe(1);
   });
 });

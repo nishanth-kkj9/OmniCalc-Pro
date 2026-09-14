@@ -392,7 +392,11 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
 
-      if (expr.lineStyle === 'dashed') {
+      const isStrictInequality =
+        expr.type === 'inequality' &&
+        (expr.inequalityOperator === '<' || expr.inequalityOperator === '>');
+
+      if (expr.lineStyle === 'dashed' || isStrictInequality) {
         ctx.setLineDash([7, 5]);
       } else if (expr.lineStyle === 'dotted') {
         ctx.setLineDash([2.5, 3.5]);

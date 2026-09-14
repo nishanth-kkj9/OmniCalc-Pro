@@ -1,5 +1,13 @@
-import { GraphSession, GraphExpression, GraphViewport, GraphSettings, GraphSlider } from '../types';
-import { DEFAULT_VIEWPORT, GRAPH_PALETTE } from './graph';
+import {
+  GraphSession,
+  GraphExpression,
+  GraphViewport,
+  GraphSettings,
+  GraphSlider,
+  CurveType,
+  InequalityOperator,
+} from '../types';
+import { DEFAULT_VIEWPORT, GRAPH_PALETTE, validateAndNormalizeViewport } from './graph';
 import { MAX_EXPRESSION_LENGTH } from '../constants/limits';
 
 export const GRAPH_STORAGE_KEY = 'omnicalc_graph_sessions_v1';
@@ -275,19 +283,8 @@ export function sanitizeGraphSession(raw: unknown): GraphSession | null {
   const version = typeof obj.version === 'number' ? obj.version : 1;
   const timestamp = typeof obj.timestamp === 'number' ? obj.timestamp : Date.now();
 
-  // Viewport validation
-  let viewport: GraphViewport = { ...DEFAULT_VIEWPORT };
-  if (obj.viewport && typeof obj.viewport === 'object') {
-    const vp = obj.viewport as Record<string, unknown>;
-    const xMin = typeof vp.xMin === 'number' && Number.isFinite(vp.xMin) ? vp.xMin : -10;
-    const xMax = typeof vp.xMax === 'number' && Number.isFinite(vp.xMax) ? vp.xMax : 10;
-    const yMin = typeof vp.yMin === 'number' && Number.isFinite(vp.yMin) ? vp.yMin : -10;
-    const yMax = typeof vp.yMax === 'number' && Number.isFinite(vp.yMax) ? vp.yMax : 10;
-
-    if (xMin < xMax && yMin < yMax) {
-      viewport = { xMin, xMax, yMin, yMax };
-    }
-  }
+  // Viewport validation with strict mathematical invariants
+  const viewport: GraphViewport = validateAndNormalizeViewport(obj.viewport, DEFAULT_VIEWPORT);
 
   // Settings validation
   const settings: GraphSettings = {
@@ -358,6 +355,47 @@ export function sanitizeGraphSession(raw: unknown): GraphSession | null {
         ? exprObj.domainMax
         : undefined;
 
+    // Validate curve type
+    const rawType = exprObj.type;
+    const type: CurveType =
+      rawType === 'parametric' || rawType === 'polar' || rawType === 'inequality'
+        ? rawType
+        : 'cartesian';
+
+    // Type-specific attributes
+    let parametricY: string | undefined;
+    if (type === 'parametric' && typeof exprObj.parametricY === 'string') {
+      parametricY = exprObj.parametricY.slice(0, MAX_EXPRESSION_LENGTH);
+    }
+
+    const tMin =
+      typeof exprObj.tMin === 'number' && Number.isFinite(exprObj.tMin)
+        ? exprObj.tMin
+        : undefined;
+    const tMax =
+      typeof exprObj.tMax === 'number' && Number.isFinite(exprObj.tMax)
+        ? exprObj.tMax
+        : undefined;
+
+    const thetaMin =
+      typeof exprObj.thetaMin === 'number' && Number.isFinite(exprObj.thetaMin)
+        ? exprObj.thetaMin
+        : undefined;
+    const thetaMax =
+      typeof exprObj.thetaMax === 'number' && Number.isFinite(exprObj.thetaMax)
+        ? exprObj.thetaMax
+        : undefined;
+
+    let inequalityOperator: InequalityOperator | undefined;
+    if (type === 'inequality') {
+      const op = exprObj.inequalityOperator;
+      if (op === '<' || op === '<=' || op === '>' || op === '>=') {
+        inequalityOperator = op;
+      } else {
+        inequalityOperator = '<=';
+      }
+    }
+
     expressions.push({
       id: exprId,
       expression: exprText,
@@ -368,6 +406,13 @@ export function sanitizeGraphSession(raw: unknown): GraphSession | null {
       label,
       domainMin,
       domainMax,
+      type,
+      parametricY,
+      tMin,
+      tMax,
+      thetaMin,
+      thetaMax,
+      inequalityOperator,
     });
   }
 

@@ -8,6 +8,7 @@ export interface SampleCurveOptions {
   domainMax?: number;
   scope?: Record<string, number>;
   pixelWidth?: number;
+  steps?: number;
   maxSamples?: number;
 }
 
@@ -25,7 +26,7 @@ export function sampleGraphCurve(
     domainMin,
     domainMax,
     scope = {},
-    pixelWidth = 800,
+    pixelWidth = options.steps ?? 800,
     maxSamples = MAX_GRAPH_SAMPLES,
   } = options;
 
@@ -163,21 +164,27 @@ export function sampleGraphCurve(
         currentSegment = [];
       }
     } else if (prevY !== null && curY !== null) {
-      // Both points are valid, check for asymptote jump
+      // Both points are valid, check for asymptote jump vs steep continuous function
       const dy = Math.abs(curY - prevY);
       const signChange = (prevY > 0 && curY < 0) || (prevY < 0 && curY > 0);
       const midVal = evalAt((prevX + curX) / 2);
 
-      const isOddPole = dy > jumpThreshold && signChange;
       const isMidNull = midVal === null;
+      // Odd pole (1/x, tan(x)): sign changes, steep jump, and midpoint diverges from linear chord
+      const isOddPole =
+        dy > jumpThreshold &&
+        signChange &&
+        (midVal === null || Math.abs(midVal - (prevY + curY) / 2) > jumpThreshold * 0.4);
+      // Even pole (1/x^2): same sign, but midpoint shoots far outside the interval [prevY, curY]
       const isEvenPole =
         midVal !== null &&
-        (Math.abs(midVal) > jumpThreshold * 0.5 || dy > jumpThreshold) &&
-        (Math.abs(midVal - prevY) > jumpThreshold || Math.abs(curY - midVal) > jumpThreshold);
-      const isExtremeJump = dy > jumpThreshold * 2.5;
+        ((midVal > Math.max(prevY, curY) + jumpThreshold * 0.5 && dy > jumpThreshold * 0.5) ||
+          (midVal < Math.min(prevY, curY) - jumpThreshold * 0.5 && dy > jumpThreshold * 0.5));
 
-      if (isOddPole || isMidNull || isEvenPole || isExtremeJump) {
-        // High steep jump across singularity
+      // Notice: monotonic steep functions (1000*x, exp(10x), x^10) have midVal lying smoothly
+      // between prevY and curY, so neither isOddPole nor isEvenPole triggers!
+      if (isOddPole || isMidNull || isEvenPole) {
+        // Steep jump across true singularity
         if (currentSegment.length > 0) {
           segments.push({ points: currentSegment });
           currentSegment = [];
@@ -215,7 +222,7 @@ export interface SampleParametricOptions {
 }
 
 /**
- * Samples a parametric curve x = f(t), y = g(t) over [tMin, tMax].
+ * Samples a parametric curve x = f(t), y = g(t) over [tMin, tMax] with adaptive refinement and singularity splitting.
  */
 export function sampleParametricCurve(
   compiledX: CompiledSafeExpression,
@@ -232,34 +239,96 @@ export function sampleParametricCurve(
 
   const ySpan = viewport ? Math.abs(viewport.yMax - viewport.yMin) * 5 : 1e4;
   const xSpan = viewport ? Math.abs(viewport.xMax - viewport.xMin) * 5 : 1e4;
+  const jumpThreshold = Math.max(xSpan, ySpan) * 0.8;
 
-  for (let i = 0; i <= steps; i++) {
-    const t = tMin + i * dt;
+  const evalPt = (t: number): Point2D | null => {
     try {
-      const xVal = compiledX.evaluate({ ...scope, t });
-      const yVal = compiledY.evaluate({ ...scope, t });
-
+      const x = compiledX.evaluate({ ...scope, t });
+      const y = compiledY.evaluate({ ...scope, t });
       if (
-        xVal !== null &&
-        yVal !== null &&
-        Number.isFinite(xVal) &&
-        Number.isFinite(yVal) &&
-        Math.abs(xVal) < xSpan &&
-        Math.abs(yVal) < ySpan
+        x !== null &&
+        y !== null &&
+        Number.isFinite(x) &&
+        Number.isFinite(y) &&
+        Math.abs(x) < xSpan &&
+        Math.abs(y) < ySpan
       ) {
-        currentSegment.push({ x: xVal, y: yVal });
-      } else {
-        if (currentSegment.length > 0) {
-          segments.push({ points: currentSegment });
-          currentSegment = [];
-        }
+        return { x, y };
       }
+      return null;
     } catch {
+      return null;
+    }
+  };
+
+  const adaptSubdivide = (
+    t1: number,
+    p1: Point2D,
+    t2: number,
+    p2: Point2D,
+    depth: number
+  ) => {
+    if (depth >= 3) {
+      currentSegment.push(p2);
+      return;
+    }
+
+    const tMid = (t1 + t2) / 2;
+    const pMid = evalPt(tMid);
+
+    if (!pMid) {
+      // Midpoint undefined -> split segment across singularity
       if (currentSegment.length > 0) {
         segments.push({ points: currentSegment });
         currentSegment = [];
       }
+      return;
     }
+
+    const chordMidX = (p1.x + p2.x) / 2;
+    const chordMidY = (p1.y + p2.y) / 2;
+    const dev = Math.hypot(pMid.x - chordMidX, pMid.y - chordMidY);
+
+    if (dev > 0.05 && dev < jumpThreshold) {
+      adaptSubdivide(t1, p1, tMid, pMid, depth + 1);
+      adaptSubdivide(tMid, pMid, t2, p2, depth + 1);
+    } else {
+      currentSegment.push(p2);
+    }
+  };
+
+  let prevPt: Point2D | null = evalPt(tMin);
+  if (prevPt) {
+    currentSegment.push(prevPt);
+  }
+
+  for (let i = 1; i <= steps; i++) {
+    const t = tMin + i * dt;
+    const curPt = evalPt(t);
+
+    if (prevPt === null && curPt !== null) {
+      currentSegment = [curPt];
+    } else if (prevPt !== null && curPt === null) {
+      if (currentSegment.length > 0) {
+        segments.push({ points: currentSegment });
+        currentSegment = [];
+      }
+    } else if (prevPt !== null && curPt !== null) {
+      const dist = Math.hypot(curPt.x - prevPt.x, curPt.y - prevPt.y);
+      if (dist > jumpThreshold) {
+        // High jump / asymptote
+        if (currentSegment.length > 0) {
+          segments.push({ points: currentSegment });
+          currentSegment = [];
+        }
+        currentSegment.push(curPt);
+      } else {
+        const prevT = t - dt;
+        adaptSubdivide(prevT, prevPt, t, curPt, 0);
+      }
+    }
+
+    prevPt = curPt;
   }
 
   if (currentSegment.length > 0) {
@@ -278,7 +347,7 @@ export interface SamplePolarOptions {
 }
 
 /**
- * Samples a polar curve r = f(theta) over [thetaMin, thetaMax], mapping to x = r*cos(theta), y = r*sin(theta).
+ * Samples a polar curve r = f(theta) over [thetaMin, thetaMax] with adaptive refinement and singularity splitting.
  */
 export function samplePolarCurve(
   compiledR: CompiledSafeExpression,
@@ -295,29 +364,90 @@ export function samplePolarCurve(
   const bound = viewport
     ? Math.max(Math.abs(viewport.xMax - viewport.xMin), Math.abs(viewport.yMax - viewport.yMin)) * 4
     : 1e4;
+  const jumpThreshold = bound * 0.8;
 
-  for (let i = 0; i <= steps; i++) {
-    const theta = thetaMin + i * dTheta;
+  const evalPt = (theta: number): Point2D | null => {
     try {
       const r = compiledR.evaluate({ ...scope, theta, θ: theta, t: theta, x: theta });
       if (r !== null && Number.isFinite(r) && Math.abs(r) < bound) {
         const x = r * Math.cos(theta);
         const y = r * Math.sin(theta);
         if (Number.isFinite(x) && Number.isFinite(y)) {
-          currentSegment.push({ x, y });
-        }
-      } else {
-        if (currentSegment.length > 0) {
-          segments.push({ points: currentSegment });
-          currentSegment = [];
+          return { x, y };
         }
       }
+      return null;
     } catch {
+      return null;
+    }
+  };
+
+  const adaptSubdivide = (
+    th1: number,
+    p1: Point2D,
+    th2: number,
+    p2: Point2D,
+    depth: number
+  ) => {
+    if (depth >= 3) {
+      currentSegment.push(p2);
+      return;
+    }
+
+    const thMid = (th1 + th2) / 2;
+    const pMid = evalPt(thMid);
+
+    if (!pMid) {
       if (currentSegment.length > 0) {
         segments.push({ points: currentSegment });
         currentSegment = [];
       }
+      return;
     }
+
+    const chordMidX = (p1.x + p2.x) / 2;
+    const chordMidY = (p1.y + p2.y) / 2;
+    const dev = Math.hypot(pMid.x - chordMidX, pMid.y - chordMidY);
+
+    if (dev > 0.05 && dev < jumpThreshold) {
+      adaptSubdivide(th1, p1, thMid, pMid, depth + 1);
+      adaptSubdivide(thMid, pMid, th2, p2, depth + 1);
+    } else {
+      currentSegment.push(p2);
+    }
+  };
+
+  let prevPt: Point2D | null = evalPt(thetaMin);
+  if (prevPt) {
+    currentSegment.push(prevPt);
+  }
+
+  for (let i = 1; i <= steps; i++) {
+    const theta = thetaMin + i * dTheta;
+    const curPt = evalPt(theta);
+
+    if (prevPt === null && curPt !== null) {
+      currentSegment = [curPt];
+    } else if (prevPt !== null && curPt === null) {
+      if (currentSegment.length > 0) {
+        segments.push({ points: currentSegment });
+        currentSegment = [];
+      }
+    } else if (prevPt !== null && curPt !== null) {
+      const dist = Math.hypot(curPt.x - prevPt.x, curPt.y - prevPt.y);
+      if (dist > jumpThreshold) {
+        if (currentSegment.length > 0) {
+          segments.push({ points: currentSegment });
+          currentSegment = [];
+        }
+        currentSegment.push(curPt);
+      } else {
+        const prevTh = theta - dTheta;
+        adaptSubdivide(prevTh, prevPt, theta, curPt, 0);
+      }
+    }
+
+    prevPt = curPt;
   }
 
   if (currentSegment.length > 0) {
