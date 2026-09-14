@@ -8,6 +8,7 @@ import { MAX_TABLE_ROWS } from '../../constants/limits';
 export interface GraphTableProps {
   expressions: GraphExpression[];
   compiledMap: Map<string, CompiledSafeExpression>;
+  compiledParametricYMap?: Map<string, CompiledSafeExpression>;
   sliderScope: Record<string, number>;
   onSelectRowPoint: (pt: Point2D) => void;
   theme: 'dark' | 'light' | 'oled';
@@ -16,6 +17,7 @@ export interface GraphTableProps {
 export const GraphTable: React.FC<GraphTableProps> = ({
   expressions,
   compiledMap,
+  compiledParametricYMap,
   sliderScope,
   onSelectRowPoint,
   theme: _theme,
@@ -27,55 +29,155 @@ export const GraphTable: React.FC<GraphTableProps> = ({
 
   const visibleExpressions = useMemo(() => expressions.filter((e) => e.visible), [expressions]);
 
+  // Determine parameter label based on active curve types
+  const paramLabel = useMemo(() => {
+    if (visibleExpressions.length === 0) return 'x';
+    const allParametric = visibleExpressions.every((e) => e.type === 'parametric');
+    if (allParametric) return 't';
+    const allPolar = visibleExpressions.every((e) => e.type === 'polar');
+    if (allPolar) return 'θ';
+    return 'x';
+  }, [visibleExpressions]);
+
   // Generate table rows
-  const { headers, rows } = useMemo(() => {
-    const head = ['x', ...visibleExpressions.map((e) => e.label || `y = ${e.expression}`)];
+  const { headers, rows, rowGraphPoints } = useMemo(() => {
+    const head = [paramLabel, ...visibleExpressions.map((e) => e.label || e.expression)];
     const dataRows: (number | string)[][] = [];
+    const points: Point2D[] = [];
 
     const start = Math.min(xStart, xEnd);
     const end = Math.max(xStart, xEnd);
     const step = Math.max(0.001, Math.abs(xStep));
 
     let count = 0;
-    for (let x = start; x <= end + step * 0.01 && count < MAX_TABLE_ROWS; x += step) {
-      const cleanX = Number(x.toFixed(6));
-      const row: (number | string)[] = [cleanX];
+    for (let p = start; p <= end + step * 0.01 && count < MAX_TABLE_ROWS; p += step) {
+      const cleanP = Number(p.toFixed(6));
+      const row: (number | string)[] = [cleanP];
+      let firstPoint: Point2D | null = null;
 
       for (const expr of visibleExpressions) {
-        const compiled = compiledMap.get(expr.id);
-        if (!compiled) {
-          row.push('Err');
-          continue;
-        }
+        const type = expr.type || 'function';
 
-        // Domain check
-        if (expr.domainMin !== undefined && cleanX < expr.domainMin) {
-          row.push('–');
-          continue;
-        }
-        if (expr.domainMax !== undefined && cleanX > expr.domainMax) {
-          row.push('–');
-          continue;
-        }
+        if (type === 'parametric') {
+          const compX = compiledMap.get(expr.id);
+          const compY =
+            compiledParametricYMap?.get(expr.id) || compiledMap.get(`${expr.id}_y`);
 
-        try {
-          const y = compiled.evaluate({ ...sliderScope, x: cleanX });
-          if (y === null || !Number.isFinite(y)) {
-            row.push('Undefined');
-          } else {
-            row.push(Number(y.toFixed(5)));
+          if (!compX || !compY) {
+            row.push('Err');
+            continue;
           }
-        } catch {
-          row.push('Err');
+          if (expr.tMin !== undefined && cleanP < expr.tMin) {
+            row.push('–');
+            continue;
+          }
+          if (expr.tMax !== undefined && cleanP > expr.tMax) {
+            row.push('–');
+            continue;
+          }
+
+          try {
+            const xVal = compX.evaluate({ ...sliderScope, t: cleanP, x: cleanP });
+            const yVal = compY.evaluate({ ...sliderScope, t: cleanP, x: cleanP });
+            if (
+              xVal === null ||
+              yVal === null ||
+              !Number.isFinite(xVal) ||
+              !Number.isFinite(yVal)
+            ) {
+              row.push('Undefined');
+            } else {
+              row.push(`(${Number(xVal.toFixed(3))}, ${Number(yVal.toFixed(3))})`);
+              if (!firstPoint) firstPoint = { x: xVal, y: yVal };
+            }
+          } catch {
+            row.push('Err');
+          }
+        } else if (type === 'polar') {
+          const compiled = compiledMap.get(expr.id);
+          if (!compiled) {
+            row.push('Err');
+            continue;
+          }
+          if (expr.thetaMin !== undefined && cleanP < expr.thetaMin) {
+            row.push('–');
+            continue;
+          }
+          if (expr.thetaMax !== undefined && cleanP > expr.thetaMax) {
+            row.push('–');
+            continue;
+          }
+
+          try {
+            const r = compiled.evaluate({
+              ...sliderScope,
+              theta: cleanP,
+              θ: cleanP,
+              t: cleanP,
+              x: cleanP,
+            });
+            if (r === null || !Number.isFinite(r)) {
+              row.push('Undefined');
+            } else {
+              const rClean = Number(r.toFixed(4));
+              row.push(rClean);
+              if (!firstPoint) {
+                firstPoint = {
+                  x: rClean * Math.cos(cleanP),
+                  y: rClean * Math.sin(cleanP),
+                };
+              }
+            }
+          } catch {
+            row.push('Err');
+          }
+        } else {
+          // Standard function or inequality
+          const compiled = compiledMap.get(expr.id);
+          if (!compiled) {
+            row.push('Err');
+            continue;
+          }
+          if (expr.domainMin !== undefined && cleanP < expr.domainMin) {
+            row.push('–');
+            continue;
+          }
+          if (expr.domainMax !== undefined && cleanP > expr.domainMax) {
+            row.push('–');
+            continue;
+          }
+
+          try {
+            const y = compiled.evaluate({ ...sliderScope, x: cleanP });
+            if (y === null || !Number.isFinite(y)) {
+              row.push('Undefined');
+            } else {
+              const yClean = Number(y.toFixed(5));
+              row.push(yClean);
+              if (!firstPoint) firstPoint = { x: cleanP, y: yClean };
+            }
+          } catch {
+            row.push('Err');
+          }
         }
       }
 
       dataRows.push(row);
+      points.push(firstPoint || { x: cleanP, y: 0 });
       count++;
     }
 
-    return { headers: head, rows: dataRows };
-  }, [xStart, xEnd, xStep, visibleExpressions, compiledMap, sliderScope]);
+    return { headers: head, rows: dataRows, rowGraphPoints: points };
+  }, [
+    paramLabel,
+    xStart,
+    xEnd,
+    xStep,
+    visibleExpressions,
+    compiledMap,
+    compiledParametricYMap,
+    sliderScope,
+  ]);
 
   const handleCopy = () => {
     const text = [headers.join('\t'), ...rows.map((r) => r.join('\t'))].join('\n');
@@ -180,7 +282,7 @@ export const GraphTable: React.FC<GraphTableProps> = ({
                 return (
                   <tr
                     key={rIdx}
-                    onClick={() => onSelectRowPoint({ x: xVal, y: firstY })}
+                    onClick={() => onSelectRowPoint(rowGraphPoints[rIdx] || { x: xVal, y: firstY })}
                     className="hover:bg-sky-500/10 cursor-pointer transition-colors"
                   >
                     {row.map((cell, cIdx) => (

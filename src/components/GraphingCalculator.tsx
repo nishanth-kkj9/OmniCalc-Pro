@@ -102,6 +102,7 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
     isVertical: boolean;
   } | null>(null);
   const [integralPolygon, setIntegralPolygon] = useState<Point2D[] | null>(null);
+  const [integralPolygons, setIntegralPolygons] = useState<Point2D[][] | null>(null);
   const [integralLabel, setIntegralLabel] = useState<string | null>(null);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -561,6 +562,7 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
               tangentLine,
               normalLine,
               integralPolygon,
+              integralPolygons,
               integralLabel,
             }}
             canvasRef={canvasRef}
@@ -613,6 +615,7 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
               activeExpression={activeExpression}
               allExpressions={expressions}
               compiledMap={compiledMap}
+              compiledParametricYMap={compiledParametricYMap}
               viewport={viewport}
               sliderScope={sliderScope}
               onSelectPoint={(pt) => {
@@ -626,8 +629,9 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
               }}
               onSetTangentLine={setTangentLine}
               onSetNormalLine={setNormalLine}
-              onSetIntegralPolygon={(poly, label) => {
+              onSetIntegralPolygon={(poly, label, polys) => {
                 setIntegralPolygon(poly);
+                setIntegralPolygons(polys ?? (poly ? [poly] : null));
                 setIntegralLabel(label || null);
               }}
               theme={settings.theme}
@@ -638,6 +642,7 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({ settings
             <GraphTable
               expressions={expressions}
               compiledMap={compiledMap}
+              compiledParametricYMap={compiledParametricYMap}
               sliderScope={sliderScope}
               onSelectRowPoint={(pt) => {
                 setIsTraceActive(true);

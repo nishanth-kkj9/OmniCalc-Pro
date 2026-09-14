@@ -9,13 +9,17 @@ import {
   calculateTangentLine,
   calculateNormalLine,
   calculateDefiniteIntegral,
-  generateIntegralPolygon,
+  generateIntegralPolygons,
+  calculateParametricArcLength,
+  calculatePolarArcLength,
+  calculatePolarArea,
 } from '../../utils/graphAnalysis';
 
 export interface GraphAnalysisPanelProps {
   activeExpression: GraphExpression | null;
   allExpressions: GraphExpression[];
   compiledMap: Map<string, CompiledSafeExpression>;
+  compiledParametricYMap?: Map<string, CompiledSafeExpression>;
   viewport: GraphViewport;
   sliderScope: Record<string, number>;
   onSelectPoint: (pt: Point2D) => void;
@@ -24,7 +28,11 @@ export interface GraphAnalysisPanelProps {
   onSetNormalLine: (
     line: { x0: number; y0: number; slope: number | null; isVertical: boolean } | null
   ) => void;
-  onSetIntegralPolygon: (polygon: Point2D[] | null, label?: string | null) => void;
+  onSetIntegralPolygon: (
+    polygon: Point2D[] | null,
+    label?: string | null,
+    polygons?: Point2D[][] | null
+  ) => void;
   theme: 'dark' | 'light' | 'oled';
 }
 
@@ -32,6 +40,7 @@ export const GraphAnalysisPanel: React.FC<GraphAnalysisPanelProps> = ({
   activeExpression,
   allExpressions,
   compiledMap,
+  compiledParametricYMap,
   viewport,
   sliderScope,
   onSelectPoint,
@@ -52,11 +61,11 @@ export const GraphAnalysisPanel: React.FC<GraphAnalysisPanelProps> = ({
 
   const compiled = activeExpression ? compiledMap.get(activeExpression.id) : null;
 
-  const curveType = activeExpression?.type || 'cartesian';
+  const curveType = activeExpression?.type || 'function';
 
-  // 1. Calculate Roots (Cartesian or Inequality boundary)
+  // 1. Calculate Roots (function or Inequality boundary)
   const roots = useMemo<number[]>(() => {
-    if (!compiled || !activeExpression || (curveType !== 'cartesian' && curveType !== 'inequality'))
+    if (!compiled || !activeExpression || (curveType !== 'function' && curveType !== 'inequality'))
       return [];
     const min =
       activeExpression.domainMin !== undefined
@@ -69,9 +78,9 @@ export const GraphAnalysisPanel: React.FC<GraphAnalysisPanelProps> = ({
     return findRoots(compiled, { min, max }, sliderScope, 120);
   }, [compiled, activeExpression, curveType, viewport, sliderScope]);
 
-  // 2. Calculate Extrema (Cartesian or Inequality boundary)
+  // 2. Calculate Extrema (function or Inequality boundary)
   const extrema = useMemo<{ x: number; y: number; type: 'min' | 'max' }[]>(() => {
-    if (!compiled || !activeExpression || (curveType !== 'cartesian' && curveType !== 'inequality'))
+    if (!compiled || !activeExpression || (curveType !== 'function' && curveType !== 'inequality'))
       return [];
     const min =
       activeExpression.domainMin !== undefined
@@ -86,7 +95,7 @@ export const GraphAnalysisPanel: React.FC<GraphAnalysisPanelProps> = ({
 
   // 3. Calculate Y-Intercept (x=0)
   const yIntercept = useMemo<{ x: number; y: number } | null>(() => {
-    if (!compiled || !activeExpression || (curveType !== 'cartesian' && curveType !== 'inequality'))
+    if (!compiled || !activeExpression || (curveType !== 'function' && curveType !== 'inequality'))
       return null;
     if (activeExpression.domainMin !== undefined && activeExpression.domainMin > 0) return null;
     if (activeExpression.domainMax !== undefined && activeExpression.domainMax < 0) return null;
@@ -105,7 +114,9 @@ export const GraphAnalysisPanel: React.FC<GraphAnalysisPanelProps> = ({
     const tMax = activeExpression.tMax ?? 2 * Math.PI;
 
     const compiledX = compiledMap.get(activeExpression.id);
-    const compiledY = compiledMap.get(`${activeExpression.id}_y`);
+    const compiledY =
+      compiledParametricYMap?.get(activeExpression.id) ||
+      compiledMap.get(`${activeExpression.id}_y`);
     if (!compiledX || !compiledY) return null;
 
     try {
@@ -114,21 +125,17 @@ export const GraphAnalysisPanel: React.FC<GraphAnalysisPanelProps> = ({
       const x1 = compiledX.evaluate({ ...sliderScope, t: tMax });
       const y1 = compiledY.evaluate({ ...sliderScope, t: tMax });
 
-      // Arc length numerical integration
-      let arcLength = 0;
+      // Arc length via genuine adaptive Simpson quadrature
+      const arcLength = calculateParametricArcLength(compiledX, compiledY, tMin, tMax, sliderScope);
+
       const steps = 100;
       const dt = (tMax - tMin) / steps;
-      let prevPt =
-        x0 !== null && y0 !== null && Number.isFinite(x0) && Number.isFinite(y0)
-          ? { x: x0, y: y0 }
-          : null;
-
       let minX = Infinity,
         maxX = -Infinity,
         minY = Infinity,
         maxY = -Infinity;
 
-      for (let i = 1; i <= steps; i++) {
+      for (let i = 0; i <= steps; i++) {
         const t = tMin + i * dt;
         const curX = compiledX.evaluate({ ...sliderScope, t });
         const curY = compiledY.evaluate({ ...sliderScope, t });
@@ -137,11 +144,6 @@ export const GraphAnalysisPanel: React.FC<GraphAnalysisPanelProps> = ({
           maxX = Math.max(maxX, curX);
           minY = Math.min(minY, curY);
           maxY = Math.max(maxY, curY);
-
-          if (prevPt) {
-            arcLength += Math.hypot(curX - prevPt.x, curY - prevPt.y);
-          }
-          prevPt = { x: curX, y: curY };
         }
       }
 
@@ -156,7 +158,7 @@ export const GraphAnalysisPanel: React.FC<GraphAnalysisPanelProps> = ({
           x1 !== null && y1 !== null && Number.isFinite(x1) && Number.isFinite(y1)
             ? { x: Number(x1.toFixed(4)), y: Number(y1.toFixed(4)) }
             : null,
-        arcLength: arcLength > 0 ? Number(arcLength.toFixed(4)) : null,
+        arcLength: arcLength !== null && arcLength > 0 ? Number(arcLength.toFixed(4)) : null,
         boundingBox:
           Number.isFinite(minX) && Number.isFinite(maxX)
             ? {
@@ -170,7 +172,7 @@ export const GraphAnalysisPanel: React.FC<GraphAnalysisPanelProps> = ({
     } catch {
       return null;
     }
-  }, [curveType, activeExpression, compiledMap, sliderScope]);
+  }, [curveType, activeExpression, compiledMap, compiledParametricYMap, sliderScope]);
 
   // 5. Polar Analysis Metrics
   const polarAnalysis = useMemo(() => {
@@ -212,6 +214,9 @@ export const GraphAnalysisPanel: React.FC<GraphAnalysisPanelProps> = ({
         }
       }
 
+      const arcLength = calculatePolarArcLength(compiled, thetaMin, thetaMax, sliderScope);
+      const enclosedArea = calculatePolarArea(compiled, thetaMin, thetaMax, sliderScope);
+
       return {
         thetaMin,
         thetaMax,
@@ -220,6 +225,8 @@ export const GraphAnalysisPanel: React.FC<GraphAnalysisPanelProps> = ({
         rMin: Number.isFinite(rMin) ? Number(rMin.toFixed(4)) : null,
         rMinTheta: Number.isFinite(rMin) ? Number(rMinTheta.toFixed(3)) : null,
         passesOrigin,
+        arcLength: arcLength !== null && arcLength > 0 ? Number(arcLength.toFixed(4)) : null,
+        enclosedArea: enclosedArea !== null && enclosedArea > 0 ? Number(enclosedArea.toFixed(4)) : null,
       };
     } catch {
       return null;
@@ -230,7 +237,8 @@ export const GraphAnalysisPanel: React.FC<GraphAnalysisPanelProps> = ({
   const intersections = useMemo<
     { otherLabel: string; otherColor: string; points: Point2D[] }[]
   >(() => {
-    if (!compiled || !activeExpression) return [];
+    if (!compiled || !activeExpression || (curveType !== 'function' && curveType !== 'inequality'))
+      return [];
     const list: { otherLabel: string; otherColor: string; points: Point2D[] }[] = [];
     const range = {
       min:
@@ -245,6 +253,8 @@ export const GraphAnalysisPanel: React.FC<GraphAnalysisPanelProps> = ({
 
     for (const other of allExpressions) {
       if (other.id === activeExpression.id || !other.visible) continue;
+      const otherType = other.type || 'function';
+      if (otherType !== 'function' && otherType !== 'inequality') continue;
       const otherCompiled = compiledMap.get(other.id);
       if (!otherCompiled) continue;
 
@@ -258,18 +268,18 @@ export const GraphAnalysisPanel: React.FC<GraphAnalysisPanelProps> = ({
       }
     }
     return list;
-  }, [compiled, activeExpression, allExpressions, compiledMap, viewport, sliderScope]);
+  }, [compiled, activeExpression, curveType, allExpressions, compiledMap, viewport, sliderScope]);
 
   // 5. Tangent & Normal Lines
   const tangentResult = useMemo(() => {
-    if (!compiled || !showTangent) return null;
+    if (!compiled || !showTangent || curveType !== 'function') return null;
     return calculateTangentLine(compiled, tangentX, sliderScope);
-  }, [compiled, tangentX, showTangent, sliderScope]);
+  }, [compiled, tangentX, showTangent, curveType, sliderScope]);
 
   const normalResult = useMemo(() => {
-    if (!compiled || !showNormal) return null;
+    if (!compiled || !showNormal || curveType !== 'function') return null;
     return calculateNormalLine(compiled, tangentX, sliderScope);
-  }, [compiled, tangentX, showNormal, sliderScope]);
+  }, [compiled, tangentX, showNormal, curveType, sliderScope]);
 
   // Update canvas markers for tangent and normal
   React.useEffect(() => {
@@ -282,22 +292,23 @@ export const GraphAnalysisPanel: React.FC<GraphAnalysisPanelProps> = ({
 
   // 6. Definite Integral
   const integralResult = useMemo(() => {
-    if (!compiled) return null;
+    if (!compiled || curveType !== 'function') return null;
     return calculateDefiniteIntegral(compiled, integralA, integralB, sliderScope);
-  }, [compiled, integralA, integralB, sliderScope]);
+  }, [compiled, integralA, integralB, curveType, sliderScope]);
 
-  // Update canvas shading polygon
+  // Update canvas shading polygon (splits across singularities, never bridging asymptotes)
   React.useEffect(() => {
-    if (showIntegralShading && compiled && activeExpression) {
-      const poly = generateIntegralPolygon(compiled, integralA, integralB, sliderScope, 100);
-      onSetIntegralPolygon(poly, `∫ f(x)dx`);
+    if (showIntegralShading && compiled && activeExpression && curveType === 'function') {
+      const polys = generateIntegralPolygons(compiled, integralA, integralB, sliderScope, 160);
+      onSetIntegralPolygon(polys[0] || null, `∫ f(x)dx`, polys);
     } else {
-      onSetIntegralPolygon(null, null);
+      onSetIntegralPolygon(null, null, null);
     }
   }, [
     showIntegralShading,
     compiled,
     activeExpression,
+    curveType,
     integralA,
     integralB,
     sliderScope,
@@ -330,7 +341,7 @@ export const GraphAnalysisPanel: React.FC<GraphAnalysisPanelProps> = ({
               Active Curve ({curveType})
             </span>
             <div className="text-xs font-mono font-bold text-slate-100 truncate">
-              {curveType === 'cartesian' && `y = ${activeExpression.expression}`}
+              {curveType === 'function' && `y = ${activeExpression.expression}`}
               {curveType === 'parametric' &&
                 `(x(t), y(t)) = (${activeExpression.expression}, ${activeExpression.parametricY || '0'})`}
               {curveType === 'polar' && `r(θ) = ${activeExpression.expression}`}
@@ -340,7 +351,7 @@ export const GraphAnalysisPanel: React.FC<GraphAnalysisPanelProps> = ({
           </div>
         </div>
 
-        {onSendToCalculus && curveType === 'cartesian' && (
+        {onSendToCalculus && curveType === 'function' && (
           <button
             onClick={() => onSendToCalculus(activeExpression.expression)}
             className="px-2 py-1 rounded-xl text-[11px] font-semibold bg-sky-500 hover:bg-sky-400 text-white flex items-center gap-1 flex-shrink-0 transition-colors shadow-xs"
@@ -495,8 +506,8 @@ export const GraphAnalysisPanel: React.FC<GraphAnalysisPanelProps> = ({
         </div>
       )}
 
-      {/* CARTESIAN & INEQUALITY BOUNDARY CALCULUS TOOLS */}
-      {(curveType === 'cartesian' || curveType === 'inequality') && (
+      {/* FUNCTION & INEQUALITY BOUNDARY CALCULUS TOOLS */}
+      {(curveType === 'function' || curveType === 'inequality') && (
         <>
           {/* 1. Roots (Zeros) */}
           <div className="p-3 rounded-2xl border border-slate-700/60 bg-slate-900/40">
@@ -631,8 +642,8 @@ export const GraphAnalysisPanel: React.FC<GraphAnalysisPanelProps> = ({
             </div>
           )}
 
-          {/* 5. Tangent & Normal Line Analyzer (Cartesian only) */}
-          {curveType === 'cartesian' && (
+          {/* 5. Tangent & Normal Line Analyzer (Function only) */}
+          {curveType === 'function' && (
             <div className="p-3 rounded-2xl border border-slate-700/60 bg-slate-900/40">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-purple-400">Tangent & Normal Lines</span>
@@ -689,8 +700,8 @@ export const GraphAnalysisPanel: React.FC<GraphAnalysisPanelProps> = ({
             </div>
           )}
 
-          {/* 6. Definite Integral & Area Shading (Cartesian only) */}
-          {curveType === 'cartesian' && (
+          {/* 6. Definite Integral & Area Shading (Function only) */}
+          {curveType === 'function' && (
             <div className="p-3 rounded-2xl border border-slate-700/60 bg-slate-900/40">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-sky-400">Definite Integral & Area</span>

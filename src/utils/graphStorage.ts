@@ -360,7 +360,7 @@ export function sanitizeGraphSession(raw: unknown): GraphSession | null {
     const type: CurveType =
       rawType === 'parametric' || rawType === 'polar' || rawType === 'inequality'
         ? rawType
-        : 'cartesian';
+        : 'function';
 
     // Type-specific attributes
     let parametricY: string | undefined;

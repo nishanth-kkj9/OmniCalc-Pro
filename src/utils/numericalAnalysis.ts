@@ -17,7 +17,7 @@ export function toEvaluator(
   }
   return (x: number) => {
     try {
-      const val = fnOrCompiled.evaluate({ ...scope, x });
+      const val = fnOrCompiled.evaluate({ ...scope, x, t: x, theta: x, θ: x });
       return val !== null && Number.isFinite(val) && !isNaN(val) ? val : null;
     } catch {
       return null;
@@ -589,6 +589,8 @@ export interface IntegrationResult {
   method: string;
   subdivisions: number;
   converged: boolean;
+  singularityDetected?: boolean;
+  error?: string;
 }
 
 /**
@@ -611,6 +613,50 @@ export function integrateDefinite(
   const sign = b >= a ? 1 : -1;
   const lower = Math.min(a, b);
   const upper = Math.max(a, b);
+
+  // Pre-screen for singularities/poles within [lower, upper]
+  const screenSamples = 80;
+  const screenH = (upper - lower) / screenSamples;
+  let prevScreenY: number | null = evalAt(lower);
+  if (prevScreenY === null || !Number.isFinite(prevScreenY) || Math.abs(prevScreenY) > 1e7) {
+    return {
+      value: NaN,
+      method,
+      subdivisions: 0,
+      converged: false,
+      singularityDetected: true,
+      error: 'Singularity detected at integration boundary',
+    };
+  }
+
+  for (let i = 1; i <= screenSamples; i++) {
+    const sx = lower + i * screenH;
+    const sy = evalAt(sx);
+    if (sy === null || !Number.isFinite(sy) || Math.abs(sy) > 1e7) {
+      return {
+        value: NaN,
+        method,
+        subdivisions: i,
+        converged: false,
+        singularityDetected: true,
+        error: 'Singularity detected in integration interval',
+      };
+    }
+    if (prevScreenY !== null) {
+      const dy = Math.abs(sy - prevScreenY);
+      if (dy > 1e5 && Math.sign(sy) !== Math.sign(prevScreenY)) {
+        return {
+          value: NaN,
+          method,
+          subdivisions: i,
+          converged: false,
+          singularityDetected: true,
+          error: 'Asymptotic discontinuity detected in integration interval',
+        };
+      }
+    }
+    prevScreenY = sy;
+  }
 
   if (method === 'midpoint') {
     const n = Math.max(10, subdivisions);
@@ -837,4 +883,102 @@ export function solveNewtonRaphson(
     converged: false,
     error: 'Maximum iterations exceeded without converging.',
   };
+}
+
+/**
+ * Calculates arc length of a parametric curve (x(t), y(t)) over [tMin, tMax].
+ * Integrates sqrt((x'(t))^2 + (y'(t))^2) dt using adaptive quadrature.
+ */
+export function calculateParametricArcLength(
+  evalX: EvaluatorFn | CompiledSafeExpression,
+  evalY: EvaluatorFn | CompiledSafeExpression,
+  tMin: number,
+  tMax: number,
+  options: IntegrationOptions = {}
+): IntegrationResult | null {
+  if (!Number.isFinite(tMin) || !Number.isFinite(tMax) || tMin >= tMax) return null;
+
+  const xEval = toEvaluator(evalX, options.scope || {});
+  const yEval = toEvaluator(evalY, options.scope || {});
+
+  const speedFn: EvaluatorFn = (t: number) => {
+    const h = 1e-5;
+    const xP = xEval(t + h);
+    const xM = xEval(t - h);
+    const yP = yEval(t + h);
+    const yM = yEval(t - h);
+    if (xP === null || xM === null || yP === null || yM === null) return null;
+    const dx = (xP - xM) / (2 * h);
+    const dy = (yP - yM) / (2 * h);
+    if (!Number.isFinite(dx) || !Number.isFinite(dy)) return null;
+    return Math.hypot(dx, dy);
+  };
+
+  return integrateDefinite(speedFn, tMin, tMax, {
+    method: options.method || 'adaptive',
+    tolerance: options.tolerance || 1e-6,
+    subdivisions: options.subdivisions || 200,
+    scope: options.scope || {},
+  });
+}
+
+/**
+ * Calculates arc length of a polar curve r = f(theta) over [thetaMin, thetaMax].
+ * Integrates sqrt(r(theta)^2 + (r'(theta))^2) dtheta.
+ */
+export function calculatePolarArcLength(
+  evalR: EvaluatorFn | CompiledSafeExpression,
+  thetaMin: number,
+  thetaMax: number,
+  options: IntegrationOptions = {}
+): IntegrationResult | null {
+  if (!Number.isFinite(thetaMin) || !Number.isFinite(thetaMax) || thetaMin >= thetaMax) return null;
+
+  const rEval = toEvaluator(evalR, options.scope || {});
+
+  const integrand: EvaluatorFn = (th: number) => {
+    const r = rEval(th);
+    if (r === null || !Number.isFinite(r)) return null;
+    const h = 1e-5;
+    const rP = rEval(th + h);
+    const rM = rEval(th - h);
+    if (rP === null || rM === null) return null;
+    const dr = (rP - rM) / (2 * h);
+    if (!Number.isFinite(dr)) return null;
+    return Math.hypot(r, dr);
+  };
+
+  return integrateDefinite(integrand, thetaMin, thetaMax, {
+    method: options.method || 'adaptive',
+    tolerance: options.tolerance || 1e-6,
+    subdivisions: options.subdivisions || 200,
+    scope: options.scope || {},
+  });
+}
+
+/**
+ * Calculates area enclosed by a polar curve r = f(theta) over [thetaMin, thetaMax].
+ * Integrates 0.5 * r(theta)^2 dtheta.
+ */
+export function calculatePolarArea(
+  evalR: EvaluatorFn | CompiledSafeExpression,
+  thetaMin: number,
+  thetaMax: number,
+  options: IntegrationOptions = {}
+): IntegrationResult | null {
+  if (!Number.isFinite(thetaMin) || !Number.isFinite(thetaMax) || thetaMin >= thetaMax) return null;
+
+  const rEval = toEvaluator(evalR, options.scope || {});
+
+  const areaIntegrand: EvaluatorFn = (th: number) => {
+    const r = rEval(th);
+    if (r === null || !Number.isFinite(r)) return null;
+    return 0.5 * r * r;
+  };
+
+  return integrateDefinite(areaIntegrand, thetaMin, thetaMax, {
+    method: options.method || 'simpson',
+    subdivisions: options.subdivisions || 200,
+    scope: options.scope || {},
+  });
 }

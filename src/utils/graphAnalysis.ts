@@ -9,6 +9,9 @@ import {
   calculateNormalLine as numCalcNormal,
   integrateDefinite as numIntegrateDefinite,
   calculateAreaBetweenCurves as numCalcAreaBetween,
+  calculateParametricArcLength as numCalcParametricArcLength,
+  calculatePolarArcLength as numCalcPolarArcLength,
+  calculatePolarArea as numCalcPolarArea,
 } from './numericalAnalysis';
 
 export interface AnalysisRange {
@@ -122,13 +125,20 @@ export function calculateDefiniteIntegral(
   b: number,
   scope: Record<string, number> = {},
   nSubintervals: number = 200
-): { value: number; formatted: string } | null {
+): { value: number; formatted: string; singularityDetected?: boolean } | null {
   const res = numIntegrateDefinite(compiled, a, b, {
     scope,
     subdivisions: nSubintervals,
     method: 'simpson',
   });
   if (!res) return null;
+  if (res.singularityDetected || !Number.isFinite(res.value)) {
+    return {
+      value: NaN,
+      formatted: res.error || 'Singularity in interval',
+      singularityDetected: true,
+    };
+  }
   return {
     value: res.value,
     formatted: Number(res.value.toFixed(5)).toString(),
@@ -156,6 +166,66 @@ export function calculateAreaBetweenCurves(
 
 /**
  * Generates polygon points for area under curve shading between x=a and x=b.
+ * Splits into separate polygons across undefined points or asymptotes (non-bridging).
+ */
+export function generateIntegralPolygons(
+  compiled: CompiledSafeExpression,
+  a: number,
+  b: number,
+  scope: Record<string, number> = {},
+  samples: number = 160
+): Point2D[][] {
+  if (a >= b) return [];
+
+  const step = (b - a) / samples;
+  const polygons: Point2D[][] = [];
+  let currentSegment: Point2D[] = [];
+  let segStart = a;
+
+  for (let i = 0; i <= samples; i++) {
+    const x = a + i * step;
+    let y: number | null = null;
+    try {
+      const val = compiled.evaluate({ ...scope, x });
+      if (val !== null && Number.isFinite(val) && Math.abs(val) < 1e5) {
+        y = val;
+      }
+    } catch {
+      y = null;
+    }
+
+    if (y === null) {
+      if (currentSegment.length > 0) {
+        const lastX = currentSegment[currentSegment.length - 1].x;
+        polygons.push([{ x: segStart, y: 0 }, ...currentSegment, { x: lastX, y: 0 }]);
+        currentSegment = [];
+      }
+      segStart = x + step;
+    } else {
+      // Check for steep asymptotic jump relative to previous point
+      if (currentSegment.length > 0) {
+        const prev = currentSegment[currentSegment.length - 1];
+        const dy = Math.abs(y - prev.y);
+        if (dy > 200 && Math.sign(y) !== Math.sign(prev.y)) {
+          polygons.push([{ x: segStart, y: 0 }, ...currentSegment, { x: prev.x, y: 0 }]);
+          currentSegment = [];
+          segStart = x;
+        }
+      }
+      currentSegment.push({ x, y });
+    }
+  }
+
+  if (currentSegment.length > 0) {
+    const lastX = currentSegment[currentSegment.length - 1].x;
+    polygons.push([{ x: segStart, y: 0 }, ...currentSegment, { x: lastX, y: 0 }]);
+  }
+
+  return polygons.filter((p) => p.length >= 3);
+}
+
+/**
+ * Generates polygon points for area under curve shading between x=a and x=b.
  */
 export function generateIntegralPolygon(
   compiled: CompiledSafeExpression,
@@ -164,31 +234,48 @@ export function generateIntegralPolygon(
   scope: Record<string, number> = {},
   samples: number = 100
 ): Point2D[] {
-  if (a >= b) return [];
+  const polys = generateIntegralPolygons(compiled, a, b, scope, samples);
+  return polys.length > 0 ? polys[0] : [];
+}
 
-  const step = (b - a) / samples;
-  const polygon: Point2D[] = [];
+/**
+ * Calculates arc length of a parametric curve (x(t), y(t)) over [tMin, tMax].
+ */
+export function calculateParametricArcLength(
+  compiledX: CompiledSafeExpression,
+  compiledY: CompiledSafeExpression,
+  tMin: number,
+  tMax: number,
+  scope: Record<string, number> = {}
+): number | null {
+  const res = numCalcParametricArcLength(compiledX, compiledY, tMin, tMax, { scope });
+  return res && Number.isFinite(res.value) ? Number(res.value.toFixed(5)) : null;
+}
 
-  // Start at (a, 0)
-  polygon.push({ x: a, y: 0 });
+/**
+ * Calculates arc length of a polar curve r = f(theta) over [thetaMin, thetaMax].
+ */
+export function calculatePolarArcLength(
+  compiledR: CompiledSafeExpression,
+  thetaMin: number,
+  thetaMax: number,
+  scope: Record<string, number> = {}
+): number | null {
+  const res = numCalcPolarArcLength(compiledR, thetaMin, thetaMax, { scope });
+  return res && Number.isFinite(res.value) ? Number(res.value.toFixed(5)) : null;
+}
 
-  // Curve points from a to b
-  for (let i = 0; i <= samples; i++) {
-    const x = a + i * step;
-    try {
-      const y = compiled.evaluate({ ...scope, x });
-      if (y !== null && Number.isFinite(y)) {
-        polygon.push({ x, y });
-      }
-    } catch {
-      // skip
-    }
-  }
-
-  // End at (b, 0)
-  polygon.push({ x: b, y: 0 });
-
-  return polygon;
+/**
+ * Calculates area of a polar curve r = f(theta) over [thetaMin, thetaMax].
+ */
+export function calculatePolarArea(
+  compiledR: CompiledSafeExpression,
+  thetaMin: number,
+  thetaMax: number,
+  scope: Record<string, number> = {}
+): number | null {
+  const res = numCalcPolarArea(compiledR, thetaMin, thetaMax, { scope });
+  return res && Number.isFinite(res.value) ? Number(res.value.toFixed(5)) : null;
 }
 
 /**

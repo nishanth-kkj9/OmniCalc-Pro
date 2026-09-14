@@ -53,7 +53,7 @@ export type AngleMode = 'DEG' | 'RAD' | 'GRAD';
 
 export type LineStyle = 'solid' | 'dashed' | 'dotted';
 
-export type CurveType = 'function' | 'parametric' | 'polar' | 'inequality' | 'cartesian';
+export type CurveType = 'function' | 'parametric' | 'polar' | 'inequality';
 export type InequalityOperator = '<' | '<=' | '>' | '>=';
 
 export interface GraphExpression {
