@@ -279,6 +279,94 @@ export function calculatePolarArea(
 }
 
 /**
+ * Generates polygon point sets for area between two curves f1 and f2 between x=a and x=b.
+ * Splits into separate polygons across undefined points or asymptotes (non-bridging).
+ */
+export function generateAreaBetweenPolygons(
+  fn1: CompiledSafeExpression,
+  fn2: CompiledSafeExpression,
+  a: number,
+  b: number,
+  scope: Record<string, number> = {},
+  samples: number = 160
+): Point2D[][] {
+  if (a >= b) return [];
+
+  const step = (b - a) / samples;
+  const polygons: Point2D[][] = [];
+  let currentTop: Point2D[] = [];
+  let currentBottom: Point2D[] = [];
+
+  for (let i = 0; i <= samples; i++) {
+    const x = a + i * step;
+    let y1: number | null = null;
+    let y2: number | null = null;
+    try {
+      const val1 = fn1.evaluate({ ...scope, x });
+      const val2 = fn2.evaluate({ ...scope, x });
+      if (
+        val1 !== null &&
+        Number.isFinite(val1) &&
+        Math.abs(val1) < 1e5 &&
+        val2 !== null &&
+        Number.isFinite(val2) &&
+        Math.abs(val2) < 1e5
+      ) {
+        y1 = val1;
+        y2 = val2;
+      }
+    } catch {
+      y1 = null;
+      y2 = null;
+    }
+
+    if (y1 === null || y2 === null) {
+      if (currentTop.length > 0) {
+        const poly: Point2D[] = [...currentTop];
+        for (let j = currentBottom.length - 1; j >= 0; j--) {
+          poly.push(currentBottom[j]);
+        }
+        if (poly.length >= 3) polygons.push(poly);
+        currentTop = [];
+        currentBottom = [];
+      }
+    } else {
+      // Check for steep asymptotic jump relative to previous point
+      if (currentTop.length > 0) {
+        const prev1 = currentTop[currentTop.length - 1];
+        const prev2 = currentBottom[currentBottom.length - 1];
+        const dy1 = Math.abs(y1 - prev1.y);
+        const dy2 = Math.abs(y2 - prev2.y);
+        if (
+          (dy1 > 200 && Math.sign(y1) !== Math.sign(prev1.y)) ||
+          (dy2 > 200 && Math.sign(y2) !== Math.sign(prev2.y))
+        ) {
+          const poly: Point2D[] = [...currentTop];
+          for (let j = currentBottom.length - 1; j >= 0; j--) {
+            poly.push(currentBottom[j]);
+          }
+          if (poly.length >= 3) polygons.push(poly);
+          currentTop = [];
+          currentBottom = [];
+        }
+      }
+      currentTop.push({ x, y: y1 });
+      currentBottom.push({ x, y: y2 });
+    }
+  }
+
+  if (currentTop.length > 0) {
+    const poly: Point2D[] = [...currentTop];
+    for (let j = currentBottom.length - 1; j >= 0; j--) {
+      poly.push(currentBottom[j]);
+    }
+    if (poly.length >= 3) polygons.push(poly);
+  }
+
+  return polygons;
+}
+
+/**
  * Generates polygon points for area between two curves f1 and f2 between x=a and x=b.
  */
 export function generateAreaBetweenPolygon(
@@ -289,33 +377,6 @@ export function generateAreaBetweenPolygon(
   scope: Record<string, number> = {},
   samples: number = 100
 ): Point2D[] {
-  if (a >= b) return [];
-
-  const step = (b - a) / samples;
-  const topCurve: Point2D[] = [];
-  const bottomCurve: Point2D[] = [];
-
-  for (let i = 0; i <= samples; i++) {
-    const x = a + i * step;
-    try {
-      const y1 = fn1.evaluate({ ...scope, x });
-      const y2 = fn2.evaluate({ ...scope, x });
-      if (y1 !== null && y2 !== null && Number.isFinite(y1) && Number.isFinite(y2)) {
-        topCurve.push({ x, y: y1 });
-        bottomCurve.push({ x, y: y2 });
-      }
-    } catch {
-      // skip
-    }
-  }
-
-  if (topCurve.length === 0) return [];
-
-  // Traverse top curve forward, then bottom curve backwards
-  const polygon: Point2D[] = [...topCurve];
-  for (let i = bottomCurve.length - 1; i >= 0; i--) {
-    polygon.push(bottomCurve[i]);
-  }
-
-  return polygon;
+  const polys = generateAreaBetweenPolygons(fn1, fn2, a, b, scope, samples);
+  return polys.length > 0 ? polys[0] : [];
 }

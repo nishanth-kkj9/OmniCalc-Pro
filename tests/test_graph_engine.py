@@ -8,6 +8,13 @@ except ImportError:
     QApplication = None
     HAS_PYSIDE6 = False
 
+try:
+    import numpy as np
+    HAS_NUMPY = True
+except ImportError:
+    np = None
+    HAS_NUMPY = False
+
 
 # Mock the entire backend_qt to prevent FigureCanvasQTAgg init issues
 @unittest.skipUnless(HAS_PYSIDE6, "PySide6 not installed")
@@ -88,6 +95,7 @@ class TestGraphEngine(unittest.TestCase):
         engine.figure.savefig.assert_called_once_with("test.png", dpi=150)
 
 
+@unittest.skipUnless(HAS_NUMPY, "numpy not installed")
 class TestGraphSamplerAndAnalysis(unittest.TestCase):
     def test_graph_model(self):
         from core.graph_engine import GraphModel

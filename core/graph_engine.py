@@ -2,8 +2,20 @@
 from dataclasses import dataclass
 import os
 from typing import Callable, List, Optional, Tuple, Union
-import numpy as np
-import sympy as sp
+
+try:
+    import numpy as np
+    HAS_NUMPY = True
+except ImportError:
+    np = None
+    HAS_NUMPY = False
+
+try:
+    import sympy as sp
+    HAS_SYMPY = True
+except ImportError:
+    sp = None
+    HAS_SYMPY = False
 
 try:
     import matplotlib

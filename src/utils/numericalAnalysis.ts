@@ -500,8 +500,16 @@ export function findExtrema(
       const root = brentRoot(derivAt, x1, x2, candD1, candD2, 60, 1e-7);
       if (root !== null && root >= min && root <= max) {
         const yVal = evalAt(root);
-        if (yVal !== null && Number.isFinite(yVal)) {
-          // Verify with neighbors to reject false extrema at poles/asymptotes (e.g. 1/x^2)
+        const dRoot = derivAt(root);
+        if (
+          yVal !== null &&
+          Number.isFinite(yVal) &&
+          Math.abs(yVal) < 1e6 &&
+          dRoot !== null &&
+          Number.isFinite(dRoot) &&
+          Math.abs(dRoot) < 1.0
+        ) {
+          // Verify with neighbors to reject false extrema at poles/asymptotes (e.g. 1/x, 1/x^2)
           const delta = Math.max(1e-5, step * 0.05);
           const yLeft = evalAt(root - delta);
           const yRight = evalAt(root + delta);
@@ -512,8 +520,14 @@ export function findExtrema(
             Number.isFinite(yLeft) &&
             Number.isFinite(yRight)
           ) {
-            const isMax = yVal >= yLeft - 1e-6 && yVal >= yRight - 1e-6;
-            const isMin = yVal <= yLeft + 1e-6 && yVal <= yRight + 1e-6;
+            const isMax =
+              yVal >= yLeft - 1e-6 &&
+              yVal >= yRight - 1e-6 &&
+              Math.abs(yLeft - yRight) < Math.max(1.0, Math.abs(yVal) * 0.5 + 5);
+            const isMin =
+              yVal <= yLeft + 1e-6 &&
+              yVal <= yRight + 1e-6 &&
+              Math.abs(yLeft - yRight) < Math.max(1.0, Math.abs(yVal) * 0.5 + 5);
 
             if (isMax || isMin) {
               const type: 'min' | 'max' = isMax ? 'max' : 'min';

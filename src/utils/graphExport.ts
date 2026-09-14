@@ -5,6 +5,7 @@ import {
   CurveSegment,
   GraphExpression,
 } from '../types';
+import { CompiledSafeExpression } from './calculator';
 import { generateCSV, downloadTextFile } from './exportEngine';
 import { generateAxisTicks } from './graph';
 
@@ -201,3 +202,99 @@ export function downloadTableAsCsv(
   const csv = generateCSV(headers, rows);
   downloadTextFile(filename, csv, 'text/csv');
 }
+
+export interface CurveExportOptions {
+  expression: GraphExpression;
+  compiled: CompiledSafeExpression;
+  compiledParametricY?: CompiledSafeExpression;
+  sliderScope?: Record<string, number>;
+  range?: { min: number; max: number; steps?: number };
+}
+
+/**
+ * Generates structured, curve-type-aware CSV data.
+ * - Function/Inequality: x, y
+ * - Parametric: t, x, y
+ * - Polar: theta, r, x, y
+ */
+export function generateCurveDataCsv(options: CurveExportOptions): {
+  headers: string[];
+  rows: (number | string)[][];
+  csv: string;
+} {
+  const { expression, compiled, compiledParametricY, sliderScope = {}, range } = options;
+  const type = expression.type || 'function';
+  const steps = range?.steps ?? 100;
+
+  if (type === 'parametric') {
+    const tMin = range?.min ?? expression.tMin ?? 0;
+    const tMax = range?.max ?? expression.tMax ?? 2 * Math.PI;
+    const dt = (tMax - tMin) / steps;
+    const headers = ['t', 'x', 'y'];
+    const rows: (number | string)[][] = [];
+    for (let i = 0; i <= steps; i++) {
+      const t = tMin + i * dt;
+      const x = compiled.evaluate({ ...sliderScope, t, x: t });
+      const y = compiledParametricY
+        ? compiledParametricY.evaluate({ ...sliderScope, t, x: t })
+        : null;
+      rows.push([
+        Number(t.toFixed(4)),
+        x !== null && Number.isFinite(x) ? Number(x.toFixed(5)) : 'undefined',
+        y !== null && Number.isFinite(y) ? Number(y.toFixed(5)) : 'undefined',
+      ]);
+    }
+    return { headers, rows, csv: generateCSV(headers, rows) };
+  }
+
+  if (type === 'polar') {
+    const thMin = range?.min ?? expression.thetaMin ?? 0;
+    const thMax = range?.max ?? expression.thetaMax ?? 2 * Math.PI;
+    const dth = (thMax - thMin) / steps;
+    const headers = ['theta', 'r', 'x', 'y'];
+    const rows: (number | string)[][] = [];
+    for (let i = 0; i <= steps; i++) {
+      const theta = thMin + i * dth;
+      const r = compiled.evaluate({ ...sliderScope, theta, θ: theta, t: theta, x: theta });
+      if (r !== null && Number.isFinite(r)) {
+        const x = r * Math.cos(theta);
+        const y = r * Math.sin(theta);
+        rows.push([
+          Number(theta.toFixed(4)),
+          Number(r.toFixed(5)),
+          Number(x.toFixed(5)),
+          Number(y.toFixed(5)),
+        ]);
+      } else {
+        rows.push([Number(theta.toFixed(4)), 'undefined', 'undefined', 'undefined']);
+      }
+    }
+    return { headers, rows, csv: generateCSV(headers, rows) };
+  }
+
+  // function or inequality
+  const xMin = range?.min ?? expression.domainMin ?? -10;
+  const xMax = range?.max ?? expression.domainMax ?? 10;
+  const dx = (xMax - xMin) / steps;
+  const headers = ['x', 'y'];
+  const rows: (number | string)[][] = [];
+  for (let i = 0; i <= steps; i++) {
+    const x = xMin + i * dx;
+    const y = compiled.evaluate({ ...sliderScope, x });
+    rows.push([
+      Number(x.toFixed(4)),
+      y !== null && Number.isFinite(y) ? Number(y.toFixed(5)) : 'undefined',
+    ]);
+  }
+  return { headers, rows, csv: generateCSV(headers, rows) };
+}
+
+/**
+ * Downloads curve points as CSV according to its canonical curve type.
+ */
+export function downloadCurveDataAsCsv(options: CurveExportOptions, filename?: string): void {
+  const { csv } = generateCurveDataCsv(options);
+  const name = filename || `curve-${options.expression.type || 'data'}.csv`;
+  downloadTextFile(name, csv, 'text/csv');
+}
+
